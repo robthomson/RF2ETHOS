@@ -234,7 +234,7 @@ end
 
 -- Ethos: when the RF1 and RF2 system tools are both installed, RF1 tries to call getRSSI in RF2 and gets stuck.
 -- To avoid this, getRSSI is renamed in RF2.
-function rf2_getRSSI()
+function rf2touch_getRSSI()
       --print("getRSSI RF2")
     if environment.simulation == true then
         return 100
@@ -268,7 +268,7 @@ local function updateTelemetryState()
 
     if not rssiSensor then
         telemetryState = telemetryStatus.noSensor
-    elseif getRSSI() == 0 then
+    elseif rf2touch_getRSSI() == 0 then
         telemetryState = telemetryStatus.noTelemetry
     else
         telemetryState = telemetryStatus.ok
