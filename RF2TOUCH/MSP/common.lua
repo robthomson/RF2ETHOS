@@ -25,7 +25,9 @@ function mspProcessTxQ()
         -- print("Sensor not idle... waiting to send cmd: "..tostring(mspLastReq))
         -- return true
     -- end
-    print("Sending mspTxBuf size "..tostring(#mspTxBuf).." at Idx "..tostring(mspTxIdx).." for cmd: "..tostring(mspLastReq))
+	if environment.simulation ~= true then
+		print("Sending mspTxBuf size "..tostring(#mspTxBuf).." at Idx "..tostring(mspTxIdx).." for cmd: "..tostring(mspLastReq))
+	end
     local payload = {}
     payload[1] = mspSeq + MSP_VERSION
     mspSeq = (mspSeq + 1) & 0x0F
@@ -59,10 +61,14 @@ function mspProcessTxQ()
 end
 
 function mspSendRequest(cmd, payload)
+	if environment.simulation ~= true then
     print("Sending cmd "..cmd)
+	end
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
+		if environment.simulation ~= true then
         print("Existing mspTxBuf is still being sent, failed send of cmd: "..tostring(cmd))
+		end
         return nil
     end
     mspTxBuf[1] = #(payload)
