@@ -274,16 +274,26 @@ local function updateTelemetryState()
     end
 end
 
+local function clipValue(val,min,max)
+    if val < min then
+        val = min
+    elseif val > max then
+        val = max
+    end
+    return val
+end
+
 local function saveValue(newValue, currentField)
     if environment.simulation == true then
         return
     end
 
+
     local f = Page.fields[currentField]
     local scale = f.scale or 1
+	local step = f.step or 1
 
-    f.value = newValue * 1 / scale, (f.min or 0) / scale, (f.max or 255) / scale
-    f.value = math.floor(f.value * scale / 1 + 0.5) * 1 / scale
+
     for idx = 1, #f.vals do
         Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
     end
@@ -441,7 +451,7 @@ function wakeup(widget)
                     saveSettings()
                     lcdNeedsInvalidate = true
                 else
-                    print("Failed to write page values!")
+                    --print("Failed to write page values!")
                     invalidatePages()
                 end
             -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
@@ -452,14 +462,14 @@ function wakeup(widget)
                     eepromWrite()
                     lcdNeedsInvalidate = true
                 else
-                    print("Failed to write to eeprom!")
+                    --print("Failed to write to eeprom!")
                     invalidatePages()
                 end
             -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
             end
         end
         if not Page then
-            print("Reloading data : " .. lastPage)
+            --print("Reloading data : " .. lastPage)
             Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. lastPage))()
             collectgarbage()
         end
@@ -492,7 +502,7 @@ function wakeup(widget)
 				end
                 wasSaving = false
 			elseif wasRefreshing == true then
-				print("was refreshing")
+				--print("was refreshing")
 				if lastScript == 'pids.lua' or lastIdx == 1 then
 					openPagePID(lastIdx, lastTitle, lastScript)
 				else
@@ -657,19 +667,84 @@ local function fieldChoice(f,i)
 		nil,
 		convertPageValueTable(f.table),
 		function()
-			-- get the value
-			return f.value
+			local value = getFieldValue(f)
+			return value	
 		end,
 		function(value)
-			-- save the value
-			f.value = value
-			if Page.fields[currentField].postEdit then
-				Page.fields[currentField].postEdit(Page)
-			end
-			saveValue(value, i)
+			f.value = saveFieldValue(f,value)
+			saveValue(v, i)
 		end
 	)
 end
+
+local function decimalInc(dec)
+	local decTable = {
+				10,
+				100,
+				1000,
+				10000,
+				100000,
+				1000000,
+				10000000,
+				100000000,
+				1000000000,
+				10000000000,
+				100000000000,
+				}
+				
+	if dec == nil then
+		return 1
+	else
+		return decTable[dec]
+	end
+	
+end
+
+function getFieldValue(f)
+	if f.value ~= nil then
+			if f.decimals ~= nil then
+				return round(f.value * decimalInc(f.decimals))
+			else
+				return f.value
+			end	
+	end	
+end
+
+function round(number, precision)
+	if precision == nil then
+		precision = 0
+	end
+    local fmtStr = string.format("%%0.%sf", precision)
+    number = string.format(fmtStr, number)
+    number = tonumber(number)
+    return number
+end
+
+function saveFieldValue(f,value)
+	if value ~= nil then
+		if f.decimals ~= nil then
+			f.value =  value / decimalInc(f.decimals)
+		else
+			f.value =  value
+		end	
+		if f.postEdit then
+			f.postEdit(Page)
+		end				
+	end		
+	return f.value
+
+end
+
+local function scaleValue(value,f)
+	local v
+	v = value * decimalInc(f.decimals) 
+	if f.scale ~= nil then
+		v = v / f.scale
+	end
+	v = round(v)
+	return v
+end
+
 
 local function fieldNumber(f,i)
 
@@ -685,41 +760,28 @@ local function fieldNumber(f,i)
 	end
 
 	line = form.addLine(f.t)
+	
+	minValue = scaleValue(f.min,f)
+	maxValue = scaleValue(f.max,f)
 
+	
 	field =
 		form.addNumberField(
 		line,
 		nil,
-		f.min,
-		f.max,
+		minValue,
+		maxValue,
 		function()
-			-- get the value
-			if f.scale ~= nil then
-				if f.value ~= nil then
-					return f.value * f.scale
-				end
-			else
-				return f.value
-			end
+			local value = getFieldValue(f)
+			return value	
 		end,
 		function(value)
-			-- save the value
-			if f.scale ~= nil then
-				if value ~= nil then
-					f.value = value * f.scale
-				end
-			else
-				f.value = value
-			end
-			saveValue(value, i)
+			f.value = saveFieldValue(f,value)
+			saveValue(v, i)
 		end
 	)
 	if f.default ~= nil then
-		if f.scale ~= nil then
-			field:default(math.floor(f.default / f.scale))
-		else
-			field:default(f.default)
-		end
+		field:default(f.default * decimalInc(f.decimals))
 	else
 		field:default(0)
 	end
@@ -729,6 +791,10 @@ local function fieldNumber(f,i)
 	if f.unit ~= nil then
 		field:suffix(f.unit)
 	end	
+	if f.step ~= nil then
+		print(f.step)
+		field:step(f.step)
+	end
 end
 
 local function getLabel(id,page)
@@ -907,39 +973,25 @@ function openPagePID(idx, title, script)
 		
 		pos = {x = posX + padding, y = posY, w = w - padding, h = h}
 
+		minValue = f.min * decimalInc(f.decimals) 
+		maxValue = f.max * decimalInc(f.decimals) 
+
 		field = form.addNumberField(
 			_G['PIDROWS_' .. f.row],
 			pos,
-			f.min,
-			f.max,
+			minValue,
+			maxValue,
 			function()
-				-- get the value
-				if f.scale ~= nil then
-					if f.value ~= nil then
-						return f.value * f.scale
-					end
-				else
-					return f.value
-				end
+				local value = getFieldValue(f)
+				return value	
 			end,
 			function(value)
-				-- save the value
-				if f.scale ~= nil then
-					if value ~= nil then
-						f.value = value * f.scale
-					end
-				else
-					f.value = value
-				end
-				saveValue(value, i)
+				f.value = saveFieldValue(f,value)
+				saveValue(v, i)
 			end
 		)
 		if f.default ~= nil then
-			if f.scale ~= nil then
-				field:default(math.floor(f.default / f.scale))
-			else
-				field:default(f.default)
-			end
+			--field:default(scaleValueDown(f.default,f.scale))
 		else
 			field:default(0)
 		end
