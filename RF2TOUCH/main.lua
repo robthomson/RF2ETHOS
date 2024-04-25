@@ -43,7 +43,7 @@ local popupMenuActive = 1
 local pageScrollY = 0
 local mainMenuScrollY = 0
 local telemetryState
-local saveTimeout, saveMaxRetries, PageFiles, Page, init, popupMenu, requestTimeout, rssiSensor
+local saveTimeout, saveMaxRetries, MainMenu, Page, init, popupMenu, requestTimeout, rssiSensor
 local createForm = false
 local isSaving = false
 local wasSaving = false
@@ -60,6 +60,7 @@ local callCreate = true
 local lastPage
 
 local lastIdx = nil
+local lastSubPage = nil
 local lastTitle = nil
 local lastScript = nil
 
@@ -498,7 +499,7 @@ function wakeup(widget)
 				if lastScript == 'pids.lua' or lastIdx == 1 then
 					openPagePID(lastIdx, lastTitle, lastScript)
 				else
-					openPageDefault(lastIdx, lastTitle, lastScript)
+					openPageDefault(lastIdx, lastSubPage,lastTitle, lastScript)
 				end
                 wasSaving = false
 			elseif wasRefreshing == true then
@@ -506,7 +507,7 @@ function wakeup(widget)
 				if lastScript == 'pids.lua' or lastIdx == 1 then
 					openPagePID(lastIdx, lastTitle, lastScript)
 				else
-					openPageDefault(lastIdx, lastTitle, lastScript)
+					openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
 				end
                 wasRefeshing = false			
             else
@@ -649,6 +650,12 @@ T_EXPAND = 1
 
 local function fieldChoice(f,i)
 
+	if lastSubPage ~= nil and f.subpage ~= nil then
+		if f.subpage ~= lastSubPage then
+			return
+		end
+	end	
+
 	if f.t ~= nil then
 		if f.t2 ~= nil then
 			f.t = f.t2
@@ -748,6 +755,11 @@ end
 
 local function fieldNumber(f,i)
 
+	if lastSubPage ~= nil and f.subpage ~= nil then
+		if f.subpage ~= lastSubPage then
+			return
+		end
+	end	
 
 	if f.t ~= nil then
 		if f.t2 ~= nil then
@@ -758,6 +770,7 @@ local function fieldNumber(f,i)
 			f.t = "    " .. f.t
 		end
 	end
+
 
 	line = form.addLine(f.t)
 	
@@ -810,6 +823,12 @@ end
 
 local function fieldLabel(f,i,l)
 
+	if lastSubPage ~= nil and f.subpage ~= nil then
+		if f.subpage ~= lastSubPage then
+			return
+		end
+	end	
+
 	if f.t ~= nil then
 		if f.t2 ~= nil then
 			f.t = f.t2
@@ -819,7 +838,7 @@ local function fieldLabel(f,i,l)
 			f.t = "    " .. f.t
 		end
 	end
-
+	
 	if f.label ~= nil then
 	
 		local label = getLabel(f.label, l)
@@ -836,12 +855,16 @@ local function fieldLabel(f,i,l)
 			labelName = "unknown"
 		end
 
+
 		if f.label ~= lastLabel then
 			if label.type == nil then
 				label.type = 0
 			end
+
+					
 			line = form.addLine(labelName)
 			form.addStaticText(line, nil, "")
+			
 			lastLabel = f.label
 		end
 
@@ -862,7 +885,7 @@ local function fieldHeader(title)
     navigationButtons(colStart, padding, buttonW, buttonH)
 end
 
-function openPageDefault(idx, title, script)
+function openPageDefault(idx, subpage, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
     uiState = uiStatus.pages
@@ -870,8 +893,10 @@ function openPageDefault(idx, title, script)
     longPage = false
 
     lastIdx = idx
+	lastSubPage = subpage
     lastTitle = title
     lastScript = script
+
 
     form.clear()
 
@@ -892,11 +917,13 @@ function openPageDefault(idx, title, script)
 
 		fieldLabel(f,i,l)
 
-        if f.table or f.type == 1 then
+		
+		if f.table or f.type == 1 then
 			fieldChoice(f,i)
-        else
+		else
 			fieldNumber(f,i)
-        end
+		end	
+
     end
     -- display menu at footer
     if Page.longPage ~= nil then
@@ -919,6 +946,7 @@ function openPagePID(idx, title, script)
     longPage = false
 
     lastIdx = idx
+	lastSubPage = nil
     lastTitle = title
     lastScript = script
 
@@ -960,7 +988,7 @@ function openPagePID(idx, title, script)
 
 	-- display each row
 	for ri,rv in ipairs(Page.rows) do
-		_G['PIDROWS_' .. ri] = form.addLine(rv)		
+		_G['RF2TOUCH_PIDROWS_' .. ri] = form.addLine(rv)		
 	end
 
 	for i = 1, #Page.fields do
@@ -977,7 +1005,7 @@ function openPagePID(idx, title, script)
 		maxValue = f.max * decimalInc(f.decimals) 
 
 		field = form.addNumberField(
-			_G['PIDROWS_' .. f.row],
+			_G['RF2TOUCH_PIDROWS_' .. f.row],
 			pos,
 			minValue,
 			maxValue,
@@ -991,7 +1019,7 @@ function openPagePID(idx, title, script)
 			end
 		)
 		if f.default ~= nil then
-			--field:default(scaleValueDown(f.default,f.scale))
+			field:default(f.default * decimalInc(f.decimals))
 		else
 			field:default(0)
 		end
@@ -1006,6 +1034,81 @@ function openPagePID(idx, title, script)
     lcdNeedsInvalidate = true
 end
 
+
+local function getSection(id,sections)
+    for i, v in ipairs(sections) do
+		print(v)
+        if id ~= nil then
+            if v.section == id then
+                return v
+            end
+        end
+    end
+end
+
+function openMainMenu()
+    uiState = uiStatus.mainMenu
+
+    local windowWidth, windowHeight = lcd.getWindowSize()
+
+    local padding = 15
+    local h = 40
+    local w = (windowWidth - 3 * padding) / 2 - padding
+    --local x = 0
+	local x = padding
+    local y = 8
+
+    form.clear()
+	
+	
+	-- create drop downs
+    for idx, value in ipairs(MainMenu.sections) do
+
+		panel = form.addLine(value.title)
+		
+		lc = 0
+		for pidx, pvalue in ipairs(MainMenu.pages) do	
+			if pvalue.section == value.section then
+				if lc == 0 then
+					line = form.addLine("")
+					x = padding
+				end	
+			
+				if lc == 1 then
+					x = w + (padding*2)
+				end
+			
+				form.addTextButton(
+				line,
+				{x = x, y = y, w = w, h = h},
+				pvalue.title,
+				function()
+					if pvalue.script == "pids.lua" then
+						openPagePID(pidx, pvalue.title, pvalue.script)
+					else
+						openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+					end
+				end
+				)			
+			
+			
+				lc = lc + 1
+				
+				if lc == 2 then
+					lc = 0
+				end
+				
+			end
+		end
+			
+			
+	end
+
+
+
+end
+
+--[[
 function openMainMenu()
     uiState = uiStatus.mainMenu
 
@@ -1019,8 +1122,9 @@ function openMainMenu()
 
     form.clear()
 
-    for idx, value in ipairs(PageFiles) do
-        --print(value.title)
+	local lastSection
+    for idx, value in ipairs(MainMenu.pages) do
+
 
         if idx % 2 == 1 then
             x = padding
@@ -1028,6 +1132,8 @@ function openMainMenu()
         else
             x = x + w + padding
         end
+		
+
 
         form.addTextButton(
             nil,
@@ -1037,12 +1143,14 @@ function openMainMenu()
 				if value.script == "pids.lua" then
 					openPagePID(idx, value.title, value.script)
 				else
-					openPageDefault(idx, value.title, value.script)
+					openPageDefault(idx, value.subpage, value.title, value.script)
 				end
             end
         )
+
     end
 end
+]]--
 
 local function create()
     protocol = assert(loadScript("/scripts/RF2TOUCH/protocols.lua"))()
@@ -1074,7 +1182,7 @@ local function create()
     lastEvent = nil
     apiVersion = 0
 
-    PageFiles = assert(loadScript("/scripts/RF2TOUCH/pages.lua"))()
+    MainMenu = assert(loadScript("/scripts/RF2TOUCH/pages.lua"))()
 
     -- force page to get pickup data as it loads in
     form.onWakeup(
