@@ -880,7 +880,7 @@ local function fieldHeader(title)
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
     buttonW = (w - colStart) / 3 - padding
-    buttonH = radio.fieldHeight
+    buttonH = radio.buttonHeight
     line = form.addLine(title)
     navigationButtons(colStart, padding, buttonW, buttonH)
 end
@@ -963,7 +963,7 @@ function openPagePID(idx, title, script)
 	local screenWidth = LCD_W - 10
 	local padding = 10
 	local paddingTop = 8
-	local h = radio.fieldHeight
+	local h = radio.buttonHeight
 	local w = ((screenWidth * 70 / 100) / numCols) 
 	local paddingRight = 20
 	local positions = {}
@@ -1051,12 +1051,12 @@ function openMainMenu()
 
     local windowWidth, windowHeight = lcd.getWindowSize()
 
-    local padding = 15
-    local h = 40
+    local padding = radio.buttonPadding
+    local h = radio.buttonHeight
     local w = (windowWidth - 3 * padding) / 2 - padding
     --local x = 0
-	local x = padding
-    local y = 8
+
+    local y = radio.buttonPaddingTop
 
     form.clear()
 	
@@ -1075,7 +1075,7 @@ function openMainMenu()
 				end	
 			
 				if lc == 1 then
-					x = w + (padding*2)
+					x = w + (padding*3)
 				end
 			
 				form.addTextButton(

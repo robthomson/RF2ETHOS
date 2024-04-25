@@ -12,7 +12,7 @@ sections[#sections + 1] = {title = "Flight Profiles" , section=1,open=true}
 	pages[#pages + 1] = { title = "Tail Rotor", section=1, subpage=2,script = "profile.lua" }
 	pages[#pages + 1] = { title = "Main Rotor", section=1, subpage=4,script = "profile.lua" }
 	pages[#pages + 1] = { title = "Auto Level", section=1, subpage=5,script = "profile.lua" }
-	--pages[#pages + 1] = { title = "Rates (NC)", script = "rates.lua" }
+	pages[#pages + 1] = { title = "Rates (NC)",section=1, script = "rates.lua" }
 
 sections[#sections + 1] = {title = "General", section=2,open=false }
 	pages[#pages + 1] = { title = "Governor", section=2, script = "governor.lua" }
@@ -21,7 +21,7 @@ sections[#sections + 1] = {title = "General", section=2,open=false }
 
 
 sections[#sections + 1] = {title = "Hardware", section=3,open=false }
-	--pages[#pages + 1] = { title = "Servos (NC)", section=3,  script = "servos.lua" }
+	pages[#pages + 1] = { title = "Servos (NC)", section=3,  script = "servos.lua" }
 	pages[#pages + 1] = { title = "Accelerometer",section=3,  script = "accelerometer.lua" }
 
 sections[#sections + 1] = {title = "Tools",section=4,open=false }
