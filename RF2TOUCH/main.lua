@@ -666,12 +666,49 @@ local function fieldChoice(f,i)
 		end
 	end
 
-	line = form.addLine(f.t)
+	if f.inline ~= nil and f.inline >= 1 then
+		--inline element so no new line
+		local numElements = f.inline * 2 -- text + value so double
+		local w, h = lcd.getWindowSize()
+		local colStart = math.floor((w * 59.4) / 100)
+		local padding = 20
+		local fieldW = (w - colStart) / 4
+		local eX			
+		local eW = fieldW
+		local eH = radio.buttonHeight
+		local eY = radio.buttonPaddingTop	
+		tsizeW, tsizeH = lcd.getTextSize(f.t)	
+			
+		if f.inline == 1 then
+			posX = colStart - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart + fieldW - padding
+			posField = {x = posX, y = eY, w = eW, h = eH}
+		elseif f.inline == 2 then
+			posX = (colStart + fieldW*2) - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart + (fieldW*3) - padding/2
+			posField = {x = posX, y = eY, w = eW, h = eH}	
+		elseif f.inline == 3 then
+			posX = (colStart - fieldW*2) - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart - (fieldW) - padding
+			posField = {x = posX, y = eY, w = eW, h = eH}	
+		else
+			print ("We can only do inlines of 3 elements")
+		end	
+		field = form.addStaticText(line, posText, f.t)
+	
+	else
+		line = form.addLine(f.t)
+		posField = nil
+		postText = nil
+	end
 
 	field =
 		form.addChoiceField(
 		line,
-		nil,
+		posField,
 		convertPageValueTable(f.table),
 		function()
 			local value = getFieldValue(f)
@@ -753,6 +790,7 @@ local function scaleValue(value,f)
 end
 
 
+
 local function fieldNumber(f,i)
 
 	if lastSubPage ~= nil and f.subpage ~= nil then
@@ -772,7 +810,44 @@ local function fieldNumber(f,i)
 	end
 
 
-	line = form.addLine(f.t)
+	if f.inline ~= nil and f.inline >= 1 then
+		--inline element so no new line
+		local numElements = f.inline * 2 -- text + value so double
+		local w, h = lcd.getWindowSize()
+		local colStart = math.floor((w * 59.4) / 100)
+		local padding = 20
+		local fieldW = (w - colStart) / 4
+		local eX			
+		local eW = fieldW
+		local eH = radio.buttonHeight
+		local eY = radio.buttonPaddingTop	
+		tsizeW, tsizeH = lcd.getTextSize(f.t)	
+			
+		if f.inline == 1 then
+			posX = colStart - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart + fieldW - padding
+			posField = {x = posX, y = eY, w = eW, h = eH}
+		elseif f.inline == 2 then
+			posX = (colStart + fieldW*2) - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart + (fieldW*3) - padding/2
+			posField = {x = posX, y = eY, w = eW, h = eH}	
+		elseif f.inline == 3 then
+			posX = (colStart - fieldW*2) - tsizeW/2
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			posX = colStart - (fieldW) - padding
+			posField = {x = posX, y = eY, w = eW, h = eH}	
+		else
+			print ("We can only do inlines of 3 elements")
+		end	
+		field = form.addStaticText(line, posText, f.t)
+	
+	else
+		line = form.addLine(f.t)
+		posField = nil
+		postText = nil
+	end
 	
 	minValue = scaleValue(f.min,f)
 	maxValue = scaleValue(f.max,f)
@@ -781,7 +856,7 @@ local function fieldNumber(f,i)
 	field =
 		form.addNumberField(
 		line,
-		nil,
+		posField,
 		minValue,
 		maxValue,
 		function()
@@ -861,9 +936,10 @@ local function fieldLabel(f,i,l)
 				label.type = 0
 			end
 
-					
+
 			line = form.addLine(labelName)
 			form.addStaticText(line, nil, "")
+
 			
 			lastLabel = f.label
 		end
@@ -917,7 +993,6 @@ function openPageDefault(idx, subpage, title, script)
 
 		fieldLabel(f,i,l)
 
-		
 		if f.table or f.type == 1 then
 			fieldChoice(f,i)
 		else

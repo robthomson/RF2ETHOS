@@ -5,31 +5,32 @@ local fields = {}
 
 
 -- pid controller settings =
-labels[#labels + 1] = { subpage=1,t = "Error decay ground", t2="Ground Error Decay", label=1      }
-	fields[#fields + 1] = { subpage=1,t = "Time", label=1,                   min = 0, max = 250,unit="s",default=250, vals = { 2 }, decimals=1, scale = 10 }
+--labels[#labels + 1] = { subpage=1,t = "Error decay ground", t2="Ground Error Decay", label=1      }
+	fields[#fields + 1] = { subpage=1,t = "Error decay ground",                   min = 0, max = 250,unit="s",default=250, vals = { 2 }, decimals=1, scale = 10 }
 
 labels[#labels + 1] = { subpage=1,t = "Error decay cyclic", t2="Cyclic Error Decay", label=2       }
-	fields[#fields + 1] = { subpage=1,t = "Time",                    label=2, min = 0, max = 250,unit="s",default=180, vals = { 3 },decimals=1, scale = 10 }
-	fields[#fields + 1] = { subpage=1,t = "Limit",                   label=2, min = 0, max = 250,unit="°",default=20, vals = { 5 } }
+	fields[#fields + 1] = { subpage=1,t = "Time", inline=1,                   label=2, min = 0, max = 250,unit="s",default=180, vals = { 3 },decimals=1, scale = 10 }
+	fields[#fields + 1] = { subpage=1,t = "Limit",inline=2,                   label=2, min = 0, max = 250,unit="°",default=20, vals = { 5 } }
 
 labels[#labels + 1] = { subpage=1,t = "Error decay yaw", t2="Yaw Error Decay", label=3         }
-	fields[#fields + 1] = { subpage=1,t = "Time",                    label=3,min = 0, max = 250,unit="s", vals = { 4 },decimals=1,scale = 10 }
-	fields[#fields + 1] = { subpage=1,t = "Limit",                   label=3,min = 0, max = 250,unit="°", vals = { 6 } }
+	fields[#fields + 1] = { subpage=1,t = "Time",  inline=1,                   label=3,min = 0, max = 250,unit="s", vals = { 4 },decimals=1,scale = 10 }
+	fields[#fields + 1] = { subpage=1,t = "Limit",  inline=2,                  label=3,min = 0, max = 250,unit="°", vals = { 6 } }
 
 labels[#labels + 1] = { subpage=1,t = "Error limit", label=4             }
-	fields[#fields + 1] = { subpage=1,t = "Roll",                    label=4, min = 0, max = 180,default=30,unit="°", vals = { 8 } }
-	fields[#fields + 1] = { subpage=1,t = "Pitch",                   label=4, min = 0, max = 180,default=30,unit="°", vals = { 9 } }
-	fields[#fields + 1] = { subpage=1,t = "Yaw",                     label=4, min = 0, max = 180,default=45,unit="°", vals = { 10 } }
+	fields[#fields + 1] = { subpage=1,t = "Roll", inline=3,                    label=4, min = 0, max = 180,default=30,unit="°", vals = { 8 } }
+	fields[#fields + 1] = { subpage=1,t = "Pitch",  inline=1,                  label=4, min = 0, max = 180,default=30,unit="°", vals = { 9 } }
+	fields[#fields + 1] = { subpage=1,t = "Yaw",  inline=2,                    label=4, min = 0, max = 180,default=45,unit="°", vals = { 10 } }
 
 labels[#labels + 1] = { subpage=1,t = "Offset limit", label=5              }
-	fields[#fields + 1] = { subpage=1,t = "Roll",                    label=5, min = 0, max = 180,default=45,unit="°", vals = { 37 } }
-	fields[#fields + 1] = { subpage=1,t = "Pitch",                   label=5, min = 0, max = 180,default=45,unit="°", vals = { 38 } }
+	fields[#fields + 1] = { subpage=1,t = "Roll", inline=1,                    label=5, min = 0, max = 180,default=45,unit="°", vals = { 37 } }
+	fields[#fields + 1] = { subpage=1,t = "Pitch", inline=2,                  label=5, min = 0, max = 180,default=45,unit="°", vals = { 38 } }
 	fields[#fields + 1] = { subpage=1,t = "Error rotation",          min = 0, max = 1, vals = { 7 }, table = { [0] = "OFF", "ON" } }
 	labels[#labels + 1] = { subpage=1,t = "I-term relax", label=6              }
 	fields[#fields + 1] = { subpage=1,t = "Type",       			   label=6,min = 0, max = 2, vals = { 17 }, table = { [0] = "OFF", "RP", "RPY" } }
-	fields[#fields + 1] = { subpage=1,t = "Cut-off point R",         label=6,min = 1, max = 100,default=10, vals = { 18 } }
-	fields[#fields + 1] = { subpage=1,t = "Cut-off point P",         label=6,min = 1, max = 100,default=10, vals = { 19 } }
-	fields[#fields + 1] = { subpage=1,t = "Cut-off point Y",         label=6,min = 1, max = 100,default=15, vals = { 20 } }
+labels[#labels + 1] = { subpage=1,t = "        Cut-off point", label=15              }
+	fields[#fields + 1] = { subpage=1,t = "R",inline=3,         label=15,min = 1, max = 100,default=10, vals = { 18 } }
+	fields[#fields + 1] = { subpage=1,t = "P",inline=1,         label=15,min = 1, max = 100,default=10, vals = { 19 } }
+	fields[#fields + 1] = { subpage=1,t = "Y",inline=2,         label=15,min = 1, max = 100,default=15, vals = { 20 } }
 
 
 -- tail rotor settings
