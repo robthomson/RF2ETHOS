@@ -580,7 +580,7 @@ function navigationButtons(x, y, w, h)
     )
     form.addTextButton(
         line,
-        {x = colStart + buttonW + padding, y = padding, w = buttonW, h = buttonH},
+        {x = colStart + buttonW + padding, y = y, w = buttonW, h = h},
         "SAVE",
         function()
             local buttons = {
@@ -606,7 +606,7 @@ function navigationButtons(x, y, w, h)
     )
     form.addTextButton(
         line,
-        {x = colStart + (buttonW + padding)*2, y = padding, w = buttonW, h = buttonH},
+        {x = colStart + (buttonW + padding)*2, y = y, w = buttonW, h = h},
         "REFRESH",
         function()
             local buttons = {
@@ -648,6 +648,94 @@ T_LABEL = 0
 T_EXPAND = 1
 ]] 
 
+
+local function getInlineSize(id)
+
+    for i, v in ipairs(Page.labels) do
+	
+        if id ~= nil then
+            if v.label == id then
+                if v.inline_size == nil then
+					return 10
+				else
+					return v.inline_size
+				end
+            end
+        end
+    end
+end
+
+local function getInlinePositions(f)
+
+		inline_size = getInlineSize(f.label)
+	
+		local w, h = lcd.getWindowSize()
+		local colStart
+		
+		local padding = 5
+		local fieldW = (w * inline_size) / 100
+
+		local eX			
+		local eW = fieldW - padding
+		local eH = radio.buttonHeight
+		local eY = radio.buttonPaddingTop	
+		local posX
+		tsizeW, tsizeH = lcd.getTextSize(f.t)	
+
+
+		if f.inline == 5 then
+			posX = w - fieldW*9 - tsizeW - padding
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			
+			posX = w - fieldW*9
+			posField = {x = posX, y = eY, w = eW, h = eH}
+	
+		elseif f.inline == 4 then
+
+			posX = w - fieldW*7 - tsizeW - padding
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			
+			posX = w - fieldW*7
+			posField = {x = posX, y = eY, w = eW, h = eH}
+								
+		elseif f.inline == 3 then
+		
+			posX = w - fieldW*5 - tsizeW - padding
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			
+			posX = w - fieldW*5
+			posField = {x = posX, y = eY, w = eW, h = eH}
+			
+		elseif f.inline == 2 then
+		
+			posX = w - fieldW*3 - tsizeW - padding
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			
+			posX = w - fieldW*3
+			posField = {x = posX, y = eY, w = eW, h = eH}	
+			
+			
+		elseif f.inline == 1 then
+
+			posX = w - fieldW - tsizeW - padding
+			posText = {x = posX, y = eY, w = tsizeW, h = eH}
+			
+			posX = w - fieldW
+			posField = {x = posX, y = eY, w = eW, h = eH}		
+		end	
+
+	
+	ret = {
+		posText=posText,
+		posField = posField
+	}
+
+	
+	return 	ret
+end
+
+
+
 local function fieldChoice(f,i)
 
 	if lastSubPage ~= nil and f.subpage ~= nil then
@@ -656,50 +744,30 @@ local function fieldChoice(f,i)
 		end
 	end	
 
-	if f.t ~= nil then
-		if f.t2 ~= nil then
-			f.t = f.t2
-		end
-
-		if f.label ~= nil then
-			f.t = "    " .. f.t
-		end
-	end
-
-	if f.inline ~= nil and f.inline >= 1 then
-		--inline element so no new line
-		local numElements = f.inline * 2 -- text + value so double
-		local w, h = lcd.getWindowSize()
-		local colStart = math.floor((w * 59.4) / 100)
-		local padding = 20
-		local fieldW = (w - colStart) / 4
-		local eX			
-		local eW = fieldW
-		local eH = radio.buttonHeight
-		local eY = radio.buttonPaddingTop	
-		tsizeW, tsizeH = lcd.getTextSize(f.t)	
-			
-		if f.inline == 1 then
-			posX = colStart - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart + fieldW - padding
-			posField = {x = posX, y = eY, w = eW, h = eH}
-		elseif f.inline == 2 then
-			posX = (colStart + fieldW*2) - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart + (fieldW*3) - padding/2
-			posField = {x = posX, y = eY, w = eW, h = eH}	
-		elseif f.inline == 3 then
-			posX = (colStart - fieldW*2) - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart - (fieldW) - padding
-			posField = {x = posX, y = eY, w = eW, h = eH}	
-		else
-			print ("We can only do inlines of 3 elements")
-		end	
-		field = form.addStaticText(line, posText, f.t)
+	if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
 	
+		if f.t ~= nil then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end
+		end	
+		
+		local p = getInlinePositions(f)
+		posText = p.posText
+		posField = p.posField
+
+		field = form.addStaticText(line, posText, f.t)
 	else
+		if f.t ~= nil then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end
+
+			if f.label ~= nil then
+				f.t = "    " .. f.t
+			end
+		end	
+		formLineCnt = formLineCnt + 1
 		line = form.addLine(f.t)
 		posField = nil
 		postText = nil
@@ -790,7 +858,6 @@ local function scaleValue(value,f)
 end
 
 
-
 local function fieldNumber(f,i)
 
 	if lastSubPage ~= nil and f.subpage ~= nil then
@@ -799,51 +866,32 @@ local function fieldNumber(f,i)
 		end
 	end	
 
-	if f.t ~= nil then
-		if f.t2 ~= nil then
-			f.t = f.t2
-		end
 
-		if f.label ~= nil then
-			f.t = "    " .. f.t
-		end
-	end
-
-
-	if f.inline ~= nil and f.inline >= 1 then
-		--inline element so no new line
-		local numElements = f.inline * 2 -- text + value so double
-		local w, h = lcd.getWindowSize()
-		local colStart = math.floor((w * 59.4) / 100)
-		local padding = 20
-		local fieldW = (w - colStart) / 4
-		local eX			
-		local eW = fieldW
-		local eH = radio.buttonHeight
-		local eY = radio.buttonPaddingTop	
-		tsizeW, tsizeH = lcd.getTextSize(f.t)	
-			
-		if f.inline == 1 then
-			posX = colStart - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart + fieldW - padding
-			posField = {x = posX, y = eY, w = eW, h = eH}
-		elseif f.inline == 2 then
-			posX = (colStart + fieldW*2) - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart + (fieldW*3) - padding/2
-			posField = {x = posX, y = eY, w = eW, h = eH}	
-		elseif f.inline == 3 then
-			posX = (colStart - fieldW*2) - tsizeW/2
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			posX = colStart - (fieldW) - padding
-			posField = {x = posX, y = eY, w = eW, h = eH}	
-		else
-			print ("We can only do inlines of 3 elements")
-		end	
-		field = form.addStaticText(line, posText, f.t)
+	if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
 	
+		if f.t ~= nil then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end
+		end	
+		
+		local p = getInlinePositions(f)
+		posText = p.posText
+		posField = p.posField
+
+		field = form.addStaticText(line, posText, f.t)
 	else
+		if f.t ~= nil then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end
+
+			if f.label ~= nil then
+				f.t = "    " .. f.t
+			end
+		end	
+		
+		formLineCnt = formLineCnt + 1
 		line = form.addLine(f.t)
 		posField = nil
 		postText = nil
@@ -936,7 +984,7 @@ local function fieldLabel(f,i,l)
 				label.type = 0
 			end
 
-
+			formLineCnt = formLineCnt + 1
 			line = form.addLine(labelName)
 			form.addStaticText(line, nil, "")
 
@@ -958,7 +1006,7 @@ local function fieldHeader(title)
     buttonW = (w - colStart) / 3 - padding
     buttonH = radio.buttonHeight
     line = form.addLine(title)
-    navigationButtons(colStart, padding, buttonW, buttonH)
+    navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)	
 end
 
 function openPageDefault(idx, subpage, title, script)
@@ -982,8 +1030,11 @@ function openPageDefault(idx, subpage, title, script)
 
 	fieldHeader(title)
 
-
+	formLineCnt = 0
     for i = 1, #Page.fields do
+
+		
+	
         local f = Page.fields[i]
         local l = Page.labels
         local pageValue = f
@@ -1001,11 +1052,11 @@ function openPageDefault(idx, subpage, title, script)
 
     end
     -- display menu at footer
-    if Page.longPage ~= nil then
-        if Page.longPage == true then
-            line = form.addLine("")
-            navigationButtons(colStart, padding, buttonW, buttonH)
-        end
+	
+	
+    if formLineCnt*(radio.buttonHeight+radio.buttonPadding) > LCD_H then
+        line = form.addLine("")
+         navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 	
     lcdNeedsInvalidate = true
@@ -1043,13 +1094,16 @@ function openPagePID(idx, title, script)
 	local paddingRight = 20
 	local positions = {}
 	local positions_r = {}
+	local pos
+	
 
 	line = form.addLine("")	
 
-	loc = numCols
-	posX = screenWidth - paddingRight
-	posY = paddingTop
-	c = 1
+	local loc = numCols
+	local posX = screenWidth - paddingRight
+	local posY = paddingTop
+	
+	local c = 1
 	while loc > 0 do
 		local colLabel = Page.cols[loc]
 		pos = {x = posX, y = posY, w = w, h = h}
@@ -1105,6 +1159,14 @@ function openPagePID(idx, title, script)
 			field:suffix(f.unit)
 		end	
 	end		
+
+    -- display menu at footer
+    if Page.longPage ~= nil then
+        if Page.longPage == true then
+            line = form.addLine("")
+            navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        end
+    end
 	
     lcdNeedsInvalidate = true
 end
@@ -1124,19 +1186,23 @@ end
 function openMainMenu()
     uiState = uiStatus.mainMenu
 
+	local numPerRow = 3
+
     local windowWidth, windowHeight = lcd.getWindowSize()
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
-    local w = (windowWidth - 3 * padding) / 2 - padding
+    local w = ((windowWidth) / numPerRow)-(padding*numPerRow-1)
     --local x = 0
 
     local y = radio.buttonPaddingTop
 
     form.clear()
 	
+
 	
 	-- create drop downs
+
     for idx, value in ipairs(MainMenu.sections) do
 
 		panel = form.addLine(value.title)
@@ -1149,8 +1215,8 @@ function openMainMenu()
 					x = padding
 				end	
 			
-				if lc == 1 then
-					x = w + (padding*3)
+				if lc >= 1 then
+					x = (w+(padding*numPerRow))*lc
 				end
 			
 				form.addTextButton(
@@ -1169,7 +1235,7 @@ function openMainMenu()
 			
 				lc = lc + 1
 				
-				if lc == 2 then
+				if lc == numPerRow then
 					lc = 0
 				end
 				
@@ -1183,49 +1249,7 @@ function openMainMenu()
 
 end
 
---[[
-function openMainMenu()
-    uiState = uiStatus.mainMenu
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
-
-    local padding = 15
-    local h = 50
-    local w = (windowWidth - 3 * padding) / 2
-    local x = padding
-    local y = -h
-
-    form.clear()
-
-	local lastSection
-    for idx, value in ipairs(MainMenu.pages) do
-
-
-        if idx % 2 == 1 then
-            x = padding
-            y = y + h + padding
-        else
-            x = x + w + padding
-        end
-		
-
-
-        form.addTextButton(
-            nil,
-            {x = x, y = y, w = w, h = h},
-            value.title,
-            function()
-				if value.script == "pids.lua" then
-					openPagePID(idx, value.title, value.script)
-				else
-					openPageDefault(idx, value.subpage, value.title, value.script)
-				end
-            end
-        )
-
-    end
-end
-]]--
 
 local function create()
     protocol = assert(loadScript("/scripts/RF2TOUCH/protocols.lua"))()

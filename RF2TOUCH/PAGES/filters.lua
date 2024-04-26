@@ -40,5 +40,4 @@ return {
     minBytes    = 25,
     labels      = labels,
     fields      = fields,
-	longPage	= true
 }

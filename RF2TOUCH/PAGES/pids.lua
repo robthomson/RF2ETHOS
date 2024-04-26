@@ -49,5 +49,4 @@ return {
     fields      = fields,
 	rows		= rows,
 	cols		= cols,
-	longPage = false
 }
