@@ -50,10 +50,12 @@ local wasSaving = false
 local isRefreshing = false
 local wasRefreshing = false
 local lastLabel = nil
+local NewRateTable
 reloadRates = false
 
 defaultRateTable = 4 -- ACTUAL
 RateTable = nil
+ResetRates = nil
 
 
 -- New variables for Ethos version
@@ -598,12 +600,50 @@ local function writeText(x, y, str)
     lcd.drawText(x, y, str)
 end
 
+function defaultAllRates()
+
+end
+
+function resetRates()
+
+	if lastScript == "rates.lua" and lastSubPage == 2 then
+		if ResetRates == true then
+
+				
+		
+			local defaults = {}
+			
+			defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+			defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 }
+			defaults[2] = { 360, 360, 360, 12.5, 0, 0, 0, 0, 0, 0, 0, 0 }
+			defaults[3] = { 1.8, 1.8, 1.8, 2.5, 0, 0, 0, 0, 0, 0, 0, 0 }
+			defaults[4] = { 360, 360, 360, 12, 360, 360, 360, 12, 0, 0, 0, 0 }
+			defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 }	
+			
+			
+			for i = 1, #Page.fields do
+				local f = Page.fields[i]
+				if f.subpage == 1 then	
+					if defaults[NewRateTable][i] ~= nil then
+						f.value = defaults[NewRateTable][i]
+						print("Reset " .. i .. " to " .. f.value)
+					end	
+				end
+			end	
+		
+				
+			ResetRates = false	
+		end
+	end	
+end
+
 function navigationButtons(x, y, w, h)
     form.addTextButton(
         line,
         {x = x, y = y, w = w, h = h},
         "MENU",
         function()
+			ResetRates = false
             openMainMenu()
         end
     )
@@ -618,6 +658,7 @@ function navigationButtons(x, y, w, h)
                     action = function()
                         isSaving = true
                         wasSaving = true
+						resetRates()
                         saveSettings()
                         return true
                     end
@@ -812,8 +853,20 @@ local function fieldChoice(f,i)
 			return value	
 		end,
 		function(value)
+			-- we do this hook to allow rates to be reset
+			if lastScript == "rates.lua" and lastSubPage == 2 then
+				if i == 13 then
+					if RateTable ~= value then
+						print("Set new rate to " .. value)
+						NewRateTable = value
+						ResetRates = true
+					end
+				end
+			end	
+			
 			f.value = saveFieldValue(f,value)
 			saveValue(v, i)
+		
 		end
 	)
 end
