@@ -50,6 +50,11 @@ local wasSaving = false
 local isRefreshing = false
 local wasRefreshing = false
 local lastLabel = nil
+reloadRates = false
+
+defaultRateTable = 4 -- ACTUAL
+RateTable = nil
+
 
 -- New variables for Ethos version
 local screenTitle = nil
@@ -181,15 +186,7 @@ local function processMspReply(cmd, rx_buf, err)
     elseif (cmd == Page.read) and (#rx_buf > 0) then
         --print("processMspReply:  Page.read and non-zero rx_buf")
         Page.values = rx_buf
-        if Page.postRead then
-            print("Post read executed")
-            Page.postRead(Page)
-        end
         dataBindFields()
-        if Page.postLoad then
-            Page.postLoad(Page)
-            print("Postload executed")
-        end
         lcdNeedsInvalidate = true
     end
 end
@@ -394,6 +391,32 @@ function paint()
 end
 
 function wakeUpForm()
+
+
+
+	if lastScript == "rates.lua" and lastSubPage == 1 then
+		if Page.fields then
+		
+			local v = Page.fields[13].value
+			if v ~= nil then
+				activeRateTable =  math.floor(v)
+			end
+			
+			if activeRateTable ~= nil then
+				if activeRateTable ~= RateTable then
+					RateTable = activeRateTable
+					collectgarbage()
+					--reloadRates = true
+					isRefeshing = true
+					wasRefreshing = true
+					createForm = true
+					form.clear()
+
+				end			
+			end
+		end
+	end
+
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
         --print("Form invalidation disabled....")
@@ -498,19 +521,25 @@ function wakeup(widget)
             if wasSaving == true then
 				if lastScript == 'pids.lua' or lastIdx == 1 then
 					openPagePID(lastIdx, lastTitle, lastScript)
+				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
+					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
 				else
 					openPageDefault(lastIdx, lastSubPage,lastTitle, lastScript)
 				end
                 wasSaving = false
 			elseif wasRefreshing == true then
-				--print("was refreshing")
+	
 				if lastScript == 'pids.lua' or lastIdx == 1 then
 					openPagePID(lastIdx, lastTitle, lastScript)
+				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
+					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
 				else
 					openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
 				end
                 wasRefeshing = false			
-            else
+            elseif reloadRates == true then
+				openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+			else
                 openMainMenu()
             end
             createForm = false
@@ -813,13 +842,23 @@ local function decimalInc(dec)
 end
 
 function getFieldValue(f)
+	local v
 	if f.value ~= nil then
 			if f.decimals ~= nil then
-				return round(f.value * decimalInc(f.decimals))
+				v = round(f.value * decimalInc(f.decimals))
 			else
-				return f.value
+				v = f.value
 			end	
+	else
+		v = 0
 	end	
+	
+	if f.mult ~= nil then
+		v = v * f.mult
+	end
+	
+	return v
+	
 end
 
 function round(number, precision)
@@ -843,6 +882,12 @@ function saveFieldValue(f,value)
 			f.postEdit(Page)
 		end				
 	end		
+	
+	if f.mult ~= nil then
+		f.value = f.value / f.mult
+	end
+	
+	
 	return f.value
 
 end
@@ -899,7 +944,10 @@ local function fieldNumber(f,i)
 	
 	minValue = scaleValue(f.min,f)
 	maxValue = scaleValue(f.max,f)
-
+	if f.mult ~= nil then
+		minValue = minValue * f.mult
+		maxValue = maxValue * f.mult
+	end
 	
 	field =
 		form.addNumberField(
@@ -917,7 +965,11 @@ local function fieldNumber(f,i)
 		end
 	)
 	if f.default ~= nil then
-		field:default(f.default * decimalInc(f.decimals))
+		local default = f.default * decimalInc(f.decimals)
+		if f.mult ~= nil then
+			default = default * f.mult
+		end
+		field:default(default)
 	else
 		field:default(0)
 	end
@@ -1132,6 +1184,10 @@ function openPagePID(idx, title, script)
 
 		minValue = f.min * decimalInc(f.decimals) 
 		maxValue = f.max * decimalInc(f.decimals) 
+		if f.mult ~= nil then
+			minValue = minValue * f.mult
+			maxValue = maxValue * f.mult
+		end
 
 		field = form.addNumberField(
 			_G['RF2TOUCH_PIDROWS_' .. f.row],
@@ -1148,7 +1204,11 @@ function openPagePID(idx, title, script)
 			end
 		)
 		if f.default ~= nil then
-			field:default(f.default * decimalInc(f.decimals))
+			local default = f.default * decimalInc(f.decimals)
+			if f.mult ~= nil then
+				default = default * f.mult
+			end
+			field:default(default)
 		else
 			field:default(0)
 		end
@@ -1157,6 +1217,138 @@ function openPagePID(idx, title, script)
 		end
 		if f.unit ~= nil then
 			field:suffix(f.unit)
+		end	
+	end		
+
+    -- display menu at footer
+    if Page.longPage ~= nil then
+        if Page.longPage == true then
+            line = form.addLine("")
+            navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        end
+    end
+	
+    lcdNeedsInvalidate = true
+end
+
+
+
+function openPageRATES(idx, subpage, title, script)
+
+
+
+    local LCD_W, LCD_H = getWindowSize()
+
+    uiState = uiStatus.pages
+
+    longPage = false
+
+    lastIdx = idx
+	lastSubPage = subpage
+    lastTitle = title
+    lastScript = script
+
+    form.clear()
+
+    lastPage = script
+    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
+
+
+	fieldHeader(title)
+	
+
+	local numCols = #Page.cols
+	local screenWidth = LCD_W - 10
+	local padding = 10
+	local paddingTop = 8
+	local h = radio.buttonHeight
+	local w = ((screenWidth * 70 / 100) / numCols) 
+	local paddingRight = 20
+	local positions = {}
+	local positions_r = {}
+	local pos
+	
+
+	line = form.addLine(Page.rTableName)	
+
+	local loc = numCols
+	local posX = screenWidth - paddingRight
+	local posY = paddingTop
+	
+	local c = 1
+	while loc > 0 do
+		local colLabel = Page.cols[loc]
+		tsizeW, tsizeH = lcd.getTextSize(colLabel)			
+		pos = {x = posX - tsizeW + paddingRight, y = posY, w = w, h = h}	
+		form.addStaticText(line, pos, colLabel)
+		positions[loc] = posX -w + paddingRight
+		positions_r[c] = posX -w + paddingRight		
+		posX = math.floor(posX - w)
+		loc = loc - 1
+		c = c + 1
+	end
+
+	
+
+	-- display each row
+	for ri,rv in ipairs(Page.rows) do
+		_G['RF2TOUCH_RATEROWS_' .. ri] = form.addLine(rv)		
+	end
+
+	for i = 1, #Page.fields do
+	
+	
+		local f = Page.fields[i]
+		local l = Page.labels
+		local pageIdx = i
+		local currentField = i
+		
+		if f.subpage == 1 then
+		
+			posX = positions[f.col]
+			
+			pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+
+			minValue = f.min * decimalInc(f.decimals) 
+			maxValue = f.max * decimalInc(f.decimals) 
+			if f.mult ~= nil then
+				minValue = minValue * f.mult
+				maxValue = maxValue * f.mult
+			end
+
+			field = form.addNumberField(
+				_G['RF2TOUCH_RATEROWS_' .. f.row],
+				pos,
+				minValue,
+				maxValue,
+				function()
+					local value = getFieldValue(f)
+					return value	
+				end,
+				function(value)
+					f.value = saveFieldValue(f,value)
+					saveValue(v, i)
+				end
+			)
+			if f.default ~= nil then
+				local default = f.default * decimalInc(f.decimals)
+				if f.mult ~= nil then
+					default = default * f.mult
+				end
+				field:default(default)
+			else
+				field:default(0)
+			end
+			if f.decimals ~= nil then
+				field:decimals(f.decimals)
+			end
+			if f.unit ~= nil then
+				field:suffix(f.unit)
+			end	
+			if f.step ~= nil then
+				field:step(f.step)
+			end			
 		end	
 	end		
 
@@ -1226,6 +1418,8 @@ function openMainMenu()
 				function()
 					if pvalue.script == "pids.lua" then
 						openPagePID(pidx, pvalue.title, pvalue.script)
+					elseif 	pvalue.script == "rates.lua" and pvalue.subpage == 1 then
+						openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
 					else
 						openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
 					end
