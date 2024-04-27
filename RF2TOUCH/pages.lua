@@ -20,7 +20,7 @@ sections[#sections + 1] = {title = "Advanced" , section=2,open=true}
 
 
 sections[#sections + 1] = {title = "Hardware", section=4,open=false }
-	pages[#pages + 1] = { title = "Servos", section=4,  script = "servos.lua" }
+	--pages[#pages + 1] = { title = "Servos", section=4,  script = "servos.lua" }
 	pages[#pages + 1] = { title = "Mixer", section=4, script = "mixer.lua" }	
 	pages[#pages + 1] = { title = "Accelerometer",section=4,  script = "accelerometer.lua" }
 	pages[#pages + 1] = { title = "Filters", section=4, script = "filters.lua" }
