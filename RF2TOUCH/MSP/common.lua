@@ -26,7 +26,7 @@ function mspProcessTxQ()
         -- return true
     -- end
 	if environment.simulation ~= true then
-		print("Sending mspTxBuf size "..tostring(#mspTxBuf).." at Idx "..tostring(mspTxIdx).." for cmd: "..tostring(mspLastReq))
+		--print("Sending mspTxBuf size "..tostring(#mspTxBuf).." at Idx "..tostring(mspTxIdx).." for cmd: "..tostring(mspLastReq))
 	end
     local payload = {}
     payload[1] = mspSeq + MSP_VERSION
@@ -62,7 +62,7 @@ end
 
 function mspSendRequest(cmd, payload)
 	if environment.simulation ~= true then
-    print("Sending cmd "..cmd)
+    --print("Sending cmd "..cmd)
 	end
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
@@ -105,10 +105,10 @@ local function mspReceivedReply(payload)
             mspStarted = true
         end
     elseif not mspStarted then
-		print("  mspReceivedReply: missing Start flag")
+		--print("  mspReceivedReply: missing Start flag")
         return nil
     elseif (mspRemoteSeq + 1) & 0x0F ~= seq then
-		print("  mspReceivedReply: msp packet sequence # incorrect")
+		--print("  mspReceivedReply: msp packet sequence # incorrect")
         mspStarted = false
         return nil
     end
@@ -126,12 +126,12 @@ local function mspReceivedReply(payload)
     mspStarted = false
     -- check CRC
     if mspRxCRC ~= payload[idx] and version == 0 then
-		print("  mspReceivedReply:  payload checksum incorrect, message failed!")
+		--print("  mspReceivedReply:  payload checksum incorrect, message failed!")
         --print("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
         --print("    CRC from payload:     0x"..string.format("%X", payload[idx]))
         return nil
     end
-    print("  Got reply for cmd "..mspRxReq)
+    --print("  Got reply for cmd "..mspRxReq)
     return true
 end
 

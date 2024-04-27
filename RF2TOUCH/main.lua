@@ -93,7 +93,7 @@ local function saveSettings()
         else
             pageState = pageStatus.saving
             saveRetries = 0
-            print("Attempting to write page values...")
+            --print("Attempting to write page values...")
         end
         protocol.mspWrite(Page.write, payload)
     end
@@ -160,11 +160,10 @@ end
 local function processMspReply(cmd, rx_buf, err)
     if Page and rx_buf ~= nil then
         if environment.simulation ~= true then
-            print("heredoc")
-            print(
-                "Page is processing reply for cmd " ..
-                    tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
-            )
+            --print(
+            --    "Page is processing reply for cmd " ..
+            --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
+            --)
         end
     end
     if not Page or not rx_buf then
@@ -287,7 +286,6 @@ local function saveValue(newValue, currentField)
     if environment.simulation == true then
         return
     end
-
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
@@ -600,43 +598,6 @@ local function writeText(x, y, str)
     lcd.drawText(x, y, str)
 end
 
-function defaultAllRates()
-
-end
-
-function resetRates()
-
-	if lastScript == "rates.lua" and lastSubPage == 2 then
-		if ResetRates == true then
-
-				
-		
-			local defaults = {}
-			
-			defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-			defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 }
-			defaults[2] = { 360, 360, 360, 12.5, 0, 0, 0, 0, 0, 0, 0, 0 }
-			defaults[3] = { 1.8, 1.8, 1.8, 2.5, 0, 0, 0, 0, 0, 0, 0, 0 }
-			defaults[4] = { 360, 360, 360, 12, 360, 360, 360, 12, 0, 0, 0, 0 }
-			defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 }	
-			
-			
-			for i = 1, #Page.fields do
-				local f = Page.fields[i]
-				if f.subpage == 1 then	
-					if defaults[NewRateTable][i] ~= nil then
-						f.value = defaults[NewRateTable][i]
-						print("Reset " .. i .. " to " .. f.value)
-					end	
-				end
-			end	
-		
-				
-			ResetRates = false	
-		end
-	end	
-end
-
 function navigationButtons(x, y, w, h)
     form.addTextButton(
         line,
@@ -658,8 +619,8 @@ function navigationButtons(x, y, w, h)
                     action = function()
                         isSaving = true
                         wasSaving = true
-						resetRates()
-                        saveSettings()
+						rf2touch_resetRates()
+						saveSettings()
                         return true
                     end
                 },
@@ -804,7 +765,51 @@ local function getInlinePositions(f)
 	return 	ret
 end
 
+local function defaultRates(x)
 
+
+	local defaults = {}
+	--[[
+	--there values are presented 
+	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
+	defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 } --BF 
+	defaults[2] = { 360, 360, 360, 12.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- RACEFL 
+	defaults[3] = { 1.8, 1.8, 1.8, 2.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- KISS
+	defaults[4] = { 360, 360, 360, 12, 360, 360, 360, 12, 0, 0, 0, 0 } -- ACTUAL
+	defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 } --QUICK
+	]]--
+	
+	-- these values are stored but scaled on presentation
+	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
+	defaults[1] = { 180, 180, 180, 203, 0, 0, 0, 1, 0, 0, 0, 0 } --BF 
+	defaults[2] = { 36, 36, 36, 50, 0, 0, 0, 0, 0, 0, 0, 0 } -- RACEFL 
+	defaults[3] = { 180, 180, 180, 205, 0, 0, 0, 0, 0, 0, 0, 0 } -- KISS
+	defaults[4] = { 36, 36, 30, 48, 36, 36, 36, 48, 0, 0, 0, 0 } -- ACTUAL
+	defaults[5] = { 180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0 } --QUICK
+
+	return defaults[x]
+end
+
+
+
+function rf2touch_resetRates()
+	if lastScript == "rates.lua" and lastSubPage == 2 then
+		if ResetRates == true then
+		
+			NewRateTable = Page.fields[13].value
+			
+			local newTable = defaultRates(NewRateTable)
+					
+			for k,v in pairs(newTable) do 
+					local f = Page.fields[k]
+					for idx = 1, #f.vals do
+						Page.values[f.vals[idx]] = v >> ((idx - 1) * 8)
+					end
+			end		
+			ResetRates = false
+		end	
+	end		
+end
 
 local function fieldChoice(f,i)
 
@@ -854,16 +859,9 @@ local function fieldChoice(f,i)
 		end,
 		function(value)
 			-- we do this hook to allow rates to be reset
-			if lastScript == "rates.lua" and lastSubPage == 2 then
-				if i == 13 then
-					if RateTable ~= value then
-						print("Set new rate to " .. value)
-						NewRateTable = value
-						ResetRates = true
-					end
-				end
-			end	
-			
+			if f.onchange then
+				f.onchange(Page)
+			end		
 			f.value = saveFieldValue(f,value)
 			saveValue(v, i)
 		
@@ -896,9 +894,10 @@ end
 
 function getFieldValue(f)
 	local v
+
 	if f.value ~= nil then
 			if f.decimals ~= nil then
-				v = round(f.value * decimalInc(f.decimals))
+				v = rf2touch_round(f.value * decimalInc(f.decimals))
 			else
 				v = f.value
 			end	
@@ -907,14 +906,15 @@ function getFieldValue(f)
 	end	
 	
 	if f.mult ~= nil then
-		v = v * f.mult
+		v = math.floor(v * f.mult+0.5)
 	end
 	
+
 	return v
 	
 end
 
-function round(number, precision)
+function rf2touch_round(number, precision)
 	if precision == nil then
 		precision = 0
 	end
@@ -951,12 +951,13 @@ local function scaleValue(value,f)
 	if f.scale ~= nil then
 		v = v / f.scale
 	end
-	v = round(v)
+	v = rf2touch_round(v)
 	return v
 end
 
 
 local function fieldNumber(f,i)
+
 
 	if lastSubPage ~= nil and f.subpage ~= nil then
 		if f.subpage ~= lastSubPage then
@@ -977,6 +978,7 @@ local function fieldNumber(f,i)
 		posText = p.posText
 		posField = p.posField
 
+
 		field = form.addStaticText(line, posText, f.t)
 	else
 		if f.t ~= nil then
@@ -987,19 +989,28 @@ local function fieldNumber(f,i)
 			if f.label ~= nil then
 				f.t = "    " .. f.t
 			end
+		else
+			f.t = ""
 		end	
 		
 		formLineCnt = formLineCnt + 1
+		
 		line = form.addLine(f.t)
+
 		posField = nil
 		postText = nil
 	end
+	
 	
 	minValue = scaleValue(f.min,f)
 	maxValue = scaleValue(f.max,f)
 	if f.mult ~= nil then
 		minValue = minValue * f.mult
 		maxValue = maxValue * f.mult
+	end
+	
+	if HideMe == true then
+		--posField = {x = 2000, y = 0, w = 20, h = 20}
 	end
 	
 	field =
@@ -1013,10 +1024,15 @@ local function fieldNumber(f,i)
 			return value	
 		end,
 		function(value)
+			if f.onchange then
+				f.onchange(Page)
+			end			
+		
 			f.value = saveFieldValue(f,value)
 			saveValue(v, i)
 		end
 	)
+	
 	if f.default ~= nil then
 		local default = f.default * decimalInc(f.decimals)
 		if f.mult ~= nil then
@@ -1026,14 +1042,13 @@ local function fieldNumber(f,i)
 	else
 		field:default(0)
 	end
-	if f.decimals ~= nil then
+	if f.decimals ~= nil  then
 		field:decimals(f.decimals)
 	end
 	if f.unit ~= nil then
 		field:suffix(f.unit)
 	end	
 	if f.step ~= nil then
-		print(f.step)
 		field:step(f.step)
 	end
 end
@@ -1369,7 +1384,11 @@ function openPageRATES(idx, subpage, title, script)
 				minValue = minValue * f.mult
 				maxValue = maxValue * f.mult
 			end
-
+			if f.scale ~= nil then
+				minValue = minValue / f.scale
+				maxValue = maxValue / f.scale
+			end
+				
 			field = form.addNumberField(
 				_G['RF2TOUCH_RATEROWS_' .. f.row],
 				pos,
@@ -1387,7 +1406,10 @@ function openPageRATES(idx, subpage, title, script)
 			if f.default ~= nil then
 				local default = f.default * decimalInc(f.decimals)
 				if f.mult ~= nil then
-					default = default * f.mult
+					default = math.floor(default * f.mult)
+				end
+				if f.scale ~= nil then
+					default = math.floor(default / f.scale)
 				end
 				field:default(default)
 			else
