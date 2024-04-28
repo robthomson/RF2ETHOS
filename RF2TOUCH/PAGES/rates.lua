@@ -144,7 +144,7 @@ elseif RateTable == 5 then
 	fields[#fields + 1] = {              row=4,col=3,subpage=1,min = 0, max = 100, vals = { 21 }, decimals=2,scale=100,default=0 }
 end
 
-fields[#fields + 1] = { t = "Rates Type",          ratetype=1,subpage=2, min = 0, max = 5,      vals = { 1 }, table = { [0] = "NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"},onchange = function(self) self.flagRateChange(self, true) end}
+fields[#fields + 1] = { t = "Rates Type",          ratetype=1,subpage=2, min = 0, max = 5,      vals = { 1 }, table = { [0] = "NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"},postEdit = function(self) self.flagRateChange(self, true) end}
 
 
 labels[#labels + 1] = { t = "Roll dynamics", subpage=2,label="rolldynamics",inline_size=15      }

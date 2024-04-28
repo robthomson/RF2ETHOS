@@ -44,18 +44,25 @@ local pageScrollY = 0
 local mainMenuScrollY = 0
 local telemetryState
 local saveTimeout, saveMaxRetries, MainMenu, Page, init, popupMenu, requestTimeout, rssiSensor
-local createForm = false
+createForm = false
 local isSaving = false
 local wasSaving = false
 local isRefreshing = false
 local wasRefreshing = false
 local lastLabel = nil
 local NewRateTable
-reloadRates = false
-
-defaultRateTable = 4 -- ACTUAL
 RateTable = nil
 ResetRates = nil
+reloadRates = false
+
+currentServoID = 1 -- this is default servo id
+currentServoCount = 4
+servoDataLoaded = false
+
+lastServoCount = nil
+reloadServos = false
+
+defaultRateTable = 4 -- ACTUAL
 
 
 -- New variables for Ethos version
@@ -187,9 +194,23 @@ local function processMspReply(cmd, rx_buf, err)
     elseif (cmd == Page.read) and (#rx_buf > 0) then
         --print("processMspReply:  Page.read and non-zero rx_buf")
         Page.values = rx_buf
+        if Page.postRead then
+			-- print("Postread executed")
+            Page.postRead(Page)
+        end
         dataBindFields()
+        if Page.postLoad then
+            Page.postLoad(Page)
+            --print("Postload executed")
+        end
         lcdNeedsInvalidate = true
-    end
+    end		
+    --elseif (cmd == Page.read) and (#rx_buf > 0) then
+    --    --print("processMspReply:  Page.read and non-zero rx_buf")
+    --    Page.values = rx_buf
+    --    dataBindFields()
+    --    lcdNeedsInvalidate = true
+    --end
 end
 
 local function requestPage()
@@ -390,7 +411,7 @@ function paint()
 	
 end
 
-function wakeUpForm()
+function wakeupForm()
 
 
 
@@ -415,7 +436,24 @@ function wakeUpForm()
 				end			
 			end
 		end
+		
 	end
+	
+	if lastScript == "servos.lua" then
+
+		if servoDataLoaded == true then
+			--print("Updating initial values")
+			for i = 1, #Page.fields do
+				local f = Page.fields[i]
+				f.value = getServoValue(i)
+			end			
+			dataBindFields()
+
+			servoDataLoaded = false
+		end
+	end
+	
+	
 
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
@@ -523,6 +561,8 @@ function wakeup(widget)
 					openPagePID(lastIdx, lastTitle, lastScript)
 				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
 					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+				elseif lastScript == 'servos.lua' then
+					openPageSERVOS(lastIdx, lastTitle, lastScript)
 				else
 					openPageDefault(lastIdx, lastSubPage,lastTitle, lastScript)
 				end
@@ -533,12 +573,16 @@ function wakeup(widget)
 					openPagePID(lastIdx, lastTitle, lastScript)
 				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
 					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-				else
+				elseif lastScript == 'servos.lua'  then
+					openPageSERVOS(lastIdx, lastTitle, lastScript)
+				else 
 					openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
 				end
                 wasRefeshing = false			
             elseif reloadRates == true then
 				openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+			elseif reloadServos == true then
+				openPageSERVOS(lastIdx, lastTitle, lastScript)
 			else
                 openMainMenu()
             end
@@ -566,27 +610,83 @@ local function convertPageValueTable(tbl)
     return thetable
 end
 
-function print_r(arr, indentLevel)
-    local str = ""
-    local indentStr = "#"
+function print_r(node)
+    local cache, stack, output = {},{},{}
+    local depth = 1
+    local output_str = "{\n"
 
-    if (indentLevel == nil) then
-        print(print_r(arr, 0))
-        return
-    end
+    while true do
+        local size = 0
+        for k,v in pairs(node) do
+            size = size + 1
+        end
 
-    for i = 0, indentLevel do
-        indentStr = indentStr .. "\t"
-    end
+        local cur_index = 1
+        for k,v in pairs(node) do
+            if (cache[node] == nil) or (cur_index >= cache[node]) then
 
-    for index, value in ipairs(arr) do
-        if type(value) == "table" then
-            str = str .. indentStr .. index .. ": \n" .. print_r(value, (indentLevel + 1))
+                if (string.find(output_str,"}",output_str:len())) then
+                    output_str = output_str .. ",\n"
+                elseif not (string.find(output_str,"\n",output_str:len())) then
+                    output_str = output_str .. "\n"
+                end
+
+                -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
+                table.insert(output,output_str)
+                output_str = ""
+
+                local key
+                if (type(k) == "number" or type(k) == "boolean") then
+                    key = "["..tostring(k).."]"
+                else
+                    key = "['"..tostring(k).."']"
+                end
+
+                if (type(v) == "number" or type(v) == "boolean") then
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = "..tostring(v)
+                elseif (type(v) == "table") then
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = {\n"
+                    table.insert(stack,node)
+                    table.insert(stack,v)
+                    cache[node] = cur_index+1
+                    break
+                else
+                    output_str = output_str .. string.rep('\t',depth) .. key .. " = '"..tostring(v).."'"
+                end
+
+                if (cur_index == size) then
+                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                else
+                    output_str = output_str .. ","
+                end
+            else
+                -- close the table
+                if (cur_index == size) then
+                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                end
+            end
+
+            cur_index = cur_index + 1
+        end
+
+        if (size == 0) then
+            output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+        end
+
+        if (#stack > 0) then
+            node = stack[#stack]
+            stack[#stack] = nil
+            depth = cache[node] == nil and depth + 1 or depth - 1
         else
-            str = str .. indentStr .. index .. ": " .. value .. "\n"
+            break
         end
     end
-    return str
+
+    -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
+    table.insert(output,output_str)
+    output_str = table.concat(output)
+
+    print(output_str)
 end
 
 local function writeText(x, y, str)
@@ -620,6 +720,7 @@ function navigationButtons(x, y, w, h)
                         isSaving = true
                         wasSaving = true
 						rf2touch_resetRates()
+						rf2touch_resetServos()
 						saveSettings()
                         return true
                     end
@@ -811,6 +912,24 @@ function rf2touch_resetRates()
 	end		
 end
 
+function rf2touch_resetServos()
+	if lastScript == "servos.lua" then
+	
+		Page.fields[1].value = currentServoID
+		--saveValue(currentServoID, 1)
+		local f = Page.fields[1]
+		
+		print(f.value)
+		
+		--for idx = 1, #f.vals do
+		--	Page.values[f.vals[idx]] = currentServoID >> ((idx - 1) * 8)
+		--end
+
+
+
+	end		
+end
+
 local function fieldChoice(f,i)
 
 	if lastSubPage ~= nil and f.subpage ~= nil then
@@ -859,8 +978,8 @@ local function fieldChoice(f,i)
 		end,
 		function(value)
 			-- we do this hook to allow rates to be reset
-			if f.onchange then
-				f.onchange(Page)
+			if f.postEdit then
+				f.postEdit(Page)
 			end		
 			f.value = saveFieldValue(f,value)
 			saveValue(v, i)
@@ -1021,11 +1140,12 @@ local function fieldNumber(f,i)
 		maxValue,
 		function()
 			local value = getFieldValue(f)
+				
 			return value	
 		end,
 		function(value)
-			if f.onchange then
-				f.onchange(Page)
+			if f.postEdit then
+				f.postEdit(Page)
 			end			
 		
 			f.value = saveFieldValue(f,value)
@@ -1052,6 +1172,8 @@ local function fieldNumber(f,i)
 		field:step(f.step)
 	end
 end
+
+
 
 local function getLabel(id,page)
     for i, v in ipairs(page) do
@@ -1154,7 +1276,6 @@ function openPageDefault(idx, subpage, title, script)
     for i = 1, #Page.fields do
 
 		
-	
         local f = Page.fields[i]
         local l = Page.labels
         local pageValue = f
@@ -1179,6 +1300,166 @@ function openPageDefault(idx, subpage, title, script)
          navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 	
+    lcdNeedsInvalidate = true
+end
+
+
+
+
+function getServoValue(currentIndex)
+
+	if Page.values ~= nil then
+		servoCount = currentServoCount
+		local servoConfiguration = {}
+		for i = 1, servoCount do
+			servoConfiguration[i] = {}
+			for j = 1, 16 do
+				servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j]
+			end
+		end
+		Page.minBytes = 1 + 16
+
+
+		for i = 1, 16 do
+			Page.values[1 + i] = servoConfiguration[currentServoID][i]
+		end
+		Page.fields[1].value = currentServoID
+		dataBindFields()
+
+		v =  Page.fields[currentIndex].value
+
+	end
+	if v == nil then
+		v = 0
+	end
+
+	return v
+	
+end
+
+
+
+function openPageSERVOS(idx, title, script)
+    local LCD_W, LCD_H = getWindowSize()
+
+	reloadServos = false
+
+    uiState = uiStatus.pages
+
+	local numPerRow = 2
+
+	
+
+    local windowWidth, windowHeight = lcd.getWindowSize()
+
+    local padding = radio.buttonPadding
+    local h = radio.buttonHeight
+    local w = ((windowWidth) / numPerRow)-(padding*numPerRow-1)
+
+
+    local y = radio.buttonPaddingTop
+
+    longPage = false
+
+    lastIdx = idx
+	lastSubPage = subpage
+    lastTitle = title
+    lastScript = script
+
+
+    form.clear()
+
+    lastPage = script
+	
+
+	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+	collectgarbage()
+
+
+	fieldHeader(title)
+	
+
+	-- we add a servo selector that is not part of msp table
+	-- this is done as a selector - to pass a servoID on refresh
+	if currentServoCount == 3 then
+		servoTable = { "ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT" }
+	else
+		servoTable = { "ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL" }
+	end
+	line = form.addLine("Servo")	
+	field =
+		form.addChoiceField(
+		line,
+		posField,
+		convertPageValueTable(servoTable),
+		function()		
+			value = currentServoID
+			return value	
+		end,
+		function(value)		
+		
+		
+				currentServoID = value
+				isRefeshing = true
+				wasRefreshing = true
+				createForm = true
+				form.clear()
+				return true				
+		end
+	)
+
+	-- we can now loop throught pages to get values
+	formLineCnt = 0
+	for i = 1, #Page.fields do
+
+		local f = Page.fields[i]
+		local l = Page.labels
+		local pageValue = f
+		local pageIdx = i
+		local currentField = i
+
+
+		if f.hideme == nil or f.hideme == false  then
+
+
+			line = form.addLine(f.t)
+			field =
+				form.addNumberField(
+				line,
+				nil,
+				f.min,
+				f.max,
+				function()
+					local value = getFieldValue(f)
+					return value	
+				end,
+				function(value)
+					f.value = saveFieldValue(f,value)
+					saveValue(value, i)
+				end
+			)
+			if f.default ~= nil then
+				local default = f.default * decimalInc(f.decimals)
+				if f.mult ~= nil then
+					default = default * f.mult
+				end
+				field:default(default)
+			else
+				field:default(0)
+			end
+			if f.decimals ~= nil then
+				field:decimals(f.decimals)
+			end
+			if f.unit ~= nil then
+				field:suffix(f.unit)
+			end	
+
+		end	
+
+	end		
+
+
+
     lcdNeedsInvalidate = true
 end
 
@@ -1438,7 +1719,6 @@ function openPageRATES(idx, subpage, title, script)
     lcdNeedsInvalidate = true
 end
 
-
 local function getSection(id,sections)
     for i, v in ipairs(sections) do
 		print(v)
@@ -1493,6 +1773,8 @@ function openMainMenu()
 				function()
 					if pvalue.script == "pids.lua" then
 						openPagePID(pidx, pvalue.title, pvalue.script)
+					elseif pvalue.script == "servos.lua" then
+						openPageSERVOS(pidx, pvalue.title, pvalue.script)
 					elseif 	pvalue.script == "rates.lua" and pvalue.subpage == 1 then
 						openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
 					else
@@ -1555,7 +1837,7 @@ local function create()
     -- force page to get pickup data as it loads in
     form.onWakeup(
         function()
-            wakeUpForm()
+            wakeupForm()
         end
     )
 
