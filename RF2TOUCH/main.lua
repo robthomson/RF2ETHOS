@@ -37,6 +37,8 @@ RateTable = nil
 ResetRates = nil
 reloadRates = false
 
+showLoading = false
+
 local mspDataLoaded = false
 
 currentServoID = 1 -- this is default servo id
@@ -438,16 +440,14 @@ function paint()
         msgBox("Refreshing")
     end
 
-    -- this displays message box - but for now we disable due to
-    -- lcd overlay issue
-    -- bounce to frsky..
-	--if uiState ~= uiStatus.mainMenu then
-	--	if mspDataLoaded == false then
-	--		msgBox("Loading...",false)
-	--	else
-	--		lcd.invalidate()
-	--	end
-	--end
+	if uiState ~= uiStatus.mainMenu then
+		if showLoading == true and ResetRates == false then
+			 msgBox("Loading...")
+		else
+			lcd.invalidate()
+		end
+		
+	end
 
 end
 
@@ -581,24 +581,24 @@ function wakeup(widget)
         if createForm == true then
             if wasSaving == true then
                 if lastScript == "pids.lua" or lastIdx == 1 then
-                    openPagePID(lastIdx, lastTitle, lastScript)
+                    openPagePIDLoader(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                    openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
-                    openPageSERVOS(lastIdx, lastTitle, lastScript)
+                    openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
                 else
-                    openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                    openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
                 wasSaving = false
             elseif wasRefreshing == true then
                 if lastScript == "pids.lua" or lastIdx == 1 then
-                    openPagePID(lastIdx, lastTitle, lastScript)
+                    openPagePIDLoader(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                    openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
-                    openPageSERVOS(lastIdx, lastTitle, lastScript)
+                    openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
                 else
-                    openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                    openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
                 wasRefeshing = false
             elseif reloadRates == true then
@@ -612,6 +612,28 @@ function wakeup(widget)
         else
             createForm = false
         end
+	
+		
+		if uiState ~= uiStatus.mainMenu then
+			if mspDataLoaded == true then
+				print("Got the data...")
+				mspDataLoaded = false
+                if lastScript == "pids.lua" or lastIdx == 1 then
+                    openPagePID(lastIdx, lastTitle, lastScript)
+                elseif lastScript == "rates.lua" and lastSubPage == 1 then
+                    openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                elseif lastScript == "servos.lua" then
+                    openPageSERVOS(lastIdx, lastTitle, lastScript)
+                else
+                    openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                end
+				showLoading = false
+			else
+				showLoading = true
+			end
+		end		
+	
+		
     end
 end
 
@@ -1070,6 +1092,26 @@ local function fieldHeader(title)
     navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 end
 
+function openPageDefaultLoader(idx, subpage, title, script)
+ 
+    uiState = uiStatus.pages
+	mspDataLoaded = false
+
+	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
+	
+	form.clear()
+
+    lastIdx = idx
+    lastSubPage = subpage
+    lastTitle = title
+    lastScript = script	
+		
+	lcdNeedsInvalidate = true
+
+	print("Finished: openPageDefaultLoader")
+end
+
 function openPageDefault(idx, subpage, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
@@ -1080,10 +1122,7 @@ function openPageDefault(idx, subpage, title, script)
 
     longPage = false
 
-    lastIdx = idx
-    lastSubPage = subpage
-    lastTitle = title
-    lastScript = script
+
 
     form.clear()
 
@@ -1091,8 +1130,7 @@ function openPageDefault(idx, subpage, title, script)
 
     fieldHeader(title)
 
-    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
-    collectgarbage()
+
 
     formLineCnt = 0
 
@@ -1121,6 +1159,26 @@ function openPageDefault(idx, subpage, title, script)
     lcdNeedsInvalidate = true
 end
 
+function openPageSERVOSLoader(idx, title, script)
+ 
+    uiState = uiStatus.pages
+	mspDataLoaded = false
+
+	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
+	
+	form.clear()
+
+    lastIdx = idx
+    lastSubPage = subpage
+    lastTitle = title
+    lastScript = script	
+		
+	lcdNeedsInvalidate = true
+
+	print("Finished: openPageSERVOS")
+end
+
 
 function openPageSERVOS(idx, title, script)
     local LCD_W, LCD_H = getWindowSize()
@@ -1141,17 +1199,11 @@ function openPageSERVOS(idx, title, script)
 
     longPage = false
 
-    lastIdx = idx
-    lastSubPage = subpage
-    lastTitle = title
-    lastScript = script
 
     form.clear()
 
     lastPage = script
 
-    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
-    collectgarbage()
 
     fieldHeader(title)
 
@@ -1215,6 +1267,26 @@ function openPageSERVOS(idx, title, script)
     lcdNeedsInvalidate = true
 end
 
+function openPagePIDLoader(idx, title, script)
+ 
+    uiState = uiStatus.pages
+	mspDataLoaded = false
+
+	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
+	
+	form.clear()
+
+    lastIdx = idx
+    lastSubPage = subpage
+    lastTitle = title
+    lastScript = script	
+		
+	lcdNeedsInvalidate = true
+
+	print("Finished: openPagePID")
+end
+
 function openPagePID(idx, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
@@ -1222,17 +1294,8 @@ function openPagePID(idx, title, script)
 
     longPage = false
 
-    lastIdx = idx
-    lastSubPage = nil
-    lastTitle = title
-    lastScript = script
-
     form.clear()
-
-    lastPage = script
-    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
-    collectgarbage()
-
+	
     fieldHeader(title)
 
     local numCols = #Page.cols
@@ -1313,6 +1376,27 @@ function openPagePID(idx, title, script)
     lcdNeedsInvalidate = true
 end
 
+
+function openPageRATESLoader(idx, subpage, title, script)
+ 
+    uiState = uiStatus.pages
+	mspDataLoaded = false
+
+	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
+	
+	form.clear()
+
+    lastIdx = idx
+    lastSubPage = subpage
+    lastTitle = title
+    lastScript = script	
+		
+	lcdNeedsInvalidate = true
+
+	print("Finished: openPageRATES")
+end
+
 function openPageRATES(idx, subpage, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
@@ -1320,17 +1404,10 @@ function openPageRATES(idx, subpage, title, script)
 
     longPage = false
 
-    lastIdx = idx
-    lastSubPage = subpage
-    lastTitle = title
-    lastScript = script
 
     form.clear()
 
-    lastPage = script
-    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
-    collectgarbage()
-
+  
     fieldHeader(title)
 
     local numCols = #Page.cols
@@ -1461,13 +1538,13 @@ function openMainMenu()
 
                 form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
                     if pvalue.script == "pids.lua" then
-                        openPagePID(pidx, pvalue.title, pvalue.script)
+                        openPagePIDLoader(pidx, pvalue.title, pvalue.script)
                     elseif pvalue.script == "servos.lua" then
-                        openPageSERVOS(pidx, pvalue.title, pvalue.script)
+                        openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
                     elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-                        openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     else
-                        openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
                 end)
 
