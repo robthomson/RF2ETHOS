@@ -5,31 +5,13 @@ local LUA_VERSION = "2.0 - 240229"
 
 apiVersion = 0
 
-local uiStatus = {
-    init = 1,
-    mainMenu = 2,
-    pages = 3,
-    confirm = 4
-}
+local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
-local pageStatus = {
-    display = 1,
-    editing = 2,
-    saving = 3,
-    eepromWrite = 4,
-    rebooting = 5
-}
+local pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
 
-local telemetryStatus = {
-    ok = 1,
-    noSensor = 2,
-    noTelemetry = 3
-}
+local telemetryStatus = {ok = 1, noSensor = 2, noTelemetry = 3}
 
-local uiMsp = {
-    reboot = 68,
-    eepromWrite = 250
-}
+local uiMsp = {reboot = 68, eepromWrite = 250}
 
 local uiState = uiStatus.init
 local prevUiState
@@ -90,14 +72,12 @@ rfglobals = {}
 local function saveSettings()
     if Page.values then
         local payload = Page.values
-        if Page.preSave then
-            payload = Page.preSave(Page)
-        end
+        if Page.preSave then payload = Page.preSave(Page) end
         saveTS = os.clock()
         if pageState == pageStatus.saving then
             saveRetries = saveRetries + 1
         else
-            --print("Attempting to write page values...")
+            -- print("Attempting to write page values...")
             pageState = pageStatus.saving
             saveRetries = 0
         end
@@ -110,7 +90,7 @@ local function eepromWrite()
     if pageState == pageStatus.eepromWrite then
         saveRetries = saveRetries + 1
     else
-        --print("Attempting to write to eeprom...")
+        -- print("Attempting to write to eeprom...")
         pageState = pageStatus.eepromWrite
         saveRetries = 0
     end
@@ -121,7 +101,7 @@ local function rebootFc()
     -- Only sent once.  I think a response may come back from FC if successful?
     -- May want to either check for that and repeat if not, or check for loss of telemetry to confirm, etc.
     -- TODO: Implement an auto-retry?  Right now if the command gets lost then there's just no reboot and no notice.
-    --print("Attempting to reboot the FC (one shot)...")
+    -- print("Attempting to reboot the FC (one shot)...")
     saveTS = os.clock()
     pageState = pageStatus.rebooting
     protocol.mspRead(uiMsp.reboot)
@@ -148,9 +128,7 @@ local function dataBindFields()
                     f.value = f.value | raw_val
                 end
                 local bits = #f.vals * 8
-                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
-                    f.value = f.value - (2 ^ bits)
-                end
+                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
                 f.value = f.value / (f.scale or 1)
             end
         end
@@ -161,10 +139,10 @@ end
 local function processMspReply(cmd, rx_buf, err)
     if Page and rx_buf ~= nil then
         if environment.simulation ~= true then
-        --print(
-        --    "Page is processing reply for cmd " ..
-        --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
-        --)
+            -- print(
+            --    "Page is processing reply for cmd " ..
+            --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
+            -- )
         end
     end
     if not Page or not rx_buf then
@@ -172,21 +150,17 @@ local function processMspReply(cmd, rx_buf, err)
         -- check if this page requires writing to eeprom to save (most do)
         if Page.eepromWrite then
             -- don't write again if we're already responding to earlier page.write()s
-            if pageState ~= pageStatus.eepromWrite then
-                eepromWrite()
-            end
+            if pageState ~= pageStatus.eepromWrite then eepromWrite() end
         elseif pageState ~= pageStatus.eepromWrite then
             -- If we're not already trying to write to eeprom from a previous save, then we're done.
             invalidatePages()
         end
         lcdNeedsInvalidate = true
     elseif cmd == uiMsp.eepromWrite then
-        if Page.reboot then
-            rebootFc()
-        end
+        if Page.reboot then rebootFc() end
         invalidatePages()
     elseif (cmd == Page.read) and (#rx_buf > 0) then
-        --print("processMspReply:  Page.read and non-zero rx_buf")
+        -- print("processMspReply:  Page.read and non-zero rx_buf")
         Page.values = rx_buf
         if Page.postRead then
             -- print("Postread executed")
@@ -195,7 +169,7 @@ local function processMspReply(cmd, rx_buf, err)
         dataBindFields()
         if Page.postLoad then
             Page.postLoad(Page)
-        --print("Postload executed")
+            -- print("Postload executed")
         end
         mspDataLoaded = true
         lcdNeedsInvalidate = true
@@ -204,7 +178,7 @@ end
 
 local function requestPage()
     if Page.read and ((not Page.reqTS) or (Page.reqTS + requestTimeout <= os.clock())) then
-        --print("Trying requestPage()")
+        -- print("Trying requestPage()")
         Page.reqTS = os.clock()
         protocol.mspRead(Page.read)
     end
@@ -213,9 +187,7 @@ end
 function sportTelemetryPop()
     -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
     local frame = sensor:popFrame()
-    if frame == nil then
-        return nil, nil, nil, nil
-    end
+    if frame == nil then return nil, nil, nil, nil end
     -- physId = physical / remote sensor Id (aka sensorId)
     --   0x00 for FPORT, 0x1B for SmartPort
     -- primId = frame ID  (should be 0x32 for reply frames)
@@ -239,10 +211,8 @@ end
 -- Ethos: when the RF1 and RF2 system tools are both installed, RF1 tries to call getRSSI in RF2 and gets stuck.
 -- To avoid this, getRSSI is renamed in RF2.
 function rf2touch_getRSSI()
-    --print("getRSSI RF2")
-    if environment.simulation == true then
-        return 100
-    end
+    -- print("getRSSI RF2")
+    if environment.simulation == true then return 100 end
 
     if rssiSensor ~= nil and rssiSensor:state() then
         -- this will return the last known value if nothing is received
@@ -252,19 +222,15 @@ function rf2touch_getRSSI()
     return 0
 end
 
-function getTime()
-    return os.clock() * 100
-end
+function getTime() return os.clock() * 100 end
 
-function loadScript(script)
-    return loadfile(script)
-end
+function loadScript(script) return loadfile(script) end
 
 function getWindowSize()
     return lcd.getWindowSize()
-    --return 784, 406
-    --return 472, 288
-    --return 472, 240
+    -- return 784, 406
+    -- return 472, 288
+    -- return 472, 240
 end
 
 local function updateTelemetryState()
@@ -278,9 +244,7 @@ local function updateTelemetryState()
         telemetryState = telemetryStatus.ok
     end
 
-    if oldTelemetryState ~= telemetryState then
-        lcdNeedsInvalidate = true
-    end
+    if oldTelemetryState ~= telemetryState then lcdNeedsInvalidate = true end
 end
 
 local function clipValue(val, min, max)
@@ -293,20 +257,14 @@ local function clipValue(val, min, max)
 end
 
 local function saveValue(newValue, currentField)
-    if environment.simulation == true then
-        return
-    end
+    if environment.simulation == true then return end
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
     local step = f.step or 1
 
-    for idx = 1, #f.vals do
-        Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
-    end
-    if f.upd and Page.values then
-        f.upd(Page)
-    end
+    for idx = 1, #f.vals do Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) end
+    if f.upd and Page.values then f.upd(Page) end
 end
 
 local translations = {en = "RF2 TOUCH"}
@@ -324,7 +282,7 @@ function msgBox(str)
     boxH = 45
     tsizeW, tsizeH = lcd.getTextSize(str)
 
-    --draw the background
+    -- draw the background
     if isDARKMODE then
         lcd.color(lcd.RGB(40, 40, 40))
     else
@@ -332,7 +290,7 @@ function msgBox(str)
     end
     lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
 
-    --draw the border
+    -- draw the border
     if isDARKMODE then
         -- dark theme
         lcd.color(lcd.RGB(255, 255, 255, 1))
@@ -358,30 +316,22 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    --print("Event received:", category, value, x, y)
+    -- print("Event received:", category, value, x, y)
     return false
 end
 
 function paint()
-    if environment.simulation ~= true then
-        if telemetryState ~= 1 then
-            msgBox("NO RF LINK")
-        end
-    end
+    if environment.simulation ~= true then if telemetryState ~= 1 then msgBox("NO RF LINK") end end
     if isSaving then
         if pageState >= pageStatus.saving then
-            --print(saveMsg)
+            -- print(saveMsg)
             local saveMsg = ""
             if pageState == pageStatus.saving then
                 saveMsg = "Saving..."
-                if saveRetries > 0 then
-                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
-                end
+                if saveRetries > 0 then saveMsg = "Retry #" .. string.format("%u", saveRetries) end
             elseif pageState == pageStatus.eepromWrite then
                 saveMsg = "Updating..."
-                if saveRetries > 0 then
-                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
-                end
+                if saveRetries > 0 then saveMsg = "Retry #" .. string.format("%u", saveRetries) end
             elseif pageState == pageStatus.rebooting then
                 saveMsg = "Rebooting..."
             end
@@ -392,7 +342,7 @@ function paint()
     end
 
     if isRefreshing then
-        --print("Got to paint isRefresh")
+        -- print("Got to paint isRefresh")
         msgBox("Refreshing")
     end
 
@@ -408,22 +358,20 @@ function paint()
 		end
 	end
 	]]
- --
+    --
 end
 
 function wakeupForm()
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
             local v = Page.fields[13].value
-            if v ~= nil then
-                activeRateTable = math.floor(v)
-            end
+            if v ~= nil then activeRateTable = math.floor(v) end
 
             if activeRateTable ~= nil then
                 if activeRateTable ~= RateTable then
                     RateTable = activeRateTable
                     collectgarbage()
-                    --reloadRates = true
+                    -- reloadRates = true
                     isRefeshing = true
                     wasRefreshing = true
                     createForm = true
@@ -435,7 +383,7 @@ function wakeupForm()
 
     if lastScript == "servos.lua" then
         if servoDataLoaded == true then
-            --print("Updating initial values")
+            -- print("Updating initial values")
             for i = 1, #Page.fields do
                 local f = Page.fields[i]
                 f.value = getServoValue(i)
@@ -448,11 +396,9 @@ function wakeupForm()
 
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) or mspDataLoaded == false then
         -- we dont refresh as busy doing other stuff
-        --print("Form invalidation disabled....")
+        -- print("Form invalidation disabled....")
     else
-        if (isSaving == false and wasSaving == false) or (isRefreshing == false and wasRefreshing == false) then
-            form.invalidate()
-        end
+        if (isSaving == false and wasSaving == false) or (isRefreshing == false and wasRefreshing == false) then form.invalidate() end
     end
 end
 
@@ -466,11 +412,9 @@ function wakeup(widget)
     updateTelemetryState()
 
     if uiState == uiStatus.init then
-        --print("Init")
+        -- print("Init")
         local prevInit
-        if init ~= nil then
-            prevInit = init.t
-        end
+        if init ~= nil then prevInit = init.t end
         init = init or assert(loadScript("/scripts/RF2TOUCH/ui_init.lua"))()
 
         local initSuccess = init.f()
@@ -491,7 +435,7 @@ function wakeup(widget)
         uiState = prevUiState or uiStatus.mainMenu
         prevUiState = nil
     elseif uiState == uiStatus.mainMenu then
-        --print("Menu")
+        -- print("Menu")
     elseif uiState == uiStatus.pages then
         if prevUiState ~= uiState then
             lcdNeedsInvalidate = true
@@ -504,10 +448,10 @@ function wakeup(widget)
                     saveSettings()
                     lcdNeedsInvalidate = true
                 else
-                    --print("Failed to write page values!")
+                    -- print("Failed to write page values!")
                     invalidatePages()
                 end
-            -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
+                -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
             end
         elseif pageState == pageStatus.eepromWrite then
             if (saveTS + saveTimeout) < os.clock() then
@@ -515,20 +459,18 @@ function wakeup(widget)
                     eepromWrite()
                     lcdNeedsInvalidate = true
                 else
-                    --print("Failed to write to eeprom!")
+                    -- print("Failed to write to eeprom!")
                     invalidatePages()
                 end
-            -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
+                -- drop through to processMspReply to send MSP_SET and see if we've received a response to this yet.
             end
         end
         if not Page then
-            --print("Reloading data : " .. lastPage)
+            -- print("Reloading data : " .. lastPage)
             Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. lastPage))()
             collectgarbage()
         end
-        if not Page.values and pageState == pageStatus.display then
-            requestPage()
-        end
+        if not Page.values and pageState == pageStatus.display then requestPage() end
     end
 
     mspProcessTxQ()
@@ -583,7 +525,7 @@ function wakeup(widget)
     end
 end
 
---local openMainMenu
+-- local openMainMenu
 
 local function convertPageValueTable(tbl)
     local thetable = {}
@@ -607,9 +549,7 @@ function print_r(node)
 
     while true do
         local size = 0
-        for k, v in pairs(node) do
-            size = size + 1
-        end
+        for k, v in pairs(node) do size = size + 1 end
 
         local cur_index = 1
         for k, v in pairs(node) do
@@ -650,17 +590,13 @@ function print_r(node)
                 end
             else
                 -- close the table
-                if (cur_index == size) then
-                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
-                end
+                if (cur_index == size) then output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}" end
             end
 
             cur_index = cur_index + 1
         end
 
-        if (size == 0) then
-            output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
-        end
+        if (size == 0) then output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}" end
 
         if (#stack > 0) then
             node = stack[#stack]
@@ -688,68 +624,41 @@ local function writeText(x, y, str)
 end
 
 function navigationButtons(x, y, w, h)
-    form.addTextButton(
-        line,
-        {x = x, y = y, w = w, h = h},
-        "MENU",
-        function()
-            ResetRates = false
-            openMainMenu()
-        end
-    )
-    form.addTextButton(
-        line,
-        {x = colStart + buttonW + padding, y = y, w = buttonW, h = h},
-        "SAVE",
-        function()
-            local buttons = {
-                {
-                    label = "        OK        ",
-                    action = function()
-                        isSaving = true
-                        wasSaving = true
-                        rf2touch_resetRates()
-                        rf2touch_debugSave()
-                        saveSettings()
-                        return true
-                    end
-                },
-                {
-                    label = "CANCEL",
-                    action = function()
-                        return true
-                    end
-                }
-            }
-            form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
-        end
-    )
-    form.addTextButton(
-        line,
-        {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h},
-        "REFRESH",
-        function()
-            local buttons = {
-                {
-                    label = "        OK        ",
-                    action = function()
-                        isRefeshing = true
-                        wasRefreshing = true
-                        createForm = true
-                        form.clear()
-                        return true
-                    end
-                },
-                {
-                    label = "CANCEL",
-                    action = function()
-                        return true
-                    end
-                }
-            }
-            form.openDialog("REFRESH", "Reload data from flight controller", buttons)
-        end
-    )
+    form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
+        ResetRates = false
+        openMainMenu()
+    end)
+    form.addTextButton(line, {x = colStart + buttonW + padding, y = y, w = buttonW, h = h}, "SAVE", function()
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+                    isSaving = true
+                    wasSaving = true
+                    rf2touch_resetRates()
+                    rf2touch_debugSave()
+                    saveSettings()
+                    return true
+                end
+            }, {label = "CANCEL", action = function() return true end}
+        }
+        form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+    end)
+    form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "REFRESH", function()
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+                    isRefeshing = true
+                    wasRefreshing = true
+                    createForm = true
+                    form.clear()
+                    return true
+                end
+            }, {label = "CANCEL", action = function() return true end}
+        }
+        form.openDialog("REFRESH", "Reload data from flight controller", buttons)
+    end)
 end
 --
 
@@ -828,17 +737,14 @@ local function getInlinePositions(f)
         posField = {x = posX, y = eY, w = eW, h = eH}
     end
 
-    ret = {
-        posText = posText,
-        posField = posField
-    }
+    ret = {posText = posText, posField = posField}
 
     return ret
 end
 
 local function defaultRates(x)
     local defaults = {}
-     --
+    --
     --[[
 	--there values are presented 
 	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
@@ -849,11 +755,11 @@ local function defaultRates(x)
 	defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 } --QUICK
 	]] -- these values are stored but scaled on presentation
     defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} -- NONE - OK
-    defaults[1] = {180, 180, 180, 203, 0, 0, 0, 1, 0, 0, 0, 0} --BF
+    defaults[1] = {180, 180, 180, 203, 0, 0, 0, 1, 0, 0, 0, 0} -- BF
     defaults[2] = {36, 36, 36, 50, 0, 0, 0, 0, 0, 0, 0, 0} -- RACEFL
     defaults[3] = {180, 180, 180, 205, 0, 0, 0, 0, 0, 0, 0, 0} -- KISS
     defaults[4] = {36, 36, 30, 48, 36, 36, 36, 48, 0, 0, 0, 0} -- ACTUAL
-    defaults[5] = {180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0} --QUICK
+    defaults[5] = {180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0} -- QUICK
 
     return defaults[x]
 end
@@ -867,9 +773,7 @@ function rf2touch_resetRates()
 
             for k, v in pairs(newTable) do
                 local f = Page.fields[k]
-                for idx = 1, #f.vals do
-                    Page.values[f.vals[idx]] = v >> ((idx - 1) * 8)
-                end
+                for idx = 1, #f.vals do Page.values[f.vals[idx]] = v >> ((idx - 1) * 8) end
             end
             ResetRates = false
         end
@@ -882,33 +786,25 @@ function rf2touch_debugSave()
 
     if lastScript == "servos.lua" then
 
-    --Page.fields[1].value = currentServoID
-    --saveValue(currentServoID, 1)
-    --local f = Page.fields[1]
+        -- Page.fields[1].value = currentServoID
+        -- saveValue(currentServoID, 1)
+        -- local f = Page.fields[1]
 
-    --print(f.value)
+        -- print(f.value)
 
-    --for idx = 1, #f.vals do
-    --	Page.values[f.vals[idx]] = currentServoID >> ((idx - 1) * 8)
-    --end
+        -- for idx = 1, #f.vals do
+        --	Page.values[f.vals[idx]] = currentServoID >> ((idx - 1) * 8)
+        -- end
 
-    --print(Page.fields[1].value)
+        -- print(Page.fields[1].value)
     end
 end
 
 local function fieldChoice(f, i)
-    if lastSubPage ~= nil and f.subpage ~= nil then
-        if f.subpage ~= lastSubPage then
-            return
-        end
-    end
+    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if f.t ~= nil then
-            if f.t2 ~= nil then
-                f.t = f.t2
-            end
-        end
+        if f.t ~= nil then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -917,13 +813,9 @@ local function fieldChoice(f, i)
         field = form.addStaticText(line, posText, f.t)
     else
         if f.t ~= nil then
-            if f.t2 ~= nil then
-                f.t = f.t2
-            end
+            if f.t2 ~= nil then f.t = f.t2 end
 
-            if f.label ~= nil then
-                f.t = "    " .. f.t
-            end
+            if f.label ~= nil then f.t = "    " .. f.t end
         end
         formLineCnt = formLineCnt + 1
         line = form.addLine(f.t)
@@ -931,40 +823,19 @@ local function fieldChoice(f, i)
         postText = nil
     end
 
-    field =
-        form.addChoiceField(
-        line,
-        posField,
-        convertPageValueTable(f.table),
-        function()
-            local value = getFieldValue(f)
-            return value
-        end,
-        function(value)
-            -- we do this hook to allow rates to be reset
-            if f.postEdit then
-                f.postEdit(Page)
-            end
-            f.value = saveFieldValue(f, value)
-            saveValue(v, i)
-        end
-    )
+    field = form.addChoiceField(line, posField, convertPageValueTable(f.table), function()
+        local value = getFieldValue(f)
+        return value
+    end, function(value)
+        -- we do this hook to allow rates to be reset
+        if f.postEdit then f.postEdit(Page) end
+        f.value = saveFieldValue(f, value)
+        saveValue(v, i)
+    end)
 end
 
 local function decimalInc(dec)
-    local decTable = {
-        10,
-        100,
-        1000,
-        10000,
-        100000,
-        1000000,
-        10000000,
-        100000000,
-        1000000000,
-        10000000000,
-        100000000000
-    }
+    local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
 
     if dec == nil then
         return 1
@@ -986,17 +857,13 @@ function getFieldValue(f)
         v = 0
     end
 
-    if f.mult ~= nil then
-        v = math.floor(v * f.mult + 0.5)
-    end
+    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
 
     return v
 end
 
 function rf2touch_round(number, precision)
-    if precision == nil then
-        precision = 0
-    end
+    if precision == nil then precision = 0 end
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     number = tonumber(number)
@@ -1010,14 +877,10 @@ function saveFieldValue(f, value)
         else
             f.value = value
         end
-        if f.postEdit then
-            f.postEdit(Page)
-        end
+        if f.postEdit then f.postEdit(Page) end
     end
 
-    if f.mult ~= nil then
-        f.value = f.value / f.mult
-    end
+    if f.mult ~= nil then f.value = f.value / f.mult end
 
     return f.value
 end
@@ -1025,26 +888,16 @@ end
 local function scaleValue(value, f)
     local v
     v = value * decimalInc(f.decimals)
-    if f.scale ~= nil then
-        v = v / f.scale
-    end
+    if f.scale ~= nil then v = v / f.scale end
     v = rf2touch_round(v)
     return v
 end
 
 local function fieldNumber(f, i)
-    if lastSubPage ~= nil and f.subpage ~= nil then
-        if f.subpage ~= lastSubPage then
-            return
-        end
-    end
+    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if f.t ~= nil then
-            if f.t2 ~= nil then
-                f.t = f.t2
-            end
-        end
+        if f.t ~= nil then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -1053,13 +906,9 @@ local function fieldNumber(f, i)
         field = form.addStaticText(line, posText, f.t)
     else
         if f.t ~= nil then
-            if f.t2 ~= nil then
-                f.t = f.t2
-            end
+            if f.t2 ~= nil then f.t = f.t2 end
 
-            if f.label ~= nil then
-                f.t = "    " .. f.t
-            end
+            if f.label ~= nil then f.t = "    " .. f.t end
         else
             f.t = ""
         end
@@ -1080,75 +929,41 @@ local function fieldNumber(f, i)
     end
 
     if HideMe == true then
-    --posField = {x = 2000, y = 0, w = 20, h = 20}
+        -- posField = {x = 2000, y = 0, w = 20, h = 20}
     end
 
-    field =
-        form.addNumberField(
-        line,
-        posField,
-        minValue,
-        maxValue,
-        function()
-            local value = getFieldValue(f)
+    field = form.addNumberField(line, posField, minValue, maxValue, function()
+        local value = getFieldValue(f)
 
-            return value
-        end,
-        function(value)
-            if f.postEdit then
-                f.postEdit(Page)
-            end
+        return value
+    end, function(value)
+        if f.postEdit then f.postEdit(Page) end
 
-            f.value = saveFieldValue(f, value)
-            saveValue(v, i)
-        end
-    )
+        f.value = saveFieldValue(f, value)
+        saveValue(v, i)
+    end)
 
     if f.default ~= nil then
         local default = f.default * decimalInc(f.decimals)
-        if f.mult ~= nil then
-            default = default * f.mult
-        end
+        if f.mult ~= nil then default = default * f.mult end
         field:default(default)
     else
         field:default(0)
     end
-    if f.decimals ~= nil then
-        field:decimals(f.decimals)
-    end
-    if f.unit ~= nil then
-        field:suffix(f.unit)
-    end
-    if f.step ~= nil then
-        field:step(f.step)
-    end
+    if f.decimals ~= nil then field:decimals(f.decimals) end
+    if f.unit ~= nil then field:suffix(f.unit) end
+    if f.step ~= nil then field:step(f.step) end
 end
 
-local function getLabel(id, page)
-    for i, v in ipairs(page) do
-        if id ~= nil then
-            if v.label == id then
-                return v
-            end
-        end
-    end
-end
+local function getLabel(id, page) for i, v in ipairs(page) do if id ~= nil then if v.label == id then return v end end end end
 
 local function fieldLabel(f, i, l)
-    if lastSubPage ~= nil and f.subpage ~= nil then
-        if f.subpage ~= lastSubPage then
-            return
-        end
-    end
+    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
 
     if f.t ~= nil then
-        if f.t2 ~= nil then
-            f.t = f.t2
-        end
+        if f.t2 ~= nil then f.t = f.t2 end
 
-        if f.label ~= nil then
-            f.t = "    " .. f.t
-        end
+        if f.label ~= nil then f.t = "    " .. f.t end
     end
 
     if f.label ~= nil then
@@ -1157,9 +972,7 @@ local function fieldLabel(f, i, l)
         local labelValue = label.t
         local labelID = label.label
 
-        if label.t2 ~= nil then
-            labelValue = label.t2
-        end
+        if label.t2 ~= nil then labelValue = label.t2 end
         if f.t ~= nil then
             labelName = labelValue
         else
@@ -1167,9 +980,7 @@ local function fieldLabel(f, i, l)
         end
 
         if f.label ~= lastLabel then
-            if label.type == nil then
-                label.type = 0
-            end
+            if label.type == nil then label.type = 0 end
 
             formLineCnt = formLineCnt + 1
             line = form.addLine(labelName)
@@ -1247,23 +1058,17 @@ function getServoValue(currentIndex)
         local servoConfiguration = {}
         for i = 1, servoCount do
             servoConfiguration[i] = {}
-            for j = 1, 16 do
-                servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j]
-            end
+            for j = 1, 16 do servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j] end
         end
         Page.minBytes = 1 + 16
 
-        for i = 1, 16 do
-            Page.values[1 + i] = servoConfiguration[currentServoID][i]
-        end
+        for i = 1, 16 do Page.values[1 + i] = servoConfiguration[currentServoID][i] end
         Page.fields[1].value = currentServoID
         dataBindFields()
 
         v = Page.fields[currentIndex].value
     end
-    if v == nil then
-        v = 0
-    end
+    if v == nil then v = 0 end
 
     return v
 end
@@ -1320,61 +1125,40 @@ function openPageSERVOS(idx, title, script)
 
         if i == 1 then
             line = form.addLine("Servo")
-            field =
-                form.addChoiceField(
-                line,
-                nil,
-                convertPageValueTable(servoTable),
-                function()
-                    value = currentServoID
-                    Page.fields[1].value = currentServoID
-                    return value
-                end,
-                function(value)
-                    currentServoID = value
+            field = form.addChoiceField(line, nil, convertPageValueTable(servoTable), function()
+                value = currentServoID
+                Page.fields[1].value = currentServoID
+                return value
+            end, function(value)
+                currentServoID = value
 
-                    f.value = saveFieldValue(f, value)
-                    saveValue(value, i)
+                f.value = saveFieldValue(f, value)
+                saveValue(value, i)
 
-                    isRefeshing = true
-                    wasRefreshing = true
-                    createForm = true
-                    return true
-                end
-            )
+                isRefeshing = true
+                wasRefreshing = true
+                createForm = true
+                return true
+            end)
         else
             if f.hideme == nil or f.hideme == false then
                 line = form.addLine(f.t)
-                field =
-                    form.addNumberField(
-                    line,
-                    nil,
-                    f.min,
-                    f.max,
-                    function()
-                        local value = getFieldValue(f)
-                        return value
-                    end,
-                    function(value)
-                        f.value = saveFieldValue(f, value)
-                        saveValue(value, i)
-                    end
-                )
+                field = form.addNumberField(line, nil, f.min, f.max, function()
+                    local value = getFieldValue(f)
+                    return value
+                end, function(value)
+                    f.value = saveFieldValue(f, value)
+                    saveValue(value, i)
+                end)
                 if f.default ~= nil then
                     local default = f.default * decimalInc(f.decimals)
-                    if f.mult ~= nil then
-                        default = default * f.mult
-                    end
+                    if f.mult ~= nil then default = default * f.mult end
                     field:default(default)
                 else
                     field:default(0)
                 end
-                if f.decimals ~= nil then
-                    field:decimals(f.decimals)
-                end
-                if f.unit ~= nil then
-                    field:suffix(f.unit)
-                end
+                if f.decimals ~= nil then field:decimals(f.decimals) end
+                if f.unit ~= nil then field:suffix(f.unit) end
             end
         end
     end
@@ -1432,9 +1216,7 @@ function openPagePID(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do
-        _G["RF2TOUCH_PIDROWS_" .. ri] = form.addLine(rv)
-    end
+    for ri, rv in ipairs(Page.rows) do _G["RF2TOUCH_PIDROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1453,36 +1235,22 @@ function openPagePID(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        field =
-            form.addNumberField(
-            _G["RF2TOUCH_PIDROWS_" .. f.row],
-            pos,
-            minValue,
-            maxValue,
-            function()
-                local value = getFieldValue(f)
-                return value
-            end,
-            function(value)
-                f.value = saveFieldValue(f, value)
-                saveValue(v, i)
-            end
-        )
+        field = form.addNumberField(_G["RF2TOUCH_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
+            local value = getFieldValue(f)
+            return value
+        end, function(value)
+            f.value = saveFieldValue(f, value)
+            saveValue(v, i)
+        end)
         if f.default ~= nil then
             local default = f.default * decimalInc(f.decimals)
-            if f.mult ~= nil then
-                default = default * f.mult
-            end
+            if f.mult ~= nil then default = default * f.mult end
             field:default(default)
         else
             field:default(0)
         end
-        if f.decimals ~= nil then
-            field:decimals(f.decimals)
-        end
-        if f.unit ~= nil then
-            field:suffix(f.unit)
-        end
+        if f.decimals ~= nil then field:decimals(f.decimals) end
+        if f.unit ~= nil then field:suffix(f.unit) end
     end
 
     -- display menu at footer
@@ -1547,9 +1315,7 @@ function openPageRATES(idx, subpage, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do
-        _G["RF2TOUCH_RATEROWS_" .. ri] = form.addLine(rv)
-    end
+    for ri, rv in ipairs(Page.rows) do _G["RF2TOUCH_RATEROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1573,42 +1339,24 @@ function openPageRATES(idx, subpage, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            field =
-                form.addNumberField(
-                _G["RF2TOUCH_RATEROWS_" .. f.row],
-                pos,
-                minValue,
-                maxValue,
-                function()
-                    local value = getFieldValue(f)
-                    return value
-                end,
-                function(value)
-                    f.value = saveFieldValue(f, value)
-                    saveValue(v, i)
-                end
-            )
+            field = form.addNumberField(_G["RF2TOUCH_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
+                local value = getFieldValue(f)
+                return value
+            end, function(value)
+                f.value = saveFieldValue(f, value)
+                saveValue(v, i)
+            end)
             if f.default ~= nil then
                 local default = f.default * decimalInc(f.decimals)
-                if f.mult ~= nil then
-                    default = math.floor(default * f.mult)
-                end
-                if f.scale ~= nil then
-                    default = math.floor(default / f.scale)
-                end
+                if f.mult ~= nil then default = math.floor(default * f.mult) end
+                if f.scale ~= nil then default = math.floor(default / f.scale) end
                 field:default(default)
             else
                 field:default(0)
             end
-            if f.decimals ~= nil then
-                field:decimals(f.decimals)
-            end
-            if f.unit ~= nil then
-                field:suffix(f.unit)
-            end
-            if f.step ~= nil then
-                field:step(f.step)
-            end
+            if f.decimals ~= nil then field:decimals(f.decimals) end
+            if f.unit ~= nil then field:suffix(f.unit) end
+            if f.step ~= nil then field:step(f.step) end
         end
     end
 
@@ -1626,11 +1374,7 @@ end
 local function getSection(id, sections)
     for i, v in ipairs(sections) do
         print(v)
-        if id ~= nil then
-            if v.section == id then
-                return v
-            end
-        end
+        if id ~= nil then if v.section == id then return v end end
     end
 end
 
@@ -1645,7 +1389,7 @@ function openMainMenu()
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
     local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
-    --local x = 0
+    -- local x = 0
 
     local y = radio.buttonPaddingTop
 
@@ -1664,32 +1408,23 @@ function openMainMenu()
                     x = padding
                 end
 
-                if lc >= 1 then
-                    x = (w + (padding * numPerRow)) * lc
-                end
+                if lc >= 1 then x = (w + (padding * numPerRow)) * lc end
 
-                form.addTextButton(
-                    line,
-                    {x = x, y = y, w = w, h = h},
-                    pvalue.title,
-                    function()
-                        if pvalue.script == "pids.lua" then
-                            openPagePID(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "servos.lua" then
-                            openPageSERVOS(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-                            openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-                        else
-                            openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-                        end
+                form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
+                    if pvalue.script == "pids.lua" then
+                        openPagePID(pidx, pvalue.title, pvalue.script)
+                    elseif pvalue.script == "servos.lua" then
+                        openPageSERVOS(pidx, pvalue.title, pvalue.script)
+                    elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
+                        openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                    else
+                        openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
-                )
+                end)
 
                 lc = lc + 1
 
-                if lc == numPerRow then
-                    lc = 0
-                end
+                if lc == numPerRow then lc = 0 end
             end
         end
     end
@@ -1709,9 +1444,7 @@ local function create()
             rssiSensor = system.getSource("RSSI 900M")
             if not rssiSensor then
                 rssiSensor = system.getSource("Rx RSSI1")
-                if not rssiSensor then
-                    rssiSensor = system.getSource("Rx RSSI2")
-                end
+                if not rssiSensor then rssiSensor = system.getSource("Rx RSSI2") end
             end
         end
     end
@@ -1728,17 +1461,13 @@ local function create()
     MainMenu = assert(loadScript("/scripts/RF2TOUCH/pages.lua"))()
 
     -- force page to get pickup data as it loads in
-    form.onWakeup(
-        function()
-            wakeupForm()
-        end
-    )
+    form.onWakeup(function() wakeupForm() end)
 
     openMainMenu()
 end
 
 local function close()
-    --print("Close")
+    -- print("Close")
     pageLoaded = 100
     pageTitle = nil
     pageFile = nil
@@ -1747,10 +1476,6 @@ end
 
 local icon = lcd.loadMask("/scripts/RF2TOUCH/RF.png")
 
-local function init()
-    system.registerSystemTool(
-        {event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}
-    )
-end
+local function init() system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}) end
 
 return {init = init}

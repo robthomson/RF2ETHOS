@@ -3,25 +3,25 @@ local template = assert(loadScript(radio.template))()
 local labels = {}
 local fields = {}
 
-fields[#fields + 1] = { t = "Profile type",                min = 0, max = 1, vals = { 1 }, table = { [0] = "PID", "Rate" } }
-fields[#fields + 1] = { t = "Source profile",              min = 0, max = 5, vals = { 3 }, table = { [0] = "1", "2", "3", "4", "5", "6" } }
-fields[#fields + 1] = { t = "Dest. profile",               min = 0, max = 5, vals = { 2 }, table = { [0] = "1", "2", "3", "4", "5", "6" } }
-labels[#labels + 1] = { t = "Use Save to copy the source",  }
-labels[#labels + 1] = { t = "profile to the destination.",  }
+fields[#fields + 1] = {t = "Profile type", min = 0, max = 1, vals = {1}, table = {[0] = "PID", "Rate"}}
+fields[#fields + 1] = {t = "Source profile", min = 0, max = 5, vals = {3}, table = {[0] = "1", "2", "3", "4", "5", "6"}}
+fields[#fields + 1] = {t = "Dest. profile", min = 0, max = 5, vals = {2}, table = {[0] = "1", "2", "3", "4", "5", "6"}}
+labels[#labels + 1] = {t = "Use Save to copy the source"}
+labels[#labels + 1] = {t = "profile to the destination."}
 
 return {
-    read        = 101, -- MSP_STATUS
-    write       = 183, -- MSP_COPY_PROFILE
-    reboot      = false,
+    read = 101, -- MSP_STATUS
+    write = 183, -- MSP_COPY_PROFILE
+    reboot = false,
     eepromWrite = true,
-    title       = "Copy",
-    minBytes    = 30,
-    labels      = labels,
-    fields      = fields,
+    title = "Copy",
+    minBytes = 30,
+    labels = labels,
+    fields = fields,
     postRead = function(self)
         self.maxPidProfiles = self.values[25]
         self.currentPidProfile = self.values[24]
-        self.values = { 0, self.getDestinationPidProfile(self), self.currentPidProfile }
+        self.values = {0, self.getDestinationPidProfile(self), self.currentPidProfile}
         self.minBytes = 3
     end,
     getDestinationPidProfile = function(self)
@@ -32,5 +32,5 @@ return {
             destPidProfile = self.currentPidProfile - 1
         end
         return destPidProfile
-    end,
+    end
 }
