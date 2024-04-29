@@ -41,11 +41,6 @@ showLoading = false
 
 local mspDataLoaded = false
 
-currentServoID = 1 -- this is default servo id
-currentServoCount = 4
-servoDataLoaded = false
-
-lastServoCount = nil
 reloadServos = false
 
 defaultRateTable = 4 -- ACTUAL
@@ -69,7 +64,7 @@ protocol = nil
 radio = nil
 sensor = nil
 
-rfglobals = {}
+rf2touch = {}
 
 local function decimalInc(dec)
     local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
@@ -128,7 +123,7 @@ local function invalidatePages()
     lcdNeedsInvalidate = true
 end
 
-local function dataBindFields()
+function dataBindFields()
 	if Page.fields ~= nil and Page.values ~= nil then
 		for i = 1, #Page.fields do
 			if #Page.values >= Page.minBytes then
@@ -146,7 +141,7 @@ local function dataBindFields()
 				end
 			end
 		end
-	end	
+	end
 end
 
 -- Run lcd.invalidate() if anything actionable comes back from it.
@@ -271,7 +266,7 @@ local function clipValue(val, min, max)
 end
 
 function getFieldValue(f)
-	
+
     local v
 
     if f.value ~= nil then
@@ -297,65 +292,13 @@ local function saveValue(currentField)
     local scale = f.scale or 1
     local step = f.step or 1
 
-    for idx = 1, #f.vals do 
-		Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) 
+    for idx = 1, #f.vals do
+		Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
 	end
     if f.upd and Page.values then f.upd(Page) end
 end
 
 
-function getServoValue(currentIndex)
-
-	-- when the form field loads; this function is called.
-	-- it retrieves the value from the msp data
-	-- and returns it as variable v
-	
-	-- its a bit convoluted because I dont really understand how
-	-- the previous code worked and kind of hacked it together :(
-	
-    if Page.values ~= nil then
-        servoCount = currentServoCount
-        local servoConfiguration = {}
-        for i = 1, servoCount do
-           servoConfiguration[i] = {}
-           for j = 1, 16 do 
-			servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j] 
-		   end
-        end
-        Page.minBytes = 1 + 16
-
-        for i = 1, 16 do 
-			Page.values[1 + i] = servoConfiguration[currentServoID][i] 
-		end
-        Page.fields[1].value = currentServoID
-        dataBindFields()
-
-        v = Page.fields[currentIndex].value
-    end
-    if v == nil then v = 0 end
-
-    return v
-end
-
-local function saveServoValue(currentIndex)
-
-	-- every time a field changes - this function is called.
-	-- it should in theory write the data that is found in
-	-- f.value (Page.fields[currentIndex].value) 
-	-- into the Page.values field for the current Index
-
-    if environment.simulation == true then return end
-
-    local f = Page.fields[currentIndex]
-
-
-	for idx = 1, 16 do 
-		Page.values[1 + idx] = f.value >> ((idx - 1) * 8) 
-	end	
-
-    if f.upd and Page.values then f.upd(Page) end
-
-end
 
 local translations = {en = "RF2 TOUCH"}
 
@@ -442,13 +385,10 @@ function paint()
 
 	if uiState ~= uiStatus.mainMenu then
 		if showLoading == true and ResetRates == false  then
-			 msgBox("Loading...")
-		else
-			lcd.invalidate()
+			 -- dont show until we solve layer bug
+			 --msgBox("Loading...")
 		end
-
 	end
-	lcd.invalidate()
 end
 
 function wakeupForm()
@@ -471,25 +411,23 @@ function wakeupForm()
         end
     end
 
-    if lastScript == "servos.lua" then
-        if servoDataLoaded == true then
-            -- print("Updating initial values")
-            for i = 1, #Page.fields do
-                local f = Page.fields[i]
-                f.value = getServoValue(i)
-            end
-            dataBindFields()
-
-            servoDataLoaded = false
-        end
-    end
-
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) or mspDataLoaded == false then
         -- we dont refresh as busy doing other stuff
         -- print("Form invalidation disabled....")
     else
-        if (isSaving == false and wasSaving == false) or (isRefreshing == false and wasRefreshing == false) then form.invalidate() end
+        if (isSaving == false and wasSaving == false) or (isRefreshing == false and wasRefreshing == false) or showLoading == false then form.invalidate() end
     end
+	--lcd.invalidate()
+end
+
+function clearScreen()
+local w, h = lcd.getWindowSize()  
+if isDARKMODE then
+        lcd.color(lcd.RGB(40, 40, 40))
+else
+        lcd.color(lcd.RGB(240, 240, 240))
+end
+lcd.drawFilledRectangle(0, 0,w, h)
 end
 
 -- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
@@ -612,8 +550,8 @@ function wakeup(widget)
         else
             createForm = false
         end
-	
-		
+
+
 		if uiState ~= uiStatus.mainMenu then
 			if mspDataLoaded == true then
 				print("Got the data...")
@@ -631,9 +569,9 @@ function wakeup(widget)
 			else
 				showLoading = true
 			end
-		end		
-	
-		
+		end
+
+
     end
 end
 
@@ -858,10 +796,10 @@ local function defaultRates(x)
     local defaults = {}
     --
     --[[
-	--there values are presented 
+	--there values are presented
 	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
-	defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 } --BF 
-	defaults[2] = { 360, 360, 360, 12.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- RACEFL 
+	defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 } --BF
+	defaults[2] = { 360, 360, 360, 12.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- RACEFL
 	defaults[3] = { 1.8, 1.8, 1.8, 2.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- KISS
 	defaults[4] = { 360, 360, 360, 12, 360, 360, 360, 12, 0, 0, 0, 0 } -- ACTUAL
 	defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 } --QUICK
@@ -1093,20 +1031,20 @@ local function fieldHeader(title)
 end
 
 function openPageDefaultLoader(idx, subpage, title, script)
- 
+
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
 	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
-	
+
 	form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
-    lastScript = script	
-		
+    lastScript = script
+
 	lcdNeedsInvalidate = true
 
 	print("Finished: openPageDefaultLoader")
@@ -1160,20 +1098,20 @@ function openPageDefault(idx, subpage, title, script)
 end
 
 function openPageSERVOSLoader(idx, title, script)
- 
+
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
 	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
-	
+
 	form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
-    lastScript = script	
-		
+    lastScript = script
+
 	lcdNeedsInvalidate = true
 
 	print("Finished: openPageSERVOS")
@@ -1209,7 +1147,7 @@ function openPageSERVOS(idx, title, script)
 
     -- we add a servo selector that is not part of msp table
     -- this is done as a selector - to pass a servoID on refresh
-    if currentServoCount == 3 then
+    if Page.servoCount == 3 then
         servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
     else
         servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
@@ -1227,15 +1165,11 @@ function openPageSERVOS(idx, title, script)
         if i == 1 then
             line = form.addLine("Servo")
             field = form.addChoiceField(line, nil, convertPageValueTable(servoTable), function()
-                value = currentServoID
-                Page.fields[1].value = currentServoID
+                value = rf2touch.lastChangedServo
+                Page.fields[1].value = value
                 return value
             end, function(value)
-                currentServoID = value
-
-                f.value = saveFieldValue(f, value)
-                saveServoValue(i)
-
+                Page.servoChanged(Page, value)
                 isRefeshing = true
                 wasRefreshing = true
                 createForm = true
@@ -1249,7 +1183,7 @@ function openPageSERVOS(idx, title, script)
                     return value
                 end, function(value)
                     f.value = saveFieldValue(f, value)
-                    saveServoValue(i)
+                    saveValue(i)
                 end)
                 if f.default ~= nil then
                     local default = f.default * decimalInc(f.decimals)
@@ -1268,20 +1202,20 @@ function openPageSERVOS(idx, title, script)
 end
 
 function openPagePIDLoader(idx, title, script)
- 
+
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
 	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
-	
+
 	form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
-    lastScript = script	
-		
+    lastScript = script
+
 	lcdNeedsInvalidate = true
 
 	print("Finished: openPagePID")
@@ -1295,7 +1229,7 @@ function openPagePID(idx, title, script)
     longPage = false
 
     form.clear()
-	
+
     fieldHeader(title)
 
     local numCols = #Page.cols
@@ -1378,20 +1312,20 @@ end
 
 
 function openPageRATESLoader(idx, subpage, title, script)
- 
+
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
 	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
-	
+
 	form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
-    lastScript = script	
-		
+    lastScript = script
+
 	lcdNeedsInvalidate = true
 
 	print("Finished: openPageRATES")
@@ -1407,7 +1341,7 @@ function openPageRATES(idx, subpage, title, script)
 
     form.clear()
 
-  
+
     fieldHeader(title)
 
     local numCols = #Page.cols

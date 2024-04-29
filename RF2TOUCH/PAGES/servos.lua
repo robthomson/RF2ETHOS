@@ -24,13 +24,36 @@ return {
     labels = labels,
     fields = fields,
     postRead = function(self)
-        -- reset values
-        currentServoCount = self.values[1]
-        servoDataLoaded = true
-        if lastServoCount ~= currentServoCount then
-            lastServoCount = currentServoCount
+        self.servoCount = self.values[1]
+        if rf2touch.lastServoCount ~= self.servoCount then
+            rf2touch.lastServoCount = self.servoCount
             createForm = true
             reloadServos = true
         end
+        --self.fields[1].max = servoCount - 1
+        self.servoConfiguration = {}
+        for i = 1, self.servoCount do
+            self.servoConfiguration[i] = {}
+            for j = 1, 16 do
+                self.servoConfiguration[i][j] = self.values[1 + (i - 1) * 16 + j]
+            end
+        end
+        if rf2touch.lastChangedServo == nil then
+            rf2touch.lastChangedServo = 1
+        end
+        self.setValues(self, rf2touch.lastChangedServo)
+        self.minBytes = 1 + 16
+    end,
+    setValues = function(self, servoIndex)
+        self.values = {}
+        self.values[1] = servoIndex - 1
+        for i = 1, 16 do
+            self.values[1 + i] = self.servoConfiguration[servoIndex][i]
+        end
+    end,
+    servoChanged = function(self, servoIndex)
+        rf2touch.lastChangedServo = servoIndex
+        self.setValues(self, rf2touch.lastChangedServo)
+        dataBindFields()
     end
 }
