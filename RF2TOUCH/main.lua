@@ -55,6 +55,8 @@ RateTable = nil
 ResetRates = nil
 reloadRates = false
 
+local mspDataLoaded = false
+
 currentServoID = 1 -- this is default servo id
 currentServoCount = 4
 servoDataLoaded = false
@@ -63,7 +65,6 @@ lastServoCount = nil
 reloadServos = false
 
 defaultRateTable = 4 -- ACTUAL
-
 
 -- New variables for Ethos version
 local screenTitle = nil
@@ -79,8 +80,6 @@ local lastTitle = nil
 local lastScript = nil
 
 lcdNeedsInvalidate = false
-
-
 
 protocol = nil
 radio = nil
@@ -98,14 +97,13 @@ local function saveSettings()
         if pageState == pageStatus.saving then
             saveRetries = saveRetries + 1
         else
+            --print("Attempting to write page values...")
             pageState = pageStatus.saving
             saveRetries = 0
-            --print("Attempting to write page values...")
         end
         protocol.mspWrite(Page.write, payload)
     end
 end
-
 
 local function eepromWrite()
     saveTS = os.clock()
@@ -138,39 +136,35 @@ local function invalidatePages()
     lcdNeedsInvalidate = true
 end
 
-
-
 local function dataBindFields()
-		for i = 1, #Page.fields do
-			if #Page.values >= Page.minBytes then
-				local f = Page.fields[i]
-				if f.vals then
-					f.value = 0
-					for idx = 1, #f.vals do
-						local raw_val = Page.values[f.vals[idx]] or 0
-						raw_val = raw_val << ((idx - 1) * 8)
-						f.value = f.value | raw_val
-					end
-					local bits = #f.vals * 8
-					if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
-						f.value = f.value - (2 ^ bits)
-					end
-					f.value = f.value / (f.scale or 1)
-				end
-			end
-		end
-
+    for i = 1, #Page.fields do
+        if #Page.values >= Page.minBytes then
+            local f = Page.fields[i]
+            if f.vals then
+                f.value = 0
+                for idx = 1, #f.vals do
+                    local raw_val = Page.values[f.vals[idx]] or 0
+                    raw_val = raw_val << ((idx - 1) * 8)
+                    f.value = f.value | raw_val
+                end
+                local bits = #f.vals * 8
+                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
+                    f.value = f.value - (2 ^ bits)
+                end
+                f.value = f.value / (f.scale or 1)
+            end
+        end
+    end
 end
-
 
 -- Run lcd.invalidate() if anything actionable comes back from it.
 local function processMspReply(cmd, rx_buf, err)
     if Page and rx_buf ~= nil then
         if environment.simulation ~= true then
-            --print(
-            --    "Page is processing reply for cmd " ..
-            --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
-            --)
+        --print(
+        --    "Page is processing reply for cmd " ..
+        --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
+        --)
         end
     end
     if not Page or not rx_buf then
@@ -195,22 +189,17 @@ local function processMspReply(cmd, rx_buf, err)
         --print("processMspReply:  Page.read and non-zero rx_buf")
         Page.values = rx_buf
         if Page.postRead then
-			-- print("Postread executed")
+            -- print("Postread executed")
             Page.postRead(Page)
         end
         dataBindFields()
         if Page.postLoad then
             Page.postLoad(Page)
-            --print("Postload executed")
+        --print("Postload executed")
         end
+        mspDataLoaded = true
         lcdNeedsInvalidate = true
-    end		
-    --elseif (cmd == Page.read) and (#rx_buf > 0) then
-    --    --print("processMspReply:  Page.read and non-zero rx_buf")
-    --    Page.values = rx_buf
-    --    dataBindFields()
-    --    lcdNeedsInvalidate = true
-    --end
+    end
 end
 
 local function requestPage()
@@ -294,7 +283,7 @@ local function updateTelemetryState()
     end
 end
 
-local function clipValue(val,min,max)
+local function clipValue(val, min, max)
     if val < min then
         val = min
     elseif val > max then
@@ -310,8 +299,7 @@ local function saveValue(newValue, currentField)
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
-	local step = f.step or 1
-
+    local step = f.step or 1
 
     for idx = 1, #f.vals do
         Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
@@ -380,82 +368,85 @@ function paint()
             msgBox("NO RF LINK")
         end
     end
-	if isSaving then
-		if pageState >= pageStatus.saving then
-			--print(saveMsg)
-			local saveMsg = ""
-			if pageState == pageStatus.saving then
-				saveMsg = "Saving..."
-				if saveRetries > 0 then
-					saveMsg = "Retry #" .. string.format("%u", saveRetries)
-				end
-			elseif pageState == pageStatus.eepromWrite then
-				saveMsg = "Updating..."
-				if saveRetries > 0 then
-					saveMsg = "Retry #" .. string.format("%u", saveRetries)
-				end
-			elseif pageState == pageStatus.rebooting then
-				saveMsg = "Rebooting..."
-			end
-			msgBox(saveMsg)
+    if isSaving then
+        if pageState >= pageStatus.saving then
+            --print(saveMsg)
+            local saveMsg = ""
+            if pageState == pageStatus.saving then
+                saveMsg = "Saving..."
+                if saveRetries > 0 then
+                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
+                end
+            elseif pageState == pageStatus.eepromWrite then
+                saveMsg = "Updating..."
+                if saveRetries > 0 then
+                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
+                end
+            elseif pageState == pageStatus.rebooting then
+                saveMsg = "Rebooting..."
+            end
+            msgBox(saveMsg)
+        else
+            isSaving = false
+        end
+    end
+
+    if isRefreshing then
+        --print("Got to paint isRefresh")
+        msgBox("Refreshing")
+    end
+
+    -- this displays message box - but for now we disable due to
+    -- lcd overlay issue
+    -- bounce to frsky..
+    --[[
+	if uiState ~= uiStatus.mainMenu then
+		if mspDataLoaded == false then
+			msgBox("Loading...")
 		else
-			isSaving = false
+			lcd.invalidate()
 		end
 	end
-
-	if isRefreshing then
-		print("Got to paint isRefresh")
-			msgBox("Refreshing")	
-	end
-	
-	
+	]]
+ --
 end
 
 function wakeupForm()
+    if lastScript == "rates.lua" and lastSubPage == 1 then
+        if Page.fields then
+            local v = Page.fields[13].value
+            if v ~= nil then
+                activeRateTable = math.floor(v)
+            end
 
+            if activeRateTable ~= nil then
+                if activeRateTable ~= RateTable then
+                    RateTable = activeRateTable
+                    collectgarbage()
+                    --reloadRates = true
+                    isRefeshing = true
+                    wasRefreshing = true
+                    createForm = true
+                    form.clear()
+                end
+            end
+        end
+    end
 
+    if lastScript == "servos.lua" then
+        if servoDataLoaded == true then
+            --print("Updating initial values")
+            for i = 1, #Page.fields do
+                local f = Page.fields[i]
+                f.value = getServoValue(i)
+            end
+            dataBindFields()
 
-	if lastScript == "rates.lua" and lastSubPage == 1 then
-		if Page.fields then
-		
-			local v = Page.fields[13].value
-			if v ~= nil then
-				activeRateTable =  math.floor(v)
-			end
-			
-			if activeRateTable ~= nil then
-				if activeRateTable ~= RateTable then
-					RateTable = activeRateTable
-					collectgarbage()
-					--reloadRates = true
-					isRefeshing = true
-					wasRefreshing = true
-					createForm = true
-					form.clear()
+            servoDataLoaded = false
+        end
+    end
 
-				end			
-			end
-		end
-		
-	end
-	
-	if lastScript == "servos.lua" then
-
-		if servoDataLoaded == true then
-			--print("Updating initial values")
-			for i = 1, #Page.fields do
-				local f = Page.fields[i]
-				f.value = getServoValue(i)
-			end			
-			dataBindFields()
-
-			servoDataLoaded = false
-		end
-	end
-	
-	
-
-    if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
+    if telemetryState ~= 1 or (pageState >= pageStatus.saving) or mspDataLoaded == false then
         -- we dont refresh as busy doing other stuff
         --print("Form invalidation disabled....")
     else
@@ -557,33 +548,32 @@ function wakeup(widget)
     else
         if createForm == true then
             if wasSaving == true then
-				if lastScript == 'pids.lua' or lastIdx == 1 then
-					openPagePID(lastIdx, lastTitle, lastScript)
-				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
-					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-				elseif lastScript == 'servos.lua' then
-					openPageSERVOS(lastIdx, lastTitle, lastScript)
-				else
-					openPageDefault(lastIdx, lastSubPage,lastTitle, lastScript)
-				end
+                if lastScript == "pids.lua" or lastIdx == 1 then
+                    openPagePID(lastIdx, lastTitle, lastScript)
+                elseif lastScript == "rates.lua" and lastSubPage == 1 then
+                    openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                elseif lastScript == "servos.lua" then
+                    openPageSERVOS(lastIdx, lastTitle, lastScript)
+                else
+                    openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                end
                 wasSaving = false
-			elseif wasRefreshing == true then
-	
-				if lastScript == 'pids.lua' or lastIdx == 1 then
-					openPagePID(lastIdx, lastTitle, lastScript)
-				elseif lastScript == 'rates.lua' and lastSubPage == 1 then
-					openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-				elseif lastScript == 'servos.lua'  then
-					openPageSERVOS(lastIdx, lastTitle, lastScript)
-				else 
-					openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
-				end
-                wasRefeshing = false			
+            elseif wasRefreshing == true then
+                if lastScript == "pids.lua" or lastIdx == 1 then
+                    openPagePID(lastIdx, lastTitle, lastScript)
+                elseif lastScript == "rates.lua" and lastSubPage == 1 then
+                    openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                elseif lastScript == "servos.lua" then
+                    openPageSERVOS(lastIdx, lastTitle, lastScript)
+                else
+                    openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                end
+                wasRefeshing = false
             elseif reloadRates == true then
-				openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-			elseif reloadServos == true then
-				openPageSERVOS(lastIdx, lastTitle, lastScript)
-			else
+                openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+            elseif reloadServos == true then
+                openPageSERVOS(lastIdx, lastTitle, lastScript)
+            else
                 openMainMenu()
             end
             createForm = false
@@ -611,58 +601,57 @@ local function convertPageValueTable(tbl)
 end
 
 function print_r(node)
-    local cache, stack, output = {},{},{}
+    local cache, stack, output = {}, {}, {}
     local depth = 1
     local output_str = "{\n"
 
     while true do
         local size = 0
-        for k,v in pairs(node) do
+        for k, v in pairs(node) do
             size = size + 1
         end
 
         local cur_index = 1
-        for k,v in pairs(node) do
+        for k, v in pairs(node) do
             if (cache[node] == nil) or (cur_index >= cache[node]) then
-
-                if (string.find(output_str,"}",output_str:len())) then
+                if (string.find(output_str, "}", output_str:len())) then
                     output_str = output_str .. ",\n"
-                elseif not (string.find(output_str,"\n",output_str:len())) then
+                elseif not (string.find(output_str, "\n", output_str:len())) then
                     output_str = output_str .. "\n"
                 end
 
                 -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
-                table.insert(output,output_str)
+                table.insert(output, output_str)
                 output_str = ""
 
                 local key
                 if (type(k) == "number" or type(k) == "boolean") then
-                    key = "["..tostring(k).."]"
+                    key = "[" .. tostring(k) .. "]"
                 else
-                    key = "['"..tostring(k).."']"
+                    key = "['" .. tostring(k) .. "']"
                 end
 
                 if (type(v) == "number" or type(v) == "boolean") then
-                    output_str = output_str .. string.rep('\t',depth) .. key .. " = "..tostring(v)
+                    output_str = output_str .. string.rep("\t", depth) .. key .. " = " .. tostring(v)
                 elseif (type(v) == "table") then
-                    output_str = output_str .. string.rep('\t',depth) .. key .. " = {\n"
-                    table.insert(stack,node)
-                    table.insert(stack,v)
-                    cache[node] = cur_index+1
+                    output_str = output_str .. string.rep("\t", depth) .. key .. " = {\n"
+                    table.insert(stack, node)
+                    table.insert(stack, v)
+                    cache[node] = cur_index + 1
                     break
                 else
-                    output_str = output_str .. string.rep('\t',depth) .. key .. " = '"..tostring(v).."'"
+                    output_str = output_str .. string.rep("\t", depth) .. key .. " = '" .. tostring(v) .. "'"
                 end
 
                 if (cur_index == size) then
-                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
                 else
                     output_str = output_str .. ","
                 end
             else
                 -- close the table
                 if (cur_index == size) then
-                    output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
                 end
             end
 
@@ -670,7 +659,7 @@ function print_r(node)
         end
 
         if (size == 0) then
-            output_str = output_str .. "\n" .. string.rep('\t',depth-1) .. "}"
+            output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
         end
 
         if (#stack > 0) then
@@ -683,7 +672,7 @@ function print_r(node)
     end
 
     -- This is necessary for working with HUGE tables otherwise we run out of memory using concat on huge strings
-    table.insert(output,output_str)
+    table.insert(output, output_str)
     output_str = table.concat(output)
 
     print(output_str)
@@ -704,7 +693,7 @@ function navigationButtons(x, y, w, h)
         {x = x, y = y, w = w, h = h},
         "MENU",
         function()
-			ResetRates = false
+            ResetRates = false
             openMainMenu()
         end
     )
@@ -719,9 +708,9 @@ function navigationButtons(x, y, w, h)
                     action = function()
                         isSaving = true
                         wasSaving = true
-						rf2touch_resetRates()
-						rf2touch_resetServos()
-						saveSettings()
+                        rf2touch_resetRates()
+                        rf2touch_debugSave()
+                        saveSettings()
                         return true
                     end
                 },
@@ -732,13 +721,12 @@ function navigationButtons(x, y, w, h)
                     end
                 }
             }
-			form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
-
+            form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
         end
     )
     form.addTextButton(
         line,
-        {x = colStart + (buttonW + padding)*2, y = y, w = buttonW, h = h},
+        {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h},
         "REFRESH",
         function()
             local buttons = {
@@ -747,8 +735,8 @@ function navigationButtons(x, y, w, h)
                     action = function()
                         isRefeshing = true
                         wasRefreshing = true
-						createForm = true
-						form.clear()
+                        createForm = true
+                        form.clear()
                         return true
                     end
                 },
@@ -759,12 +747,11 @@ function navigationButtons(x, y, w, h)
                     end
                 }
             }
-			form.openDialog("REFRESH", "Reload data from flight controller", buttons)
-
+            form.openDialog("REFRESH", "Reload data from flight controller", buttons)
         end
-    )	
+    )
 end
- --
+--
 
 --[[
 -- page types
@@ -778,99 +765,81 @@ T_NUMERIC_ALT = 4
 -- label types
 T_LABEL = 0
 T_EXPAND = 1
-]] 
-
-
+]]
 local function getInlineSize(id)
-
     for i, v in ipairs(Page.labels) do
-	
         if id ~= nil then
             if v.label == id then
                 if v.inline_size == nil then
-					return 10
-				else
-					return v.inline_size
-				end
+                    return 10
+                else
+                    return v.inline_size
+                end
             end
         end
     end
 end
 
 local function getInlinePositions(f)
+    inline_size = getInlineSize(f.label)
 
-		inline_size = getInlineSize(f.label)
-	
-		local w, h = lcd.getWindowSize()
-		local colStart
-		
-		local padding = 5
-		local fieldW = (w * inline_size) / 100
+    local w, h = lcd.getWindowSize()
+    local colStart
 
-		local eX			
-		local eW = fieldW - padding
-		local eH = radio.buttonHeight
-		local eY = radio.buttonPaddingTop	
-		local posX
-		tsizeW, tsizeH = lcd.getTextSize(f.t)	
+    local padding = 5
+    local fieldW = (w * inline_size) / 100
 
+    local eX
+    local eW = fieldW - padding
+    local eH = radio.buttonHeight
+    local eY = radio.buttonPaddingTop
+    local posX
+    tsizeW, tsizeH = lcd.getTextSize(f.t)
 
-		if f.inline == 5 then
-			posX = w - fieldW*9 - tsizeW - padding
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			
-			posX = w - fieldW*9
-			posField = {x = posX, y = eY, w = eW, h = eH}
-	
-		elseif f.inline == 4 then
+    if f.inline == 5 then
+        posX = w - fieldW * 9 - tsizeW - padding
+        posText = {x = posX, y = eY, w = tsizeW, h = eH}
 
-			posX = w - fieldW*7 - tsizeW - padding
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			
-			posX = w - fieldW*7
-			posField = {x = posX, y = eY, w = eW, h = eH}
-								
-		elseif f.inline == 3 then
-		
-			posX = w - fieldW*5 - tsizeW - padding
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			
-			posX = w - fieldW*5
-			posField = {x = posX, y = eY, w = eW, h = eH}
-			
-		elseif f.inline == 2 then
-		
-			posX = w - fieldW*3 - tsizeW - padding
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			
-			posX = w - fieldW*3
-			posField = {x = posX, y = eY, w = eW, h = eH}	
-			
-			
-		elseif f.inline == 1 then
+        posX = w - fieldW * 9
+        posField = {x = posX, y = eY, w = eW, h = eH}
+    elseif f.inline == 4 then
+        posX = w - fieldW * 7 - tsizeW - padding
+        posText = {x = posX, y = eY, w = tsizeW, h = eH}
 
-			posX = w - fieldW - tsizeW - padding
-			posText = {x = posX, y = eY, w = tsizeW, h = eH}
-			
-			posX = w - fieldW
-			posField = {x = posX, y = eY, w = eW, h = eH}		
-		end	
+        posX = w - fieldW * 7
+        posField = {x = posX, y = eY, w = eW, h = eH}
+    elseif f.inline == 3 then
+        posX = w - fieldW * 5 - tsizeW - padding
+        posText = {x = posX, y = eY, w = tsizeW, h = eH}
 
-	
-	ret = {
-		posText=posText,
-		posField = posField
-	}
+        posX = w - fieldW * 5
+        posField = {x = posX, y = eY, w = eW, h = eH}
+    elseif f.inline == 2 then
+        posX = w - fieldW * 3 - tsizeW - padding
+        posText = {x = posX, y = eY, w = tsizeW, h = eH}
 
-	
-	return 	ret
+        posX = w - fieldW * 3
+        posField = {x = posX, y = eY, w = eW, h = eH}
+    elseif f.inline == 1 then
+        posX = w - fieldW - tsizeW - padding
+        posText = {x = posX, y = eY, w = tsizeW, h = eH}
+
+        posX = w - fieldW
+        posField = {x = posX, y = eY, w = eW, h = eH}
+    end
+
+    ret = {
+        posText = posText,
+        posField = posField
+    }
+
+    return ret
 end
 
 local function defaultRates(x)
-
-
-	local defaults = {}
-	--[[
+    local defaults = {}
+     --
+    --[[
 	--there values are presented 
 	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
 	defaults[1] = { 1.8, 1.8, 1.8, 2.03, 0, 0, 0, 0.01, 0, 0, 0, 0 } --BF 
@@ -878,304 +847,284 @@ local function defaultRates(x)
 	defaults[3] = { 1.8, 1.8, 1.8, 2.5, 0, 0, 0, 0, 0, 0, 0, 0 } -- KISS
 	defaults[4] = { 360, 360, 360, 12, 360, 360, 360, 12, 0, 0, 0, 0 } -- ACTUAL
 	defaults[5] = { 1.8, 1.8, 1.8, 2.5, 360, 360, 360, 500, 0, 0, 0, 0 } --QUICK
-	]]--
-	
-	-- these values are stored but scaled on presentation
-	defaults[0] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }  -- NONE - OK
-	defaults[1] = { 180, 180, 180, 203, 0, 0, 0, 1, 0, 0, 0, 0 } --BF 
-	defaults[2] = { 36, 36, 36, 50, 0, 0, 0, 0, 0, 0, 0, 0 } -- RACEFL 
-	defaults[3] = { 180, 180, 180, 205, 0, 0, 0, 0, 0, 0, 0, 0 } -- KISS
-	defaults[4] = { 36, 36, 30, 48, 36, 36, 36, 48, 0, 0, 0, 0 } -- ACTUAL
-	defaults[5] = { 180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0 } --QUICK
+	]] -- these values are stored but scaled on presentation
+    defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} -- NONE - OK
+    defaults[1] = {180, 180, 180, 203, 0, 0, 0, 1, 0, 0, 0, 0} --BF
+    defaults[2] = {36, 36, 36, 50, 0, 0, 0, 0, 0, 0, 0, 0} -- RACEFL
+    defaults[3] = {180, 180, 180, 205, 0, 0, 0, 0, 0, 0, 0, 0} -- KISS
+    defaults[4] = {36, 36, 30, 48, 36, 36, 36, 48, 0, 0, 0, 0} -- ACTUAL
+    defaults[5] = {180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0} --QUICK
 
-	return defaults[x]
+    return defaults[x]
 end
-
-
 
 function rf2touch_resetRates()
-	if lastScript == "rates.lua" and lastSubPage == 2 then
-		if ResetRates == true then
-		
-			NewRateTable = Page.fields[13].value
-			
-			local newTable = defaultRates(NewRateTable)
-					
-			for k,v in pairs(newTable) do 
-					local f = Page.fields[k]
-					for idx = 1, #f.vals do
-						Page.values[f.vals[idx]] = v >> ((idx - 1) * 8)
-					end
-			end		
-			ResetRates = false
-		end	
-	end		
+    if lastScript == "rates.lua" and lastSubPage == 2 then
+        if ResetRates == true then
+            NewRateTable = Page.fields[13].value
+
+            local newTable = defaultRates(NewRateTable)
+
+            for k, v in pairs(newTable) do
+                local f = Page.fields[k]
+                for idx = 1, #f.vals do
+                    Page.values[f.vals[idx]] = v >> ((idx - 1) * 8)
+                end
+            end
+            ResetRates = false
+        end
+    end
 end
 
-function rf2touch_resetServos()
-	if lastScript == "servos.lua" then
-	
-		Page.fields[1].value = currentServoID
-		--saveValue(currentServoID, 1)
-		local f = Page.fields[1]
-		
-		print(f.value)
-		
-		--for idx = 1, #f.vals do
-		--	Page.values[f.vals[idx]] = currentServoID >> ((idx - 1) * 8)
-		--end
+function rf2touch_debugSave()
+    -- this function runs before save action
+    -- happens.  use it to do debug if needed
 
+    if lastScript == "servos.lua" then
 
+    --Page.fields[1].value = currentServoID
+    --saveValue(currentServoID, 1)
+    --local f = Page.fields[1]
 
-	end		
+    --print(f.value)
+
+    --for idx = 1, #f.vals do
+    --	Page.values[f.vals[idx]] = currentServoID >> ((idx - 1) * 8)
+    --end
+
+    --print(Page.fields[1].value)
+    end
 end
 
-local function fieldChoice(f,i)
+local function fieldChoice(f, i)
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
-	if lastSubPage ~= nil and f.subpage ~= nil then
-		if f.subpage ~= lastSubPage then
-			return
-		end
-	end	
+    if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
+        if f.t ~= nil then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
+        end
 
-	if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-	
-		if f.t ~= nil then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end
-		end	
-		
-		local p = getInlinePositions(f)
-		posText = p.posText
-		posField = p.posField
+        local p = getInlinePositions(f)
+        posText = p.posText
+        posField = p.posField
 
-		field = form.addStaticText(line, posText, f.t)
-	else
-		if f.t ~= nil then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end
+        field = form.addStaticText(line, posText, f.t)
+    else
+        if f.t ~= nil then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
 
-			if f.label ~= nil then
-				f.t = "    " .. f.t
-			end
-		end	
-		formLineCnt = formLineCnt + 1
-		line = form.addLine(f.t)
-		posField = nil
-		postText = nil
-	end
+            if f.label ~= nil then
+                f.t = "    " .. f.t
+            end
+        end
+        formLineCnt = formLineCnt + 1
+        line = form.addLine(f.t)
+        posField = nil
+        postText = nil
+    end
 
-	field =
-		form.addChoiceField(
-		line,
-		posField,
-		convertPageValueTable(f.table),
-		function()
-			local value = getFieldValue(f)
-			return value	
-		end,
-		function(value)
-			-- we do this hook to allow rates to be reset
-			if f.postEdit then
-				f.postEdit(Page)
-			end		
-			f.value = saveFieldValue(f,value)
-			saveValue(v, i)
-		
-		end
-	)
+    field =
+        form.addChoiceField(
+        line,
+        posField,
+        convertPageValueTable(f.table),
+        function()
+            local value = getFieldValue(f)
+            return value
+        end,
+        function(value)
+            -- we do this hook to allow rates to be reset
+            if f.postEdit then
+                f.postEdit(Page)
+            end
+            f.value = saveFieldValue(f, value)
+            saveValue(v, i)
+        end
+    )
 end
 
 local function decimalInc(dec)
-	local decTable = {
-				10,
-				100,
-				1000,
-				10000,
-				100000,
-				1000000,
-				10000000,
-				100000000,
-				1000000000,
-				10000000000,
-				100000000000,
-				}
-				
-	if dec == nil then
-		return 1
-	else
-		return decTable[dec]
-	end
-	
+    local decTable = {
+        10,
+        100,
+        1000,
+        10000,
+        100000,
+        1000000,
+        10000000,
+        100000000,
+        1000000000,
+        10000000000,
+        100000000000
+    }
+
+    if dec == nil then
+        return 1
+    else
+        return decTable[dec]
+    end
 end
 
 function getFieldValue(f)
-	local v
+    local v
 
-	if f.value ~= nil then
-			if f.decimals ~= nil then
-				v = rf2touch_round(f.value * decimalInc(f.decimals))
-			else
-				v = f.value
-			end	
-	else
-		v = 0
-	end	
-	
-	if f.mult ~= nil then
-		v = math.floor(v * f.mult+0.5)
-	end
-	
+    if f.value ~= nil then
+        if f.decimals ~= nil then
+            v = rf2touch_round(f.value * decimalInc(f.decimals))
+        else
+            v = f.value
+        end
+    else
+        v = 0
+    end
 
-	return v
-	
+    if f.mult ~= nil then
+        v = math.floor(v * f.mult + 0.5)
+    end
+
+    return v
 end
 
 function rf2touch_round(number, precision)
-	if precision == nil then
-		precision = 0
-	end
+    if precision == nil then
+        precision = 0
+    end
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     number = tonumber(number)
     return number
 end
 
-function saveFieldValue(f,value)
-	if value ~= nil then
-		if f.decimals ~= nil then
-			f.value =  value / decimalInc(f.decimals)
-		else
-			f.value =  value
-		end	
-		if f.postEdit then
-			f.postEdit(Page)
-		end				
-	end		
-	
-	if f.mult ~= nil then
-		f.value = f.value / f.mult
-	end
-	
-	
-	return f.value
+function saveFieldValue(f, value)
+    if value ~= nil then
+        if f.decimals ~= nil then
+            f.value = value / decimalInc(f.decimals)
+        else
+            f.value = value
+        end
+        if f.postEdit then
+            f.postEdit(Page)
+        end
+    end
 
+    if f.mult ~= nil then
+        f.value = f.value / f.mult
+    end
+
+    return f.value
 end
 
-local function scaleValue(value,f)
-	local v
-	v = value * decimalInc(f.decimals) 
-	if f.scale ~= nil then
-		v = v / f.scale
-	end
-	v = rf2touch_round(v)
-	return v
+local function scaleValue(value, f)
+    local v
+    v = value * decimalInc(f.decimals)
+    if f.scale ~= nil then
+        v = v / f.scale
+    end
+    v = rf2touch_round(v)
+    return v
 end
 
+local function fieldNumber(f, i)
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
-local function fieldNumber(f,i)
+    if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
+        if f.t ~= nil then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
+        end
 
+        local p = getInlinePositions(f)
+        posText = p.posText
+        posField = p.posField
 
-	if lastSubPage ~= nil and f.subpage ~= nil then
-		if f.subpage ~= lastSubPage then
-			return
-		end
-	end	
+        field = form.addStaticText(line, posText, f.t)
+    else
+        if f.t ~= nil then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
 
+            if f.label ~= nil then
+                f.t = "    " .. f.t
+            end
+        else
+            f.t = ""
+        end
 
-	if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-	
-		if f.t ~= nil then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end
-		end	
-		
-		local p = getInlinePositions(f)
-		posText = p.posText
-		posField = p.posField
+        formLineCnt = formLineCnt + 1
 
+        line = form.addLine(f.t)
 
-		field = form.addStaticText(line, posText, f.t)
-	else
-		if f.t ~= nil then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end
+        posField = nil
+        postText = nil
+    end
 
-			if f.label ~= nil then
-				f.t = "    " .. f.t
-			end
-		else
-			f.t = ""
-		end	
-		
-		formLineCnt = formLineCnt + 1
-		
-		line = form.addLine(f.t)
+    minValue = scaleValue(f.min, f)
+    maxValue = scaleValue(f.max, f)
+    if f.mult ~= nil then
+        minValue = minValue * f.mult
+        maxValue = maxValue * f.mult
+    end
 
-		posField = nil
-		postText = nil
-	end
-	
-	
-	minValue = scaleValue(f.min,f)
-	maxValue = scaleValue(f.max,f)
-	if f.mult ~= nil then
-		minValue = minValue * f.mult
-		maxValue = maxValue * f.mult
-	end
-	
-	if HideMe == true then
-		--posField = {x = 2000, y = 0, w = 20, h = 20}
-	end
-	
-	field =
-		form.addNumberField(
-		line,
-		posField,
-		minValue,
-		maxValue,
-		function()
-			local value = getFieldValue(f)
-				
-			return value	
-		end,
-		function(value)
-			if f.postEdit then
-				f.postEdit(Page)
-			end			
-		
-			f.value = saveFieldValue(f,value)
-			saveValue(v, i)
-		end
-	)
-	
-	if f.default ~= nil then
-		local default = f.default * decimalInc(f.decimals)
-		if f.mult ~= nil then
-			default = default * f.mult
-		end
-		field:default(default)
-	else
-		field:default(0)
-	end
-	if f.decimals ~= nil  then
-		field:decimals(f.decimals)
-	end
-	if f.unit ~= nil then
-		field:suffix(f.unit)
-	end	
-	if f.step ~= nil then
-		field:step(f.step)
-	end
+    if HideMe == true then
+    --posField = {x = 2000, y = 0, w = 20, h = 20}
+    end
+
+    field =
+        form.addNumberField(
+        line,
+        posField,
+        minValue,
+        maxValue,
+        function()
+            local value = getFieldValue(f)
+
+            return value
+        end,
+        function(value)
+            if f.postEdit then
+                f.postEdit(Page)
+            end
+
+            f.value = saveFieldValue(f, value)
+            saveValue(v, i)
+        end
+    )
+
+    if f.default ~= nil then
+        local default = f.default * decimalInc(f.decimals)
+        if f.mult ~= nil then
+            default = default * f.mult
+        end
+        field:default(default)
+    else
+        field:default(0)
+    end
+    if f.decimals ~= nil then
+        field:decimals(f.decimals)
+    end
+    if f.unit ~= nil then
+        field:suffix(f.unit)
+    end
+    if f.step ~= nil then
+        field:step(f.step)
+    end
 end
 
-
-
-local function getLabel(id,page)
+local function getLabel(id, page)
     for i, v in ipairs(page) do
         if id ~= nil then
             if v.label == id then
@@ -1185,60 +1134,53 @@ local function getLabel(id,page)
     end
 end
 
+local function fieldLabel(f, i, l)
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
-local function fieldLabel(f,i,l)
+    if f.t ~= nil then
+        if f.t2 ~= nil then
+            f.t = f.t2
+        end
 
-	if lastSubPage ~= nil and f.subpage ~= nil then
-		if f.subpage ~= lastSubPage then
-			return
-		end
-	end	
+        if f.label ~= nil then
+            f.t = "    " .. f.t
+        end
+    end
 
-	if f.t ~= nil then
-		if f.t2 ~= nil then
-			f.t = f.t2
-		end
+    if f.label ~= nil then
+        local label = getLabel(f.label, l)
 
-		if f.label ~= nil then
-			f.t = "    " .. f.t
-		end
-	end
-	
-	if f.label ~= nil then
-	
-		local label = getLabel(f.label, l)
-	
-		local labelValue = label.t
-		local labelID = label.label
-		
-		if label.t2 ~= nil then
-			labelValue = label.t2
-		end
-		if f.t ~= nil then
-			labelName = labelValue
-		else
-			labelName = "unknown"
-		end
+        local labelValue = label.t
+        local labelID = label.label
 
+        if label.t2 ~= nil then
+            labelValue = label.t2
+        end
+        if f.t ~= nil then
+            labelName = labelValue
+        else
+            labelName = "unknown"
+        end
 
-		if f.label ~= lastLabel then
-			if label.type == nil then
-				label.type = 0
-			end
+        if f.label ~= lastLabel then
+            if label.type == nil then
+                label.type = 0
+            end
 
-			formLineCnt = formLineCnt + 1
-			line = form.addLine(labelName)
-			form.addStaticText(line, nil, "")
+            formLineCnt = formLineCnt + 1
+            line = form.addLine(labelName)
+            form.addStaticText(line, nil, "")
 
-			
-			lastLabel = f.label
-		end
-
-		
-	else
-		labelID = nil
-	end
-end		
+            lastLabel = f.label
+        end
+    else
+        labelID = nil
+    end
+end
 
 local function fieldHeader(title)
     local w, h = lcd.getWindowSize()
@@ -1248,7 +1190,7 @@ local function fieldHeader(title)
     buttonW = (w - colStart) / 3 - padding
     buttonH = radio.buttonHeight
     line = form.addLine(title)
-    navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)	
+    navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 end
 
 function openPageDefault(idx, subpage, title, script)
@@ -1259,211 +1201,186 @@ function openPageDefault(idx, subpage, title, script)
     longPage = false
 
     lastIdx = idx
-	lastSubPage = subpage
+    lastSubPage = subpage
     lastTitle = title
     lastScript = script
-
 
     form.clear()
 
     lastPage = script
+
+    fieldHeader(title)
+
     Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
-	fieldHeader(title)
+    formLineCnt = 0
 
-	formLineCnt = 0
     for i = 1, #Page.fields do
-
-		
         local f = Page.fields[i]
         local l = Page.labels
         local pageValue = f
         local pageIdx = i
         local currentField = i
 
+        fieldLabel(f, i, l)
 
-		fieldLabel(f,i,l)
-
-		if f.table or f.type == 1 then
-			fieldChoice(f,i)
-		else
-			fieldNumber(f,i)
-		end	
-
+        if f.table or f.type == 1 then
+            fieldChoice(f, i)
+        else
+            fieldNumber(f, i)
+        end
     end
     -- display menu at footer
-	
-	
-    if formLineCnt*(radio.buttonHeight+radio.buttonPadding) > LCD_H then
+
+    if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-         navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
-	
+
     lcdNeedsInvalidate = true
 end
 
-
-
-
 function getServoValue(currentIndex)
+    if Page.values ~= nil then
+        servoCount = currentServoCount
+        local servoConfiguration = {}
+        for i = 1, servoCount do
+            servoConfiguration[i] = {}
+            for j = 1, 16 do
+                servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j]
+            end
+        end
+        Page.minBytes = 1 + 16
 
-	if Page.values ~= nil then
-		servoCount = currentServoCount
-		local servoConfiguration = {}
-		for i = 1, servoCount do
-			servoConfiguration[i] = {}
-			for j = 1, 16 do
-				servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j]
-			end
-		end
-		Page.minBytes = 1 + 16
+        for i = 1, 16 do
+            Page.values[1 + i] = servoConfiguration[currentServoID][i]
+        end
+        Page.fields[1].value = currentServoID
+        dataBindFields()
 
+        v = Page.fields[currentIndex].value
+    end
+    if v == nil then
+        v = 0
+    end
 
-		for i = 1, 16 do
-			Page.values[1 + i] = servoConfiguration[currentServoID][i]
-		end
-		Page.fields[1].value = currentServoID
-		dataBindFields()
-
-		v =  Page.fields[currentIndex].value
-
-	end
-	if v == nil then
-		v = 0
-	end
-
-	return v
-	
+    return v
 end
-
-
 
 function openPageSERVOS(idx, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
-	reloadServos = false
+    reloadServos = false
 
     uiState = uiStatus.pages
 
-	local numPerRow = 2
-
-	
+    local numPerRow = 2
 
     local windowWidth, windowHeight = lcd.getWindowSize()
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
-    local w = ((windowWidth) / numPerRow)-(padding*numPerRow-1)
-
+    local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
 
     local y = radio.buttonPaddingTop
 
     longPage = false
 
     lastIdx = idx
-	lastSubPage = subpage
+    lastSubPage = subpage
     lastTitle = title
     lastScript = script
-
 
     form.clear()
 
     lastPage = script
-	
 
-	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
-	collectgarbage()
+    Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+    collectgarbage()
 
+    fieldHeader(title)
 
-	fieldHeader(title)
-	
+    -- we add a servo selector that is not part of msp table
+    -- this is done as a selector - to pass a servoID on refresh
+    if currentServoCount == 3 then
+        servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
+    else
+        servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
+    end
 
-	-- we add a servo selector that is not part of msp table
-	-- this is done as a selector - to pass a servoID on refresh
-	if currentServoCount == 3 then
-		servoTable = { "ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT" }
-	else
-		servoTable = { "ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL" }
-	end
-	line = form.addLine("Servo")	
-	field =
-		form.addChoiceField(
-		line,
-		posField,
-		convertPageValueTable(servoTable),
-		function()		
-			value = currentServoID
-			return value	
-		end,
-		function(value)		
-		
-		
-				currentServoID = value
-				isRefeshing = true
-				wasRefreshing = true
-				createForm = true
-				form.clear()
-				return true				
-		end
-	)
+    -- we can now loop throught pages to get values
+    formLineCnt = 0
+    for i = 1, #Page.fields do
+        local f = Page.fields[i]
+        local l = Page.labels
+        local pageValue = f
+        local pageIdx = i
+        local currentField = i
 
-	-- we can now loop throught pages to get values
-	formLineCnt = 0
-	for i = 1, #Page.fields do
+        if i == 1 then
+            line = form.addLine("Servo")
+            field =
+                form.addChoiceField(
+                line,
+                nil,
+                convertPageValueTable(servoTable),
+                function()
+                    value = currentServoID
+                    Page.fields[1].value = currentServoID
+                    return value
+                end,
+                function(value)
+                    currentServoID = value
 
-		local f = Page.fields[i]
-		local l = Page.labels
-		local pageValue = f
-		local pageIdx = i
-		local currentField = i
+                    f.value = saveFieldValue(f, value)
+                    saveValue(value, i)
 
-
-		if f.hideme == nil or f.hideme == false  then
-
-
-			line = form.addLine(f.t)
-			field =
-				form.addNumberField(
-				line,
-				nil,
-				f.min,
-				f.max,
-				function()
-					local value = getFieldValue(f)
-					return value	
-				end,
-				function(value)
-					f.value = saveFieldValue(f,value)
-					saveValue(value, i)
-				end
-			)
-			if f.default ~= nil then
-				local default = f.default * decimalInc(f.decimals)
-				if f.mult ~= nil then
-					default = default * f.mult
-				end
-				field:default(default)
-			else
-				field:default(0)
-			end
-			if f.decimals ~= nil then
-				field:decimals(f.decimals)
-			end
-			if f.unit ~= nil then
-				field:suffix(f.unit)
-			end	
-
-		end	
-
-	end		
-
-
+                    isRefeshing = true
+                    wasRefreshing = true
+                    createForm = true
+                    return true
+                end
+            )
+        else
+            if f.hideme == nil or f.hideme == false then
+                line = form.addLine(f.t)
+                field =
+                    form.addNumberField(
+                    line,
+                    nil,
+                    f.min,
+                    f.max,
+                    function()
+                        local value = getFieldValue(f)
+                        return value
+                    end,
+                    function(value)
+                        f.value = saveFieldValue(f, value)
+                        saveValue(value, i)
+                    end
+                )
+                if f.default ~= nil then
+                    local default = f.default * decimalInc(f.decimals)
+                    if f.mult ~= nil then
+                        default = default * f.mult
+                    end
+                    field:default(default)
+                else
+                    field:default(0)
+                end
+                if f.decimals ~= nil then
+                    field:decimals(f.decimals)
+                end
+                if f.unit ~= nil then
+                    field:suffix(f.unit)
+                end
+            end
+        end
+    end
 
     lcdNeedsInvalidate = true
 end
-
-
 
 function openPagePID(idx, title, script)
     local LCD_W, LCD_H = getWindowSize()
@@ -1473,7 +1390,7 @@ function openPagePID(idx, title, script)
     longPage = false
 
     lastIdx = idx
-	lastSubPage = nil
+    lastSubPage = nil
     lastTitle = title
     lastScript = script
 
@@ -1483,91 +1400,90 @@ function openPagePID(idx, title, script)
     Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
-	fieldHeader(title)
-	
+    fieldHeader(title)
 
-	local numCols = #Page.cols
-	local screenWidth = LCD_W - 10
-	local padding = 10
-	local paddingTop = 8
-	local h = radio.buttonHeight
-	local w = ((screenWidth * 70 / 100) / numCols) 
-	local paddingRight = 20
-	local positions = {}
-	local positions_r = {}
-	local pos
-	
+    local numCols = #Page.cols
+    local screenWidth = LCD_W - 10
+    local padding = 10
+    local paddingTop = 8
+    local h = radio.buttonHeight
+    local w = ((screenWidth * 70 / 100) / numCols)
+    local paddingRight = 20
+    local positions = {}
+    local positions_r = {}
+    local pos
 
-	line = form.addLine("")	
+    line = form.addLine("")
 
-	local loc = numCols
-	local posX = screenWidth - paddingRight
-	local posY = paddingTop
-	
-	local c = 1
-	while loc > 0 do
-		local colLabel = Page.cols[loc]
-		pos = {x = posX, y = posY, w = w, h = h}
-		form.addStaticText(line, pos, colLabel)
-		positions[loc] = posX -w + paddingRight
-		positions_r[c] = posX -w + paddingRight		
-		posX = math.floor(posX - w)
-		loc = loc - 1
-		c = c + 1
-	end
+    local loc = numCols
+    local posX = screenWidth - paddingRight
+    local posY = paddingTop
 
-	-- display each row
-	for ri,rv in ipairs(Page.rows) do
-		_G['RF2TOUCH_PIDROWS_' .. ri] = form.addLine(rv)		
-	end
+    local c = 1
+    while loc > 0 do
+        local colLabel = Page.cols[loc]
+        pos = {x = posX, y = posY, w = w, h = h}
+        form.addStaticText(line, pos, colLabel)
+        positions[loc] = posX - w + paddingRight
+        positions_r[c] = posX - w + paddingRight
+        posX = math.floor(posX - w)
+        loc = loc - 1
+        c = c + 1
+    end
 
-	for i = 1, #Page.fields do
-		local f = Page.fields[i]
-		local l = Page.labels
-		local pageIdx = i
-		local currentField = i
-		
-		posX = positions[f.col]
-		
-		pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+    -- display each row
+    for ri, rv in ipairs(Page.rows) do
+        _G["RF2TOUCH_PIDROWS_" .. ri] = form.addLine(rv)
+    end
 
-		minValue = f.min * decimalInc(f.decimals) 
-		maxValue = f.max * decimalInc(f.decimals) 
-		if f.mult ~= nil then
-			minValue = minValue * f.mult
-			maxValue = maxValue * f.mult
-		end
+    for i = 1, #Page.fields do
+        local f = Page.fields[i]
+        local l = Page.labels
+        local pageIdx = i
+        local currentField = i
 
-		field = form.addNumberField(
-			_G['RF2TOUCH_PIDROWS_' .. f.row],
-			pos,
-			minValue,
-			maxValue,
-			function()
-				local value = getFieldValue(f)
-				return value	
-			end,
-			function(value)
-				f.value = saveFieldValue(f,value)
-				saveValue(v, i)
-			end
-		)
-		if f.default ~= nil then
-			local default = f.default * decimalInc(f.decimals)
-			if f.mult ~= nil then
-				default = default * f.mult
-			end
-			field:default(default)
-		else
-			field:default(0)
-		end
-		if f.decimals ~= nil then
-			field:decimals(f.decimals)
-		end
-		if f.unit ~= nil then
-			field:suffix(f.unit)
-		end	
-	end		
+        posX = positions[f.col]
+
+        pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+
+        minValue = f.min * decimalInc(f.decimals)
+        maxValue = f.max * decimalInc(f.decimals)
+        if f.mult ~= nil then
+            minValue = minValue * f.mult
+            maxValue = maxValue * f.mult
+        end
+
+        field =
+            form.addNumberField(
+            _G["RF2TOUCH_PIDROWS_" .. f.row],
+            pos,
+            minValue,
+            maxValue,
+            function()
+                local value = getFieldValue(f)
+                return value
+            end,
+            function(value)
+                f.value = saveFieldValue(f, value)
+                saveValue(v, i)
+            end
+        )
+        if f.default ~= nil then
+            local default = f.default * decimalInc(f.decimals)
+            if f.mult ~= nil then
+                default = default * f.mult
+            end
+            field:default(default)
+        else
+            field:default(0)
+        end
+        if f.decimals ~= nil then
+            field:decimals(f.decimals)
+        end
+        if f.unit ~= nil then
+            field:suffix(f.unit)
+        end
+    end
 
     -- display menu at footer
     if Page.longPage ~= nil then
@@ -1576,16 +1492,11 @@ function openPagePID(idx, title, script)
             navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
         end
     end
-	
+
     lcdNeedsInvalidate = true
 end
 
-
-
 function openPageRATES(idx, subpage, title, script)
-
-
-
     local LCD_W, LCD_H = getWindowSize()
 
     uiState = uiStatus.pages
@@ -1593,7 +1504,7 @@ function openPageRATES(idx, subpage, title, script)
     longPage = false
 
     lastIdx = idx
-	lastSubPage = subpage
+    lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
@@ -1603,110 +1514,103 @@ function openPageRATES(idx, subpage, title, script)
     Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
+    fieldHeader(title)
 
-	fieldHeader(title)
-	
+    local numCols = #Page.cols
+    local screenWidth = LCD_W - 10
+    local padding = 10
+    local paddingTop = 8
+    local h = radio.buttonHeight
+    local w = ((screenWidth * 70 / 100) / numCols)
+    local paddingRight = 20
+    local positions = {}
+    local positions_r = {}
+    local pos
 
-	local numCols = #Page.cols
-	local screenWidth = LCD_W - 10
-	local padding = 10
-	local paddingTop = 8
-	local h = radio.buttonHeight
-	local w = ((screenWidth * 70 / 100) / numCols) 
-	local paddingRight = 20
-	local positions = {}
-	local positions_r = {}
-	local pos
-	
+    line = form.addLine(Page.rTableName)
 
-	line = form.addLine(Page.rTableName)	
+    local loc = numCols
+    local posX = screenWidth - paddingRight
+    local posY = paddingTop
 
-	local loc = numCols
-	local posX = screenWidth - paddingRight
-	local posY = paddingTop
-	
-	local c = 1
-	while loc > 0 do
-		local colLabel = Page.cols[loc]
-		tsizeW, tsizeH = lcd.getTextSize(colLabel)			
-		pos = {x = posX - tsizeW + paddingRight, y = posY, w = w, h = h}	
-		form.addStaticText(line, pos, colLabel)
-		positions[loc] = posX -w + paddingRight
-		positions_r[c] = posX -w + paddingRight		
-		posX = math.floor(posX - w)
-		loc = loc - 1
-		c = c + 1
-	end
+    local c = 1
+    while loc > 0 do
+        local colLabel = Page.cols[loc]
+        tsizeW, tsizeH = lcd.getTextSize(colLabel)
+        pos = {x = posX - tsizeW + paddingRight, y = posY, w = w, h = h}
+        form.addStaticText(line, pos, colLabel)
+        positions[loc] = posX - w + paddingRight
+        positions_r[c] = posX - w + paddingRight
+        posX = math.floor(posX - w)
+        loc = loc - 1
+        c = c + 1
+    end
 
-	
+    -- display each row
+    for ri, rv in ipairs(Page.rows) do
+        _G["RF2TOUCH_RATEROWS_" .. ri] = form.addLine(rv)
+    end
 
-	-- display each row
-	for ri,rv in ipairs(Page.rows) do
-		_G['RF2TOUCH_RATEROWS_' .. ri] = form.addLine(rv)		
-	end
+    for i = 1, #Page.fields do
+        local f = Page.fields[i]
+        local l = Page.labels
+        local pageIdx = i
+        local currentField = i
 
-	for i = 1, #Page.fields do
-	
-	
-		local f = Page.fields[i]
-		local l = Page.labels
-		local pageIdx = i
-		local currentField = i
-		
-		if f.subpage == 1 then
-		
-			posX = positions[f.col]
-			
-			pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+        if f.subpage == 1 then
+            posX = positions[f.col]
 
-			minValue = f.min * decimalInc(f.decimals) 
-			maxValue = f.max * decimalInc(f.decimals) 
-			if f.mult ~= nil then
-				minValue = minValue * f.mult
-				maxValue = maxValue * f.mult
-			end
-			if f.scale ~= nil then
-				minValue = minValue / f.scale
-				maxValue = maxValue / f.scale
-			end
-				
-			field = form.addNumberField(
-				_G['RF2TOUCH_RATEROWS_' .. f.row],
-				pos,
-				minValue,
-				maxValue,
-				function()
-					local value = getFieldValue(f)
-					return value	
-				end,
-				function(value)
-					f.value = saveFieldValue(f,value)
-					saveValue(v, i)
-				end
-			)
-			if f.default ~= nil then
-				local default = f.default * decimalInc(f.decimals)
-				if f.mult ~= nil then
-					default = math.floor(default * f.mult)
-				end
-				if f.scale ~= nil then
-					default = math.floor(default / f.scale)
-				end
-				field:default(default)
-			else
-				field:default(0)
-			end
-			if f.decimals ~= nil then
-				field:decimals(f.decimals)
-			end
-			if f.unit ~= nil then
-				field:suffix(f.unit)
-			end	
-			if f.step ~= nil then
-				field:step(f.step)
-			end			
-		end	
-	end		
+            pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+
+            minValue = f.min * decimalInc(f.decimals)
+            maxValue = f.max * decimalInc(f.decimals)
+            if f.mult ~= nil then
+                minValue = minValue * f.mult
+                maxValue = maxValue * f.mult
+            end
+            if f.scale ~= nil then
+                minValue = minValue / f.scale
+                maxValue = maxValue / f.scale
+            end
+
+            field =
+                form.addNumberField(
+                _G["RF2TOUCH_RATEROWS_" .. f.row],
+                pos,
+                minValue,
+                maxValue,
+                function()
+                    local value = getFieldValue(f)
+                    return value
+                end,
+                function(value)
+                    f.value = saveFieldValue(f, value)
+                    saveValue(v, i)
+                end
+            )
+            if f.default ~= nil then
+                local default = f.default * decimalInc(f.decimals)
+                if f.mult ~= nil then
+                    default = math.floor(default * f.mult)
+                end
+                if f.scale ~= nil then
+                    default = math.floor(default / f.scale)
+                end
+                field:default(default)
+            else
+                field:default(0)
+            end
+            if f.decimals ~= nil then
+                field:decimals(f.decimals)
+            end
+            if f.unit ~= nil then
+                field:suffix(f.unit)
+            end
+            if f.step ~= nil then
+                field:step(f.step)
+            end
+        end
+    end
 
     -- display menu at footer
     if Page.longPage ~= nil then
@@ -1715,13 +1619,13 @@ function openPageRATES(idx, subpage, title, script)
             navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
         end
     end
-	
+
     lcdNeedsInvalidate = true
 end
 
-local function getSection(id,sections)
+local function getSection(id, sections)
     for i, v in ipairs(sections) do
-		print(v)
+        print(v)
         if id ~= nil then
             if v.section == id then
                 return v
@@ -1731,76 +1635,65 @@ local function getSection(id,sections)
 end
 
 function openMainMenu()
+    mspDataLoaded = false
     uiState = uiStatus.mainMenu
 
-	local numPerRow = 3
+    local numPerRow = 3
 
     local windowWidth, windowHeight = lcd.getWindowSize()
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
-    local w = ((windowWidth) / numPerRow)-(padding*numPerRow-1)
+    local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
     --local x = 0
 
     local y = radio.buttonPaddingTop
 
     form.clear()
-	
 
-	
-	-- create drop downs
+    -- create drop downs
 
     for idx, value in ipairs(MainMenu.sections) do
+        panel = form.addLine(value.title)
 
-		panel = form.addLine(value.title)
-		
-		lc = 0
-		for pidx, pvalue in ipairs(MainMenu.pages) do	
-			if pvalue.section == value.section then
-				if lc == 0 then
-					line = form.addLine("")
-					x = padding
-				end	
-			
-				if lc >= 1 then
-					x = (w+(padding*numPerRow))*lc
-				end
-			
-				form.addTextButton(
-				line,
-				{x = x, y = y, w = w, h = h},
-				pvalue.title,
-				function()
-					if pvalue.script == "pids.lua" then
-						openPagePID(pidx, pvalue.title, pvalue.script)
-					elseif pvalue.script == "servos.lua" then
-						openPageSERVOS(pidx, pvalue.title, pvalue.script)
-					elseif 	pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-						openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-					else
-						openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-					end
-				end
-				)			
-			
-			
-				lc = lc + 1
-				
-				if lc == numPerRow then
-					lc = 0
-				end
-				
-			end
-		end
-			
-			
-	end
+        lc = 0
+        for pidx, pvalue in ipairs(MainMenu.pages) do
+            if pvalue.section == value.section then
+                if lc == 0 then
+                    line = form.addLine("")
+                    x = padding
+                end
 
+                if lc >= 1 then
+                    x = (w + (padding * numPerRow)) * lc
+                end
 
+                form.addTextButton(
+                    line,
+                    {x = x, y = y, w = w, h = h},
+                    pvalue.title,
+                    function()
+                        if pvalue.script == "pids.lua" then
+                            openPagePID(pidx, pvalue.title, pvalue.script)
+                        elseif pvalue.script == "servos.lua" then
+                            openPageSERVOS(pidx, pvalue.title, pvalue.script)
+                        elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
+                            openPageRATES(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        else
+                            openPageDefault(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        end
+                    end
+                )
 
+                lc = lc + 1
+
+                if lc == numPerRow then
+                    lc = 0
+                end
+            end
+        end
+    end
 end
-
-
 
 local function create()
     protocol = assert(loadScript("/scripts/RF2TOUCH/protocols.lua"))()
