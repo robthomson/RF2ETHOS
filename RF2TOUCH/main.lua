@@ -69,6 +69,16 @@ sensor = nil
 
 rfglobals = {}
 
+local function decimalInc(dec)
+    local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
+
+    if dec == nil then
+        return 1
+    else
+        return decTable[dec]
+    end
+end
+
 local function saveSettings()
     if Page.values then
         local payload = Page.values
@@ -117,22 +127,24 @@ local function invalidatePages()
 end
 
 local function dataBindFields()
-    for i = 1, #Page.fields do
-        if #Page.values >= Page.minBytes then
-            local f = Page.fields[i]
-            if f.vals then
-                f.value = 0
-                for idx = 1, #f.vals do
-                    local raw_val = Page.values[f.vals[idx]] or 0
-                    raw_val = raw_val << ((idx - 1) * 8)
-                    f.value = f.value | raw_val
-                end
-                local bits = #f.vals * 8
-                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
-                f.value = f.value / (f.scale or 1)
-            end
-        end
-    end
+	if Page.fields ~= nil and Page.values ~= nil then
+		for i = 1, #Page.fields do
+			if #Page.values >= Page.minBytes then
+				local f = Page.fields[i]
+				if f.vals then
+					f.value = 0
+					for idx = 1, #f.vals do
+						local raw_val = Page.values[f.vals[idx]] or 0
+						raw_val = raw_val << ((idx - 1) * 8)
+						f.value = f.value | raw_val
+					end
+					local bits = #f.vals * 8
+					if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
+					f.value = f.value / (f.scale or 1)
+				end
+			end
+		end
+	end	
 end
 
 -- Run lcd.invalidate() if anything actionable comes back from it.
@@ -256,15 +268,91 @@ local function clipValue(val, min, max)
     return val
 end
 
-local function saveValue(newValue, currentField)
+function getFieldValue(f)
+	
+    local v
+
+    if f.value ~= nil then
+        if f.decimals ~= nil then
+            v = rf2touch_round(f.value * decimalInc(f.decimals))
+        else
+            v = f.value
+        end
+    else
+        v = 0
+    end
+
+    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
+
+    return v
+end
+
+
+local function saveValue(currentField)
     if environment.simulation == true then return end
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
     local step = f.step or 1
 
-    for idx = 1, #f.vals do Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) end
+    for idx = 1, #f.vals do 
+		Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) 
+	end
     if f.upd and Page.values then f.upd(Page) end
+end
+
+
+function getServoValue(currentIndex)
+
+	-- when the form field loads; this function is called.
+	-- it retrieves the value from the msp data
+	-- and returns it as variable v
+	
+	-- its a bit convoluted because I dont really understand how
+	-- the previous code worked and kind of hacked it together :(
+	
+    if Page.values ~= nil then
+        servoCount = currentServoCount
+        local servoConfiguration = {}
+        for i = 1, servoCount do
+           servoConfiguration[i] = {}
+           for j = 1, 16 do 
+			servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j] 
+		   end
+        end
+        Page.minBytes = 1 + 16
+
+        for i = 1, 16 do 
+			Page.values[1 + i] = servoConfiguration[currentServoID][i] 
+		end
+        Page.fields[1].value = currentServoID
+        dataBindFields()
+
+        v = Page.fields[currentIndex].value
+    end
+    if v == nil then v = 0 end
+
+    return v
+end
+
+local function saveServoValue(currentIndex)
+
+	-- every time a field changes - this function is called.
+	-- it should in theory write the data that is found in
+	-- f.value (Page.fields[currentIndex].value) 
+	-- into the Page.values field for the current Index
+
+    if environment.simulation == true then return end
+
+    local f = Page.fields[currentIndex]
+
+
+	for idx = 1, 16 do 
+		Page.values[1 + idx] = f.value >> ((idx - 1) * 8) 
+	end	
+
+    if f.upd and Page.values then f.upd(Page) end
+
 end
 
 local translations = {en = "RF2 TOUCH"}
@@ -274,7 +362,9 @@ local function name(widget)
     return translations[locale] or translations["en"]
 end
 
-function msgBox(str)
+
+
+function msgBox(str,border)
     lcd.font(FONT_STD)
 
     local w, h = lcd.getWindowSize()
@@ -291,14 +381,16 @@ function msgBox(str)
     lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
 
     -- draw the border
-    if isDARKMODE then
-        -- dark theme
-        lcd.color(lcd.RGB(255, 255, 255, 1))
-    else
-        -- light theme
-        lcd.color(lcd.RGB(90, 90, 90))
-    end
-    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+	if border == nil or border == true then
+		if isDARKMODE then
+			-- dark theme
+			lcd.color(lcd.RGB(255, 255, 255, 1))
+		else
+			-- light theme
+			lcd.color(lcd.RGB(90, 90, 90))
+		end
+		lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+	end
 
     if isDARKMODE then
         -- dark theme
@@ -349,16 +441,14 @@ function paint()
     -- this displays message box - but for now we disable due to
     -- lcd overlay issue
     -- bounce to frsky..
-    --[[
-	if uiState ~= uiStatus.mainMenu then
-		if mspDataLoaded == false then
-			msgBox("Loading...")
-		else
-			lcd.invalidate()
-		end
-	end
-	]]
-    --
+	--if uiState ~= uiStatus.mainMenu then
+	--	if mspDataLoaded == false then
+	--		msgBox("Loading...",false)
+	--	else
+	--		lcd.invalidate()
+	--	end
+	--end
+
 end
 
 function wakeupForm()
@@ -830,37 +920,12 @@ local function fieldChoice(f, i)
         -- we do this hook to allow rates to be reset
         if f.postEdit then f.postEdit(Page) end
         f.value = saveFieldValue(f, value)
-        saveValue(v, i)
+        saveValue(i)
     end)
 end
 
-local function decimalInc(dec)
-    local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
 
-    if dec == nil then
-        return 1
-    else
-        return decTable[dec]
-    end
-end
 
-function getFieldValue(f)
-    local v
-
-    if f.value ~= nil then
-        if f.decimals ~= nil then
-            v = rf2touch_round(f.value * decimalInc(f.decimals))
-        else
-            v = f.value
-        end
-    else
-        v = 0
-    end
-
-    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
-
-    return v
-end
 
 function rf2touch_round(number, precision)
     if precision == nil then precision = 0 end
@@ -940,7 +1005,7 @@ local function fieldNumber(f, i)
         if f.postEdit then f.postEdit(Page) end
 
         f.value = saveFieldValue(f, value)
-        saveValue(v, i)
+        saveValue(i)
     end)
 
     if f.default ~= nil then
@@ -950,6 +1015,7 @@ local function fieldNumber(f, i)
     else
         field:default(0)
     end
+
     if f.decimals ~= nil then field:decimals(f.decimals) end
     if f.unit ~= nil then field:suffix(f.unit) end
     if f.step ~= nil then field:step(f.step) end
@@ -1007,6 +1073,9 @@ end
 function openPageDefault(idx, subpage, title, script)
     local LCD_W, LCD_H = getWindowSize()
 
+
+	local fieldAR = {}
+
     uiState = uiStatus.pages
 
     longPage = false
@@ -1052,26 +1121,6 @@ function openPageDefault(idx, subpage, title, script)
     lcdNeedsInvalidate = true
 end
 
-function getServoValue(currentIndex)
-    if Page.values ~= nil then
-        servoCount = currentServoCount
-        local servoConfiguration = {}
-        for i = 1, servoCount do
-            servoConfiguration[i] = {}
-            for j = 1, 16 do servoConfiguration[i][j] = Page.values[1 + (i - 1) * 16 + j] end
-        end
-        Page.minBytes = 1 + 16
-
-        for i = 1, 16 do Page.values[1 + i] = servoConfiguration[currentServoID][i] end
-        Page.fields[1].value = currentServoID
-        dataBindFields()
-
-        v = Page.fields[currentIndex].value
-    end
-    if v == nil then v = 0 end
-
-    return v
-end
 
 function openPageSERVOS(idx, title, script)
     local LCD_W, LCD_H = getWindowSize()
@@ -1133,7 +1182,7 @@ function openPageSERVOS(idx, title, script)
                 currentServoID = value
 
                 f.value = saveFieldValue(f, value)
-                saveValue(value, i)
+                saveServoValue(i)
 
                 isRefeshing = true
                 wasRefreshing = true
@@ -1148,7 +1197,7 @@ function openPageSERVOS(idx, title, script)
                     return value
                 end, function(value)
                     f.value = saveFieldValue(f, value)
-                    saveValue(value, i)
+                    saveServoValue(i)
                 end)
                 if f.default ~= nil then
                     local default = f.default * decimalInc(f.decimals)
@@ -1240,7 +1289,7 @@ function openPagePID(idx, title, script)
             return value
         end, function(value)
             f.value = saveFieldValue(f, value)
-            saveValue(v, i)
+            saveValue(i)
         end)
         if f.default ~= nil then
             local default = f.default * decimalInc(f.decimals)
@@ -1344,7 +1393,7 @@ function openPageRATES(idx, subpage, title, script)
                 return value
             end, function(value)
                 f.value = saveFieldValue(f, value)
-                saveValue(v, i)
+                saveValue(i)
             end)
             if f.default ~= nil then
                 local default = f.default * decimalInc(f.decimals)
