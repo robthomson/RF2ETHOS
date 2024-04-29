@@ -441,14 +441,14 @@ function paint()
     end
 
 	if uiState ~= uiStatus.mainMenu then
-		if showLoading == true and ResetRates == false then
+		if showLoading == true and ResetRates == false  then
 			 msgBox("Loading...")
 		else
 			lcd.invalidate()
 		end
-		
-	end
 
+	end
+	lcd.invalidate()
 end
 
 function wakeupForm()
