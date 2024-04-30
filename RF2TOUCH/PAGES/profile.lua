@@ -1,4 +1,4 @@
-local template = assert(loadScript(radio.template))()
+local template = assert(loadScriptRF2TOUCH(radio.template))()
 
 local labels = {}
 local fields = {}

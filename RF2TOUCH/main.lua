@@ -240,7 +240,10 @@ end
 
 function getTime() return os.clock() * 100 end
 
-function loadScript(script) return loadfile(script) end
+function loadScriptRF2TOUCH(script) 
+	system.compile(script)
+	return loadfile(script) 
+end
 
 function rf2touch.getWindowSize()
     return lcd.getWindowSize()
@@ -445,7 +448,7 @@ function wakeup(widget)
         -- print("Init")
         local prevInit
         if init ~= nil then prevInit = init.t end
-        init = init or assert(loadScript("/scripts/RF2TOUCH/ui_init.lua"))()
+        init = init or assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/ui_init.lua"))()
 
         local initSuccess = init.f()
 
@@ -497,7 +500,7 @@ function wakeup(widget)
         end
         if not Page then
             -- print("Reloading data : " .. lastPage)
-            Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. lastPage))()
+            Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. lastPage))()
             collectgarbage()
         end
         if not Page.values and pageState == pageStatus.display then requestPage() end
@@ -1037,7 +1040,7 @@ function rf2touch.openPageDefaultLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1104,7 +1107,7 @@ function rf2touch.openPageSERVOSLoader(idx, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1208,7 +1211,7 @@ function rf2touch.openPagePIDLoader(idx, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1318,7 +1321,7 @@ function rf2touch.openPageRATESLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScript("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1493,10 +1496,10 @@ function rf2touch.openMainMenu()
 end
 
 local function create()
-    protocol = assert(loadScript("/scripts/RF2TOUCH/protocols.lua"))()
-    radio = assert(loadScript("/scripts/RF2TOUCH/radios.lua"))().msp
-    assert(loadScript(protocol.mspTransport))()
-    assert(loadScript("/scripts/RF2TOUCH/MSP/common.lua"))()
+    protocol = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/protocols.lua"))()
+    radio = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/radios.lua"))().msp
+    assert(loadScriptRF2TOUCH(protocol.mspTransport))()
+    assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/MSP/common.lua"))()
 
     sensor = sport.getSensor({primId = 0x32})
     rssiSensor = system.getSource("RSSI")
@@ -1520,7 +1523,7 @@ local function create()
     lastEvent = nil
     apiVersion = 0
 
-    MainMenu = assert(loadScript("/scripts/RF2TOUCH/pages.lua"))()
+    MainMenu = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages.lua"))()
 
     -- force page to get pickup data as it loads in
     form.onWakeup(function() rf2touch.wakeupForm() end)
@@ -1538,6 +1541,9 @@ end
 
 local icon = lcd.loadMask("/scripts/RF2TOUCH/RF.png")
 
-local function init() system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}) end
+local function init() 
+	system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}) 
+	system.compile("/scripts/RF2TOUCH/main.lua")
+	end
 
 return {init = init}
