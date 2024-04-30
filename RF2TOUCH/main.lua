@@ -32,8 +32,7 @@ local saveTimeout, saveMaxRetries, MainMenu, Page, init, popupMenu, requestTimeo
 createForm = false
 local isSaving = false
 local wasSaving = false
-local isRefreshing = false
-local wasRefreshing = false
+
 local lastLabel = nil
 local NewRateTable
 RateTable = nil
@@ -408,12 +407,8 @@ function paint()
             isSaving = false
         end
     end
-
-    if isRefreshing then
-        print("Got to paint isRefresh")
-        rf2touch.msgBox("Refreshing")
-    elseif isLoading == true and uiState ~= uiStatus.mainMenu then
-		print("Got to paint isLoading")
+	
+    if isLoading == true and uiState ~= uiStatus.mainMenu then
 		rf2touch.msgBox("Loading...")
 	end
 end
@@ -429,10 +424,8 @@ function rf2touch.wakeupForm()
                     RateTable = activeRateTable
                     collectgarbage()
                     -- reloadRates = true
-                    isRefeshing = true
-                    wasRefreshing = true
-                    createForm = true
-                    form.clear()
+					wasSaving=true
+					createForm = true
                 end
             end
         end
@@ -444,7 +437,6 @@ function rf2touch.wakeupForm()
         -- print("Form invalidation disabled....")
     else
         if (isSaving == false and wasSaving == false) 
-		or (isRefreshing == false and wasRefreshing == false) 
 		or (isLoading == false and wasLoading == false) then 
 		form.invalidate() 
 		end
@@ -550,6 +542,7 @@ function wakeup(widget)
     else
         if createForm == true then
             if wasSaving == true then
+                wasSaving = false			
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2touch.openPagePIDLoader(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -559,19 +552,8 @@ function wakeup(widget)
                 else
                     rf2touch.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
-                wasSaving = false
-            elseif wasRefreshing == true then
-                if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2touch.openPagePIDLoader(lastIdx, lastTitle, lastScript)
-                elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-                elseif lastScript == "servos.lua" then
-                    rf2touch.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
-                else
-                    rf2touch.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-                end
-                wasRefeshing = false
             elseif wasLoading == true then
+                wasLoading = false				
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2touch.openPagePID(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -580,8 +562,7 @@ function wakeup(widget)
                     rf2touch.openPageSERVOS(lastIdx, lastTitle, lastScript)
                 else
                     rf2touch.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
-                end
-                wasLoading = false				
+                end	
             elseif reloadRates == true then
                 rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
@@ -599,8 +580,11 @@ function wakeup(widget)
 			if mspDataLoaded == true then
 				print("Got the data...")
 				mspDataLoaded = false
+				
 				isLoading = false
 				wasLoading = true
+				
+					
 				createForm = true
 			end
 		end
@@ -728,15 +712,14 @@ function rf2touch.navigationButtons(x, y, w, h)
         }
         form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
     end)
-    form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "REFRESH", function()
+    form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "RELOAD", function()
         local buttons = {
             {
                 label = "        OK        ",
                 action = function()
-                    isRefeshing = true
-                    wasRefreshing = true
-                    createForm = true
-                    form.clear()
+					-- trigger RELOAD
+					wasSaving=true
+					createForm = true
                     return true
                 end
             }, {label = "CANCEL", action = function() return true end}
@@ -1098,6 +1081,7 @@ function rf2touch.openPageDefault(idx, subpage, title, script)
 
 
 
+
     form.clear()
 
     lastPage = script
@@ -1149,7 +1133,7 @@ function rf2touch.openPageSERVOSLoader(idx, title, script)
     lastScript = script
 
 	lcdNeedsInvalidate = true
-
+	isLoading = true
 	print("Finished: rf2touch.openPageSERVOS")
 end
 
@@ -1206,9 +1190,9 @@ function rf2touch.openPageSERVOS(idx, title, script)
                 return value
             end, function(value)
                 Page.servoChanged(Page, value)
-                isRefeshing = true
-                wasRefreshing = true
-                createForm = true
+					-- trigger RELOAD
+					wasSaving=true
+					createForm = true
                 return true
             end)
         else
@@ -1253,7 +1237,7 @@ function rf2touch.openPagePIDLoader(idx, title, script)
     lastScript = script
 
 	lcdNeedsInvalidate = true
-
+	isLoading = true
 	print("Finished: rf2touch.openPagePID")
 end
 
@@ -1363,7 +1347,7 @@ function rf2touch.openPageRATESLoader(idx, subpage, title, script)
     lastScript = script
 
 	lcdNeedsInvalidate = true
-
+	isLoading = true
 	print("Finished: rf2touch.openPageRATES")
 end
 
