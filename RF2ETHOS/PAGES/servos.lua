@@ -1,4 +1,4 @@
-local template = assert(loadScriptRF2TOUCH(radio.template))()
+local template = assert(loadScriptRF2ETHOS(radio.template))()
 
 local labels = {}
 local fields = {}
@@ -25,8 +25,8 @@ return {
     fields = fields,
     postRead = function(self)
         self.servoCount = self.values[1]
-        if rf2touch.lastServoCount ~= self.servoCount then
-            rf2touch.lastServoCount = self.servoCount
+        if rf2ethos.lastServoCount ~= self.servoCount then
+            rf2ethos.lastServoCount = self.servoCount
             createForm = true
             reloadServos = true
         end
@@ -38,10 +38,10 @@ return {
                 self.servoConfiguration[i][j] = self.values[1 + (i - 1) * 16 + j]
             end
         end
-        if rf2touch.lastChangedServo == nil then
-            rf2touch.lastChangedServo = 1
+        if rf2ethos.lastChangedServo == nil then
+            rf2ethos.lastChangedServo = 1
         end
-        self.setValues(self, rf2touch.lastChangedServo)
+        self.setValues(self, rf2ethos.lastChangedServo)
         self.minBytes = 1 + 16
     end,
     setValues = function(self, servoIndex)
@@ -52,8 +52,8 @@ return {
         end
     end,
     servoChanged = function(self, servoIndex)
-        rf2touch.lastChangedServo = servoIndex
-        self.setValues(self, rf2touch.lastChangedServo)
+        rf2ethos.lastChangedServo = servoIndex
+        self.setValues(self, rf2ethos.lastChangedServo)
         dataBindFields()
     end
 }

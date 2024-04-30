@@ -67,9 +67,9 @@ protocol = nil
 radio = nil
 sensor = nil
 
-rf2touch = {}
+rf2ethos = {}
 
-local translations = {en = "RF2 TOUCH"}
+local translations = {en = "RF2 ETHOS"}
 
 local function name(widget)
     local locale = system.getLocale()
@@ -229,7 +229,7 @@ end
 
 -- Ethos: when the RF1 and RF2 system tools are both installed, RF1 tries to call getRSSI in RF2 and gets stuck.
 -- To avoid this, getRSSI is renamed in RF2.
-function rf2touch.getRSSI()
+function rf2ethos.getRSSI()
     -- print("getRSSI RF2")
     if environment.simulation == true then return 100 end
 
@@ -243,12 +243,12 @@ end
 
 function getTime() return os.clock() * 100 end
 
-function loadScriptRF2TOUCH(script) 
+function loadScriptRF2ETHOS(script) 
 	system.compile(script)
 	return loadfile(script) 
 end
 
-function rf2touch.getWindowSize()
+function rf2ethos.getWindowSize()
     return lcd.getWindowSize()
     -- return 784, 406
     -- return 472, 288
@@ -260,7 +260,7 @@ local function updateTelemetryState()
 
     if not rssiSensor then
         telemetryState = telemetryStatus.noSensor
-    elseif rf2touch.getRSSI() == 0 then
+    elseif rf2ethos.getRSSI() == 0 then
         telemetryState = telemetryStatus.noTelemetry
     else
         telemetryState = telemetryStatus.ok
@@ -278,13 +278,13 @@ local function clipValue(val, min, max)
     return val
 end
 
-function rf2touch.getFieldValue(f)
+function rf2ethos.getFieldValue(f)
 
     local v
 
     if f.value ~= nil then
         if f.decimals ~= nil then
-            v = rf2touch.round(f.value * decimalInc(f.decimals))
+            v = rf2ethos.round(f.value * decimalInc(f.decimals))
         else
             v = f.value
         end
@@ -298,7 +298,7 @@ function rf2touch.getFieldValue(f)
 end
 
 
-function rf2touch.saveValue(currentField)
+function rf2ethos.saveValue(currentField)
     if environment.simulation == true then return end
 
     local f = Page.fields[currentField]
@@ -317,7 +317,7 @@ end
 
 
 
-function rf2touch.msgBox(str,border)
+function rf2ethos.msgBox(str,border)
     lcd.font(FONT_STD)
 
     local w, h = lcd.getWindowSize()
@@ -366,7 +366,7 @@ local function event(widget, category, value, x, y)
 end
 
 
-function rf2touch.sensorMakeNumber(x)
+function rf2ethos.sensorMakeNumber(x)
     if x == nil or x == "" then
         x = 0
     end
@@ -382,13 +382,13 @@ end
 
 function paint()
 
-    if tonumber(rf2touch.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
+    if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
 		-- version check
-        rf2touch.msgBox(ETHOS_VERSION_STR)
+        rf2ethos.msgBox(ETHOS_VERSION_STR)
         return
     end
 
-    if environment.simulation ~= true then if telemetryState ~= 1 then rf2touch.msgBox("NO RF LINK") end end
+    if environment.simulation ~= true then if telemetryState ~= 1 then rf2ethos.msgBox("NO RF LINK") end end
     if isSaving then
         if pageState >= pageStatus.saving then
             -- print(saveMsg)
@@ -402,7 +402,7 @@ function paint()
             elseif pageState == pageStatus.rebooting then
                 saveMsg = "Rebooting..."
             end
-            rf2touch.msgBox(saveMsg)
+            rf2ethos.msgBox(saveMsg)
         else
             isSaving = false
         end
@@ -411,12 +411,12 @@ function paint()
 	
     if isLoading == true and uiState ~= uiStatus.mainMenu then
 		if environment.simulation ~= true then
-			rf2touch.msgBox("Loading...")
+			rf2ethos.msgBox("Loading...")
 		end
 	end
 end
 
-function rf2touch.wakeupForm()
+function rf2ethos.wakeupForm()
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
             local v = Page.fields[13].value
@@ -447,7 +447,7 @@ function rf2touch.wakeupForm()
 	--lcd.invalidate()
 end
 
-function rf2touch.clearScreen()
+function rf2ethos.clearScreen()
 local w, h = lcd.getWindowSize()  
 if isDARKMODE then
         lcd.color(lcd.RGB(40, 40, 40))
@@ -470,7 +470,7 @@ function wakeup(widget)
         -- print("Init")
         local prevInit
         if init ~= nil then prevInit = init.t end
-        init = init or assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/ui_init.lua"))()
+        init = init or assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/ui_init.lua"))()
 
         local initSuccess = init.f()
 
@@ -522,7 +522,7 @@ function wakeup(widget)
         end
         if not Page then
             -- print("Reloading data : " .. lastPage)
-            Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. lastPage))()
+            Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. lastPage))()
             collectgarbage()
         end
         if not Page.values and pageState == pageStatus.display then requestPage() end
@@ -547,31 +547,31 @@ function wakeup(widget)
             if wasSaving == true or environment.simulation == true then
                 wasSaving = false			
                 if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2touch.openPagePIDLoader(lastIdx, lastTitle, lastScript)
+                    rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+                    rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
-                    rf2touch.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+                    rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
                 else
-                    rf2touch.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+                    rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
             elseif wasLoading == true or environment.simulation == true then
                 wasLoading = false				
                 if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2touch.openPagePID(lastIdx, lastTitle, lastScript)
+                    rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2touch.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                    rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
-                    rf2touch.openPageSERVOS(lastIdx, lastTitle, lastScript)
+                    rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
                 else
-                    rf2touch.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                    rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
                 end	
             elseif reloadRates == true or environment.simulation == true then
-                rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+                rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
-                rf2touch.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+                rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
             else
-                rf2touch.openMainMenu()
+                rf2ethos.openMainMenu()
             end
             createForm = false
         else
@@ -596,7 +596,7 @@ function wakeup(widget)
     end
 end
 
--- local rf2touch.openMainMenu
+-- local rf2ethos.openMainMenu
 
 local function convertPageValueTable(tbl)
     local thetable = {}
@@ -613,7 +613,7 @@ local function convertPageValueTable(tbl)
     return thetable
 end
 
-function rf2touch.print_r(node)
+function rf2ethos.print_r(node)
     local cache, stack, output = {}, {}, {}
     local depth = 1
     local output_str = "{\n"
@@ -694,10 +694,10 @@ local function writeText(x, y, str)
     lcd.drawText(x, y, str)
 end
 
-function rf2touch.navigationButtons(x, y, w, h)
+function rf2ethos.navigationButtons(x, y, w, h)
     form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
-        rf2touch.openMainMenu()
+        rf2ethos.openMainMenu()
     end)
     form.addTextButton(line, {x = colStart + buttonW + padding, y = y, w = buttonW, h = h}, "SAVE", function()
         local buttons = {
@@ -706,8 +706,8 @@ function rf2touch.navigationButtons(x, y, w, h)
                 action = function()
                     isSaving = true
                     wasSaving = true
-                    rf2touch.resetRates()
-                    rf2touch.debugSave()
+                    rf2ethos.resetRates()
+                    rf2ethos.debugSave()
                     saveSettings()
                     return true
                 end
@@ -834,7 +834,7 @@ local function defaultRates(x)
     return defaults[x]
 end
 
-function rf2touch.resetRates()
+function rf2ethos.resetRates()
     if lastScript == "rates.lua" and lastSubPage == 2 then
         if ResetRates == true then
             NewRateTable = Page.fields[13].value
@@ -850,14 +850,14 @@ function rf2touch.resetRates()
     end
 end
 
-function rf2touch.debugSave()
+function rf2ethos.debugSave()
     -- this function runs before save action
     -- happens.  use it to do debug if needed
 
     if lastScript == "servos.lua" then
 
         -- Page.fields[1].value = currentServoID
-        -- rf2touch.saveValue(currentServoID, 1)
+        -- rf2ethos.saveValue(currentServoID, 1)
         -- local f = Page.fields[1]
 
         -- print(f.value)
@@ -899,20 +899,20 @@ local function fieldChoice(f, i)
     end
 
     field = form.addChoiceField(line, posField, convertPageValueTable(f.table), function()
-        local value = rf2touch.getFieldValue(f)
+        local value = rf2ethos.getFieldValue(f)
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
         if f.postEdit then f.postEdit(Page) end
-        f.value = rf2touch.saveFieldValue(f, value)
-        rf2touch.saveValue(i)
+        f.value = rf2ethos.saveFieldValue(f, value)
+        rf2ethos.saveValue(i)
     end)
 end
 
 
 
 
-function rf2touch.round(number, precision)
+function rf2ethos.round(number, precision)
     if precision == nil then precision = 0 end
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
@@ -920,7 +920,7 @@ function rf2touch.round(number, precision)
     return number
 end
 
-function rf2touch.saveFieldValue(f, value)
+function rf2ethos.saveFieldValue(f, value)
     if value ~= nil then
         if f.decimals ~= nil then
             f.value = value / decimalInc(f.decimals)
@@ -939,7 +939,7 @@ local function scaleValue(value, f)
     local v
     v = value * decimalInc(f.decimals)
     if f.scale ~= nil then v = v / f.scale end
-    v = rf2touch.round(v)
+    v = rf2ethos.round(v)
     return v
 end
 
@@ -992,14 +992,14 @@ local function fieldNumber(f, i)
     end
 
     field = form.addNumberField(line, posField, minValue, maxValue, function()
-        local value = rf2touch.getFieldValue(f)
+        local value = rf2ethos.getFieldValue(f)
 
         return value
     end, function(value)
         if f.postEdit then f.postEdit(Page) end
 
-        f.value = rf2touch.saveFieldValue(f, value)
-        rf2touch.saveValue(i)
+        f.value = rf2ethos.saveFieldValue(f, value)
+        rf2ethos.saveValue(i)
     end)
 
     if f.default ~= nil then
@@ -1069,15 +1069,15 @@ local function fieldHeader(title)
 	end
     buttonH = radio.buttonHeight
     line = form.addLine(title)
-    rf2touch.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+    rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 end
 
-function rf2touch.openPageDefaultLoader(idx, subpage, title, script)
+function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1091,16 +1091,16 @@ function rf2touch.openPageDefaultLoader(idx, subpage, title, script)
 
 	isLoading = true
 
-	print("Finished: rf2touch.openPageDefaultLoader")
+	print("Finished: rf2ethos.openPageDefaultLoader")
 	
 	if environment.simulation == true then
-		rf2touch.openPageDefault(idx, subpage, title, script)
+		rf2ethos.openPageDefault(idx, subpage, title, script)
 	end
 	
 end
 
-function rf2touch.openPageDefault(idx, subpage, title, script)
-    local LCD_W, LCD_H = rf2touch.getWindowSize()
+function rf2ethos.openPageDefault(idx, subpage, title, script)
+    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
 
 	local fieldAR = {}
@@ -1141,18 +1141,18 @@ function rf2touch.openPageDefault(idx, subpage, title, script)
 
     if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2touch.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
     lcdNeedsInvalidate = true
 end
 
-function rf2touch.openPageSERVOSLoader(idx, title, script)
+function rf2ethos.openPageSERVOSLoader(idx, title, script)
 
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1166,15 +1166,15 @@ function rf2touch.openPageSERVOSLoader(idx, title, script)
 	isLoading = true
 	
 	if environment.simulation == true then
-		rf2touch.openPageSERVOS(idx, title, script)
+		rf2ethos.openPageSERVOS(idx, title, script)
 	end	
 	
-	print("Finished: rf2touch.openPageSERVOS")
+	print("Finished: rf2ethos.openPageSERVOS")
 end
 
 
-function rf2touch.openPageSERVOS(idx, title, script)
-    local LCD_W, LCD_H = rf2touch.getWindowSize()
+function rf2ethos.openPageSERVOS(idx, title, script)
+    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     reloadServos = false
 
@@ -1220,7 +1220,7 @@ function rf2touch.openPageSERVOS(idx, title, script)
         if i == 1 then
             line = form.addLine("Servo")
             field = form.addChoiceField(line, nil, convertPageValueTable(servoTable), function()
-                value = rf2touch.lastChangedServo
+                value = rf2ethos.lastChangedServo
                 Page.fields[1].value = value
                 return value
             end, function(value)
@@ -1234,11 +1234,11 @@ function rf2touch.openPageSERVOS(idx, title, script)
             if f.hideme == nil or f.hideme == false then
                 line = form.addLine(f.t)
                 field = form.addNumberField(line, nil, f.min, f.max, function()
-                    local value = rf2touch.getFieldValue(f)
+                    local value = rf2ethos.getFieldValue(f)
                     return value
                 end, function(value)
-                    f.value = rf2touch.saveFieldValue(f, value)
-                    rf2touch.saveValue(i)
+                    f.value = rf2ethos.saveFieldValue(f, value)
+                    rf2ethos.saveValue(i)
                 end)
                 if f.default ~= nil then
                     local default = f.default * decimalInc(f.decimals)
@@ -1256,12 +1256,12 @@ function rf2touch.openPageSERVOS(idx, title, script)
     lcdNeedsInvalidate = true
 end
 
-function rf2touch.openPagePIDLoader(idx, title, script)
+function rf2ethos.openPagePIDLoader(idx, title, script)
 
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1275,14 +1275,14 @@ function rf2touch.openPagePIDLoader(idx, title, script)
 	isLoading = true
 	
 	if environment.simulation == true then
-		rf2touch.openPagePID(idx, title, script)
+		rf2ethos.openPagePID(idx, title, script)
 	end		
 	
-	print("Finished: rf2touch.openPagePID")
+	print("Finished: rf2ethos.openPagePID")
 end
 
-function rf2touch.openPagePID(idx, title, script)
-    local LCD_W, LCD_H = rf2touch.getWindowSize()
+function rf2ethos.openPagePID(idx, title, script)
+    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     uiState = uiStatus.pages
 
@@ -1322,7 +1322,7 @@ function rf2touch.openPagePID(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do _G["RF2TOUCH_PIDROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(Page.rows) do _G["RF2ETHOS_PIDROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1341,12 +1341,12 @@ function rf2touch.openPagePID(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        field = form.addNumberField(_G["RF2TOUCH_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
-            local value = rf2touch.getFieldValue(f)
+        field = form.addNumberField(_G["RF2ETHOS_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
+            local value = rf2ethos.getFieldValue(f)
             return value
         end, function(value)
-            f.value = rf2touch.saveFieldValue(f, value)
-            rf2touch.saveValue(i)
+            f.value = rf2ethos.saveFieldValue(f, value)
+            rf2ethos.saveValue(i)
         end)
         if f.default ~= nil then
             local default = f.default * decimalInc(f.decimals)
@@ -1363,7 +1363,7 @@ function rf2touch.openPagePID(idx, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2touch.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
         end
     end
 
@@ -1371,12 +1371,12 @@ function rf2touch.openPagePID(idx, title, script)
 end
 
 
-function rf2touch.openPageRATESLoader(idx, subpage, title, script)
+function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages/" .. script))()
+	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1390,14 +1390,14 @@ function rf2touch.openPageRATESLoader(idx, subpage, title, script)
 	isLoading = true
 
 	if environment.simulation == true then
-		rf2touch.openPageRATES(idx, subpage, title, script)
+		rf2ethos.openPageRATES(idx, subpage, title, script)
 	end		
 	
-	print("Finished: rf2touch.openPageRATES")
+	print("Finished: rf2ethos.openPageRATES")
 end
 
-function rf2touch.openPageRATES(idx, subpage, title, script)
-    local LCD_W, LCD_H = rf2touch.getWindowSize()
+function rf2ethos.openPageRATES(idx, subpage, title, script)
+    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     uiState = uiStatus.pages
 
@@ -1440,7 +1440,7 @@ function rf2touch.openPageRATES(idx, subpage, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do _G["RF2TOUCH_RATEROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(Page.rows) do _G["RF2ETHOS_RATEROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1464,12 +1464,12 @@ function rf2touch.openPageRATES(idx, subpage, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            field = form.addNumberField(_G["RF2TOUCH_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
-                local value = rf2touch.getFieldValue(f)
+            field = form.addNumberField(_G["RF2ETHOS_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
+                local value = rf2ethos.getFieldValue(f)
                 return value
             end, function(value)
-                f.value = rf2touch.saveFieldValue(f, value)
-                rf2touch.saveValue(i)
+                f.value = rf2ethos.saveFieldValue(f, value)
+                rf2ethos.saveValue(i)
             end)
             if f.default ~= nil then
                 local default = f.default * decimalInc(f.decimals)
@@ -1489,7 +1489,7 @@ function rf2touch.openPageRATES(idx, subpage, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2touch.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
         end
     end
 
@@ -1503,10 +1503,10 @@ local function getSection(id, sections)
     end
 end
 
-function rf2touch.openMainMenu()
+function rf2ethos.openMainMenu()
 
 
-    if tonumber(rf2touch.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
+    if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
         return
     end
 
@@ -1543,13 +1543,13 @@ function rf2touch.openMainMenu()
 
                 form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
                     if pvalue.script == "pids.lua" then
-                        rf2touch.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
+                        rf2ethos.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
                     elseif pvalue.script == "servos.lua" then
-                        rf2touch.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
+                        rf2ethos.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
                     elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-                        rf2touch.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        rf2ethos.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     else
-                        rf2touch.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
                 end)
 
@@ -1562,10 +1562,10 @@ function rf2touch.openMainMenu()
 end
 
 local function create()
-    protocol = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/protocols.lua"))()
-    radio = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/radios.lua"))().msp
-    assert(loadScriptRF2TOUCH(protocol.mspTransport))()
-    assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/MSP/common.lua"))()
+    protocol = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/protocols.lua"))()
+    radio = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/radios.lua"))().msp
+    assert(loadScriptRF2ETHOS(protocol.mspTransport))()
+    assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/MSP/common.lua"))()
 
     sensor = sport.getSensor({primId = 0x32})
     rssiSensor = system.getSource("RSSI")
@@ -1589,12 +1589,12 @@ local function create()
     lastEvent = nil
     apiVersion = 0
 
-    MainMenu = assert(loadScriptRF2TOUCH("/scripts/RF2TOUCH/pages.lua"))()
+    MainMenu = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages.lua"))()
 
     -- force page to get pickup data as it loads in
-    form.onWakeup(function() rf2touch.wakeupForm() end)
+    form.onWakeup(function() rf2ethos.wakeupForm() end)
 
-    rf2touch.openMainMenu()
+    rf2ethos.openMainMenu()
 end
 
 local function close()
@@ -1605,11 +1605,11 @@ local function close()
     system.exit()
 end
 
-local icon = lcd.loadMask("/scripts/RF2TOUCH/RF.png")
+local icon = lcd.loadMask("/scripts/RF2ETHOS/RF.png")
 
 local function init() 
 	system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}) 
-	system.compile("/scripts/RF2TOUCH/main.lua")
+	system.compile("/scripts/RF2ETHOS/main.lua")
 	end
 
 return {init = init}
