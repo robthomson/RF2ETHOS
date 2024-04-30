@@ -2,8 +2,11 @@
 local environment = system.getVersion()
 
 local LUA_VERSION = "2.0 - 240229"
+local ETHOS_VERSION = 157
+local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 
 apiVersion = 0
+ 
 
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
@@ -37,7 +40,8 @@ RateTable = nil
 ResetRates = nil
 reloadRates = false
 
-showLoading = false
+isLoading = false
+wasLoading = false
 
 local mspDataLoaded = false
 
@@ -362,7 +366,29 @@ local function event(widget, category, value, x, y)
     return false
 end
 
+
+function rf2touch.sensorMakeNumber(x)
+    if x == nil or x == "" then
+        x = 0
+    end
+
+    x = string.gsub(x, "%D+", "")
+    x = tonumber(x)
+    if x == nil or x == "" then
+        x = 0
+    end
+
+    return x
+end
+
 function paint()
+
+    if tonumber(rf2touch.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
+		-- version check
+        rf2touch.msgBox(ETHOS_VERSION_STR)
+        return
+    end
+
     if environment.simulation ~= true then if telemetryState ~= 1 then rf2touch.msgBox("NO RF LINK") end end
     if isSaving then
         if pageState >= pageStatus.saving then
@@ -384,15 +410,11 @@ function paint()
     end
 
     if isRefreshing then
-        -- print("Got to paint isRefresh")
+        print("Got to paint isRefresh")
         rf2touch.msgBox("Refreshing")
-    end
-
-	if uiState ~= uiStatus.mainMenu then
-		if showLoading == true and ResetRates == false  then
-			 -- dont show until we solve layer bug
-			 --rf2touch.msgBox("Loading...")
-		end
+    elseif isLoading == true and uiState ~= uiStatus.mainMenu then
+		print("Got to paint isLoading")
+		rf2touch.msgBox("Loading...")
 	end
 end
 
@@ -416,11 +438,16 @@ function rf2touch.wakeupForm()
         end
     end
 
-    if telemetryState ~= 1 or (pageState >= pageStatus.saving) or mspDataLoaded == false then
+
+    if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
         -- print("Form invalidation disabled....")
     else
-        if (isSaving == false and wasSaving == false) or (isRefreshing == false and wasRefreshing == false) or showLoading == false then form.invalidate() end
+        if (isSaving == false and wasSaving == false) 
+		or (isRefreshing == false and wasRefreshing == false) 
+		or (isLoading == false and wasLoading == false) then 
+		form.invalidate() 
+		end
     end
 	--lcd.invalidate()
 end
@@ -544,10 +571,21 @@ function wakeup(widget)
                     rf2touch.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
                 wasRefeshing = false
+            elseif wasLoading == true then
+                if lastScript == "pids.lua" or lastIdx == 1 then
+                    rf2touch.openPagePID(lastIdx, lastTitle, lastScript)
+                elseif lastScript == "rates.lua" and lastSubPage == 1 then
+                    rf2touch.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                elseif lastScript == "servos.lua" then
+                    rf2touch.openPageSERVOS(lastIdx, lastTitle, lastScript)
+                else
+                    rf2touch.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                end
+                wasLoading = false				
             elseif reloadRates == true then
-                rf2touch.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
-                rf2touch.openPageSERVOS(lastIdx, lastTitle, lastScript)
+                rf2touch.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
             else
                 rf2touch.openMainMenu()
             end
@@ -561,18 +599,9 @@ function wakeup(widget)
 			if mspDataLoaded == true then
 				print("Got the data...")
 				mspDataLoaded = false
-                if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2touch.openPagePID(lastIdx, lastTitle, lastScript)
-                elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2touch.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-                elseif lastScript == "servos.lua" then
-                    rf2touch.openPageSERVOS(lastIdx, lastTitle, lastScript)
-                else
-                    rf2touch.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
-                end
-				showLoading = false
-			else
-				showLoading = true
+				isLoading = false
+				wasLoading = true
+				createForm = true
 			end
 		end
 
@@ -1052,6 +1081,8 @@ function rf2touch.openPageDefaultLoader(idx, subpage, title, script)
 
 	lcdNeedsInvalidate = true
 
+	isLoading = true
+
 	print("Finished: rf2touch.openPageDefaultLoader")
 end
 
@@ -1444,6 +1475,12 @@ local function getSection(id, sections)
 end
 
 function rf2touch.openMainMenu()
+
+
+    if tonumber(rf2touch.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
+        return
+    end
+
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
 
