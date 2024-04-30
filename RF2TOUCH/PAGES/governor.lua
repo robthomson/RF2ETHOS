@@ -11,7 +11,7 @@ fields[#fields + 1] = {t = "Recovery time", min = 0, max = 100, unit = "s", defa
 
 labels[#labels + 1] = {t = "Auto Rotation", label = "ar", inline_size = 11.5}
 fields[#fields + 1] = {t = "Bailout", inline = 1, label = "ar", min = 0, max = 100, unit = "s", default = 0, vals = {16, 17}, decimals = 1, scale = 10}
-fields[#fields + 1] = {t = "Timeout", inline = 2, label = "ar", min = 0, max = 100, unit = "s", default = 0, vals = {14, 15}, decimals = 1, scale = 10}
+fields[#fields + 1] = {t = "Timeout", t2="T/O", inline = 2, label = "ar", min = 0, max = 100, unit = "s", default = 0, vals = {14, 15}, decimals = 1, scale = 10}
 fields[#fields + 1] = {t = "Min Entry", inline = 3, label = "ar", min = 0, max = 100, unit = "s", default = 50, vals = {18, 19}, decimals = 1, scale = 10}
 
 fields[#fields + 1] = {t = "Zero throttle Timeout", min = 0, max = 100, unit = "s", default = 30, vals = {10, 11}, decimals = 1, scale = 10}

@@ -874,7 +874,12 @@ local function fieldChoice(f, i)
     if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if f.t ~= nil then if f.t2 ~= nil then f.t = f.t2 end end
+
+		if radio.text == 2 then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end	
+		end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -942,7 +947,11 @@ local function fieldNumber(f, i)
     if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if f.t ~= nil then if f.t2 ~= nil then f.t = f.t2 end end
+		if radio.text == 2 then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end	
+		end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -950,8 +959,13 @@ local function fieldNumber(f, i)
 
         field = form.addStaticText(line, posText, f.t)
     else
+		if radio.text == 2 then
+			if f.t2 ~= nil then
+				f.t = f.t2
+			end	
+		end	
+	
         if f.t ~= nil then
-            if f.t2 ~= nil then f.t = f.t2 end
 
             if f.label ~= nil then f.t = "    " .. f.t end
         else
@@ -1044,7 +1058,15 @@ local function fieldHeader(title)
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
-    buttonW = (w - colStart) / 3 - padding
+	if radio.navButtonOffset ~= nil then
+		 colStart =  colStart - radio.navButtonOffset 
+	end
+	
+	if radio.buttonWidth == nil then
+		buttonW = (w - colStart) / 3 - padding
+	else
+		buttonW = radio.buttonWidth
+	end
     buttonH = radio.buttonHeight
     line = form.addLine(title)
     rf2touch.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
@@ -1497,7 +1519,7 @@ function rf2touch.openMainMenu()
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
-    local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
+    local w = (windowWidth-(padding*numPerRow)-padding - 5) / numPerRow
     -- local x = 0
 
     local y = radio.buttonPaddingTop
@@ -1517,7 +1539,7 @@ function rf2touch.openMainMenu()
                     x = padding
                 end
 
-                if lc >= 1 then x = (w + (padding * numPerRow)) * lc end
+                if lc >= 1 then x = padding + (w + padding)*lc end
 
                 form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
                     if pvalue.script == "pids.lua" then

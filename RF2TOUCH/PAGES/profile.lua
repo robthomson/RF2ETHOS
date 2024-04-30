@@ -4,14 +4,14 @@ local labels = {}
 local fields = {}
 
 -- pid controller settings =
--- labels[#labels + 1] = { subpage=1,t = "Error decay ground", t2="Ground Error Decay", label=1      }
+-- labels[#labels + 1] = { subpage=1,t ="Ground Error Decay", label=1      }
 fields[#fields + 1] = {subpage = 1, t = "Error decay ground", min = 0, max = 250, unit = "s", default = 250, vals = {2}, decimals = 1, scale = 10}
 
-labels[#labels + 1] = {subpage = 1, t = "Error decay cyclic", t2 = "Cyclic Error Decay", label = 2}
+labels[#labels + 1] = {subpage = 1, t = "Cyclic Error Decay", label = 2}
 fields[#fields + 1] = {subpage = 1, t = "Time", inline = 2, label = 2, min = 0, max = 250, unit = "s", default = 180, vals = {3}, decimals = 1, scale = 10}
 fields[#fields + 1] = {subpage = 1, t = "Limit", inline = 1, label = 2, min = 0, max = 250, unit = "°", default = 20, vals = {5}}
 
-labels[#labels + 1] = {subpage = 1, t = "Error decay yaw", t2 = "Yaw Error Decay", label = 3}
+labels[#labels + 1] = {subpage = 1, t = "Yaw Error Decay", label = 3}
 fields[#fields + 1] = {subpage = 1, t = "Time", inline = 2, label = 3, min = 0, max = 250, unit = "s", vals = {4}, decimals = 1, scale = 10}
 fields[#fields + 1] = {subpage = 1, t = "Limit", inline = 1, label = 3, min = 0, max = 250, unit = "°", vals = {6}}
 
@@ -67,10 +67,14 @@ fields[#fields + 1] = {subpage = 3, t = "Pitch", inline = 2, label = "bcutoff", 
 fields[#fields + 1] = {subpage = 3, t = "Yaw", inline = 1, label = "bcutoff", min = 0, max = 250, default = 20, vals = {41}}
 
 -- main rotor settings
-labels[#labels + 1] = {subpage = 4, t = "Cyclic Cross coupling", label = 10, inline_size = 10}
-fields[#fields + 1] = {subpage = 4, t = "Gain", inline = 1, label = 10, min = 0, max = 250, default = 25, vals = {34}}
-fields[#fields + 1] = {subpage = 4, t = "Ratio", inline = 2, label = 10, min = 0, max = 200, default = 0, unit = "%", vals = {35}}
-fields[#fields + 1] = {subpage = 4, t = "Cutoff", inline = 3, label = 10, min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
+labels[#labels + 1] = {subpage = 4, t = "Cyclic Cross coupling", label = "cycliccc1", inline_size = 40.6}
+fields[#fields + 1] = {subpage = 4, t = "Gain", inline = 1, label = "cycliccc1", min = 0, max = 250, default = 25, vals = {34}}
+
+labels[#labels + 1] = {subpage = 4, t = "", label = "cycliccc2", inline_size = 40.6}
+fields[#fields + 1] = {subpage = 4, t = "Ratio", inline = 1, label = "cycliccc2", min = 0, max = 200, default = 0, unit = "%", vals = {35}}
+
+labels[#labels + 1] = {subpage = 4, t = "", label = "cycliccc3", inline_size = 40.6}
+fields[#fields + 1] = {subpage = 4, t = "Cutoff", inline = 1, label = "cycliccc3", min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
 
 -- auto leveling settings
 labels[#labels + 1] = {subpage = 5, t = "Acro trainer", label = 11}

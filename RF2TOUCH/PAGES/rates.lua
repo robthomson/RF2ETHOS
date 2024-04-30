@@ -98,7 +98,12 @@ elseif RateTable == 4 then
 
     rTableName = "ACTUAL"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
-    cols = {"Center Sensitivity", "Max Rate", "Expo"}
+	
+	if radio.text == 2 then
+		cols = {"Cntr. Sens.", "Max Rate", "Expo"}
+	else
+		cols = {"Center Sensitivity", "Max Rate", "Expo"}
+	end
 
     -- rc rate
     fields[#fields + 1] = {row = 1, col = 1, subpage = 1, min = 0, max = 100, vals = {2}, default = 36, mult = 10, step = 10}
