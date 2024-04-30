@@ -408,8 +408,11 @@ function paint()
         end
     end
 	
+	
     if isLoading == true and uiState ~= uiStatus.mainMenu then
-		rf2touch.msgBox("Loading...")
+		if environment.simulation ~= true then
+			rf2touch.msgBox("Loading...")
+		end
 	end
 end
 
@@ -541,7 +544,7 @@ function wakeup(widget)
         createForm = true
     else
         if createForm == true then
-            if wasSaving == true then
+            if wasSaving == true or environment.simulation == true then
                 wasSaving = false			
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2touch.openPagePIDLoader(lastIdx, lastTitle, lastScript)
@@ -552,7 +555,7 @@ function wakeup(widget)
                 else
                     rf2touch.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
-            elseif wasLoading == true then
+            elseif wasLoading == true or environment.simulation == true then
                 wasLoading = false				
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2touch.openPagePID(lastIdx, lastTitle, lastScript)
@@ -563,7 +566,7 @@ function wakeup(widget)
                 else
                     rf2touch.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
                 end	
-            elseif reloadRates == true then
+            elseif reloadRates == true or environment.simulation == true then
                 rf2touch.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
                 rf2touch.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
@@ -576,8 +579,8 @@ function wakeup(widget)
         end
 
 
-		if uiState ~= uiStatus.mainMenu then
-			if mspDataLoaded == true then
+		if uiState ~= uiStatus.mainMenu then	
+			if mspDataLoaded == true or environment.simulation == true then
 				print("Got the data...")
 				mspDataLoaded = false
 				
@@ -1067,6 +1070,11 @@ function rf2touch.openPageDefaultLoader(idx, subpage, title, script)
 	isLoading = true
 
 	print("Finished: rf2touch.openPageDefaultLoader")
+	
+	if environment.simulation == true then
+		rf2touch.openPageDefault(idx, subpage, title, script)
+	end
+	
 end
 
 function rf2touch.openPageDefault(idx, subpage, title, script)
@@ -1134,6 +1142,11 @@ function rf2touch.openPageSERVOSLoader(idx, title, script)
 
 	lcdNeedsInvalidate = true
 	isLoading = true
+	
+	if environment.simulation == true then
+		rf2touch.openPageSERVOS(idx, title, script)
+	end	
+	
 	print("Finished: rf2touch.openPageSERVOS")
 end
 
@@ -1238,6 +1251,11 @@ function rf2touch.openPagePIDLoader(idx, title, script)
 
 	lcdNeedsInvalidate = true
 	isLoading = true
+	
+	if environment.simulation == true then
+		rf2touch.openPagePID(idx, title, script)
+	end		
+	
 	print("Finished: rf2touch.openPagePID")
 end
 
@@ -1348,6 +1366,11 @@ function rf2touch.openPageRATESLoader(idx, subpage, title, script)
 
 	lcdNeedsInvalidate = true
 	isLoading = true
+
+	if environment.simulation == true then
+		rf2touch.openPageRATES(idx, subpage, title, script)
+	end		
+	
 	print("Finished: rf2touch.openPageRATES")
 end
 
