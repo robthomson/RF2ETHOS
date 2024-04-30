@@ -9,7 +9,7 @@ local supportedRadios = {
     -- Horus X10, Horus X12 (480x272)
     ["472x240"] = {msp = {template = "/scripts/RF2TOUCH/TEMPLATES/472x240.lua",text=2, buttonHeight = 40, buttonPadding = 15, buttonPaddingTop = 8}},
     -- Twin X14 (632x314)
-    ["632x314"] = {msp = {template = "/scripts/RF2TOUCH/TEMPLATES/632x314.lua", text=2, buttonHeight = 35, buttonPadding = 10, buttonPaddingTop = 8}}
+    ["632x314"] = {msp = {template = "/scripts/RF2TOUCH/TEMPLATES/632x314.lua", navButtonOffset=47, buttonWidth=95, text=2, buttonHeight = 35, buttonPadding = 10, buttonPaddingTop = 8}}
 }
 
 local radio = assert(supportedRadios[resolution], resolution .. " not supported")
