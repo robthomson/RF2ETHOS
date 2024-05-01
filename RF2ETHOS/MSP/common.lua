@@ -131,8 +131,8 @@ function mspPollReply()
 
     if environment.simulation == true then return 1, "ababababababababababababababababsa", 1 end
 
-    local startTime = getTime()
-    while (getTime() - startTime < 5) do
+    local startTime = rf2ethos.getTime()
+    while (rf2ethos.getTime() - startTime < 5) do
         local mspData = protocol.mspPoll()
         if mspData ~= nil and mspReceivedReply(mspData) then
             mspLastReq = 0

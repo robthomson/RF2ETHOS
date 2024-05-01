@@ -20,7 +20,7 @@ protocol.mspWrite = function(cmd, payload) return mspSendRequest(cmd, payload) e
 -- Discards duplicate data from lua input buffer
 local function smartPortTelemetryPop()
     while true do
-        local sensorId, frameId, dataId, value = sportTelemetryPop()
+        local sensorId, frameId, dataId, value = rf2ethos.sportTelemetryPop()
         if not sensorId then
             return nil
         elseif (lastSensorId == sensorId) and (lastFrameId == frameId) and (lastDataId == dataId) and (lastValue == value) then

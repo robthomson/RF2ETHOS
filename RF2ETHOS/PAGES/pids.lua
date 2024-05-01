@@ -1,4 +1,4 @@
-local template = assert(loadScriptRF2ETHOS(radio.template))()
+local template = assert(rf2ethos.loadScriptRF2ETHOS(radio.template))()
 
 local fields = {}
 local rows = {}

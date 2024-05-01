@@ -133,7 +133,7 @@ local function invalidatePages()
     lcdNeedsInvalidate = true
 end
 
-function dataBindFields()
+function rf2ethos.dataBindFields()
 	if Page.fields ~= nil and Page.values ~= nil then
 		for i = 1, #Page.fields do
 			if #Page.values >= Page.minBytes then
@@ -185,7 +185,7 @@ local function processMspReply(cmd, rx_buf, err)
             -- print("Postread executed")
             Page.postRead(Page)
         end
-        dataBindFields()
+        rf2ethos.dataBindFields()
         if Page.postLoad then
             Page.postLoad(Page)
             -- print("Postload executed")
@@ -203,7 +203,7 @@ local function requestPage()
     end
 end
 
-function sportTelemetryPop()
+function rf2ethos.sportTelemetryPop()
     -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
     local frame = sensor:popFrame()
     if frame == nil then return nil, nil, nil, nil end
@@ -214,7 +214,7 @@ function sportTelemetryPop()
     return frame:physId(), frame:primId(), frame:appId(), frame:value()
 end
 
-function sportTelemetryPush(sensorId, frameId, dataId, value)
+function rf2ethos.sportTelemetryPush(sensorId, frameId, dataId, value)
     -- OpenTX:
     -- When called without parameters, it will only return the status of the output buffer without sending anything.
     --   Equivalent in Ethos may be:   sensor:idle() ???
@@ -241,9 +241,9 @@ function rf2ethos.getRSSI()
     return 0
 end
 
-function getTime() return os.clock() * 100 end
+function rf2ethos.getTime() return os.clock() * 100 end
 
-function loadScriptRF2ETHOS(script) 
+function rf2ethos.loadScriptRF2ETHOS(script) 
 	system.compile(script)
 	return loadfile(script) 
 end
@@ -470,7 +470,7 @@ function wakeup(widget)
         -- print("Init")
         local prevInit
         if init ~= nil then prevInit = init.t end
-        init = init or assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/ui_init.lua"))()
+        init = init or assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ui_init.lua"))()
 
         local initSuccess = init.f()
 
@@ -522,7 +522,7 @@ function wakeup(widget)
         end
         if not Page then
             -- print("Reloading data : " .. lastPage)
-            Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. lastPage))()
+            Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. lastPage))()
             collectgarbage()
         end
         if not Page.values and pageState == pageStatus.display then requestPage() end
@@ -1077,7 +1077,7 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1152,7 +1152,7 @@ function rf2ethos.openPageSERVOSLoader(idx, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1261,7 +1261,7 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1376,7 +1376,7 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
 	mspDataLoaded = false
 
-	Page = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
 	form.clear()
@@ -1562,10 +1562,10 @@ function rf2ethos.openMainMenu()
 end
 
 local function create()
-    protocol = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/protocols.lua"))()
-    radio = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/radios.lua"))().msp
-    assert(loadScriptRF2ETHOS(protocol.mspTransport))()
-    assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/MSP/common.lua"))()
+    protocol = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/protocols.lua"))()
+    radio = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/radios.lua"))().msp
+    assert(rf2ethos.loadScriptRF2ETHOS(protocol.mspTransport))()
+    assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/MSP/common.lua"))()
 
     sensor = sport.getSensor({primId = 0x32})
     rssiSensor = system.getSource("RSSI")
@@ -1589,7 +1589,7 @@ local function create()
     lastEvent = nil
     apiVersion = 0
 
-    MainMenu = assert(loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages.lua"))()
+    MainMenu = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages.lua"))()
 
     -- force page to get pickup data as it loads in
     form.onWakeup(function() rf2ethos.wakeupForm() end)

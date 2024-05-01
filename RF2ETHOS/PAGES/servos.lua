@@ -1,4 +1,4 @@
-local template = assert(loadScriptRF2ETHOS(radio.template))()
+local template = assert(rf2ethos.loadScriptRF2ETHOS(radio.template))()
 
 local labels = {}
 local fields = {}
@@ -54,6 +54,6 @@ return {
     servoChanged = function(self, servoIndex)
         rf2ethos.lastChangedServo = servoIndex
         self.setValues(self, rf2ethos.lastChangedServo)
-        dataBindFields()
+        rf2ethos.dataBindFields()
     end
 }
