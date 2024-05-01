@@ -314,7 +314,77 @@ end
 
 
 
+function rf2ethos.msgBoxPRO(str)
+    lcd.font(FONT_STD)
+	
+	msgBoxPRO = true
 
+    local w, h = lcd.getWindowSize()
+	if w < 500 then
+		boxW = w
+	else
+		boxW = w - math.floor((w * 2)/100)	
+	end
+	if h < 200 then
+		boxH = h-2
+	else
+		boxH = h - math.floor((h* 4)/100)
+	end
+	
+	boxH = boxH -radio.buttonPadding * 5
+	boxW = boxW - (radio.buttonPadding*10)
+
+	--draw the backgrf2status.round
+    if isDARKMODE then
+        lcd.color(lcd.RGB(64, 64, 64))
+    else
+        lcd.color(lcd.RGB(208, 208, 208))
+    end
+	lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+
+	--draw the border
+	lcd.color(lcd.RGB(40, 40, 40))
+	lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+
+	--draw the title
+    if isDARKMODE then
+        lcd.color(lcd.RGB(48, 48, 48))
+    else
+        lcd.color(lcd.RGB(160, 160, 160))
+    end
+	lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH/7)
+	
+	-- title text
+	str_title = "Warning"
+    tsizeW, tsizeH = lcd.getTextSize(str_title)	
+	str_offset = (boxH/7)/2 - tsizeH/2
+    if isDARKMODE then lcd.color(lcd.RGB(255, 255, 255, 1)) else lcd.color(lcd.RGB(90, 90, 90)) end	
+    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)	
+
+	-- display message
+	tsizeW, tsizeH = lcd.getTextSize(str)
+    lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
+
+	-- create a button
+	--[[
+	str_exit = "EXIT"
+	tsizeW, tsizeH = lcd.getTextSize(str_exit)	
+	buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
+	buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
+ 
+ 	lcd.color(lcd.RGB(248, 176, 56))
+	lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
+	
+    if isDARKMODE then
+        lcd.color(lcd.RGB(64, 64, 64))
+    else
+        lcd.color(lcd.RGB(208, 208, 208))
+    end	
+	lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
+	]]--
+
+    return
+end
 
 
 function rf2ethos.msgBox(str,border)
