@@ -6,7 +6,9 @@ local ETHOS_VERSION = 157
 local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 
 apiVersion = 0
- 
+
+local SIM_ENABLE_RSSI = true -- set this to true to enable debugging of msg boxes in sim mode
+local MSGBOXPRO_HIDE_EXIT = true  --set this to turn exit button on and off on msgBoxPRO
 
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
@@ -365,26 +367,28 @@ function rf2ethos.msgBoxPRO(str)
 	tsizeW, tsizeH = lcd.getTextSize(str)
     lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
 
-	-- create a button
-	--[[
-	str_exit = "EXIT"
-	tsizeW, tsizeH = lcd.getTextSize(str_exit)	
-	buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
-	buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
- 
- 	lcd.color(lcd.RGB(248, 176, 56))
-	lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-	
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end	
-	lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
-	]]--
+
+	if MSGBOXPRO_HIDE_EXIT ~= true then
+		-- create a button
+		str_exit = "EXIT"
+		tsizeW, tsizeH = lcd.getTextSize(str_exit)	
+		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
+		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
+	 
+		lcd.color(lcd.RGB(248, 176, 56))
+		lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
+		
+		if isDARKMODE then
+			lcd.color(lcd.RGB(64, 64, 64))
+		else
+			lcd.color(lcd.RGB(208, 208, 208))
+		end	
+		lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
+	end
 
     return
 end
+
 
 
 function rf2ethos.msgBox(str,border)
@@ -431,7 +435,33 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    -- print("Event received:", category, value, x, y)
+	print("Event received:", category, value, x, y)
+
+	if msgBoxPRO == true and MSGBOXPRO_HIDE_EXIT ~= true then
+	
+		local w, h = lcd.getWindowSize()
+		if w < 500 then boxW = w else boxW = w - math.floor((w * 2)/100) end
+		if h < 200 then boxH = h-2 else boxH = h - math.floor((h* 4)/100) end
+		boxH = boxH -radio.buttonPadding * 5
+		boxW = boxW - (radio.buttonPadding*10)		
+		str_exit = "EXIT"
+		tsizeW, tsizeH = lcd.getTextSize(str_exit)		
+		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
+		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
+		buttonW = tsizeW + (radio.buttonPadding*2)
+		buttonH = tsizeH + (radio.buttonPadding*2)
+			
+		if (
+			(value == 97) or ((value == 16641 or value == 16640) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
+			
+			system.exit()
+			return(false)
+			
+		end
+  
+	 
+	end 
+	 
     return false
 end
 
@@ -454,11 +484,15 @@ function paint()
 
     if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
 		-- version check
-        rf2ethos.msgBox(ETHOS_VERSION_STR)
+        rf2ethos.msgBoxPRO(ETHOS_VERSION_STR)
         return
     end
 
-    if environment.simulation ~= true then if telemetryState ~= 1 then rf2ethos.msgBox("NO RF LINK") end end
+    if environment.simulation ~= true or SIM_ENABLE_RSSI == true then 
+		if telemetryState ~= 1 then 
+			rf2ethos.msgBoxPRO("NO RF LINK") 
+		end 
+	end
     if isSaving then
         if pageState >= pageStatus.saving then
             -- print(saveMsg)
@@ -605,7 +639,7 @@ function wakeup(widget)
     -- handle some display stuff to bring form in and out of focus for no rf link
     if telemetryState ~= 1 then
         -- we have no telemetry - hide the form
-        if environment.simulation ~= true then
+        if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             form.clear()
             createForm = true
         end
