@@ -7,7 +7,7 @@ local supportedRadios = {
     -- TANDEM X18, TWIN X Lite (480x320)
     ["472x288"] = {msp = {template = "/scripts/RF2ETHOS/TEMPLATES/472x288.lua", navButtonOffset=47, text=2, buttonWidth=75, buttonHeight = 30, buttonPadding = 10, buttonPaddingTop = 6}},
     -- Horus X10, Horus X12 (480x272)
-    ["472x240"] = {msp = {template = "/scripts/RF2ETHOS/TEMPLATES/472x240.lua",text=2, buttonHeight = 40, buttonPadding = 15, buttonPaddingTop = 8}},
+    ["472x240"] = {msp = {template = "/scripts/RF2ETHOS/TEMPLATES/472x240.lua",text=2, buttonHeight = 30, buttonPadding = 15, buttonPaddingTop = 4}},
     -- Twin X14 (632x314)
     ["632x314"] = {msp = {template = "/scripts/RF2ETHOS/TEMPLATES/632x314.lua", navButtonOffset=47, buttonWidth=95, text=2, buttonHeight = 35, buttonPadding = 10, buttonPaddingTop = 8}}
 }

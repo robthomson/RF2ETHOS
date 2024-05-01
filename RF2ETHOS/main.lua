@@ -1295,7 +1295,7 @@ function rf2ethos.openPagePID(idx, title, script)
     local numCols = #Page.cols
     local screenWidth = LCD_W - 10
     local padding = 10
-    local paddingTop = 8
+    local paddingTop = radio.buttonPaddingTop
     local h = radio.buttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
@@ -1412,7 +1412,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     local numCols = #Page.cols
     local screenWidth = LCD_W - 10
     local padding = 10
-    local paddingTop = 8
+    local paddingTop = radio.buttonPaddingTop
     local h = radio.buttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
