@@ -90,7 +90,9 @@ end
 local function saveSettings()
     if Page.values then
         local payload = Page.values
-        if Page.preSave then payload = Page.preSave(Page) end
+        if Page.preSave then
+            payload = Page.preSave(Page)
+        end
         saveTS = os.clock()
         if pageState == pageStatus.saving then
             saveRetries = saveRetries + 1
@@ -135,24 +137,26 @@ local function invalidatePages()
 end
 
 function rf2ethos.dataBindFields()
-	if Page.fields ~= nil and Page.values ~= nil then
-		for i = 1, #Page.fields do
-			if #Page.values >= Page.minBytes then
-				local f = Page.fields[i]
-				if f.vals then
-					f.value = 0
-					for idx = 1, #f.vals do
-						local raw_val = Page.values[f.vals[idx]] or 0
-						raw_val = raw_val << ((idx - 1) * 8)
-						f.value = f.value | raw_val
-					end
-					local bits = #f.vals * 8
-					if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
-					f.value = f.value / (f.scale or 1)
-				end
-			end
-		end
-	end
+    if Page.fields ~= nil and Page.values ~= nil then
+        for i = 1, #Page.fields do
+            if #Page.values >= Page.minBytes then
+                local f = Page.fields[i]
+                if f.vals then
+                    f.value = 0
+                    for idx = 1, #f.vals do
+                        local raw_val = Page.values[f.vals[idx]] or 0
+                        raw_val = raw_val << ((idx - 1) * 8)
+                        f.value = f.value | raw_val
+                    end
+                    local bits = #f.vals * 8
+                    if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
+                        f.value = f.value - (2 ^ bits)
+                    end
+                    f.value = f.value / (f.scale or 1)
+                end
+            end
+        end
+    end
 end
 
 -- Run lcd.invalidate() if anything actionable comes back from it.
@@ -170,14 +174,18 @@ local function processMspReply(cmd, rx_buf, err)
         -- check if this page requires writing to eeprom to save (most do)
         if Page.eepromWrite then
             -- don't write again if we're already responding to earlier page.write()s
-            if pageState ~= pageStatus.eepromWrite then eepromWrite() end
+            if pageState ~= pageStatus.eepromWrite then
+                eepromWrite()
+            end
         elseif pageState ~= pageStatus.eepromWrite then
             -- If we're not already trying to write to eeprom from a previous save, then we're done.
             invalidatePages()
         end
         lcdNeedsInvalidate = true
     elseif cmd == uiMsp.eepromWrite then
-        if Page.reboot then rebootFc() end
+        if Page.reboot then
+            rebootFc()
+        end
         invalidatePages()
     elseif (cmd == Page.read) and (#rx_buf > 0) then
         -- print("processMspReply:  Page.read and non-zero rx_buf")
@@ -207,7 +215,9 @@ end
 function rf2ethos.sportTelemetryPop()
     -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
     local frame = sensor:popFrame()
-    if frame == nil then return nil, nil, nil, nil end
+    if frame == nil then
+        return nil, nil, nil, nil
+    end
     -- physId = physical / remote sensor Id (aka sensorId)
     --   0x00 for FPORT, 0x1B for SmartPort
     -- primId = frame ID  (should be 0x32 for reply frames)
@@ -232,7 +242,9 @@ end
 -- To avoid this, getRSSI is renamed in RF2.
 function rf2ethos.getRSSI()
     -- print("getRSSI RF2")
-    if environment.simulation == true then return 100 end
+    if environment.simulation == true then
+        return 100
+    end
 
     if rssiSensor ~= nil and rssiSensor:state() then
         -- this will return the last known value if nothing is received
@@ -242,11 +254,13 @@ function rf2ethos.getRSSI()
     return 0
 end
 
-function rf2ethos.getTime() return os.clock() * 100 end
+function rf2ethos.getTime()
+    return os.clock() * 100
+end
 
-function rf2ethos.loadScriptRF2ETHOS(script) 
-	system.compile(script)
-	return loadfile(script) 
+function rf2ethos.loadScriptRF2ETHOS(script)
+    system.compile(script)
+    return loadfile(script)
 end
 
 function rf2ethos.getWindowSize()
@@ -267,7 +281,9 @@ local function updateTelemetryState()
         telemetryState = telemetryStatus.ok
     end
 
-    if oldTelemetryState ~= telemetryState then lcdNeedsInvalidate = true end
+    if oldTelemetryState ~= telemetryState then
+        lcdNeedsInvalidate = true
+    end
 end
 
 local function clipValue(val, min, max)
@@ -293,104 +309,105 @@ function rf2ethos.getFieldValue(f)
         v = 0
     end
 
-    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
+    if f.mult ~= nil then
+        v = math.floor(v * f.mult + 0.5)
+    end
 
     return v
 end
 
-
 function rf2ethos.saveValue(currentField)
-    if environment.simulation == true then return end
+    if environment.simulation == true then
+        return
+    end
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
     local step = f.step or 1
 
     for idx = 1, #f.vals do
-		Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
-	end
-    if f.upd and Page.values then f.upd(Page) end
+        Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
+    end
+    if f.upd and Page.values then
+        f.upd(Page)
+    end
 end
-
-
-
 
 function rf2ethos.msgBoxPRO(str)
     lcd.font(FONT_STD)
-	
-	msgBoxPRO = true
+
+    msgBoxPRO = true
 
     local w, h = lcd.getWindowSize()
-	if w < 500 then
-		boxW = w
-	else
-		boxW = w - math.floor((w * 2)/100)	
-	end
-	if h < 200 then
-		boxH = h-2
-	else
-		boxH = h - math.floor((h* 4)/100)
-	end
-	
-	boxH = boxH -radio.buttonPadding * 5
-	boxW = boxW - (radio.buttonPadding*10)
+    if w < 500 then
+        boxW = w
+    else
+        boxW = w - math.floor((w * 2) / 100)
+    end
+    if h < 200 then
+        boxH = h - 2
+    else
+        boxH = h - math.floor((h * 4) / 100)
+    end
 
-	--draw the backgrf2status.round
+    boxH = boxH - radio.buttonPadding * 5
+    boxW = boxW - (radio.buttonPadding * 10)
+
+    -- draw the backgrf2status.round
     if isDARKMODE then
         lcd.color(lcd.RGB(64, 64, 64))
     else
         lcd.color(lcd.RGB(208, 208, 208))
     end
-	lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
 
-	--draw the border
-	lcd.color(lcd.RGB(40, 40, 40))
-	lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+    -- draw the border
+    lcd.color(lcd.RGB(40, 40, 40))
+    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
 
-	--draw the title
+    -- draw the title
     if isDARKMODE then
         lcd.color(lcd.RGB(48, 48, 48))
     else
         lcd.color(lcd.RGB(160, 160, 160))
     end
-	lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH/7)
-	
-	-- title text
-	str_title = "Warning"
-    tsizeW, tsizeH = lcd.getTextSize(str_title)	
-	str_offset = (boxH/7)/2 - tsizeH/2
-    if isDARKMODE then lcd.color(lcd.RGB(255, 255, 255, 1)) else lcd.color(lcd.RGB(90, 90, 90)) end	
-    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)	
+    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
 
-	-- display message
-	tsizeW, tsizeH = lcd.getTextSize(str)
+    -- title text
+    str_title = "Warning"
+    tsizeW, tsizeH = lcd.getTextSize(str_title)
+    str_offset = (boxH / 7) / 2 - tsizeH / 2
+    if isDARKMODE then
+        lcd.color(lcd.RGB(255, 255, 255, 1))
+    else
+        lcd.color(lcd.RGB(90, 90, 90))
+    end
+    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)
+
+    -- display message
+    tsizeW, tsizeH = lcd.getTextSize(str)
     lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
 
+    -- create a button
+    str_exit = "EXIT"
+    tsizeW, tsizeH = lcd.getTextSize(str_exit)
+    buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
+    buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
 
+    lcd.color(lcd.RGB(248, 176, 56))
+    lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
 
-	-- create a button
-	str_exit = "EXIT"
-	tsizeW, tsizeH = lcd.getTextSize(str_exit)	
-	buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
-	buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
- 
-	lcd.color(lcd.RGB(248, 176, 56))
-	lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-	
-	if isDARKMODE then
-		lcd.color(lcd.RGB(64, 64, 64))
-	else
-		lcd.color(lcd.RGB(208, 208, 208))
-	end	
-	lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
-
+    if isDARKMODE then
+        lcd.color(lcd.RGB(64, 64, 64))
+    else
+        lcd.color(lcd.RGB(208, 208, 208))
+    end
+    lcd.drawText(buttonX + radio.buttonPadding / 2, buttonY + radio.buttonPadding / 2, str_exit)
 
     return
 end
 
-
-
-function rf2ethos.msgBox(str,border)
+function rf2ethos.msgBox(str, border)
     lcd.font(FONT_STD)
 
     local w, h = lcd.getWindowSize()
@@ -407,16 +424,16 @@ function rf2ethos.msgBox(str,border)
     lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
 
     -- draw the border
-	if border == nil or border == true then
-		if isDARKMODE then
-			-- dark theme
-			lcd.color(lcd.RGB(255, 255, 255, 1))
-		else
-			-- light theme
-			lcd.color(lcd.RGB(90, 90, 90))
-		end
-		lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-	end
+    if border == nil or border == true then
+        if isDARKMODE then
+            -- dark theme
+            lcd.color(lcd.RGB(255, 255, 255, 1))
+        else
+            -- light theme
+            lcd.color(lcd.RGB(90, 90, 90))
+        end
+        lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+    end
 
     if isDARKMODE then
         -- dark theme
@@ -434,39 +451,43 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-	print("Event received:", category, value, x, y)
+    print("Event received:", category, value, x, y)
 
-	if msgBoxPRO == true then
-	
-		local w, h = lcd.getWindowSize()
-		if w < 500 then boxW = w else boxW = w - math.floor((w * 2)/100) end
-		if h < 200 then boxH = h-2 else boxH = h - math.floor((h* 4)/100) end
-		boxH = boxH -radio.buttonPadding * 5
-		boxW = boxW - (radio.buttonPadding*10)		
-		str_exit = "EXIT"
-		tsizeW, tsizeH = lcd.getTextSize(str_exit)		
-		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
-		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
-		buttonW = tsizeW + (radio.buttonPadding*2)
-		buttonH = tsizeH + (radio.buttonPadding*2)
-			
-		if (
-			(value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
+    if msgBoxPRO == true then
 
+        local w, h = lcd.getWindowSize()
+        if w < 500 then
+            boxW = w
+        else
+            boxW = w - math.floor((w * 2) / 100)
+        end
+        if h < 200 then
+            boxH = h - 2
+        else
+            boxH = h - math.floor((h * 4) / 100)
+        end
+        boxH = boxH - radio.buttonPadding * 5
+        boxW = boxW - (radio.buttonPadding * 10)
+        str_exit = "EXIT"
+        tsizeW, tsizeH = lcd.getTextSize(str_exit)
+        buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
+        buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
+        buttonW = tsizeW + (radio.buttonPadding * 2)
+        buttonH = tsizeH + (radio.buttonPadding * 2)
 
-			system.killEvents(value)
-			system.exit()
+        if ((value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
 
-			return(true)
-			
-		end
-  
-	 
-	end 
-	 
+            system.killEvents(value)
+            system.exit()
+
+            return (true)
+
+        end
+
+    end
+
     return false
 end
-
 
 function rf2ethos.sensorMakeNumber(x)
     if x == nil or x == "" then
@@ -485,26 +506,30 @@ end
 function paint()
 
     if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
-		-- version check
+        -- version check
         rf2ethos.msgBoxPRO(ETHOS_VERSION_STR)
         return
     end
 
-    if environment.simulation ~= true or SIM_ENABLE_RSSI == true then 
-		if telemetryState ~= 1 then 
-			rf2ethos.msgBoxPRO("NO RF LINK") 
-		end 
-	end
+    if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
+        if telemetryState ~= 1 then
+            rf2ethos.msgBoxPRO("NO RF LINK")
+        end
+    end
     if isSaving then
         if pageState >= pageStatus.saving then
             -- print(saveMsg)
             local saveMsg = ""
             if pageState == pageStatus.saving then
                 saveMsg = "Saving..."
-                if saveRetries > 0 then saveMsg = "Retry #" .. string.format("%u", saveRetries) end
+                if saveRetries > 0 then
+                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
+                end
             elseif pageState == pageStatus.eepromWrite then
                 saveMsg = "Updating..."
-                if saveRetries > 0 then saveMsg = "Retry #" .. string.format("%u", saveRetries) end
+                if saveRetries > 0 then
+                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
+                end
             elseif pageState == pageStatus.rebooting then
                 saveMsg = "Rebooting..."
             end
@@ -513,54 +538,53 @@ function paint()
             isSaving = false
         end
     end
-	
-	
+
     if isLoading == true and uiState ~= uiStatus.mainMenu then
-		if environment.simulation ~= true then
-			rf2ethos.msgBox("Loading...")
-		end
-	end
+        if environment.simulation ~= true then
+            rf2ethos.msgBox("Loading...")
+        end
+    end
 end
 
 function rf2ethos.wakeupForm()
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
             local v = Page.fields[13].value
-            if v ~= nil then activeRateTable = math.floor(v) end
+            if v ~= nil then
+                activeRateTable = math.floor(v)
+            end
 
             if activeRateTable ~= nil then
                 if activeRateTable ~= RateTable then
                     RateTable = activeRateTable
                     collectgarbage()
                     -- reloadRates = true
-					wasSaving=true
-					createForm = true
+                    wasSaving = true
+                    createForm = true
                 end
             end
         end
     end
 
-
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
         -- print("Form invalidation disabled....")
     else
-        if (isSaving == false and wasSaving == false) 
-		or (isLoading == false and wasLoading == false) then 
-		form.invalidate() 
-		end
+        if (isSaving == false and wasSaving == false) or (isLoading == false and wasLoading == false) then
+            form.invalidate()
+        end
     end
-	--lcd.invalidate()
+    -- lcd.invalidate()
 end
 
 function rf2ethos.clearScreen()
-local w, h = lcd.getWindowSize()  
-if isDARKMODE then
+    local w, h = lcd.getWindowSize()
+    if isDARKMODE then
         lcd.color(lcd.RGB(40, 40, 40))
-else
+    else
         lcd.color(lcd.RGB(240, 240, 240))
-end
-lcd.drawFilledRectangle(0, 0,w, h)
+    end
+    lcd.drawFilledRectangle(0, 0, w, h)
 end
 
 -- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
@@ -575,7 +599,9 @@ function wakeup(widget)
     if uiState == uiStatus.init then
         -- print("Init")
         local prevInit
-        if init ~= nil then prevInit = init.t end
+        if init ~= nil then
+            prevInit = init.t
+        end
         init = init or assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ui_init.lua"))()
 
         local initSuccess = init.f()
@@ -631,7 +657,9 @@ function wakeup(widget)
             Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. lastPage))()
             collectgarbage()
         end
-        if not Page.values and pageState == pageStatus.display then requestPage() end
+        if not Page.values and pageState == pageStatus.display then
+            requestPage()
+        end
     end
 
     mspProcessTxQ()
@@ -651,7 +679,7 @@ function wakeup(widget)
     else
         if createForm == true then
             if wasSaving == true or environment.simulation == true then
-                wasSaving = false			
+                wasSaving = false
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -662,7 +690,7 @@ function wakeup(widget)
                     rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
             elseif wasLoading == true or environment.simulation == true then
-                wasLoading = false				
+                wasLoading = false
                 if lastScript == "pids.lua" or lastIdx == 1 then
                     rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
                 elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -671,7 +699,7 @@ function wakeup(widget)
                     rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
                 else
                     rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
-                end	
+                end
             elseif reloadRates == true or environment.simulation == true then
                 rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
@@ -684,20 +712,17 @@ function wakeup(widget)
             createForm = false
         end
 
+        if uiState ~= uiStatus.mainMenu then
+            if mspDataLoaded == true or environment.simulation == true then
+                print("Got the data...")
+                mspDataLoaded = false
 
-		if uiState ~= uiStatus.mainMenu then	
-			if mspDataLoaded == true or environment.simulation == true then
-				print("Got the data...")
-				mspDataLoaded = false
-				
-				isLoading = false
-				wasLoading = true
-				
-					
-				createForm = true
-			end
-		end
+                isLoading = false
+                wasLoading = true
 
+                createForm = true
+            end
+        end
 
     end
 end
@@ -726,7 +751,9 @@ function rf2ethos.print_r(node)
 
     while true do
         local size = 0
-        for k, v in pairs(node) do size = size + 1 end
+        for k, v in pairs(node) do
+            size = size + 1
+        end
 
         local cur_index = 1
         for k, v in pairs(node) do
@@ -767,13 +794,17 @@ function rf2ethos.print_r(node)
                 end
             else
                 -- close the table
-                if (cur_index == size) then output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}" end
+                if (cur_index == size) then
+                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
+                end
             end
 
             cur_index = cur_index + 1
         end
 
-        if (size == 0) then output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}" end
+        if (size == 0) then
+            output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
+        end
 
         if (#stack > 0) then
             node = stack[#stack]
@@ -817,7 +848,12 @@ function rf2ethos.navigationButtons(x, y, w, h)
                     saveSettings()
                     return true
                 end
-            }, {label = "CANCEL", action = function() return true end}
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
         }
         form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
     end)
@@ -826,12 +862,17 @@ function rf2ethos.navigationButtons(x, y, w, h)
             {
                 label = "        OK        ",
                 action = function()
-					-- trigger RELOAD
-					wasSaving=true
-					createForm = true
+                    -- trigger RELOAD
+                    wasSaving = true
+                    createForm = true
                     return true
                 end
-            }, {label = "CANCEL", action = function() return true end}
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
         }
         form.openDialog("REFRESH", "Reload data from flight controller", buttons)
     end)
@@ -949,7 +990,9 @@ function rf2ethos.resetRates()
 
             for k, v in pairs(newTable) do
                 local f = Page.fields[k]
-                for idx = 1, #f.vals do Page.values[f.vals[idx]] = v >> ((idx - 1) * 8) end
+                for idx = 1, #f.vals do
+                    Page.values[f.vals[idx]] = v >> ((idx - 1) * 8)
+                end
             end
             ResetRates = false
         end
@@ -977,15 +1020,19 @@ function rf2ethos.debugSave()
 end
 
 local function fieldChoice(f, i)
-    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
 
-		if radio.text == 2 then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end	
-		end
+        if radio.text == 2 then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
+        end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -994,9 +1041,13 @@ local function fieldChoice(f, i)
         field = form.addStaticText(line, posText, f.t)
     else
         if f.t ~= nil then
-            if f.t2 ~= nil then f.t = f.t2 end
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
 
-            if f.label ~= nil then f.t = "    " .. f.t end
+            if f.label ~= nil then
+                f.t = "    " .. f.t
+            end
         end
         formLineCnt = formLineCnt + 1
         line = form.addLine(f.t)
@@ -1009,17 +1060,18 @@ local function fieldChoice(f, i)
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
-        if f.postEdit then f.postEdit(Page) end
+        if f.postEdit then
+            f.postEdit(Page)
+        end
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
 end
 
-
-
-
 function rf2ethos.round(number, precision)
-    if precision == nil then precision = 0 end
+    if precision == nil then
+        precision = 0
+    end
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     number = tonumber(number)
@@ -1033,10 +1085,14 @@ function rf2ethos.saveFieldValue(f, value)
         else
             f.value = value
         end
-        if f.postEdit then f.postEdit(Page) end
+        if f.postEdit then
+            f.postEdit(Page)
+        end
     end
 
-    if f.mult ~= nil then f.value = f.value / f.mult end
+    if f.mult ~= nil then
+        f.value = f.value / f.mult
+    end
 
     return f.value
 end
@@ -1044,20 +1100,26 @@ end
 local function scaleValue(value, f)
     local v
     v = value * decimalInc(f.decimals)
-    if f.scale ~= nil then v = v / f.scale end
+    if f.scale ~= nil then
+        v = v / f.scale
+    end
     v = rf2ethos.round(v)
     return v
 end
 
 local function fieldNumber(f, i)
-    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-		if radio.text == 2 then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end	
-		end
+        if radio.text == 2 then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
+        end
 
         local p = getInlinePositions(f)
         posText = p.posText
@@ -1065,15 +1127,17 @@ local function fieldNumber(f, i)
 
         field = form.addStaticText(line, posText, f.t)
     else
-		if radio.text == 2 then
-			if f.t2 ~= nil then
-				f.t = f.t2
-			end	
-		end	
-	
+        if radio.text == 2 then
+            if f.t2 ~= nil then
+                f.t = f.t2
+            end
+        end
+
         if f.t ~= nil then
 
-            if f.label ~= nil then f.t = "    " .. f.t end
+            if f.label ~= nil then
+                f.t = "    " .. f.t
+            end
         else
             f.t = ""
         end
@@ -1102,7 +1166,9 @@ local function fieldNumber(f, i)
 
         return value
     end, function(value)
-        if f.postEdit then f.postEdit(Page) end
+        if f.postEdit then
+            f.postEdit(Page)
+        end
 
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
@@ -1110,26 +1176,50 @@ local function fieldNumber(f, i)
 
     if f.default ~= nil then
         local default = f.default * decimalInc(f.decimals)
-        if f.mult ~= nil then default = default * f.mult end
+        if f.mult ~= nil then
+            default = default * f.mult
+        end
         field:default(default)
     else
         field:default(0)
     end
 
-    if f.decimals ~= nil then field:decimals(f.decimals) end
-    if f.unit ~= nil then field:suffix(f.unit) end
-    if f.step ~= nil then field:step(f.step) end
+    if f.decimals ~= nil then
+        field:decimals(f.decimals)
+    end
+    if f.unit ~= nil then
+        field:suffix(f.unit)
+    end
+    if f.step ~= nil then
+        field:step(f.step)
+    end
 end
 
-local function getLabel(id, page) for i, v in ipairs(page) do if id ~= nil then if v.label == id then return v end end end end
+local function getLabel(id, page)
+    for i, v in ipairs(page) do
+        if id ~= nil then
+            if v.label == id then
+                return v
+            end
+        end
+    end
+end
 
 local function fieldLabel(f, i, l)
-    if lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= lastSubPage then return end end
+    if lastSubPage ~= nil and f.subpage ~= nil then
+        if f.subpage ~= lastSubPage then
+            return
+        end
+    end
 
     if f.t ~= nil then
-        if f.t2 ~= nil then f.t = f.t2 end
+        if f.t2 ~= nil then
+            f.t = f.t2
+        end
 
-        if f.label ~= nil then f.t = "    " .. f.t end
+        if f.label ~= nil then
+            f.t = "    " .. f.t
+        end
     end
 
     if f.label ~= nil then
@@ -1138,7 +1228,9 @@ local function fieldLabel(f, i, l)
         local labelValue = label.t
         local labelID = label.label
 
-        if label.t2 ~= nil then labelValue = label.t2 end
+        if label.t2 ~= nil then
+            labelValue = label.t2
+        end
         if f.t ~= nil then
             labelName = labelValue
         else
@@ -1146,7 +1238,9 @@ local function fieldLabel(f, i, l)
         end
 
         if f.label ~= lastLabel then
-            if label.type == nil then label.type = 0 end
+            if label.type == nil then
+                label.type = 0
+            end
 
             formLineCnt = formLineCnt + 1
             line = form.addLine(labelName)
@@ -1164,15 +1258,15 @@ local function fieldHeader(title)
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
-	if radio.navButtonOffset ~= nil then
-		 colStart =  colStart - radio.navButtonOffset 
-	end
-	
-	if radio.buttonWidth == nil then
-		buttonW = (w - colStart) / 3 - padding
-	else
-		buttonW = radio.buttonWidth
-	end
+    if radio.navButtonOffset ~= nil then
+        colStart = colStart - radio.navButtonOffset
+    end
+
+    if radio.buttonWidth == nil then
+        buttonW = (w - colStart) / 3 - padding
+    else
+        buttonW = radio.buttonWidth
+    end
     buttonH = radio.buttonHeight
     line = form.addLine(title)
     rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
@@ -1181,50 +1275,44 @@ end
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 
     uiState = uiStatus.pages
-	mspDataLoaded = false
+    mspDataLoaded = false
 
-	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+    Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
-	form.clear()
+    form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-	lcdNeedsInvalidate = true
+    lcdNeedsInvalidate = true
 
-	isLoading = true
+    isLoading = true
 
-	print("Finished: rf2ethos.openPageDefaultLoader")
-	
-	if environment.simulation == true then
-		rf2ethos.openPageDefault(idx, subpage, title, script)
-	end
-	
+    print("Finished: rf2ethos.openPageDefaultLoader")
+
+    if environment.simulation == true then
+        rf2ethos.openPageDefault(idx, subpage, title, script)
+    end
+
 end
 
 function rf2ethos.openPageDefault(idx, subpage, title, script)
     local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
-
-	local fieldAR = {}
+    local fieldAR = {}
 
     uiState = uiStatus.pages
 
     longPage = false
-
-
-
 
     form.clear()
 
     lastPage = script
 
     fieldHeader(title)
-
-
 
     formLineCnt = 0
 
@@ -1256,28 +1344,27 @@ end
 function rf2ethos.openPageSERVOSLoader(idx, title, script)
 
     uiState = uiStatus.pages
-	mspDataLoaded = false
+    mspDataLoaded = false
 
-	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+    Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
-	form.clear()
+    form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-	lcdNeedsInvalidate = true
-	isLoading = true
-	
-	if environment.simulation == true then
-		rf2ethos.openPageSERVOS(idx, title, script)
-	end	
-	
-	print("Finished: rf2ethos.openPageSERVOS")
-end
+    lcdNeedsInvalidate = true
+    isLoading = true
 
+    if environment.simulation == true then
+        rf2ethos.openPageSERVOS(idx, title, script)
+    end
+
+    print("Finished: rf2ethos.openPageSERVOS")
+end
 
 function rf2ethos.openPageSERVOS(idx, title, script)
     local LCD_W, LCD_H = rf2ethos.getWindowSize()
@@ -1298,11 +1385,9 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
     longPage = false
 
-
     form.clear()
 
     lastPage = script
-
 
     fieldHeader(title)
 
@@ -1331,9 +1416,9 @@ function rf2ethos.openPageSERVOS(idx, title, script)
                 return value
             end, function(value)
                 Page.servoChanged(Page, value)
-					-- trigger RELOAD
-					wasSaving=true
-					createForm = true
+                -- trigger RELOAD
+                wasSaving = true
+                createForm = true
                 return true
             end)
         else
@@ -1348,13 +1433,19 @@ function rf2ethos.openPageSERVOS(idx, title, script)
                 end)
                 if f.default ~= nil then
                     local default = f.default * decimalInc(f.decimals)
-                    if f.mult ~= nil then default = default * f.mult end
+                    if f.mult ~= nil then
+                        default = default * f.mult
+                    end
                     field:default(default)
                 else
                     field:default(0)
                 end
-                if f.decimals ~= nil then field:decimals(f.decimals) end
-                if f.unit ~= nil then field:suffix(f.unit) end
+                if f.decimals ~= nil then
+                    field:decimals(f.decimals)
+                end
+                if f.unit ~= nil then
+                    field:suffix(f.unit)
+                end
             end
         end
     end
@@ -1365,26 +1456,26 @@ end
 function rf2ethos.openPagePIDLoader(idx, title, script)
 
     uiState = uiStatus.pages
-	mspDataLoaded = false
+    mspDataLoaded = false
 
-	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+    Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
-	form.clear()
+    form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-	lcdNeedsInvalidate = true
-	isLoading = true
-	
-	if environment.simulation == true then
-		rf2ethos.openPagePID(idx, title, script)
-	end		
-	
-	print("Finished: rf2ethos.openPagePID")
+    lcdNeedsInvalidate = true
+    isLoading = true
+
+    if environment.simulation == true then
+        rf2ethos.openPagePID(idx, title, script)
+    end
+
+    print("Finished: rf2ethos.openPagePID")
 end
 
 function rf2ethos.openPagePID(idx, title, script)
@@ -1428,7 +1519,9 @@ function rf2ethos.openPagePID(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do _G["RF2ETHOS_PIDROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(Page.rows) do
+        _G["RF2ETHOS_PIDROWS_" .. ri] = form.addLine(rv)
+    end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1456,13 +1549,19 @@ function rf2ethos.openPagePID(idx, title, script)
         end)
         if f.default ~= nil then
             local default = f.default * decimalInc(f.decimals)
-            if f.mult ~= nil then default = default * f.mult end
+            if f.mult ~= nil then
+                default = default * f.mult
+            end
             field:default(default)
         else
             field:default(0)
         end
-        if f.decimals ~= nil then field:decimals(f.decimals) end
-        if f.unit ~= nil then field:suffix(f.unit) end
+        if f.decimals ~= nil then
+            field:decimals(f.decimals)
+        end
+        if f.unit ~= nil then
+            field:suffix(f.unit)
+        end
     end
 
     -- display menu at footer
@@ -1476,30 +1575,29 @@ function rf2ethos.openPagePID(idx, title, script)
     lcdNeedsInvalidate = true
 end
 
-
 function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 
     uiState = uiStatus.pages
-	mspDataLoaded = false
+    mspDataLoaded = false
 
-	Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
+    Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages/" .. script))()
     collectgarbage()
 
-	form.clear()
+    form.clear()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-	lcdNeedsInvalidate = true
-	isLoading = true
+    lcdNeedsInvalidate = true
+    isLoading = true
 
-	if environment.simulation == true then
-		rf2ethos.openPageRATES(idx, subpage, title, script)
-	end		
-	
-	print("Finished: rf2ethos.openPageRATES")
+    if environment.simulation == true then
+        rf2ethos.openPageRATES(idx, subpage, title, script)
+    end
+
+    print("Finished: rf2ethos.openPageRATES")
 end
 
 function rf2ethos.openPageRATES(idx, subpage, title, script)
@@ -1509,9 +1607,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 
     longPage = false
 
-
     form.clear()
-
 
     fieldHeader(title)
 
@@ -1546,7 +1642,9 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(Page.rows) do _G["RF2ETHOS_RATEROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(Page.rows) do
+        _G["RF2ETHOS_RATEROWS_" .. ri] = form.addLine(rv)
+    end
 
     for i = 1, #Page.fields do
         local f = Page.fields[i]
@@ -1579,15 +1677,25 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
             end)
             if f.default ~= nil then
                 local default = f.default * decimalInc(f.decimals)
-                if f.mult ~= nil then default = math.floor(default * f.mult) end
-                if f.scale ~= nil then default = math.floor(default / f.scale) end
+                if f.mult ~= nil then
+                    default = math.floor(default * f.mult)
+                end
+                if f.scale ~= nil then
+                    default = math.floor(default / f.scale)
+                end
                 field:default(default)
             else
                 field:default(0)
             end
-            if f.decimals ~= nil then field:decimals(f.decimals) end
-            if f.unit ~= nil then field:suffix(f.unit) end
-            if f.step ~= nil then field:step(f.step) end
+            if f.decimals ~= nil then
+                field:decimals(f.decimals)
+            end
+            if f.unit ~= nil then
+                field:suffix(f.unit)
+            end
+            if f.step ~= nil then
+                field:step(f.step)
+            end
         end
     end
 
@@ -1605,12 +1713,15 @@ end
 local function getSection(id, sections)
     for i, v in ipairs(sections) do
         print(v)
-        if id ~= nil then if v.section == id then return v end end
+        if id ~= nil then
+            if v.section == id then
+                return v
+            end
+        end
     end
 end
 
 function rf2ethos.openMainMenu()
-
 
     if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
         return
@@ -1625,7 +1736,7 @@ function rf2ethos.openMainMenu()
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
-    local w = (windowWidth-(padding*numPerRow)-padding - 5) / numPerRow
+    local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
     -- local x = 0
 
     local y = radio.buttonPaddingTop
@@ -1645,7 +1756,9 @@ function rf2ethos.openMainMenu()
                     x = padding
                 end
 
-                if lc >= 1 then x = padding + (w + padding)*lc end
+                if lc >= 1 then
+                    x = padding + (w + padding) * lc
+                end
 
                 form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
                     if pvalue.script == "pids.lua" then
@@ -1661,7 +1774,9 @@ function rf2ethos.openMainMenu()
 
                 lc = lc + 1
 
-                if lc == numPerRow then lc = 0 end
+                if lc == numPerRow then
+                    lc = 0
+                end
             end
         end
     end
@@ -1681,7 +1796,9 @@ local function create()
             rssiSensor = system.getSource("RSSI 900M")
             if not rssiSensor then
                 rssiSensor = system.getSource("Rx RSSI1")
-                if not rssiSensor then rssiSensor = system.getSource("Rx RSSI2") end
+                if not rssiSensor then
+                    rssiSensor = system.getSource("Rx RSSI2")
+                end
             end
         end
     end
@@ -1698,7 +1815,9 @@ local function create()
     MainMenu = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages.lua"))()
 
     -- force page to get pickup data as it loads in
-    form.onWakeup(function() rf2ethos.wakeupForm() end)
+    form.onWakeup(function()
+        rf2ethos.wakeupForm()
+    end)
 
     rf2ethos.openMainMenu()
 end
@@ -1709,14 +1828,14 @@ local function close()
     pageTitle = nil
     pageFile = nil
     system.exit()
-	return true
+    return true
 end
 
 local icon = lcd.loadMask("/scripts/RF2ETHOS/RF.png")
 
-local function init() 
-	system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close}) 
-	system.compile("/scripts/RF2ETHOS/main.lua")
-	end
+local function init()
+    system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close})
+    system.compile("/scripts/RF2ETHOS/main.lua")
+end
 
 return {init = init}

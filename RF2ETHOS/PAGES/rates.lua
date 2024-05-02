@@ -3,7 +3,9 @@ local template = assert(rf2ethos.loadScriptRF2ETHOS(radio.template))()
 local labels = {}
 local fields = {}
 
-if RateTable == nil then RateTable = defaultRateTable end
+if RateTable == nil then
+    RateTable = defaultRateTable
+end
 
 -- NONE
 if RateTable == 0 then
@@ -98,12 +100,12 @@ elseif RateTable == 4 then
 
     rTableName = "ACTUAL"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
-	
-	if radio.text == 2 then
-		cols = {"Cntr. Sens.", "Max Rate", "Expo"}
-	else
-		cols = {"Center Sensitivity", "Max Rate", "Expo"}
-	end
+
+    if radio.text == 2 then
+        cols = {"Cntr. Sens.", "Max Rate", "Expo"}
+    else
+        cols = {"Center Sensitivity", "Max Rate", "Expo"}
+    end
 
     -- rc rate
     fields[#fields + 1] = {row = 1, col = 1, subpage = 1, min = 0, max = 100, vals = {2}, default = 36, mult = 10, step = 10}
@@ -153,7 +155,9 @@ fields[#fields + 1] = {
     max = 5,
     vals = {1},
     table = {[0] = "NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"},
-    postEdit = function(self) self.flagRateChange(self, true) end
+    postEdit = function(self)
+        self.flagRateChange(self, true)
+    end
 }
 
 labels[#labels + 1] = {t = "Roll dynamics", subpage = 2, label = "rolldynamics", inline_size = 15}

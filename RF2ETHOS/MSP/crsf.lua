@@ -11,7 +11,9 @@ local crsfMspCmd = 0
 
 protocol.mspSend = function(payload)
     local payloadOut = {CRSF_ADDRESS_BETAFLIGHT, CRSF_ADDRESS_RADIO_TRANSMITTER}
-    for i = 1, #(payload) do payloadOut[i + 2] = payload[i] end
+    for i = 1, #(payload) do
+        payloadOut[i + 2] = payload[i]
+    end
     return crsf.pushFrame(crsfMspCmd, payloadOut)
 end
 
@@ -37,7 +39,9 @@ protocol.mspPoll = function()
             end
 --]]
             local mspData = {}
-            for i = 3, #data do mspData[i - 2] = data[i] end
+            for i = 3, #data do
+                mspData[i - 2] = data[i]
+            end
             return mspData
         elseif cmd == nil then
             return nil

@@ -19,7 +19,7 @@ fields[#fields + 1] = {t = "Collective", inline = 2, label = "hover", min = 0, m
 
 labels[#labels + 1] = {subpage = 1, t = "Flip", label = "flip", inline_size = 15}
 fields[#fields + 1] = {t = "Fail time", inline = 2, label = "flip", min = 0, max = 250, default = 100, unit = "s", vals = {7}, decimals = 1, scale = 10}
-fields[#fields + 1] = {t = "Exit time" , inline = 1, label = "flip", min = 0, max = 250, default = 50, unit = "s", vals = {8}, decimals = 1, scale = 10}
+fields[#fields + 1] = {t = "Exit time", inline = 1, label = "flip", min = 0, max = 250, default = 50, unit = "s", vals = {8}, decimals = 1, scale = 10}
 
 labels[#labels + 1] = {subpage = 1, t = "Gains", label = "rescue", inline_size = 15}
 fields[#fields + 1] = {t = "Level", label = "rescue", inline = 2, min = 5, max = 250, default = 40, unit = nil, vals = {4}}
@@ -29,7 +29,7 @@ labels[#labels + 1] = {subpage = 1, t = "", label = "rescue2", inline_size = 36}
 fields[#fields + 1] = {t = "Rate", label = "rescue2", inline = 1, min = 1, max = 1000, default = 250, unit = "°/s", vals = {25, 26}}
 
 labels[#labels + 1] = {subpage = 1, t = "", label = "rescue3", inline_size = 36}
-fields[#fields + 1] = {t = "Accel", label = "rescue3", inline = 1 , min = 1, max = 10000, default = 2000, unit = "°/^2", vals = {27, 28}}
+fields[#fields + 1] = {t = "Accel", label = "rescue3", inline = 1, min = 1, max = 10000, default = 2000, unit = "°/^2", vals = {27, 28}}
 
 return {
     read = 146, -- MSP_RESCUE_PROFILE

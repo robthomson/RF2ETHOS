@@ -18,7 +18,9 @@ local mspTxIdx = 1
 local mspTxCRC = 0
 
 function mspProcessTxQ()
-    if (#(mspTxBuf) == 0) then return false end
+    if (#(mspTxBuf) == 0) then
+        return false
+    end
     -- if not sensor:idle() then  -- was protocol.push() -- maybe sensor:idle()  here??
     -- print("Sensor not idle... waiting to send cmd: "..tostring(mspLastReq))
     -- return true
@@ -64,12 +66,16 @@ function mspSendRequest(cmd, payload)
     end
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
-        if environment.simulation ~= true then print("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd)) end
+        if environment.simulation ~= true then
+            print("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd))
+        end
         return nil
     end
     mspTxBuf[1] = #(payload)
     mspTxBuf[2] = cmd & 0xFF -- MSP command
-    for i = 1, #(payload) do mspTxBuf[i + 2] = payload[i] & 0xFF end
+    for i = 1, #(payload) do
+        mspTxBuf[i + 2] = payload[i] & 0xFF
+    end
     mspLastReq = cmd
 end
 
@@ -95,7 +101,9 @@ local function mspReceivedReply(payload)
             idx = idx + 1
         end
         mspRxCRC = mspRxSize ~ mspRxReq
-        if mspRxReq == mspLastReq then mspStarted = true end
+        if mspRxReq == mspLastReq then
+            mspStarted = true
+        end
     elseif not mspStarted then
         -- print("  mspReceivedReply: missing Start flag")
         return nil
@@ -129,7 +137,9 @@ end
 
 function mspPollReply()
 
-    if environment.simulation == true then return 1, "ababababababababababababababababsa", 1 end
+    if environment.simulation == true then
+        return 1, "ababababababababababababababababsa", 1
+    end
 
     local startTime = rf2ethos.getTime()
     while (rf2ethos.getTime() - startTime < 5) do

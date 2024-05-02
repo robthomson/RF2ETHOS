@@ -30,7 +30,7 @@ return {
             createForm = true
             reloadServos = true
         end
-        --self.fields[1].max = servoCount - 1
+        -- self.fields[1].max = servoCount - 1
         self.servoConfiguration = {}
         for i = 1, self.servoCount do
             self.servoConfiguration[i] = {}

@@ -9,16 +9,26 @@ local lastSensorId, lastFrameId, lastDataId, lastValue
 protocol.mspSend = function(payload)
     local dataId = payload[1] + (payload[2] << 8)
     local value = 0
-    for i = 3, #payload do value = value + (payload[i] << ((i - 3) * 8)) end
+    for i = 3, #payload do
+        value = value + (payload[i] << ((i - 3) * 8))
+    end
     -- return protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
     return 1
 end
 
-protocol.mspRead = function(cmd) return mspSendRequest(cmd, {}) end
+protocol.mspRead = function(cmd)
+    return mspSendRequest(cmd, {})
+end
 
-protocol.mspWrite = function(cmd, payload) return mspSendRequest(cmd, payload) end
+protocol.mspWrite = function(cmd, payload)
+    return mspSendRequest(cmd, payload)
+end
 
 -- Discards duplicate data from lua input buffer
-local function smartPortTelemetryPop() return end
+local function smartPortTelemetryPop()
+    return
+end
 
-protocol.mspPoll = function() return nil end
+protocol.mspPoll = function()
+    return nil
+end
