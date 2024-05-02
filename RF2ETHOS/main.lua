@@ -8,7 +8,6 @@ local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 apiVersion = 0
 
 local SIM_ENABLE_RSSI = true -- set this to true to enable debugging of msg boxes in sim mode
-local MSGBOXPRO_HIDE_EXIT = true  --set this to turn exit button on and off on msgBoxPRO
 
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
@@ -368,23 +367,23 @@ function rf2ethos.msgBoxPRO(str)
     lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
 
 
-	if MSGBOXPRO_HIDE_EXIT ~= true then
-		-- create a button
-		str_exit = "EXIT"
-		tsizeW, tsizeH = lcd.getTextSize(str_exit)	
-		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
-		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
-	 
-		lcd.color(lcd.RGB(248, 176, 56))
-		lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-		
-		if isDARKMODE then
-			lcd.color(lcd.RGB(64, 64, 64))
-		else
-			lcd.color(lcd.RGB(208, 208, 208))
-		end	
-		lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
-	end
+
+	-- create a button
+	str_exit = "EXIT"
+	tsizeW, tsizeH = lcd.getTextSize(str_exit)	
+	buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding*2)
+	buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding*2)
+ 
+	lcd.color(lcd.RGB(248, 176, 56))
+	lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
+	
+	if isDARKMODE then
+		lcd.color(lcd.RGB(64, 64, 64))
+	else
+		lcd.color(lcd.RGB(208, 208, 208))
+	end	
+	lcd.drawText(buttonX + radio.buttonPadding/2 ,buttonY + radio.buttonPadding/2, str_exit)
+
 
     return
 end
@@ -437,7 +436,7 @@ end
 local function event(widget, category, value, x, y)
 	print("Event received:", category, value, x, y)
 
-	if msgBoxPRO == true and MSGBOXPRO_HIDE_EXIT ~= true then
+	if msgBoxPRO == true then
 	
 		local w, h = lcd.getWindowSize()
 		if w < 500 then boxW = w else boxW = w - math.floor((w * 2)/100) end
@@ -452,10 +451,13 @@ local function event(widget, category, value, x, y)
 		buttonH = tsizeH + (radio.buttonPadding*2)
 			
 		if (
-			(value == 97) or ((value == 16641 or value == 16640) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
-			
+			(value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
+
+
+			system.killEvents(value)
 			system.exit()
-			return(false)
+
+			return(true)
 			
 		end
   
@@ -1707,6 +1709,7 @@ local function close()
     pageTitle = nil
     pageFile = nil
     system.exit()
+	return true
 end
 
 local icon = lcd.loadMask("/scripts/RF2ETHOS/RF.png")
