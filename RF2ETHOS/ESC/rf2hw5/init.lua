@@ -1,4 +1,4 @@
-local toolName = "HobbyWing ESC"
+local toolName = "HobbyWing"
 moduleName = "RF2HW5"
 moduleTitle = "HobbyWing ESC v0.42"
 

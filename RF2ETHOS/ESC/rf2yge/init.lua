@@ -1,4 +1,4 @@
-local toolName = "YGE ESC"
+local toolName = "YGE"
 moduleName = "RF2YGE"
 moduleTitle = "YGE ESC v0.42"
 

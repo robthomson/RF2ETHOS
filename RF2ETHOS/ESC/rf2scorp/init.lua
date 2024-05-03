@@ -1,4 +1,4 @@
-local toolName = "Scorpion ESC"
+local toolName = "Scorpion"
 moduleName = "RF2SCORP"
 moduleTitle = "Scorpion ESC v0.42"
 

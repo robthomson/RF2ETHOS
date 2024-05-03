@@ -481,13 +481,16 @@ local function event(widget, category, value, x, y)
 
         if ((value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
 
+			msgBoxPRO = false
             system.killEvents(value)
             system.exit()
+			lcd.invalidate()
 
             return (true)
 
         end
-
+	else
+		msgBoxPRO = false
     end
 
     return false
@@ -513,11 +516,15 @@ function paint()
         -- version check
         rf2ethos.msgBoxPRO(ETHOS_VERSION_STR)
         return
+	else
+		msgBoxPRO = false
     end
 
     if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
         if telemetryState ~= 1 then
             rf2ethos.msgBoxPRO("NO RF LINK")
+		else
+			msgBoxPRO = false
         end
     end
     if isSaving then
