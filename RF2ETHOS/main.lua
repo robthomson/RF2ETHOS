@@ -68,7 +68,8 @@ local lastScript = nil
 local ESC_MENU = false
 local ESC_FOLDER = nil
 local ESC_SCRIPT = nil
-
+local ESC_UNKNOWN = false	
+		
 lcdNeedsInvalidate = false
 
 protocol = nil
@@ -225,6 +226,9 @@ local function processMspReply(cmd, rx_buf, err)
 			print("ESC not ready, waiting...")
 		end
     elseif ESC_MENU == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
+		ESC_UNKNOWN = true
+        mspDataLoaded = true		
+		lcdNeedsInvalidate = true
 		if MSP_DEBUG == true then
 			print("ESC not recognized")
 		end
@@ -248,7 +252,10 @@ local function processMspReply(cmd, rx_buf, err)
         end
         mspDataLoaded = true
         lcdNeedsInvalidate = true
+		ESC_UNKNOWN = false		
     end
+	
+	
 end
 
 local function requestPage()
@@ -609,6 +616,7 @@ function paint()
             rf2ethos.msgBox("Loading...")
         end
     end
+	
 end
 
 function rf2ethos.wakeupForm()
@@ -758,6 +766,8 @@ function wakeup(widget)
                     rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
                     rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCToolLoader(ESC_FOLDER)					
 				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT ~= nil then
 					rf2ethos.openESCFormLoader(ESC_FOLDER,ESC_SCRIPT)			
                 else
@@ -771,6 +781,8 @@ function wakeup(widget)
                     rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
                     rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
+				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCTool(ESC_FOLDER)
 				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT ~= nil then
 					rf2ethos.openESCForm(ESC_FOLDER,ESC_SCRIPT)
                 else
@@ -1759,7 +1771,7 @@ function rf2ethos.openPageESC(idx, title, script)
 		end
 
 		form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
-				rf2ethos.openPageESCTool(pvalue.folder)
+				rf2ethos.openPageESCToolLoader(pvalue.folder)
 		end)
 
 
@@ -1775,6 +1787,42 @@ function rf2ethos.openPageESC(idx, title, script)
 end
 
 
+-- preload the page for the specic module of esc and display
+-- a then pass on to the actual form display function
+function rf2ethos.openPageESCToolLoader(folder)
+
+
+
+	ESC_FOLDER = folder
+	ESC_SCRIPT = nil
+	ESC_MENU = true
+
+
+    uiState = uiStatus.pages
+    mspDataLoaded = false
+
+    ESC.init = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/init.lua"))()
+	
+
+    Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/esc_info.lua"))()
+    form.clear()
+
+    --lastIdx = idx
+    --lastTitle = title
+    --lastScript = script
+
+    lcdNeedsInvalidate = true
+
+    isLoading = true
+
+    if environment.simulation == true then
+        rf2ethos.openPageESCTool(folder)
+    end
+
+end
+
+
+
 -- initialise menu for specific type of esc
 -- basically we load libraries then read 
 -- /scripts/RF2ETHOS/ESC/<TYPE>/pages.lua
@@ -1784,9 +1832,9 @@ function rf2ethos.openPageESCTool(folder)
 
     ESC.init = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/init.lua"))()
 
-	mspDataLoaded = false
-    uiState = uiStatus.mainMenu
-
+	--mspDataLoaded = false
+    --uiState = uiStatus.mainMenu
+	uiState = uiStatus.pages
 
     local windowWidth, windowHeight = lcd.getWindowSize()
 
@@ -1804,9 +1852,19 @@ function rf2ethos.openPageESCTool(folder)
         rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
     end)  
    
-
-	
     ESC.pages = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/pages.lua"))()
+
+	if Page.escinfo then
+		local model 	= Page.escinfo[1].t
+		local version 	= Page.escinfo[2].t
+		local fw 		= Page.escinfo[3].t
+		
+		if model == "" or version == "" then
+			model = "UNKNOWN ESC"
+		end
+		
+		line = form.addLine(model .. " " .. version .. " " .. fw)	
+	end
 
 
     local numPerRow = 1
@@ -1826,9 +1884,13 @@ function rf2ethos.openPageESCTool(folder)
 			x = padding + (w + padding) * lc
 		end
 
-		form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
+		field = form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
 				rf2ethos.openESCFormLoader(folder,pvalue.script)
 		end)
+		if ESC_UNKNOWN == true then
+			field:enable(false)
+		end
+		
 
 		lc = lc + 1
 
@@ -1852,6 +1914,8 @@ function rf2ethos.openESCFormLoader(folder,script)
 
     uiState = uiStatus.pages
     mspDataLoaded = false
+	
+	
 
     Page = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/PAGES/" .. script))()
     collectgarbage()
