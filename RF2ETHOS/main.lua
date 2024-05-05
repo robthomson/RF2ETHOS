@@ -5,6 +5,9 @@ local LUA_VERSION = "2.0 - 240229"
 local ETHOS_VERSION = 157
 local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 
+local MSP_DEBUG = false
+local VALUES_DEBUG = false
+
 apiVersion = 0
 
 local SIM_ENABLE_RSSI = false -- set this to true to enable debugging of msg boxes in sim mode
@@ -74,6 +77,8 @@ sensor = nil
 
 rf2ethos = {}
 
+
+
 local translations = {en = "RF2 ETHOS"}
 
 local function name(widget)
@@ -94,6 +99,9 @@ end
 local function saveSettings()
     if Page.values then
         local payload = Page.values
+		if ESC_MENU == true then
+			payload[2] = 0
+		end
         if Page.preSave then
             payload = Page.preSave(Page)
         end
@@ -140,7 +148,10 @@ local function invalidatePages()
     lcdNeedsInvalidate = true
 end
 
+
+
 function rf2ethos.dataBindFields()
+
     if Page.fields ~= nil and Page.values ~= nil then
         for i = 1, #Page.fields do
             if #Page.values >= Page.minBytes then
@@ -148,7 +159,12 @@ function rf2ethos.dataBindFields()
                 if f.vals then
                     f.value = 0
                     for idx = 1, #f.vals do
-                        local raw_val = Page.values[f.vals[idx]] or 0
+						local raw_val
+						if ESC_MENU == true then
+							raw_val = Page.values[f.vals[idx] + mspHeaderBytes] or 0
+						else	
+							raw_val = Page.values[f.vals[idx]] or 0
+						end	
                         raw_val = raw_val << ((idx - 1) * 8)
                         f.value = f.value | raw_val
                     end
@@ -163,14 +179,27 @@ function rf2ethos.dataBindFields()
     end
 end
 
+
+
+
 -- Run lcd.invalidate() if anything actionable comes back from it.
 local function processMspReply(cmd, rx_buf, err)
     if Page and rx_buf ~= nil then
         if environment.simulation ~= true then
-            -- print(
-            --    "Page is processing reply for cmd " ..
-            --        tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
-            -- )
+			if MSP_DEBUG == true then
+				if ESC_MENU == true then
+					-- 1 extra byte - for esc signature?
+					 print(
+						"Page is processing reply for cmd " ..
+							tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. (Page.minBytes + 1)
+					 )
+				else
+					 print(
+						"Page is processing reply for ESC cmd " ..
+							tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes
+					 )				
+				end
+			end
         end
     end
     if not Page or not rx_buf then
@@ -191,17 +220,31 @@ local function processMspReply(cmd, rx_buf, err)
             rebootFc()
         end
         invalidatePages()
+    elseif ESC_MENU == true and (cmd == Page.read and err)  then
+		if MSP_DEBUG == true then
+			print("ESC not ready, waiting...")
+		end
+    elseif ESC_MENU == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
+		if MSP_DEBUG == true then
+			print("ESC not recognized")
+		end
     elseif (cmd == Page.read) and (#rx_buf > 0) then
-        -- print("processMspReply:  Page.read and non-zero rx_buf")
+		if MSP_DEBUG == true then
+         print("processMspReply:  Page.read and non-zero rx_buf")
+		end 
         Page.values = rx_buf
         if Page.postRead then
-            -- print("Postread executed")
+			if MSP_DEBUG == true then
+             print("Postread executed")
+			end 
             Page.postRead(Page)
         end
         rf2ethos.dataBindFields()
         if Page.postLoad then
             Page.postLoad(Page)
-            -- print("Postload executed")
+			if MSP_DEBUG == true then
+             print("Postload executed")
+			end 
         end
         mspDataLoaded = true
         lcdNeedsInvalidate = true
@@ -301,6 +344,11 @@ end
 
 function rf2ethos.getFieldValue(f)
 
+	if VALUES_DEBUG == true then
+		print(f.t .. ":" .. f.value)
+	end
+
+
     local v
 
     if f.value ~= nil then
@@ -325,12 +373,18 @@ function rf2ethos.saveValue(currentField)
         return
     end
 
+
+
     local f = Page.fields[currentField]
     local scale = f.scale or 1
     local step = f.step or 1
 
     for idx = 1, #f.vals do
-        Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
+		if ESC_MENU == true then
+			Page.values[f.vals[idx] + mspHeaderBytes] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)		
+		else
+			Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
+		end	
     end
     if f.upd and Page.values then
         f.upd(Page)
@@ -704,6 +758,8 @@ function wakeup(widget)
                     rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
                     rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT ~= nil then
+					rf2ethos.openESCFormLoader(ESC_FOLDER,ESC_SCRIPT)			
                 else
                     rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
@@ -715,6 +771,8 @@ function wakeup(widget)
                     rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
                 elseif lastScript == "servos.lua" then
                     rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
+				elseif ESC_MENU == true and ESC_FOLDER ~= nil and ESC_SCRIPT ~= nil then
+					rf2ethos.openESCForm(ESC_FOLDER,ESC_SCRIPT)
                 else
                     rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
@@ -900,6 +958,8 @@ end
 function rf2ethos.navigationButtonsEscForm(x, y, w, h)
     form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
+		ESC_MENU = false
+		 collectgarbage()
         rf2ethos.openPageESCTool(ESC_FOLDER)
     end)
     form.addTextButton(line, {x = colStart + buttonW + padding, y = y, w = buttonW, h = h}, "SAVE", function()
@@ -920,7 +980,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 end
             }
         }
-        form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+        form.openDialog("SAVE SETTINGS TO ESC", "Save current page to ESC", buttons)
     end)
     form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "RELOAD", function()
         local buttons = {
@@ -1125,6 +1185,7 @@ local function fieldChoice(f, i)
 
     field = form.addChoiceField(line, posField, convertPageValueTable(f.table), function()
         local value = rf2ethos.getFieldValue(f)
+	
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
@@ -1292,6 +1353,8 @@ local function fieldLabel(f, i, l)
 
     if f.label ~= nil then
         local label = getLabel(f.label, l)
+
+
 
         local labelValue = label.t
         local labelID = label.label
@@ -1644,7 +1707,11 @@ function rf2ethos.openPagePID(idx, title, script)
 end
 
 
+-- display the list of known esc types
+-- /scripts/RF2ETHOS/pages/esc.lua
 function rf2ethos.openPageESC(idx, title, script)
+
+	print("rf2ethos.openPageESC")
 
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
@@ -1707,7 +1774,13 @@ function rf2ethos.openPageESC(idx, title, script)
 
 end
 
+
+-- initialise menu for specific type of esc
+-- basically we load libraries then read 
+-- /scripts/RF2ETHOS/ESC/<TYPE>/pages.lua
 function rf2ethos.openPageESCTool(folder)
+
+	print("rf2ethos.openPageESCTool")
 
     ESC.init = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/ESC/" .. folder .. "/init.lua"))()
 
@@ -1766,7 +1839,11 @@ function rf2ethos.openPageESCTool(folder)
 
 end
 
+-- preload the page for the specic module of esc and display
+-- a then pass on to the actual form display function
 function rf2ethos.openESCFormLoader(folder,script)
+
+
 
 	ESC_FOLDER = folder
 	ESC_SCRIPT = script
@@ -1790,7 +1867,7 @@ function rf2ethos.openESCFormLoader(folder,script)
     isLoading = true
 	
 
-
+	
 
     if environment.simulation == true then
         rf2ethos.openESCForm(folder, script)
@@ -1798,19 +1875,17 @@ function rf2ethos.openESCFormLoader(folder,script)
 
 end
 
+--
 function rf2ethos.openESCForm(folder,script)
+
+
+
     local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     local fieldAR = {}
-
     uiState = uiStatus.pages
-
     longPage = false
-
-
 	form.clear()
-
-
 
     local windowWidth, windowHeight = lcd.getWindowSize()
     local y = radio.buttonPaddingTop
@@ -1829,9 +1904,17 @@ function rf2ethos.openESCForm(folder,script)
         buttonW = radio.buttonWidth
     end
     buttonH = radio.buttonHeight
-   line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName .. ' / ' .. Page.title)
+    line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName .. ' / ' .. Page.title)
+   
     rf2ethos.navigationButtonsEscForm(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 
+
+	if Page.escinfo then
+		local model 	= Page.escinfo[1].t
+		local version 	= Page.escinfo[2].t
+		local fw 		= Page.escinfo[3].t
+		line = form.addLine(model .. " " .. version .. " " .. fw)	
+	end
 
     formLineCnt = 0
 
@@ -1854,10 +1937,11 @@ function rf2ethos.openESCForm(folder,script)
 
     if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2ethos.navigationButtons(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtonsEscForm(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
     lcdNeedsInvalidate = true
+
 end
 
 
@@ -2113,6 +2197,9 @@ end
 
 local function close()
     -- print("Close")
+	ESC_MENU = false
+	ESC_FOLDER = nil
+	ESC_SCRIPT = nil
     pageLoaded = 100
     pageTitle = nil
     pageFile = nil

@@ -1,15 +1,16 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
 
 local startupPower = {
-    [0] = "level-1",
-    "level-2",
-    "level-3",
-    "level-4",
-    "level-5",
-    "level-6",
-    "level-7",
+    [0] = "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
 }
 
 local enabledDisabled = {
@@ -24,16 +25,24 @@ local brakeType = {
     "Reverse"
 }
 
-labels[#labels + 1] = { t = "ESC",                    }
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
 
+labels[#labels + 1] = { t = "Motor",  label="motor1", inline_size=40.6                }
+fields[#fields + 1] = { t = "Timing",                 inline=1, label="motor1", min = 0, max = 30, vals = { 76 } }
 
-labels[#labels + 1] = { t = "Motor",                   }
-fields[#fields + 1] = { t = "Timing",                 min = 0, max = 30, vals = { 76 } }
-fields[#fields + 1] = { t = "Startup Power",          min = 0, max = #startupPower, vals = { 79 }, table = startupPower }
-fields[#fields + 1] = { t = "Active Freewheel",       min = 0, max = #enabledDisabled, vals = { 78 }, table = enabledDisabled }
+labels[#labels + 1] = { t = "",  label="motor2", inline_size=40.6                }
+fields[#fields + 1] = { t = "Startup Power",          inline=1,label="motor2", min = 0, max = #startupPower, vals = { 79 }, table = startupPower }
 
-fields[#fields + 1] = { t = "Brake Type",             min = 0, max = #brakeType, vals = { 74 }, table = brakeType }
-fields[#fields + 1] = { t = "Brake Force %",          min = 0, max = 100, vals = { 75 } }
+labels[#labels + 1] = { t = "",  label="motor3", inline_size=40.6                }
+fields[#fields + 1] = { t = "Active Freewheel",       inline=1, label="motor3", min = 0, max = #enabledDisabled, vals = { 78 }, table = enabledDisabled }
+
+labels[#labels + 1] = { t = "Brake",  label="brake1", inline_size=40.6                  }
+fields[#fields + 1] = { t = "Brake Type",             inline=1, label="brake1", min = 0, max = #brakeType, vals = { 74 }, table = brakeType }
+
+labels[#labels + 1] = { t = "",  label="brake2", inline_size=40.6                }
+fields[#fields + 1] = { t = "Brake Force %",          inline=1, label="brake2", min = 0, max = 100, vals = { 75 } }
 
 return {
     read        = 217, -- MSP_ESC_PARAMETERS
@@ -44,20 +53,14 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
+	escinfo		= escinfo,
 
     postLoad = function(self)
-        -- esc type
-        local l = self.labels[1]
-        -- local type = getText(self, 33, 48)
-        local name = getText(self, 49, 64)
-        l.t = name
-
-        -- HW ver
-        l = self.labels[2]
-        l.t = getText(self, 17, 32)
-
-        -- FW ver
-        l = self.labels[3]
-        l.t = getText(self, 1, 16)
+		local model = getText(self, 49, 64)
+		local version = getText(self, 17, 32)
+		local firmware = getText(self, 1, 16)			
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
     end,
 }

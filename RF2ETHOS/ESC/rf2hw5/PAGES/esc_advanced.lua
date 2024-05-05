@@ -1,6 +1,7 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
 
 local restartTime = {
     [0] = "1s",
@@ -10,20 +11,24 @@ local restartTime = {
     "3s",
 }
 
-labels[#labels + 1] = { t = "ESC",                    }
 
-labels[#labels + 1] = { t = "---",                     }
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
 
-labels[#labels + 1] = { t = "---",                     }
 
-labels[#labels + 1] = { t = "Governor",                }
-fields[#fields + 1] = { t = "P-Gain",                 min = 0, max = 9, vals = { 70 } }
-fields[#fields + 1] = { t = "I-Gain",                 min = 0, max = 9, vals = { 71 } }
+labels[#labels + 1] = { t = "Governor", label="gov",inline_size=13.4               }
+fields[#fields + 1] = { t = "P-Gain",                 inline=2, label="gov", min = 0, max = 9, vals = { 70 } }
+fields[#fields + 1] = { t = "I-Gain",                 inline=1, label="gov", min = 0, max = 9, vals = { 71 } }
 
-labels[#labels + 1] = { t = "Soft Start",              }
-fields[#fields + 1] = { t = "Startup Time",           min = 4, max = 25, vals = { 69 } }
-fields[#fields + 1] = { t = "Restart Time",           min = 0, max = #restartTime, vals = { 73 }, table = restartTime }
-fields[#fields + 1] = { t = "Auto Restart",           min = 0, max = 90, vals = { 72 } }
+labels[#labels + 1] = { t = "Soft Start",   label="start" ,inline_size=40.6            }
+fields[#fields + 1] = { t = "Startup Time",           inline=1, label="start", units="s", min = 4, max = 25, vals = { 69 } }
+
+labels[#labels + 1] = { t = "",   label="start2" ,inline_size=40.6            }
+fields[#fields + 1] = { t = "Restart Time",           inline=1, label="start2", units="s", min = 0, max = #restartTime, vals = { 73 }, table = restartTime }
+
+labels[#labels + 1] = { t = "",   label="start3" ,inline_size=40.6}
+fields[#fields + 1] = { t = "Auto Restart",           inline=1, label="start3", units="s", min = 0, max = 90, vals = { 72 } }
 
 return {
     read        = 217, -- MSP_ESC_PARAMETERS
@@ -34,21 +39,15 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
+	escinfo		= escinfo,
 
     postLoad = function(self)
-        -- esc type
-        local l = self.labels[1]
-        -- local type = getText(self, 33, 48)
-        local name = getText(self, 49, 64)
-        l.t = name
-
-        -- HW ver
-        l = self.labels[2]
-        l.t = getText(self, 17, 32)
-
-        -- FW ver
-        l = self.labels[3]
-        l.t = getText(self, 1, 16)
+		local model = getText(self, 49, 64)
+		local version = getText(self, 17, 32)
+		local firmware = getText(self, 1, 16)			
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
 
         -- Startup Time
         f = self.fields[3]

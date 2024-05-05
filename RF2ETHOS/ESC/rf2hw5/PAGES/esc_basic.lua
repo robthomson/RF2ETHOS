@@ -1,6 +1,7 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
 
 local flightMode = { 
     [0] = "Fixed Wing",
@@ -29,20 +30,29 @@ local cutoffVoltage = {
     "2.8", "2.9", "3.0", "3.1", "3.2", "3.3", "3.4", "3.5", "3.6", "3.7", "3.8",
 }
 
-labels[#labels + 1] = { t = "ESC",                     }
 
-labels[#labels + 1] = { t = "---",                     }
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
 
-labels[#labels + 1] = { t = "---",                     }
 
-fields[#fields + 1] = { t = "Flight Mode",            min = 0, max = #flightMode, vals = { 64 }, table = flightMode }
-fields[#fields + 1] = { t = "Rotation",               min = 0, max = #rotation, vals = { 77 }, table = rotation }
-fields[#fields + 1] = { t = "BEC Voltage",            min = 54, max = 84, vals = { 68 }, scale = 10 }
+labels[#labels + 1] = { t = "ESC", label="esc1",inline_size=40.6                   }
+fields[#fields + 1] = { t = "Flight Mode",            inline=1, label="esc1", min = 0, max = #flightMode, vals = { 64 }, table = flightMode }
 
-labels[#labels + 1] = { t = "Protection and Limits",   }
-fields[#fields + 1] = { t = "Lipo Cell Count",        min = 0, max = #lipoCellCount, vals = { 65 }, table = lipoCellCount }
-fields[#fields + 1] = { t = "Volt Cutoff Type",       min = 0, max = #cutoffType, vals = { 66 }, table = cutoffType }
-fields[#fields + 1] = { t = "Cuttoff Voltage",        min = 0, max = #cutoffVoltage, vals = { 67 }, table = cutoffVoltage }
+labels[#labels + 1] = { t = "", label="esc2", inline_size=40.6                   }
+fields[#fields + 1] = { t = "Rotation",               inline=1, label="esc2", min = 0, max = #rotation, vals = { 77 }, table = rotation }
+
+labels[#labels + 1] = { t = "", label="esc3",inline_size=40.6                   }
+fields[#fields + 1] = { t = "BEC Voltage",            inline=1, label="esc3", min = 54, max = 84, unit="v", decimals=1, vals = { 68 }, scale = 10 }
+
+labels[#labels + 1] = { t = "Protection and Limits", label="limits1",inline_size=40.6   }
+fields[#fields + 1] = { t = "Lipo Cell Count",        inline=1, label="limits1", min = 0, max = #lipoCellCount, vals = { 65 }, table = lipoCellCount }
+
+labels[#labels + 1] = { t = "", label="limits2",inline_size=40.6   }
+fields[#fields + 1] = { t = "Volt Cutoff Type",       inline=1, label="limits2", min = 0, max = #cutoffType, vals = { 66 }, table = cutoffType }
+
+labels[#labels + 1] = { t = "", label="limits3",inline_size=40.6   }
+fields[#fields + 1] = { t = "Cuttoff Voltage",        inline=1, label="limits3", min = 0, max = #cutoffVoltage, vals = { 67 }, table = cutoffVoltage }
 
 return {
     read        = 217, -- MSP_ESC_PARAMETERS
@@ -53,21 +63,15 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
-
+	escinfo		= escinfo,
     postLoad = function(self)
-        -- esc type
-        local l = self.labels[1]
-        -- local type = getText(self, 33, 48)
-        local name = getText(self, 49, 64)
-        l.t = name
 
-        -- HW ver
-        l = self.labels[2]
-        l.t = getText(self, 17, 32)
-
-        -- FW ver
-        l = self.labels[3]
-        l.t = getText(self, 1, 16)
+		local model = getText(self, 49, 64)
+		local version = getText(self, 17, 32)
+		local firmware = getText(self, 1, 16)			
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
 
         -- BEC offset
         local f = self.fields[3]
