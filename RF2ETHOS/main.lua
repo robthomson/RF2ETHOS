@@ -7,7 +7,7 @@ local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 
 local DEBUG_MSP = false				-- display msp messages
 local DEBUG_MSPVALUES = false  		-- display values received from valid msp
-local DEBUG_BADESC_ENABLE = true  	-- enable ability to get into esc menus even if not detected
+local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even if not detected
 
 local SIM_ENABLE_RSSI = false 	-- set this to true to enable debugging of msg boxes in sim mode
 
@@ -75,6 +75,7 @@ local ESC_MODE = false
 local ESC_MFG = nil
 local ESC_SCRIPT = nil
 local ESC_UNKNOWN = false	
+local ESC_NOTREADYCOUNT = 0
 		
 lcdNeedsInvalidate = false
 
@@ -236,6 +237,13 @@ local function processMspReply(cmd, rx_buf, err)
 		if DEBUG_MSP == true then
 			print("ESC not ready, waiting...")
 		end
+		ESC_NOTREADYCOUNT = ESC_NOTREADYCOUNT + 1
+		if ESC_NOTREADYCOUNT >= 5 then
+			ESC_UNKNOWN = true	
+			mspDataLoaded = true		
+			lcdNeedsInvalidate = true			
+		end
+
     elseif ESC_MODE == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
 		ESC_UNKNOWN = true
         mspDataLoaded = true		
@@ -264,6 +272,7 @@ local function processMspReply(cmd, rx_buf, err)
         mspDataLoaded = true
         lcdNeedsInvalidate = true
 		ESC_UNKNOWN = false		
+		ESC_NOTREADYCOUNT = 0
     end
 	
 	
@@ -1169,6 +1178,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
     form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
 		ESC_MODE = false
+		ESC_NOTREADYCOUNT = 0
 		 collectgarbage()
         rf2ethos.openPageESCTool(ESC_MFG)
     end)
@@ -1179,6 +1189,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 action = function()
                     isSaving = true
                     wasSaving = true
+					ESC_NOTREADYCOUNT = 0					
                     rf2ethos.debugSave()
                     saveSettings()
                     return true
@@ -1198,6 +1209,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
+					ESC_NOTREADYCOUNT = 0					
                     wasSaving = true
                     createForm = true
                     return true
@@ -2047,6 +2059,8 @@ function rf2ethos.openPageESCTool(folder)
    x = windowWidth - buttonW
    form.addTextButton(line, {x = x, y = radio.buttonPaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
         ResetRates = false
+		ESC_NOTREADYCOUNT = 0
+		ESC_UNKNOWN = false
         rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
     end)  
    
