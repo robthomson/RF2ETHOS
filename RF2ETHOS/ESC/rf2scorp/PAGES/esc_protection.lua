@@ -1,6 +1,12 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
+
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+
 
 
 labels[#labels + 1] = { t = "Scorpion ESC",            }
@@ -23,20 +29,21 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
-
+	escinfo		= escinfo,
+	
     svFlags     = 0,
 
     postLoad = function(self)
         -- esc type
-        local l = self.labels[1]
+        local l = self.escinfo[1]
         l.t = getEscType(self)
 
         -- SN
-        l = self.labels[2]
+        l = self.self.escinfo[2]
         l.t = string.format("%08X", getUInt(self, { 55, 56, 57, 58 }))
 
         -- FW version
-        l = self.labels[3]
+        l = self.self.escinfo[3]
         l.t = "v"..getUInt(self, { 59, 60 })
     end,
 }

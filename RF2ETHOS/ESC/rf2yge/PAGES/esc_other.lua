@@ -1,6 +1,7 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
 
 -- update pole count label text
 local function updatePoles(self)
@@ -17,6 +18,12 @@ local function updateRatio(self)
     local v = fp.value ~= 0 and fm.value / fp.value or 0
     l.t = string.format("%.2f", v)..":1"
 end
+
+
+
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
 
 labels[#labels + 1] = { t = "ESC",                     }
 
@@ -42,21 +49,22 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
-
+	escinfo		= escinfo,
+	
     updatePoles = updatePoles,
     updateRatio = updateRatio,
 
     postLoad = function(self)
         -- esc type
-        local l = self.labels[1]
+        local l = self.escinfo[1]
         l.t = getEscTypeLabel(self.values)
 
         -- SN
-        l = self.labels[2]
+        l = self.escinfo[2]
         l.t = getUInt(self, { 29, 30, 31, 32 })
 
         -- FW ver
-        l = self.labels[3]
+        l = self.escinfo[3]
         l.t = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)
 
         -- update pole count

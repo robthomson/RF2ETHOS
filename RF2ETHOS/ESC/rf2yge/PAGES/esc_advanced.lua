@@ -1,6 +1,7 @@
 
 local labels = {}
 local fields = {}
+local escinfo = {}
 
 local offOn = {
     [0] = "Off",
@@ -66,9 +67,13 @@ local freewheel = {
     "Always On",
 }
 
+
+
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = "---"}
+
 labels[#labels + 1] = { t = "ESC",                     }
-
-
 
 fields[#fields + 1] = { t = "Min Start Power (%)",    min = 0, max = 26, vals = { 47, 48 } }
 fields[#fields + 1] = { t = "Max Start Power (%)",    min = 0, max = 31, vals = { 49, 50 } }
@@ -88,21 +93,22 @@ return {
     minBytes    = mspBytes,
     labels      = labels,
     fields      = fields,
+	escinfo		= escinfo,
 
     svTiming    = 0,
     svFlags     = 0,
 
     postLoad = function(self)
         -- esc type
-        local l = self.labels[1]
+        local l = self.escinfo[1]
         l.t = getEscTypeLabel(self.values)
 
         -- SN
-        l = self.labels[2]
+        l = self.escinfo[2]
         l.t = getUInt(self, { 29, 30, 31, 32 })
 
         -- FW ver
-        l = self.labels[3]
+        l = self.escinfo[3]
         l.t = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)
 
         -- motor timing
