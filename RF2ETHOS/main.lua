@@ -420,16 +420,28 @@ function rf2ethos.saveValue(currentField)
     end
 end
 
-function rf2ethos.openPageHELP()
+function rf2ethos.openPageHELP(script,subpage)
 
 		help =  assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/HELP/pages.lua"))()
 		
 		
-		local section = string.sub(lastScript, 0 ,4) -- remove .lua
+		local section = string.gsub(script, ".lua" ,"") -- remove .lua
+		local page = subpage
+		local helpdata
+		
+		if page == nil then
+			print(section)
+			helpdata = help.data[section]
+		else
+			print(section .. '_' .. page)
+			helpdata = help.data[section .. '_' .. page]
+		end
+
+
 
 
 		message = ""
-		for k,v in ipairs(help.data[section]) do
+		for k,v in ipairs(helpdata) do
 			v = rf2ethos.wrap(v, 75, "", "")
 			message = message .. v .. "\n\n"
 		end
@@ -1169,7 +1181,7 @@ function rf2ethos.navigationButtons(x, y, w, h,help)
     end)
     form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
         ResetRates = false
-        rf2ethos.openPageHELP()
+        rf2ethos.openPageHELP(lastScript,lastSubPage)
     end)	
 end
 
@@ -1665,7 +1677,7 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
 
     lastPage = script
 
-    fieldHeader(title)
+    fieldHeader(title,true)
 
     formLineCnt = 0
 
@@ -1742,7 +1754,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
     lastPage = script
 
-    fieldHeader(title)
+    fieldHeader(title,true)
 
     -- we add a servo selector that is not part of msp table
     -- this is done as a selector - to pass a servoID on refresh
