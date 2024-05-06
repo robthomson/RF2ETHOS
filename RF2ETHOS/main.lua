@@ -442,7 +442,7 @@ function rf2ethos.openPageHELP(script,subpage)
 
 		message = ""
 		for k,v in ipairs(helpdata) do
-			v = rf2ethos.wrap(v, 75, "", "")
+			v = rf2ethos.wrap(v, radio.wrap, "", "")
 			message = message .. v .. "\n\n"
 		end
 		
