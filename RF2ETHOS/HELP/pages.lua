@@ -2,10 +2,10 @@ data = {}
 
 
 data["pids"] = {
-				"Increase D, P, I in that order until each of them wobbles, then back off a bit.",
-				"Set F so that you get good response and I remains near 0 in full stick flips and rolls.",
-				"If necessary, then tweak P:D ratio to tweak stick response damping to your liking.",
-				"Increase O until it wobbles when jabbing elevator at full collective, back off a bit.", 
+				"Increase D, P, I in order until each wobbles, then back off.",
+				"Set F for a good response in full stick flips and rolls.",
+				"If necessary, tweak P:D ratio to set response damping to your liking.",
+				"Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", 
 				"Increase B if you want sharper response.",
 				}
 data["rate"] = {
