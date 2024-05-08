@@ -2,8 +2,8 @@
 local environment = system.getVersion()
 
 local LUA_VERSION = "2.0 - 240229"
-local ETHOS_VERSION = 157
-local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
+local ETHOS_VERSION = 158
+local ETHOS_VERSION_STR = "ETHOS < V1.5.8"
 
 local DEBUG_MSP = false				-- display msp messages
 local DEBUG_MSPVALUES = false  		-- display values received from valid msp
@@ -11,7 +11,7 @@ local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even
 
 local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg boxes in sim mode
 
-local ENABLE_HELP = false
+local ENABLE_HELP = true
 
 
 apiVersion = 0
@@ -435,7 +435,7 @@ function rf2ethos.openPageHELP(helpdata)
                 end
             }
         }
-        form.openDialog("Help", message, buttons)
+        form.openDialog("Help", message, buttons,1)
 
 		
 end
@@ -893,18 +893,20 @@ end
 
 function rf2ethos.navigationButtons(x, y, w, h)
 
-
+	local helpWidth
+	local section
+	local page
+	
 	if ENABLE_HELP == true then
 		help =  assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/HELP/pages.lua"))()
-		local section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
-		local page = lastSubPage
-		local helpdata		
-		local helpWidth
+		section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
+		page = lastSubPage	
 		if page == nil then
 			section = section
 		else
 			section = section .. '_' .. page
 		end
+
 		if help.data[section] then
 			helpWidth = w - (w * 20)/100
 		else
@@ -913,6 +915,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	else
 		helpWidth = 0	
 	end
+
 
 	form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
@@ -1751,6 +1754,10 @@ function rf2ethos.openPageESC(idx, title, script)
    x = windowWidth - buttonW
    form.addTextButton(line, {x = x, y = radio.buttonPaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
         ResetRates = false
+		lastIdx = nil
+		lastPage = nil
+		lastSubPage = nil
+		ESC_MODE = false
         rf2ethos.openMainMenu()
     end)  
    
@@ -1855,6 +1862,9 @@ function rf2ethos.openPageESCTool(folder)
         ResetRates = false
 		ESC_NOTREADYCOUNT = 0
 		ESC_UNKNOWN = false
+		lastIdx = nil
+		lastPage = nil
+		lastSubPage = nil
         rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
     end)  
    
@@ -2211,6 +2221,7 @@ function rf2ethos.openMainMenu()
                     elseif pvalue.script == "esc.lua" then
                         rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)						
                     else
+                        rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                         rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
                 end)

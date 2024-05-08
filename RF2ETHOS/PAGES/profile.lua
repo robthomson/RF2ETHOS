@@ -68,13 +68,13 @@ fields[#fields + 1] = {subpage = 3, t = "Yaw", inline = 1, label = "bcutoff", mi
 
 -- main rotor settings
 labels[#labels + 1] = {subpage = 4, t = "Cyclic Cross coupling", label = "cycliccc1", inline_size = 40.6}
-fields[#fields + 1] = {subpage = 4, t = "Gain", inline = 1, label = "cycliccc1", min = 0, max = 250, default = 25, vals = {34}}
+fields[#fields + 1] = {subpage = 4, t = "Gain", inline = 1, label = "cycliccc1", line=false, min = 0, max = 250, default = 25, vals = {34}}
 
 labels[#labels + 1] = {subpage = 4, t = "", label = "cycliccc2", inline_size = 40.6}
-fields[#fields + 1] = {subpage = 4, t = "Ratio", inline = 1, label = "cycliccc2", min = 0, max = 200, default = 0, unit = "%", vals = {35}}
+fields[#fields + 1] = {subpage = 4, t = "Ratio", inline = 1, label = "cycliccc2", line=false,  min = 0, max = 200, default = 0, unit = "%", vals = {35}}
 
 labels[#labels + 1] = {subpage = 4, t = "", label = "cycliccc3", inline_size = 40.6}
-fields[#fields + 1] = {subpage = 4, t = "Cutoff", inline = 1, label = "cycliccc3", min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
+fields[#fields + 1] = {subpage = 4, t = "Cutoff", inline = 1, label = "cycliccc3", line=true,  min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
 
 -- auto leveling settings
 labels[#labels + 1] = {subpage = 5, t = "Acro trainer", label = 11}
