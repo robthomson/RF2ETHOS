@@ -6,7 +6,7 @@ local environment = system.getVersion()
 
 local function init()
     -- if true then return true end
-    if getRSSI() == 0 then
+    if rf2ethos.getRSSI() == 0 then
         returnTable.t = "Waiting for connection"
     elseif not apiVersionReceived then
         getApiVersion = getApiVersion or assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/api_version.lua"))()

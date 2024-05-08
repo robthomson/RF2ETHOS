@@ -9,13 +9,12 @@ local DEBUG_MSP = false				-- display msp messages
 local DEBUG_MSPVALUES = false  		-- display values received from valid msp
 local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even if not detected
 
-local SIM_ENABLE_RSSI = false 	-- set this to true to enable debugging of msg boxes in sim mode
+local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg boxes in sim mode
 
-
+local ENABLE_HELP = false
 
 
 apiVersion = 0
-
 
 
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
@@ -52,6 +51,10 @@ reloadRates = false
 isLoading = false
 wasLoading = false
 
+local dialogOPEN = false
+local exitAPP = false
+local noRFMsg = false
+
 local mspDataLoaded = false
 
 reloadServos = false
@@ -79,10 +82,6 @@ local ESC_NOTREADYCOUNT = 0
 		
 lcdNeedsInvalidate = false
 
-
-displayHELP = false
-displayHELPMsg = nil
-	
 
 protocol = nil
 radio = nil
@@ -420,33 +419,13 @@ function rf2ethos.saveValue(currentField)
     end
 end
 
-function rf2ethos.openPageHELP(script,subpage)
 
-		help =  assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/HELP/pages.lua"))()
-		
-		
-		local section = string.gsub(script, ".lua" ,"") -- remove .lua
-		local page = subpage
-		local helpdata
-		
-		if page == nil then
-			print(section)
-			helpdata = help.data[section]
-		else
-			print(section .. '_' .. page)
-			helpdata = help.data[section .. '_' .. page]
-		end
+function rf2ethos.openPageHELP(helpdata)
 
-
-
-
-		message = ""
+		local message = ""
 		for k,v in ipairs(helpdata) do
-			v = rf2ethos.wrap(v, radio.wrap, "", "")
 			message = message .. v .. "\n\n"
 		end
-		
-
 
         local buttons = {
 			{
@@ -456,179 +435,11 @@ function rf2ethos.openPageHELP(script,subpage)
                 end
             }
         }
-        --form.openDialog("HELP", message, buttons)
-		
-		
-		form.clear()
-		displayHELPMsg = message
-		displayHELP = true
+        form.openDialog("Help", message, buttons)
+
 		
 end
 
-function rf2ethos.msgBoxHELP(str)
-    lcd.font(FONT_STD)
-
-    displayHELP = true
-
-    local w, h = lcd.getWindowSize()
-    if w < 500 then
-        boxW = w
-    else
-       boxW = w - math.floor((w * 2) / 100)
-    end
-    if h < 200 then
-        boxH = h - 2
-    else
-        boxH = h - math.floor((h * 4) / 100)		
-    end
-
-    boxH = boxH -- radio.buttonPadding * 5
-    boxW = boxW -- (radio.buttonPadding * 10)
-
-    -- draw the backgrf2status.round
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the border
-    lcd.color(lcd.RGB(40, 40, 40))
-    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the title
-    if isDARKMODE then
-        lcd.color(lcd.RGB(48, 48, 48))
-    else
-        lcd.color(lcd.RGB(160, 160, 160))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
-
-    -- title text
-    str_title = "Help"
-    tsizeW, tsizeH = lcd.getTextSize(str_title)
-    str_offset = (boxH / 7) / 2 - tsizeH / 2
-    if isDARKMODE then
-        lcd.color(lcd.RGB(255, 255, 255, 1))
-    else
-        lcd.color(lcd.RGB(90, 90, 90))
-    end
-    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)
-
-    -- display message
-    tsizeW, tsizeH = lcd.getTextSize(str)
-    lcd.drawText((w / 2 - boxW / 2)+radio.buttonPadding, h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding, str)
-
-    -- create a button
-    str_exit = "CLOSE"
-    tsizeW, tsizeH = lcd.getTextSize(str_exit)
-    buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-    buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-
-    lcd.color(lcd.RGB(248, 176, 56))
-    lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawText(buttonX + radio.buttonPadding / 2, buttonY + radio.buttonPadding / 2, str_exit)
-
-    return
-end
-
-
-
-
-function rf2ethos.msgBoxPRO(str)
-    lcd.font(FONT_STD)
-
-    msgBoxPRO = true
-
-    local w, h = lcd.getWindowSize()
-    if w < 500 then
-        boxW = w
-    else
-        boxW = w - math.floor((w * 2) / 100)
-    end
-    if h < 200 then
-        boxH = h - 2
-    else
-        boxH = h - math.floor((h * 4) / 100)
-    end
-
-    boxH = boxH - radio.buttonPadding * 5
-    boxW = boxW - (radio.buttonPadding * 10)
-
-    -- draw the backgrf2status.round
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the border
-    lcd.color(lcd.RGB(40, 40, 40))
-    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the title
-    if isDARKMODE then
-        lcd.color(lcd.RGB(48, 48, 48))
-    else
-        lcd.color(lcd.RGB(160, 160, 160))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
-
-    -- title text
-    str_title = "Warning"
-    tsizeW, tsizeH = lcd.getTextSize(str_title)
-    str_offset = (boxH / 7) / 2 - tsizeH / 2
-    if isDARKMODE then
-        lcd.color(lcd.RGB(255, 255, 255, 1))
-    else
-        lcd.color(lcd.RGB(90, 90, 90))
-    end
-    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)
-
-    -- display message
-    tsizeW, tsizeH = lcd.getTextSize(str)
-    lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
-
-    -- create a button
-    str_exit = "EXIT"
-    tsizeW, tsizeH = lcd.getTextSize(str_exit)
-    buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-    buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-
-    lcd.color(lcd.RGB(248, 176, 56))
-    lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawText(buttonX + radio.buttonPadding / 2, buttonY + radio.buttonPadding / 2, str_exit)
-
-    return
-end
-
-function rf2ethos.wrap(str, limit, indent, indent1)
-  indent = indent or ""
-  indent1 = indent1 or indent
-  limit = limit or 79
-  local here = 1-#indent1
-  return indent1..str:gsub("(%s+)()(%S+)()",
-  function(sp, st, word, fi)
-	if fi-here > limit then
-	  here = st - #indent
-	  return "\n"..indent..word
-	end
-  end)
-end
 
 function rf2ethos.msgBox(str, border)
     lcd.font(FONT_STD)
@@ -667,7 +478,7 @@ function rf2ethos.msgBox(str, border)
     end
     lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
 
-    lcd.invalidate()
+    lcdNeedsInvalidate = true
 
     return
 end
@@ -676,79 +487,9 @@ end
 local function event(widget, category, value, x, y)
     print("Event received:", category, value, x, y)
 
-    if msgBoxPRO == true then
-
-        local w, h = lcd.getWindowSize()
-        if w < 500 then
-            boxW = w
-        else
-            boxW = w - math.floor((w * 2) / 100)
-        end
-        if h < 200 then
-            boxH = h - 2
-        else
-            boxH = h - math.floor((h * 4) / 100)
-        end
-        boxH = boxH - radio.buttonPadding * 5
-        boxW = boxW - (radio.buttonPadding * 10)
-        str_exit = "EXIT"
-        tsizeW, tsizeH = lcd.getTextSize(str_exit)
-        buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-        buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-        buttonW = tsizeW + (radio.buttonPadding * 2)
-        buttonH = tsizeH + (radio.buttonPadding * 2)
-
-        if ((value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
-
-			msgBoxPRO = false
-            system.killEvents(value)
-            system.exit()
-			lcd.invalidate()
-
-            return (true)
-
-        end
-	else
-		msgBoxPRO = false
-    end
-	
-   if displayHELP == true then
-        local w, h = lcd.getWindowSize()
-        if w < 500 then
-            boxW = w
-        else
-            boxW = w - math.floor((w * 2) / 100)
-        end
-        if h < 200 then
-            boxH = h - 2
-        else
-            boxH = h - math.floor((h * 4) / 100)
-        end
-        boxH = boxH -- radio.buttonPadding * 5
-        boxW = boxW -- (radio.buttonPadding * 10)
-        str_exit = "CLOSE"
-        tsizeW, tsizeH = lcd.getTextSize(str_exit)
-        buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-        buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-        buttonW = tsizeW + (radio.buttonPadding * 2)
-        buttonH = tsizeH + (radio.buttonPadding * 2)
-
-        if ((value == KEY_ENTER_FIRST) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
-			lcd.invalidate()	
-			displayHELP = false
-			displayHELPMsg = nil
-			wasLoading = true  -- a trick to force form to reload
-			createForm = true
-			uiState = uiStatus.pages
-
-			print("Closing help")
-            return (true)
-
-        end
-	else
-		displayHELP = false
-    end	
-	
+	if msgBox == true then
+			
+	end
 
     return false
 end
@@ -769,25 +510,16 @@ end
 
 function paint()
 
-    if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
-        -- version check
-        rf2ethos.msgBoxPRO(ETHOS_VERSION_STR)
-        return
-	else
-		msgBoxPRO = false
-    end
 
     if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
         if telemetryState ~= 1 then
-            rf2ethos.msgBoxPRO("NO RF LINK")
+            rf2ethos.msgBox("NO RF LINK")
 		else
-			msgBoxPRO = false
+			msgBox = false
         end
     end
+
 	
-	if displayHELP == true then
-		rf2ethos.msgBoxHELP(displayHELPMsg)
-	end
 	
     if isSaving then
         if pageState >= pageStatus.saving then
@@ -817,10 +549,30 @@ function paint()
             rf2ethos.msgBox("Loading...")
         end
     end
-	
 end
 
 function rf2ethos.wakeupForm()
+
+	-- ethos version
+    if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
+		if dialogOPEN == false and exitAPP ~= true then
+				local buttons = {
+					{
+						label = "EXIT",
+						action = function()
+							dialogOPEN = false
+							exitAPP = true
+							return true
+						end
+					}
+				}
+				form.openDialog("Error", ETHOS_VERSION_STR, buttons)
+				dialogOPEN = true
+		end		
+    end	
+
+
+
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
             local v = Page.fields[13].value
@@ -848,7 +600,6 @@ function rf2ethos.wakeupForm()
             form.invalidate()
         end
     end
-    -- lcd.invalidate()
 end
 
 function rf2ethos.clearScreen()
@@ -868,6 +619,13 @@ function wakeup(widget)
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
 
+	if exitAPP == true then
+		exitAPP = false
+		form.invalidate()
+		system.exit()
+		return
+	end
+
     updateTelemetryState()
 
     if uiState == uiStatus.init then
@@ -880,11 +638,11 @@ function wakeup(widget)
 
         local initSuccess = init.f()
 
-        print(initSuccess)
+        --print(initSuccess)
 
         if prevInit ~= init.t then
             -- Update initialization message
-            lcd.invalidate()
+            lcdNeedsInvalidate = true
         end
         if not initSuccess then
             -- waiting on api version to finish successfully.
@@ -899,7 +657,7 @@ function wakeup(widget)
         -- print("Menu")
     elseif uiState == uiStatus.pages then
         if prevUiState ~= uiState then
-            lcdNeedsInvalidate = true
+            --lcdNeedsInvalidate = true
             prevUiState = uiState
         end
 
@@ -918,7 +676,7 @@ function wakeup(widget)
             if (saveTS + saveTimeout) < os.clock() then
                 if saveRetries < saveMaxRetries then
                     eepromWrite()
-                    lcdNeedsInvalidate = true
+                    --lcdNeedsInvalidate = true
                 else
                     -- print("Failed to write to eeprom!")
                     invalidatePages()
@@ -949,14 +707,14 @@ function wakeup(widget)
 
     -- handle some display stuff to bring form in and out of focus for no rf link
     if telemetryState ~= 1 then
-		print("No telemetry")
+		--print("No telemetry")
         -- we have no telemetry - hide the form
         if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             form.clear()
             createForm = true
         end
     elseif (pageState >= pageStatus.saving) then
-		print(">= pageStatus.saving")	
+		--print(">= pageStatus.saving")	
         form.clear()
         createForm = true
     else
@@ -1021,6 +779,12 @@ function wakeup(widget)
         end
 
     end
+	
+	if lcdNeedsInvalidate == true then
+		lcd.invalidate()
+		lcdNeedsInvalidate  = false
+	end
+	
 end
 
 -- local rf2ethos.openMainMenu
@@ -1127,12 +891,27 @@ local function writeText(x, y, str)
     lcd.drawText(x, y, str)
 end
 
-function rf2ethos.navigationButtons(x, y, w, h,help)
+function rf2ethos.navigationButtons(x, y, w, h)
 
-	if help == true then
-		helpWidth = w - (w * 20)/100
+
+	if ENABLE_HELP == true then
+		help =  assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/HELP/pages.lua"))()
+		local section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
+		local page = lastSubPage
+		local helpdata		
+		local helpWidth
+		if page == nil then
+			section = section
+		else
+			section = section .. '_' .. page
+		end
+		if help.data[section] then
+			helpWidth = w - (w * 20)/100
+		else
+			helpWidth = 0	
+		end
 	else
-		helpWidth = 0
+		helpWidth = 0	
 	end
 
 	form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, "MENU", function()
@@ -1179,10 +958,13 @@ function rf2ethos.navigationButtons(x, y, w, h,help)
         }
         form.openDialog("RELOAD", "Reload data from flight controller", buttons)
     end)
-    form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
-        ResetRates = false
-        rf2ethos.openPageHELP(lastScript,lastSubPage)
-    end)	
+	if ENABLE_HELP == true then
+		if helpWidth > 0 then
+			form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
+				rf2ethos.openPageHELP(help.data[section])
+			end)	
+		end	
+	end	
 end
 
 
@@ -1618,7 +1400,7 @@ local function fieldLabel(f, i, l)
     end
 end
 
-local function fieldHeader(title,help)
+local function fieldHeader(title)
     local w, h = lcd.getWindowSize()
     -- column starts at 59.4% of w
     padding = 5
@@ -1634,7 +1416,7 @@ local function fieldHeader(title,help)
     end
     buttonH = radio.buttonHeight
     line = form.addLine(title)
-    rf2ethos.navigationButtons(w, radio.buttonPaddingTop, buttonW, radio.buttonHeight,help)
+    rf2ethos.navigationButtons(w, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 end
 
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
@@ -1677,7 +1459,7 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
 
     lastPage = script
 
-    fieldHeader(title,true)
+    fieldHeader(title)
 
     formLineCnt = 0
 
@@ -1754,7 +1536,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
     lastPage = script
 
-    fieldHeader(title,true)
+    fieldHeader(title)
 
     -- we add a servo selector that is not part of msp table
     -- this is done as a selector - to pass a servoID on refresh
@@ -1852,7 +1634,7 @@ function rf2ethos.openPagePID(idx, title, script)
 
     form.clear()
 
-    fieldHeader(title,true)
+    fieldHeader(title)
 
     local numCols = #Page.cols
     local screenWidth = LCD_W - 10
@@ -2268,7 +2050,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 
     form.clear()
 
-    fieldHeader(title,true)
+    fieldHeader(title)
 
     local numCols = #Page.cols
     local screenWidth = LCD_W - 10
@@ -2485,14 +2267,15 @@ end
 
 local function close()
     -- print("Close")
+	dialogOPEN = false	
 	ESC_MODE = false
 	ESC_MFG = nil
 	ESC_SCRIPT = nil
     pageLoaded = 100
     pageTitle = nil
     pageFile = nil
-	displayHELPMsg = nil
-	displayHELP = false
+	exitAPP = false
+	noRFMsg = false
     system.exit()
     return true
 end

@@ -8,7 +8,8 @@ data["pids"] = {
 				"Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", 
 				"Increase B if you want sharper response.",
 				}
-				
+
+--[[				
 -- FLIGHT TUNING RATES
 data["rates_1"] = {
 				"The purpose of rates are to change in flight sensitivity and rotation rates.",
@@ -107,6 +108,7 @@ data["copy_profiles"] = {
 				"Additional line",				
 				}					
 
+]]--
 
 return {
     data = data,
