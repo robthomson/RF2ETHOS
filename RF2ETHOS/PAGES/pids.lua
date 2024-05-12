@@ -6,26 +6,27 @@ local cols = {}
 
 rows = {"Roll", "Pitch", "Yaw"}
 --cols = {"P", "I", "O", "D", "F", "B"}
-cols = {"D", "P", "I", "F", "O", "B"}
+--cols = {"D", "P", "I", "F", "O", "B"}
+cols = {"P", "I", "D", "F", "O", "B"}
 
 -- P
-fields[#fields + 1] = {row = 1, col = 2, min = 0, max = 1000, default = 50, vals = {1, 2}}
-fields[#fields + 1] = {row = 2, col = 2, min = 0, max = 1000, default = 50, vals = {9, 10}}
-fields[#fields + 1] = {row = 3, col = 2, t = "PY", min = 0, max = 1000, default = 50, vals = {17, 18}}
+fields[#fields + 1] = {row = 1, col = 1, min = 0, max = 1000, default = 50, vals = {1, 2}}
+fields[#fields + 1] = {row = 2, col = 1, min = 0, max = 1000, default = 50, vals = {9, 10}}
+fields[#fields + 1] = {row = 3, col = 1, t = "PY", min = 0, max = 1000, default = 50, vals = {17, 18}}
 
 -- I
-fields[#fields + 1] = {row = 1, col = 3, min = 0, max = 1000, default = 100, vals = {3, 4}}
-fields[#fields + 1] = {row = 2, col = 3, min = 0, max = 1000, default = 100, vals = {11, 12}}
-fields[#fields + 1] = {row = 3, col = 3, min = 0, max = 1000, default = 50, vals = {19, 20}}
+fields[#fields + 1] = {row = 1, col = 2, min = 0, max = 1000, default = 100, vals = {3, 4}}
+fields[#fields + 1] = {row = 2, col = 2, min = 0, max = 1000, default = 100, vals = {11, 12}}
+fields[#fields + 1] = {row = 3, col = 2, min = 0, max = 1000, default = 50, vals = {19, 20}}
 
 -- O
 fields[#fields + 1] = {row = 1, col = 5, min = 0, max = 1000, default = 0, vals = {31, 32}}
 fields[#fields + 1] = {row = 2, col = 5, min = 0, max = 1000, default = 0, vals = {33, 34}}
 
 -- D
-fields[#fields + 1] = {row = 1, col = 1, min = 0, max = 1000, default = 10, vals = {5, 6}}
-fields[#fields + 1] = {row = 2, col = 1, min = 0, max = 1000, default = 20, vals = {13, 14}}
-fields[#fields + 1] = {row = 3, col = 1, min = 0, max = 1000, default = 10, vals = {21, 22}}
+fields[#fields + 1] = {row = 1, col = 3, min = 0, max = 1000, default = 10, vals = {5, 6}}
+fields[#fields + 1] = {row = 2, col = 3, min = 0, max = 1000, default = 20, vals = {13, 14}}
+fields[#fields + 1] = {row = 3, col = 3, min = 0, max = 1000, default = 10, vals = {21, 22}}
 
 -- F
 fields[#fields + 1] = {row = 1, col = 4, min = 0, max = 1000, default = 100, vals = {7, 8}}
