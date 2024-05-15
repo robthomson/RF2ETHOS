@@ -2,8 +2,8 @@
 local environment = system.getVersion()
 
 local LUA_VERSION = "2.0 - 240229"
-local ETHOS_VERSION = 158
-local ETHOS_VERSION_STR = "ETHOS < V1.5.8"
+local ETHOS_VERSION = 157
+local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
 
 local DEBUG_MSP = false				-- display msp messages
 local DEBUG_MSPVALUES = false  		-- display values received from valid msp
@@ -54,6 +54,8 @@ wasLoading = false
 local dialogOPEN = false
 local exitAPP = false
 local noRFMsg = false
+local triggerSAVE = false
+
 
 local mspDataLoaded = false
 
@@ -485,11 +487,23 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    print("Event received:", category, value, x, y)
+    --print("Event received:", category, value, x, y)
 
-	if msgBox == true then
-			
+	if uiState == uiStatus.pages then
+		if value == KEY_ENTER_LONG then
+				triggerSAVE = true
+				system.killEvents(KEY_ENTER_BREAK)
+				return true
+		end
 	end
+	
+	if uiState == uiStatus.MainMenu then
+		if value == KEY_ENTER_LONG then
+			system.killEvents(KEY_ENTER_BREAK)
+			return true
+		end
+	end
+	
 
     return false
 end
@@ -553,6 +567,32 @@ end
 
 function rf2ethos.wakeupForm()
 
+	-- trigger save
+	if triggerSAVE == true then
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+                    isSaving = true
+                    wasSaving = true
+                    rf2ethos.resetRates()
+                    rf2ethos.debugSave()
+                    saveSettings()
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+        form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+		
+		triggerSAVE = false
+	end
+
+
 	-- ethos version
     if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < ETHOS_VERSION then
 		if dialogOPEN == false and exitAPP ~= true then
@@ -570,8 +610,6 @@ function rf2ethos.wakeupForm()
 				dialogOPEN = true
 		end		
     end	
-
-
 
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
@@ -2265,6 +2303,12 @@ local function create()
     init = nil
     lastEvent = nil
     apiVersion = 0
+	
+	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < 158 then
+		print("< 158  : help functions disabled")
+		ENABLE_HELP = false
+	end
+	
 
     MainMenu = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/pages.lua"))()
 
