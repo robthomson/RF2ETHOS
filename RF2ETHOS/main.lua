@@ -334,7 +334,7 @@ function rf2ethos.getTime()
 end
 
 function rf2ethos.loadScriptRF2ETHOS(script)
-    system.compile(script)
+    --system.compile(script)
     return loadfile(script)
 end
 
@@ -2339,7 +2339,7 @@ local icon = lcd.loadMask("/scripts/RF2ETHOS/RF.png")
 
 local function init()
     system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close})
-    system.compile("/scripts/RF2ETHOS/main.lua")
+    --system.compile("/scripts/RF2ETHOS/main.lua")
 end
 
 return {init = init}
