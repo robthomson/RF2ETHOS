@@ -84,6 +84,10 @@ local ESC_NOTREADYCOUNT = 0
 		
 lcdNeedsInvalidate = false
 
+displayHELP = false
+displayHELPMsg = nil
+displayHELPQr = nil
+
 
 protocol = nil
 radio = nil
@@ -424,8 +428,12 @@ end
 
 function rf2ethos.openPageHELP(helpdata)
 
+
+		-- popup option to use in future once more
+		-- granular option appear	
+		--[[
 		local message = ""
-		for k,v in ipairs(helpdata) do
+		for k,v in ipairs(helpdata["TEXT"]) do
 			message = message .. v .. "\n\n"
 		end
 
@@ -437,9 +445,129 @@ function rf2ethos.openPageHELP(helpdata)
                 end
             }
         }
-        form.openDialog("Help", message, buttons,1)
+		form.openDialog("Help", message, buttons,1)
+		]]--
+
+		-- home spun popup
+		local message = ""
+		for k,v in ipairs(helpdata["TEXT"]) do
+			v = rf2ethos.wrap(v, radio.wrap, "", "")
+			message = message .. v .. "\n\n"
+		end		
+		
+		form.clear()
+		displayHELPMsg = message
+		displayHELPQr = helpdata["QRCODE"]
+		displayHELP = true		
 
 		
+end
+
+
+
+
+function rf2ethos.msgBoxHELP(str,qr)
+    lcd.font(FONT_STD)
+
+    displayHELP = true
+
+    local w, h = lcd.getWindowSize()
+    if w < 500 then
+        boxW = w
+    else
+       boxW = w - math.floor((w * 2) / 100)
+    end
+    if h < 200 then
+        boxH = h - 2
+    else
+        boxH = h - math.floor((h * 4) / 100)		
+    end
+
+    boxH = boxH -- radio.buttonPadding * 5
+    boxW = boxW -- (radio.buttonPadding * 10)
+
+    -- draw the backgrf2status.round
+    if isDARKMODE then
+        lcd.color(lcd.RGB(64, 64, 64))
+    else
+        lcd.color(lcd.RGB(208, 208, 208))
+    end
+    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+
+    -- draw the border
+    lcd.color(lcd.RGB(40, 40, 40))
+    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
+
+    -- draw the title
+    if isDARKMODE then
+        lcd.color(lcd.RGB(48, 48, 48))
+    else
+        lcd.color(lcd.RGB(160, 160, 160))
+    end
+    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
+
+    -- title text
+    str_title = "Help"
+    tsizeW, tsizeH = lcd.getTextSize(str_title)
+    str_offset = (boxH / 7) / 2 - tsizeH / 2
+    if isDARKMODE then
+        lcd.color(lcd.RGB(255, 255, 255, 1))
+    else
+        lcd.color(lcd.RGB(90, 90, 90))
+    end
+    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)
+
+    -- display message
+	lcd.font(FONT_S)
+    tsizeW, tsizeH = lcd.getTextSize(str)
+    lcd.drawText((w / 2 - boxW / 2)+radio.buttonPadding, h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding, str)
+
+	-- display QRCODE
+	if qr ~= nil then
+			local bitmap = lcd.loadBitmap(qr)
+			
+			local qw = 200
+			local qh = 200
+			
+			local qy = h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding			
+			local qx = boxW - qw - radio.buttonPadding/2
+			lcd.drawBitmap(qx,qy,bitmap,qw,qh)	
+
+	end
+
+
+    -- create a button
+	lcd.font(FONT_STD)
+    str_exit = "CLOSE"
+    tsizeW, tsizeH = lcd.getTextSize(str_exit)
+    buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
+    buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
+
+    lcd.color(lcd.RGB(248, 176, 56))
+    lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
+
+    if isDARKMODE then
+        lcd.color(lcd.RGB(64, 64, 64))
+    else
+        lcd.color(lcd.RGB(208, 208, 208))
+    end
+    lcd.drawText(buttonX + radio.buttonPadding / 2, buttonY + radio.buttonPadding / 2, str_exit)
+
+    return
+end
+
+function rf2ethos.wrap(str, limit, indent, indent1)
+  indent = indent or ""
+  indent1 = indent1 or indent
+  limit = limit or 79
+  local here = 1-#indent1
+  return indent1..str:gsub("(%s+)()(%S+)()",
+  function(sp, st, word, fi)
+	if fi-here > limit then
+	  here = st - #indent
+	  return "\n"..indent..word
+	end
+  end)
 end
 
 
@@ -504,6 +632,43 @@ local function event(widget, category, value, x, y)
 		end
 	end
 	
+    if displayHELP == true then
+		local w, h = lcd.getWindowSize()
+		if w < 500 then
+			boxW = w
+		else
+			boxW = w - math.floor((w * 2) / 100)
+		end
+		if h < 200 then
+			boxH = h - 2
+		else
+			boxH = h - math.floor((h * 4) / 100)
+		end
+		boxH = boxH -- radio.buttonPadding * 5
+		boxW = boxW -- (radio.buttonPadding * 10)
+		str_exit = "CLOSE"
+		tsizeW, tsizeH = lcd.getTextSize(str_exit)
+		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
+		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
+		buttonW = tsizeW + (radio.buttonPadding * 2)
+		buttonH = tsizeH + (radio.buttonPadding * 2)
+
+		if ((value == KEY_ENTER_FIRST) or (  (value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
+			lcd.invalidate()	
+			displayHELP = false
+			displayHELPMsg = nil
+			displayHELPQr = nil
+			wasLoading = true  -- a trick to force form to reload
+			createForm = true
+			uiState = uiStatus.pages
+
+			print("Closing help")
+			return (true)
+
+		end
+	else
+		displayHELP = false
+	end	
 
     return false
 end
@@ -533,6 +698,9 @@ function paint()
         end
     end
 
+	if displayHELP == true then
+		rf2ethos.msgBoxHELP(displayHELPMsg,displayHELPQr)
+	end
 	
 	
     if isSaving then
@@ -2230,18 +2398,48 @@ function rf2ethos.openMainMenu()
 
     local y = radio.buttonPaddingTop
 
-    form.clear()
 
-    -- create drop downs
 
+   
+	local MENU_EXPANSION = false
+	local sc = 0
+	local panel
+
+
+	form.clear()
+	
+
+		
+		
     for idx, value in ipairs(MainMenu.sections) do
-        panel = form.addLine(value.title)
+	
+	
+	
+	
+		if MENU_EXPANSION ~= true then
+			-- just a line with a title
+			panel = form.addLine(value.title)
+		else
+			-- or an expansion panel
+			panel = form.addExpansionPanel(value.title)
+			if sc ==  0 then
+				panel:open(true) 
+			else
+				panel:open(false) 
+			end
+		end
+		sc = sc + 1
+
 
         lc = 0
         for pidx, pvalue in ipairs(MainMenu.pages) do
             if pvalue.section == value.section then
                 if lc == 0 then
-                    line = form.addLine("")
+					if MENU_EXPANSION ~= true then
+						line = form.addLine("")
+					else
+						line = form.addLine("",panel)
+					end
                     x = padding
                 end
 
@@ -2327,6 +2525,9 @@ local function close()
 	ESC_MFG = nil
 	ESC_SCRIPT = nil
     pageLoaded = 100
+	displayHELP = nil
+	displayHELPMsg = nil
+	displayHELPQr = nil
     pageTitle = nil
     pageFile = nil
 	exitAPP = false
