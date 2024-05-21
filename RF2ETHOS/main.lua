@@ -438,7 +438,7 @@ function rf2ethos.openPageHELP(helpdata,section)
 
 	--forcing dialog for X14 due to focus bug
 	-- all this will change once better/help dialogs are available in 
-	if environment.board == "X14" or environment.board == "X14S" then
+	if environment.board == "X14" or environment.board == "X14S"  then
 		-- popup option to use in future once more
 		-- granular option appear	
 
@@ -464,7 +464,7 @@ function rf2ethos.openPageHELP(helpdata,section)
 		-- home spun popup
 		local message = ""
 		for k,v in ipairs(txtData) do
-			v = rf2ethos.wrap(v, radio.wrap, "", "")
+			v = rf2ethos.wrap(v, radio.helpTxtWrap, "", "")
 			message = message .. v .. "\n\n"
 		end		
 		
@@ -541,8 +541,8 @@ function rf2ethos.msgBoxHELP(str,qr)
 	if qr ~= nil then
 			local bitmap = lcd.loadBitmap(qr)
 			
-			local qw = 200
-			local qh = 200
+			local qw = radio.helpQrCodeSize
+			local qh = radio.helpQrCodeSize
 			
 			local qy = h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding			
 			local qx = boxW - qw - radio.buttonPadding/2
@@ -1140,7 +1140,11 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	else
 		helpWidth = 0	
 	end
-
+	print (environment.board)
+	if environment.board == "X10EXPRESS" or environment.board == "X14" or environment.board == "X14S" then
+		ENABLE_HELP = false
+		helpWidth = 0
+	end
 
 	form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
@@ -1188,9 +1192,9 @@ function rf2ethos.navigationButtons(x, y, w, h)
     end)
 	if ENABLE_HELP == true then
 		if helpWidth > 0 then
-			form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
-				rf2ethos.openPageHELP(help.data,section)
-			end)	
+				form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
+					rf2ethos.openPageHELP(help.data,section)
+				end)	
 		end	
 	end	
 end
