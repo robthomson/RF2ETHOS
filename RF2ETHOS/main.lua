@@ -41,6 +41,7 @@ local saveTimeout, saveMaxRetries, MainMenu, Page, init, popupMenu, requestTimeo
 createForm = false
 local isSaving = false
 local wasSaving = false
+local closingHELP = false
 
 local lastLabel = nil
 local NewRateTable
@@ -426,14 +427,25 @@ function rf2ethos.saveValue(currentField)
 end
 
 
-function rf2ethos.openPageHELP(helpdata)
+function rf2ethos.openPageHELP(helpdata,section)
+	local txtData
 
+	if section == "rates_1" then
+		txtData = helpdata[section]["table"][RateTable]
+	else
+		txtData = helpdata[section]["TEXT"]
+	end	
 
+	--forcing dialog for X14 due to focus bug
+	-- all this will change once better/help dialogs are available in 
+	if environment.board == "X14" or environment.board == "X14S" then
 		-- popup option to use in future once more
 		-- granular option appear	
-		--[[
+
 		local message = ""
-		for k,v in ipairs(helpdata["TEXT"]) do
+
+		
+		for k,v in ipairs(txtData) do
 			message = message .. v .. "\n\n"
 		end
 
@@ -445,20 +457,23 @@ function rf2ethos.openPageHELP(helpdata)
                 end
             }
         }
-		form.openDialog("Help", message, buttons,1)
-		]]--
+		form.openDialog("Help - " .. lastTitle, message, buttons,1)
 
+
+	else
 		-- home spun popup
 		local message = ""
-		for k,v in ipairs(helpdata["TEXT"]) do
+		for k,v in ipairs(txtData) do
 			v = rf2ethos.wrap(v, radio.wrap, "", "")
 			message = message .. v .. "\n\n"
 		end		
 		
 		form.clear()
 		displayHELPMsg = message
-		displayHELPQr = helpdata["QRCODE"]
+		displayHELPQr = helpdata[section]["QRCODE"]
 		displayHELP = true		
+		
+	end
 
 		
 end
@@ -507,7 +522,7 @@ function rf2ethos.msgBoxHELP(str,qr)
     lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
 
     -- title text
-    str_title = "Help"
+    str_title = "Help - ".. lastTitle
     tsizeW, tsizeH = lcd.getTextSize(str_title)
     str_offset = (boxH / 7) / 2 - tsizeH / 2
     if isDARKMODE then
@@ -660,8 +675,9 @@ local function event(widget, category, value, x, y)
 			displayHELPQr = nil
 			wasLoading = true  -- a trick to force form to reload
 			createForm = true
+			closingHELP = true
 			uiState = uiStatus.pages
-
+	
 			print("Closing help")
 			return (true)
 
@@ -912,20 +928,23 @@ function wakeup(widget)
     lastEvent = nil
 
     -- handle some display stuff to bring form in and out of focus for no rf link
-    if telemetryState ~= 1 then
+    if telemetryState ~= 1 and closingHELP == false then
 		--print("No telemetry")
         -- we have no telemetry - hide the form
         if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             form.clear()
             createForm = true
         end
-    elseif (pageState >= pageStatus.saving) then
+    elseif (pageState >= pageStatus.saving) and closingHELP == false then
 		--print(">= pageStatus.saving")	
         form.clear()
         createForm = true
     else
         if createForm == true then
 			--print("createForm == true")
+			if closingHELP == true then  -- this is a bit messy but it essentially enables trh
+				closingHELP = false
+			end
             if wasSaving == true or environment.simulation == true then
                 wasSaving = false
                 if lastScript == "pids.lua" or lastIdx == 1 then
@@ -1170,7 +1189,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	if ENABLE_HELP == true then
 		if helpWidth > 0 then
 			form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
-				rf2ethos.openPageHELP(help.data[section])
+				rf2ethos.openPageHELP(help.data,section)
 			end)	
 		end	
 	end	
