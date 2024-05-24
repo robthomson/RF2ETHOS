@@ -160,19 +160,19 @@ fields[#fields + 1] = {
     end
 }
 
-labels[#labels + 1] = {t = "Roll dynamics", subpage = 2, label = "rolldynamics", inline_size = 15}
+labels[#labels + 1] = {t = "Roll dynamics", subpage = 2, label = "rolldynamics", inline_size = 13.6}
 fields[#fields + 1] = {t = "Time", inline = 2, subpage = 2, label = "rolldynamics", min = 0, max = 250, vals = {5}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", inline = 1, subpage = 2, label = "rolldynamics", min = 0, max = 50000, vals = {6, 7}, unit = "°/s"}
 
-labels[#labels + 1] = {t = "Pitch dynamics", label = "pitchdynamics", inline_size = 15}
+labels[#labels + 1] = {t = "Pitch dynamics", label = "pitchdynamics", inline_size = 13.6}
 fields[#fields + 1] = {t = "Time", inline = 2, subpage = 2, label = "pitchdynamics", min = 0, max = 250, vals = {11}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", inline = 1, subpage = 2, label = "pitchdynamics", min = 0, max = 50000, vals = {12, 13}, unit = "°/s"}
 
-labels[#labels + 1] = {t = "Yaw dynamics", label = "yawdynamics", inline_size = 15}
+labels[#labels + 1] = {t = "Yaw dynamics", label = "yawdynamics", inline_size = 13.6}
 fields[#fields + 1] = {t = "Time", inline = 2, subpage = 2, label = "yawdynamics", min = 0, max = 250, vals = {17}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", inline = 1, subpage = 2, label = "yawdynamics", min = 0, max = 50000, vals = {18, 19}, unit = "°/s"}
 
-labels[#labels + 1] = {t = "Collective dynamics", label = "coldynamics", inline_size = 15}
+labels[#labels + 1] = {t = "Collective dynamics", label = "coldynamics", inline_size = 13.6}
 fields[#fields + 1] = {t = "Time", inline = 2, subpage = 2, label = "coldynamics", min = 0, max = 250, vals = {23}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", inline = 1, subpage = 2, label = "coldynamics", min = 0, max = 50000, vals = {24, 25}, unit = "°/^s", mult = 10}
 

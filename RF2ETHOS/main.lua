@@ -1272,18 +1272,24 @@ local function getInlineSize(id)
     for i, v in ipairs(Page.labels) do
         if id ~= nil then
             if v.label == id then
+				local size
                 if v.inline_size == nil then
-                    return 10
+                    size = 13.6
                 else
-                    return v.inline_size
-                end
+                    size = v.inline_size
+                end				
+				return size
+				
             end
         end
     end
 end
 
 local function getInlinePositions(f)
-    inline_size = getInlineSize(f.label)
+    local tmp_inline_size = getInlineSize(f.label)	
+	local inline_multiplier = radio.inlinesize_mult
+	
+	local inline_size = tmp_inline_size * inline_multiplier
 
     local w, h = lcd.getWindowSize()
     local colStart
@@ -1323,10 +1329,10 @@ local function getInlinePositions(f)
         posX = w - fieldW * 3
         posField = {x = posX, y = eY, w = eW, h = eH}
     elseif f.inline == 1 then
-        posX = w - fieldW - tsizeW - padding
+        posX = w - fieldW - tsizeW - padding - padding
         posText = {x = posX, y = eY, w = tsizeW, h = eH}
 
-        posX = w - fieldW
+        posX = w - fieldW - padding
         posField = {x = posX, y = eY, w = eW, h = eH}
     end
 
