@@ -42,6 +42,7 @@ createForm = false
 local isSaving = false
 local wasSaving = false
 local closingHELP = false
+local linkUPTime
 
 local lastLabel = nil
 local NewRateTable
@@ -630,7 +631,7 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    --print("Event received:", category, value, x, y)
+    print("Event received:", category, value, x, y)
 
 	if uiState == uiStatus.pages then
 		if value == KEY_ENTER_LONG then
@@ -706,9 +707,11 @@ end
 function paint()
 
 
+
     if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
         if telemetryState ~= 1 then
             rf2ethos.msgBox("NO RF LINK")
+
 		else
 			msgBox = false
         end
@@ -750,6 +753,8 @@ function paint()
 end
 
 function rf2ethos.wakeupForm()
+
+
 
 	-- trigger save
 	if triggerSAVE == true then
@@ -1004,11 +1009,27 @@ function wakeup(widget)
         end
 
     end
-	
+		
 	if lcdNeedsInvalidate == true then
 		lcd.invalidate()
 		lcdNeedsInvalidate  = false
 	end
+	
+	if environment.simulation ~= true then
+		if telemetryState ~= 1 then
+				if linkUPTime ~= nil then
+					if (os.clock() - linkUPTime) > 10 then
+							system.exit()
+					end
+				else
+					linkUPTime = os.clock()
+				end
+		else
+				linkUPTime = os.clock()
+		end
+	end	
+	
+	
 	
 end
 
@@ -2561,6 +2582,7 @@ local function close()
     pageFile = nil
 	exitAPP = false
 	noRFMsg = false
+	linkUPTime = nil
     system.exit()
     return true
 end
