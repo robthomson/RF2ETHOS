@@ -633,7 +633,14 @@ end
 local function event(widget, category, value, x, y)
     print("Event received:", category, value, x, y)
 
+	
+
 	if uiState == uiStatus.pages then
+		if value == 35 then	
+				ResetRates = false
+				rf2ethos.openMainMenu()
+			return true
+		end
 		if value == KEY_ENTER_LONG then
 				triggerSAVE = true
 				system.killEvents(KEY_ENTER_BREAK)
@@ -686,7 +693,6 @@ local function event(widget, category, value, x, y)
 	else
 		displayHELP = false
 	end	
-
     return false
 end
 
