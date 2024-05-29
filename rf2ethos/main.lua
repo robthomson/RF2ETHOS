@@ -1609,8 +1609,7 @@ local function fieldNumber(f, i)
 	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
 		if f.help ~= nil then
 			if fieldHelpTxt[f.help]['t'] ~= nil then
-				local helpTxtFull = fieldHelpTxt[f.help]['t']	
-				local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+				local helpTxt = fieldHelpTxt[f.help]['t']	
 				field:help(helpTxt)
 			end
 		end	
@@ -1997,8 +1996,7 @@ function rf2ethos.openPagePID(idx, title, script)
 		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
 			if f.help ~= nil then
 				if fieldHelpTxt[f.help]['t'] ~= nil then
-					local helpTxtFull = fieldHelpTxt[f.help]['t']	
-					local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+					local helpTxt = fieldHelpTxt[f.help]['t']	
 					field:help(helpTxt)
 				end
 			end	
@@ -2442,8 +2440,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 			if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
 				if f.help ~= nil then
 					if fieldHelpTxt[f.help]['t'] ~= nil then
-						local helpTxtFull = fieldHelpTxt[f.help]['t']	
-						local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+						local helpTxt = fieldHelpTxt[f.help]['t']	
 						field:help(helpTxt)
 					end
 				end	
