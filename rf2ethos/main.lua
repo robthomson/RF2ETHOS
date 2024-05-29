@@ -1606,7 +1606,8 @@ local function fieldNumber(f, i)
     end
 	
 	-- help only exists in new 1510 and above
-	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+	--print(tonumber(rf2ethos.sensorMakeNumber(environment.version)))
+	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
 		if f.help ~= nil then
 			if fieldHelpTxt[f.help]['t'] ~= nil then
 				local helpTxt = fieldHelpTxt[f.help]['t']	
@@ -1993,7 +1994,7 @@ function rf2ethos.openPagePID(idx, title, script)
             field:suffix(f.unit)
         end
 		-- help only exists in new 1510 and above
-		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
 			if f.help ~= nil then
 				if fieldHelpTxt[f.help]['t'] ~= nil then
 					local helpTxt = fieldHelpTxt[f.help]['t']	
@@ -2437,7 +2438,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
                 field:step(f.step)
             end
 			-- help only exists in new 1510 and above
-			if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+			if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
 				if f.help ~= nil then
 					if fieldHelpTxt[f.help]['t'] ~= nil then
 						local helpTxt = fieldHelpTxt[f.help]['t']	
@@ -2549,7 +2550,6 @@ function rf2ethos.openMainMenu()
                     elseif pvalue.script == "esc.lua" then
                         rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)						
                     else
-                        rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                         rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
                 end)
