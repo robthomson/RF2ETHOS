@@ -58,6 +58,7 @@ local exitAPP = false
 local noRFMsg = false
 local triggerSAVE = false
 
+local fieldHelpTxt = nil
 
 local mspDataLoaded = false
 
@@ -1603,6 +1604,19 @@ local function fieldNumber(f, i)
     if f.step ~= nil then
         field:step(f.step)
     end
+	
+	-- help only exists in new 1510 and above
+	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+		if f.help ~= nil then
+			if fieldHelpTxt[f.help]['t'] ~= nil then
+				local helpTxtFull = fieldHelpTxt[f.help]['t']	
+				local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+				field:help(helpTxt)
+			end
+		end	
+	end
+	
+	
 end
 
 local function getLabel(id, page)
@@ -1685,6 +1699,11 @@ local function fieldHeader(title)
 end
 
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
+
+	--if subpage == nil then
+	--	subpage = 'nil'
+	--end
+	--print("Script: " .. script .. " Subpage:" .. subpage)
 
     uiState = uiStatus.pages
     mspDataLoaded = false
@@ -1974,6 +1993,16 @@ function rf2ethos.openPagePID(idx, title, script)
         if f.unit ~= nil then
             field:suffix(f.unit)
         end
+		-- help only exists in new 1510 and above
+		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+			if f.help ~= nil then
+				if fieldHelpTxt[f.help]['t'] ~= nil then
+					local helpTxtFull = fieldHelpTxt[f.help]['t']	
+					local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+					field:help(helpTxt)
+				end
+			end	
+		end		
     end
 
     -- display menu at footer
@@ -2409,6 +2438,16 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
             if f.step ~= nil then
                 field:step(f.step)
             end
+			-- help only exists in new 1510 and above
+			if tonumber(rf2ethos.sensorMakeNumber(environment.version)) <= 1510 then
+				if f.help ~= nil then
+					if fieldHelpTxt[f.help]['t'] ~= nil then
+						local helpTxtFull = fieldHelpTxt[f.help]['t']	
+						local helpTxt =	rf2ethos.wrap(helpTxtFull, radio.helpTxtWrapFields, "", "")
+						field:help(helpTxt)
+					end
+				end	
+			end			
         end
     end
 
@@ -2533,6 +2572,8 @@ local function create()
     radio = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/radios.lua"))().msp
     assert(rf2ethos.loadScriptRF2ETHOS(protocol.mspTransport))()
     assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/MSP/common.lua"))()
+	
+	fieldHelpTxt = assert(rf2ethos.loadScriptRF2ETHOS("/scripts/RF2ETHOS/HELP/fields.lua"))()
 
     sensor = sport.getSensor({primId = 0x32})
     rssiSensor = system.getSource("RSSI")
