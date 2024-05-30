@@ -1016,7 +1016,9 @@ function wakeup(widget)
                 isLoading = false
                 wasLoading = true
 
-                --createForm = true
+				if environment.simulation ~= true then
+					createForm = true
+				end
             end
         end
 
