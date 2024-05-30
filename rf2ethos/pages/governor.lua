@@ -13,7 +13,7 @@ labels[#labels + 1] = {t = "Auto Rotation", label = "ar", inline_size = 40.15}
 fields[#fields + 1] = {t = "Bailout", help="govAutoBailoutTime", inline = 1, label = "ar", min = 0, max = 100, unit = "s", default = 0, vals = {16, 17}, decimals = 1, scale = 10}
 
 labels[#labels + 1] = {t = "", label = "ar2", inline_size = 40.15}
-fields[#fields + 1] = {t = "Timeout", help="govAutoTimeout", inline = 1, label = "ar2", min = 0, max = 100, unit = "s", default = 0, vals = {14, 15}, decimals = 1, scale = 10}
+fields[#fields + 1] = {t = "Timeout", help="govAutoTimeout", inline = 1, label = "ar2", min = 0, max = 600, unit = "s", default = 0, vals = {14, 15}, decimals = 1, scale = 10}
 
 labels[#labels + 1] = {t = "", label = "ar3", inline_size = 40.15}
 fields[#fields + 1] = {t = "Min Entry", help="govAutoMinEntryTime", inline = 1, label = "ar3", min = 0, max = 100, unit = "s", default = 50, vals = {18, 19}, decimals = 1, scale = 10}

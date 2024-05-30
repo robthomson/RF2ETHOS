@@ -5,15 +5,15 @@ local fields = {}
 
 -- pid controller settings =
 -- labels[#labels + 1] = { subpage=1,t ="Ground Error Decay", label=1      }
-fields[#fields + 1] = {subpage = 1, t = "Error decay ground",help="profilesErrorDecayGround", min = 0, max = 250, unit = "s", default = 250, vals = {2}, decimals = 1, scale = 10}
+fields[#fields + 1] = {subpage = 1, t = "Ground Error Decay",help="profilesErrorDecayGround", min = 0, max = 250, unit = "s", default = 250, vals = {2}, decimals = 1, scale = 10}
 
-labels[#labels + 1] = {subpage = 1, t = "   Cyclic Error Decay", label = 2, inline_size=13.6}
+labels[#labels + 1] = {subpage = 1, t = "Inflight Error Decay", label = 2, inline_size=13.6}
 fields[#fields + 1] = {subpage = 1, t = "Time", help="profilesErrorDecayGroundCyclicTime", inline = 2, label = 2, min = 0, max = 250, unit = "s", default = 180, vals = {3}, decimals = 1, scale = 10}
 fields[#fields + 1] = {subpage = 1, t = "Limit", help="profilesErrorDecayGroundCyclicLimit", inline = 1, label = 2, min = 0, max = 250, unit = "°", default = 20, vals = {5}}
 
-labels[#labels + 1] = {subpage = 1, t = "   Yaw Error Decay", label = 3, inline_size=13.6}
-fields[#fields + 1] = {subpage = 1, t = "Time", help="profilesErrorDecayGroundYawTime" , inline = 2, label = 3, min = 0, max = 250, unit = "s", vals = {4}, decimals = 1, scale = 10}
-fields[#fields + 1] = {subpage = 1, t = "Limit", help="profilesErrorDecayGroundYawLimit", inline = 1, label = 3, min = 0, max = 250, unit = "°", vals = {6}}
+--labels[#labels + 1] = {subpage = 1, t = "   Yaw Error Decay", label = 3, inline_size=13.6}
+fields[#fields + 1] = {subpage = 'disableme as bad', t = "Time", help="profilesErrorDecayGroundYawTime" , inline = 2, label = 3, min = 0, max = 250, unit = "s", vals = {4}, decimals = 1, scale = 10}
+fields[#fields + 1] = {subpage = 'disableme as bad', t = "Limit", help="profilesErrorDecayGroundYawLimit", inline = 1, label = 3, min = 0, max = 250, unit = "°", vals = {6}}
 
 labels[#labels + 1] = {subpage = 1, t = "Error limit", label = 4, inline_size=8.15}
 fields[#fields + 1] = {subpage = 1, t = "R", help="profilesErrorLimit", inline = 3, label = 4, min = 0, max = 180, default = 30, unit = "°", vals = {8}}

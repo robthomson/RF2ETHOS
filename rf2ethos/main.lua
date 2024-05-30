@@ -1877,6 +1877,18 @@ function rf2ethos.openPageSERVOS(idx, title, script)
                 if f.unit ~= nil then
                     field:suffix(f.unit)
                 end
+				-- help only exists in new 1510 and above
+				--print(tonumber(rf2ethos.sensorMakeNumber(environment.version)))
+				if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
+					if f.help ~= nil then
+						if fieldHelpTxt[f.help]['t'] ~= nil then
+							local helpTxt = fieldHelpTxt[f.help]['t']	
+							field:help(helpTxt)
+						end
+					end	
+				end
+					
+				
             end
         end
     end

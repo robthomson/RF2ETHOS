@@ -1,189 +1,269 @@
 return {
+--configurationFeatures = { t="<strong>Note:</strong> Not all features are supported by all flight controllers. If you enable a specific feature, and it is disabled after you hit 'Save and Reboot', it means that this feature is not supported." },
+--configurationSerialPorts = { t="Select function and speed for each serial port (UART)." },
+--configurationRSSI = { t="RSSI is a measurement of signal strength and is very handy so you know when your aircraft is going out of range or if it is suffering RF interference." },
+--configurationBoardAlignment = { t="Arbitrary board rotation allows mounting the FC sideways / upside down / rotated etc. When using external sensors, use the sensor alignments to define sensor position independent from the board orientation." },
+--configurationAccelTrims = { t="The Accelerometer Trims provide fine tuning to the horizon level, which can be used to decrease drift while in stabilized modes, such as Angle or Rescue." },
+--configurationBeeper = { t="Enable or disable when to sound the Buzzer." },
+--configurationGPSGalileo = { t="When enabled, this removes the QZSS system (Japanese) and replaces it for the Galileo system (European)." },
+--configurationGPSHomeOnce = { t="When enabled, only the first arm after the battery is connected will be used as home point. If not enabled, every time the quad is armed, the home point will be updated." },
 
-configurationFeatures = { t="<strong>Note:</strong> Not all features are supported by all flight controllers. If you enable a specific feature, and it is disabled after you hit 'Save and Reboot', it means that this feature is not supported." },
-configurationSerialPorts = { t="Select function and speed for each serial port (UART)." },
-configurationRSSI = { t="RSSI is a measurement of signal strength and is very handy so you know when your aircraft is going out of range or if it is suffering RF interference." },
-configurationBoardAlignment = { t="Arbitrary board rotation allows mounting the FC sideways / upside down / rotated etc. When using external sensors, use the sensor alignments to define sensor position independent from the board orientation." },
-configurationAccelTrims = { t="The Accelerometer Trims provide fine tuning to the horizon level, which can be used to decrease drift while in stabilized modes, such as Angle or Rescue." },
-configurationBeeper = { t="Enable or disable when to sound the Buzzer" },
-configurationGPSGalileo = { t="When enabled, this removes the QZSS system (Japanese) and replaces it for the Galileo system (European)." },
-configurationGPSHomeOnce = { t="When enabled, only the first arm after the battery is connected will be used as home point. If not enabled, every time the quad is armed, the home point will be updated." },
 
-receiverBars = { t="Shows the raw RC channels from the receiver exactly the way they are received. Please select the channel map, i.e. the corrent function for each RC channel." },
+--receiverBars = { t="Shows the raw RC channels from the receiver exactly the way they are received. Please select the channel map, i.e. the corrent function for each RC channel." },
 
-servoMid = { t="Center position in 탎. The servo arm should be level in this position." },
-servoMin = { t="Lowest point of travel (minimum pulse width). This setting changes the allowed negative servo throw. It is used for avoiding servo arm binding at the negative travel extreme." },
-servoMax = { t="Highest point of travel (maximum pulse width). This setting changes the allowed positive servo throw. It is used for avoiding servo arm binding at the positive travel extreme." },
-servoScaleNeg = { t="Scaling factor on the negative side. Typically 500탎 for normal (1520탎) servos, and 250탎 for narrow band (760탎) servos. Altering this setting from the default is used for correcting any nonlinearity between the negative and positive throws." },
-servoScalePos = { t="Scaling factor on the positive side. Typically 500탎 for normal (1520탎) servos, and 250탎 for narrow band (760탎) servos. Altering this setting from the default is used for correcting any nonlinearity between the negative and positive throws." },
-servoRate = { t="PWM update rate in Hz. For analog servos, set it to 50Hz, as higher values can cause damage. For digital servos, values from 100Hz to 560Hz are typical. Please check the servo data sheet.<br><b>Note</b>: Select <i>Save and reboot</i> to actually change the update rate, as the rate is initialised at boot time." },
-servoSpeed = { t="Limits the servo motion speed. Can be used for e.g. retracts. A value of 0 means no limitation. Values between 1-60000 milliseconds specify the time needed for 60&deg; rotation.", units="ms" },
-servoReverse = { t="Reverse the servo if it's not moving in the right direction." },
-servoGeometryCorrection = { t="Enable <i>Geometry Correction</i> for correcting the rotational geometry at the servo movement extremes. Do not use with linear servos." },
-servoOverride = { t="Select the servo to be controlled and then move the slider to move the servo arm to the commanded angle." },
 
-mixerSwashTrim = {t="Small trim adjustements to level your swash plate.  Correct mechanical setup is recommended"},
-mixerTTAPrecomp = { t="Precomp applied when adjusting tail torque attentuation" },
-mixerMainRotorDirection = { t="Looking from the top of the helicopter, what direction is the main rotor turning? For the majority of helicopters this is clockwise." },
-mixerSwashType = { t="<strong>None:</strong> The mixer is disabled. Custom mixing rules must be set in the CLI. <br><br><strong>Direct:</strong> No mixing, controls are passed through the mixer unchanged for external mixing.<br><br><strong>CCPM:</strong> Cyclic-Collective Pitch Mixing. For cyclic-pitch helicopters with three swashplate servos, at 120&deg;, 135&deg;, or 140&deg; angle.<br><br><strong>FPM:</strong> Fixed Pitch Mixing. For fixed-pitch helicopters with two swashplate servos at 90&deg; angle, either in L or V configuration." },
-mixerElevatorDirection = { t="Depending on the elevator servo position and the head design, the direction may be reversed." },
-mixerAileronDirection = { t="Depending on the aileron servo position and the head design, the direction may be reversed." },
-mixerCollectiveDirection = { t="Depending on the blade grip control arm position, the collective direction may be reversed. Usually trailing edge control has reversed direction." },
-mixerCyclicCalibration = { t="Adjust the cyclic gain to match the mechanical gain in the head design." },
-mixerCollectiveCalibration = { t="Adjust the collective gain to match the mechanical gain in the head design." },
-mixerCollectiveGeoCorrection = { t="Adjust until the collective positive and negative deflections are equal." },
-mixerTotalPitchLimit = { t="Maximum amount of total cyclic + collective blade pitch." },
-mixerCyclicLimit = { t="Maximum amount of cyclic blade pitch." },
-mixerCollectiveLimit = { t="Maximum amount of collective blade pitch." },
-mixerSwashRing = { t="The swashring limits the maximum angle the swashplate can reach in order to prevent binding. Pitch and Roll axis should be configured individually (via the Mixer input and scaling) to the desired pitch angles (without binding). If however, both the maximum Pitch and Roll are commanded <strong>at the same time</strong>, the Swashplate will have to deflect to a larger angle than either axis individually. This may result in the swashplate binding on the main shaft.<br><br>Increasing the value of Swashring will limit the maximum Swashplate angle when both Pitch and Roll are maximum." },
-mixerSwashPhase = { t="The phase offset for the swashplate controls." },
-mixerTailRotorMode = { t="<strong>Variable pitch:</strong> Variable pitch tail controlled by a tail servo (Servo#4). <br><strong>Motorised:</strong> The tail has a separate motor (Motor#2) for controlling the yaw.<br><strong>Bi-directional:</strong> Motorised tail operating in bi-directional mode (experimental)." },
-mixerTailRotorDirection = { t="Depending on the tail rotor direction and ESC/servo configuration, the yaw direction may be reversed." },
-mixerTailRotorCalibration = { t="Adjust the yaw gain to match the mechanical gain. Usually around 50-150% for servo driven tails, but can be wildly different for motorised tail rotors." },
-mixerTailRotorMinYaw = { t="An angle limit for clockwise yaw." },
-mixerTailRotorMaxYaw = { t="An angle limit for counter-clockwise yaw." },
-mixerTailMotorMinYaw = { t="A limit for clockwise yaw." },
-mixerTailMotorMaxYaw = { t="A limit for counter-clockwise yaw." },
-mixerTailMotorIdle = { t="This is the minimum throttle signal sent to the tail motor. This should be set just high enough that the motor does not stop" },
-mixerTailRotorCenterTrim = { t="Set tail rotor trim for zero yaw command." },
+--
+-- servos.lua
+--
+servoMid = { t="Servo center position pulse width." },
+servoMin = { t="Servo negative travel limit." },
+servoMax = { t="Servo positive travel limit." },
+servoScaleNeg = { t="Servo negative scaling." },
+servoScalePos = { t="Servo positive scaling." },
+servoRate = { t="Servo PWM rate." },
+servoSpeed = { t="Servo motion speed in milliseconds." },
+--servoReverse = { t="Servo reverse." },
+--servoGeometryCorrection = { t="Servo geometry correction." },
+--servoOverride = { t="Servo override for adjusting center and limits." },
+
+
+--
+-- mixer.lua
+--
+mixerSwashTrim = { t="Swash trim to level the swash plate when using fixed links." },
+mixerTTAPrecomp = { t="Mixer precomp for 0 yaw." }, -- ??? this is not named well in any of the RF LUAs
+mixerCollectiveGeoCorrection = { t="Adjust if there is too much negative collective or too much positive collective." },
+mixerTotalPitchLimit = { t="Maximum amount of combined cyclic and collective blade pitch." },
+mixerSwashPhase = { t="Phase offset for the swashplate controls." },
+mixerTailMotorIdle = { t="Minimum throttle signal sent to the tail motor. This should be set just high enough that the motor does not stop." },
 mixerTailMotorCenterTrim = { t="Set tail motor throttle value for zero yaw command." },
-mixerInputChannels = { t="<strong>Note! This is the right place to limit your controls</strong><br><br>The mixer input rate is for setting the scaling factors to match the mechanical head setup. As every rotor head is different, different scaling values are needed for each setup. <br><strong>Control:</strong> This column contains each of the Stabilized control functions. <br><strong>Minimum:</strong> Set the minimum angle you wish the blade to reach when commanded. <br><strong>Maximum:</strong> Set the maximum angle you wish the blade to reach when commanded. <br><strong>Scaling:</strong> Increase or decrease the scaling value until the helicopter blades match the commanded angle. <br><br><strong>Mixer Input Calibration Process</strong><br><strong>Step 1: </strong>Enable the mixer override by the selector on the 'SYSTEM' tab. The Mixer Override entry will now be visible on this page. <br><strong>Step 2: </strong>Enable the bypass on the Control to be calibrated. <br><strong>Step 3: </strong>Set the Mixer override to an angle (say 10 degrees). <br><strong>Step 4: </strong>Measure the actual blade angle.<br><strong>Step 5: </strong>Set the scaling so the physical blade angle matches the commanded angle." },
-mixerOverride = { t="This feature is used for setting up the rotor and is part of the <strong>Mixer Calibration</strong> process. When the bypass enable is active the mixer can be commanded to the requested positions directly." },
 
-motorsEscProtocol = { t="Select your ESC protocol.<br>Traditional helicopter ESCs use PWM. Drone ESCs may use other protocols, like DSHOT. <br>Make sure the protocol is supported by your ESC." },
-motorsEscTelemetryProtocol = { t="Select your ESC Telemetry protocol. The telemetry is transmitted via a separate wire from the ESC." },
-motorsUnsyncedPwm = { t="ESC PWM is running unsyncronised, separate from the PID loop, at the specified frequency." },
-motorsUnsyncedPWMFreq = { t="ESC PWM update frequency in Hz. This is how often the throttle value is sent to the ESC. Usually between 50Hz and 250Hz. Most modern ESCs work fine with 250Hz." },
-motorsDshotBidir = { t="The ESC RPM is sent back to the FC with DShot. <br>Note: Requires a compatible ESC, like BLHeli32, Bluejay or AM32." },
-motorsRPMSensor = { t="Use the RPM Sensor input for motor RPM. You can connect an RPM signal from the ESC, or from an external RPM Sensor dongle." },
-motorsMainRotorGearRatio = { t="Gear ratio between the motor and the main rotor.<br>Use <span class='value'>motor pinion</span> : <span class='value'>main gear</span> tooth count." },
-motorsTailRotorGearRatio = { t="Gear ratio between the tail rotor and the main rotor. Use <span class='value'>tail gear</span> : <span class='value'>autorotation gear</span> tooth count for Torque Tube, or <span class='value'>tail pulley</span> : <span class='value'>front pulley</span> for a belt tail. For a direct drive tail, use <span class='value'>1</span> : <span class='value'>1</span>" },
-motorsThrottleMinimum = { t="This is the PWM value that is sent to the ESCs at zero throttle (when the craft is armed)." },
-motorsThrottleMaximum = { t="This is the PWM value that is sent to the ESCs at full throttle (when the craft is armed)." },
-motorsThrottleMinimumCommand = { t="This is the PWM value that is sent to the ESCs when the craft is disarmed. Set this to a value that allows the ESC to arm (typically 1000)." },
+--mixerMainRotorDirection = { t="Main rotor rotation direction, look down from the above." },
+--mixerSwashType = { t="Swash type." },
+--mixerElevatorDirection = { t="Mixer pitch/elevator direction." },
+--mixerAileronDirection = { t="Mixer roll/aileron direction." },
+--mixerCollectiveDirection = { t="Mixer collective direction." },
+--mixerCyclicCalibration = { t="Adjust the cyclic gain to match the mechanical gain in the head design." },
+--mixerCollectiveCalibration = { t="Adjust the collective gain to match the mechanical gain in the head design." },
+--mixerCyclicLimit = { t="Maximum amount of cyclic blade pitch." },
+--mixerCollectiveLimit = { t="Maximum amount of collective blade pitch." },
+--mixerSwashRing = { t="Swashring limit for controlling combined roll and pitch." },
+--mixerTailRotorMode = { t="Tail rotor mode." },
+--mixerTailRotorDirection = { t="Mixer yaw direction." },
+--mixerTailRotorCalibration = { t="Adjust the yaw gain to match the mechanical gain." },
+--mixerTailRotorMinYaw = { t="Blade angle limit for clockwise yaw." },
+--mixerTailRotorMaxYaw = { t="Blade angle limit for counter-clockwise yaw." },
+--mixerTailMotorMinYaw = { t="Motor output limit for clockwise yaw." },
+--mixerTailMotorMaxYaw = { t="Motor output limit for counter-clockwise yaw." },
+--mixerTailRotorCenterTrim = { t="Tail rotor trim for zero yaw command (0 blade pitch)." },
+--mixerInputChannels = { t="." },
+--mixerOverride = { t="This feature is used for setting up the rotor and is part of the <strong>Mixer Calibration</strong> process. When the bypass enable is active the mixer can be commanded to the requested positions directly." },
 
-govMode = { t="<strong>OFF:</strong> Govenor is disabled and the throttle from the Tx is passed through to the ESC.<br><br><strong>PASSTHROUGH:</strong> Throttle passthrough from the Tx, with slow spoolup and autorotation control.<br><br><strong>STANDARD:</strong> Motor speed is controlled by the FC. Equivalent to a typical ESC Governor.<br><br><strong>MODE1:</strong> Like STANDARD but with Collective and Cyclic Precompensation (i.e. collective changes are proactively changing the throttle, just like a throttle curve in the Tx).<br><br><strong>MODE2:</strong> Like MODE1, but with proactive battery voltage sag compensation. Requires fast voltage measurement." },
-govHandoverThrottle = { t="The throttle level above which the governor is activated. Below this level the input throttle is passed to the ESC - above this level the governor is enabled and the input throttle is used for calculating the target headspeed. The motor must be able to start below this throttle level." },
+
+--
+-- motors
+--
+--motorsEscProtocol = { t="Select your ESC protocol.<br>Traditional helicopter ESCs use PWM. Drone ESCs may use other protocols, like DSHOT. <br>Make sure the protocol is supported by your ESC." },
+--motorsEscTelemetryProtocol = { t="Select your ESC Telemetry protocol. The telemetry is transmitted via a separate wire from the ESC." },
+--motorsUnsyncedPwm = { t="ESC PWM is running unsyncronised, separate from the PID loop, at the specified frequency." },
+--motorsUnsyncedPWMFreq = { t="ESC PWM update frequency in Hz. This is how often the throttle value is sent to the ESC. Usually between 50Hz and 250Hz. Most modern ESCs work fine with 250Hz." },
+--motorsDshotBidir = { t="The ESC RPM is sent back to the FC with DShot. <br>Note: Requires a compatible ESC, like BLHeli32, Bluejay or AM32." },
+--motorsRPMSensor = { t="Use the RPM Sensor input for motor RPM. You can connect an RPM signal from the ESC, or from an external RPM Sensor dongle." },
+--motorsMainRotorGearRatio = { t="Gear ratio between the motor and the main rotor.<br>Use <span class='value'>motor pinion</span> : <span class='value'>main gear</span> tooth count." },
+--motorsTailRotorGearRatio = { t="Gear ratio between the tail rotor and the main rotor. Use <span class='value'>tail gear</span> : <span class='value'>autorotation gear</span> tooth count for Torque Tube, or <span class='value'>tail pulley</span> : <span class='value'>front pulley</span> for a belt tail. For a direct drive tail, use <span class='value'>1</span> : <span class='value'>1</span>." },
+--motorsThrottleMinimum = { t="This is the PWM value that is sent to the ESCs at zero throttle (when the craft is armed)." },
+--motorsThrottleMaximum = { t="This is the PWM value that is sent to the ESCs at full throttle (when the craft is armed)." },
+--motorsThrottleMinimumCommand = { t="This is the PWM value that is sent to the ESCs when the craft is disarmed. Set this to a value that allows the ESC to arm (typically 1000)." },
+
+
+--
+-- governor.lua
+--
+--govMode = { t="<strong>OFF:</strong> Govenor is disabled and the throttle from the Tx is passed through to the ESC.<br><br><strong>PASSTHROUGH:</strong> Throttle passthrough from the Tx, with slow spoolup and autorotation control.<br><br><strong>STANDARD:</strong> Motor speed is controlled by the FC. Equivalent to a typical ESC Governor.<br><br><strong>MODE1:</strong> Like STANDARD but with Collective and Cyclic Precompensation (i.e. collective changes are proactively changing the throttle, just like a throttle curve in the Tx).<br><br><strong>MODE2:</strong> Like MODE1, but with proactive battery voltage sag compensation. Requires fast voltage measurement." },
+govHandoverThrottle = { t="Governor activates above this %. Below this the input throttle is passed to the ESC." },
 govStartupTime = { t="Time constant for slow startup, in seconds, measuring the time from zero to full headspeed." },
 govSpoolupTime = { t="Time constant for slow spoolup, in seconds, measuring the time from zero to full headspeed." },
 govTrackingTime = { t="Time constant for headspeed changes, in seconds, measuring the time from zero to full headspeed." },
 govRecoveryTime = { t="Time constant for recovery spoolup, in seconds, measuring the time from zero to full headspeed." },
+
 govAutoBailoutTime = { t="Time constant for autorotation bailout spoolup, in seconds, measuring the time from zero to full headspeed." },
-govAutoTimeout = { t="Timeout for ending autorotation and moving to normal IDLE." },
-govAutoMinEntryTime = { t="Minimum flight time before autorotation can be engaged." },
-govZeroThrottleTimeout = { t="Timeout for missing (zero) throttle signal, before shutting down the governor. If the throttle signal returns within this timeout, the governor will perform a recovery spoolup." },
-govLostHeadspeedTimeout = { t="Timeout for missing headspeed signal, before spooling down. If the RPM signal returns within this timeout, the governor will perform a recovery spoolup." },
+
+govAutoTimeout = { t="Timeout for ending autorotation and moving to normal idle and spoolup." },
+
+govAutoMinEntryTime = { t="Minimum time with governor active before autorotation can be engaged." },
+
+govZeroThrottleTimeout = { t="Timeout for missing throttle signal before governor shutoff. If signal returns within timeout, governor will perform recovery spoolup." },
+govLostHeadspeedTimeout = { t="Timeout for missing RPM before spooling down. If RPM returns within timeout, the governor will perform recovery spoolup." },
 govHeadspeedFilterHz = { t="Cutoff for the headspeed lowpass filter." },
 govVoltageFilterHz = { t="Cutoff for the battery voltage lowpass filter." },
-govTTAFilterHz = { t="Cutoff for the TTA lowpass filter." },
-govFFFilterHz = { t="Cutoff for the cyclic/collective precompensation lowpass filter." },
-govHeadspeed = { t="The governor target headspeed is calculated by multiplying the full headspeed with the throttle input." },
+govTTABandwidth = { t="Cutoff for the TTA lowpass filter." },
+govTTAPrecomp = { t="Cutoff for the cyclic/collective collective precomp lowpass filter." },
+
+
+--
+-- profile_governor.lua
+--
+govHeadspeed = { t="Target headspeed for the current profile." },
+govMasterGain = { t="Master PID loop gain." },
+govPGain = { t="PID loop P-term gain." },
+govIGain = { t="PID loop I-term gain." },
+govDGain = { t="PID loop D-term gain." },
+govFGain = { t="Feedforward gain." },
+
+govYawPrecomp = { t="Yaw precompensation weight - how much yaw is mixed into the feedforward." },
+govCyclicPrecomp = { t="Cyclic precompensation weight - how much cyclic is mixed into the feedforward." },
+govCollectivePrecomp = { t="Collective precompensation weight - how much collective is mixed into the feedfoward." },
+
+govTTAGain = { t="TTA gain applied to increase headspeed to control the tail in the negative direction (e.g. motorised tail less than idle speed)." },
+govTTALimit = { t="TTA max headspeed increase over full headspeed." },
+
 govMaxThrottle = { t="Maximum output throttle the governor is allowed to use." },
-govMasterGain = { t="Master PID loop gain. Usually 10..100" },
-govPGain = { t="PID loop P-term gain. Usually 10..100" },
-govIGain = { t="PID loop I-term gain. Usually 10..100" },
-govDGain = { t="PID loop D-term gain. Usually 0..100" },
-govFGain = { t="Collective/Cyclic feedforward gain. Usually 0..100" },
-govTTABandwidth = {t="Bandwidth in Hz allowed to be used by the TTA"},
-govTTAPrecomp = {t="Precomp in Hz allowed to be used by the TTA"},
-govTTAGain = { t="Tail Torque Assist strength (gain). This is a gain applied to increase the headspeed to control the tail in the negative direction (e.g. Motorised tail less than idle speed). Usually 50..150" },
-govTTALimit = { t="Tail Torque Assist maximum Headspeed increase. This sets an upper limit how much the headspeed can go over the Full Headspeed. Usually 20..50%." },
-govYawPrecomp = { t="Yaw precompensation weight. Determines how much Yaw is mixed into the feedforward. This helps the governor to maintain the headspeed proactively. Usually 20..100" },
-govCyclicPrecomp = { t="Cyclic precompensation weight. Determines how much cyclic is mixed into the feedforward. This helps the governor to maintain the headspeed proactively. Usually 20..100" },
-govCollectivePrecomp = { t="Collective precompensation weight. Determines how much collective is mixed into the feedfoward. This helps the governor to maintain the headspeed proactively. Usually 20..100" },
 
-accelerometerTrim = {t = "If your craft drift while in any of the stabilized modes you can use these values to trim the accelerometer."},
+--govTTAFilterHz = { t="Cutoff for the TTA lowpass filter." },
+--govFFFilterHz = { t="Cutoff for the cyclic/collective precompensation lowpass filter." },
 
 
-profilesProportional = { t="Controls the strength of how tightly the machine tracks the sticks (the Setpoint).<br /><br />Higher value (gains) provide tighter tracking, but can cause overshoot if too high in proportion to the Derivative (D-term).  Think of the P-term as the spring on a car." },
-profilesIntegral = { t="Controls the strength of how tightly the machine holds the overall position of the Setpoint.<br>Similar to Proportional, but for longer biases on the craft such as an offset center of gravity (CoG) or persistent outside influence (steady wind).<br /><br />Higher gains provide tighter tracking (e.g.: in sweeping turns), but can make the craft feel stiff for commanded stick inputs.<br>If extremely high in proportion to the D-term, can cause slow oscillations." },
-profilesDerivative = { t="Controls the strength of dampening to ANY motion on the craft.  For stick moves, the D-term dampens the command. For an outside influence (prop-wash OR wind gust) the D-term dampens the influence.<br /><br />Higher gains provide more dampening and reduce overshoot by P-term and FF.<br>However, the D-term is VERY sensitive to gyro high frequency vibrations (noise | magnifies by 10x to 100x).<br /><br />High frequency noise can cause motor heat and burn out motors if D-gains are too high or the gyro noise is not filtered well (see Filters tab).<br /><br />Think of the D-term as the shock absorber on your car, but with the negative inherent property of magnifying high frequency gyro noise." },
-profilesFeedforward = { t="Is an additional pushing term (spring) based on stick input. FF helps the P-term push the craft for commanded stick moves.<br /><br />The P-term pushes based on the difference between the commanded Setpoint (deg/sec) and the gyro reading of current rotational rate (deg/sec). FF pushes based on the commanded change of the sticks alone.<br /><br />Higher values (gains) will result in a more sharp machine response to stick input.<br>Too high of values may result in some overshoot, increased motor heat, and motor saturation (where motors can not keep up with the desired rate of change).<br>Lower or zero (0) values will result in a slower and smoother response to stick inputs." },
-profilesBoost = { t="Is an additional boost on the feedforward. This makes the heli react faster to quick stick movements." },
-profilesHSI = { t="The high speed integral gain used to prevent the craft from pitching up when flying at speed." },
-profilesRatesDynamicsTime = {t="Increase or decrease the response time of the rate to smooth heli movements."},
-profilesRatesDynamicsAcc = {t="Maximum acceleration of the craft in response to a stick movement."},
-profilesErrorDecayGround = {t="Bleeds off the current controller error when the craft is not airborne. This helps prevent the craft tipping over."},
-profilesErrorDecayGroundCyclicTime = {t="Bleeds off the current controller error when the craft is not airborne. This helps prevent the craft tipping over."},
-profilesErrorDecayGroundCyclicLimit = {t="Bleeds off the current controller error when the craft is not airborne. This helps prevent the craft tipping over."},
-profilesErrorDecayGroundYawTime = {t="Bleeds off the current controller error when the craft is not airborne. This helps prevent the craft tipping over."},
-profilesErrorDecayGroundYawLimit = {t="Bleeds off the current controller error when the craft is not airborne. This helps prevent the craft tipping over."},
-profilesErrorHSIOffsetLimit = {t="Hard limit for the High Speed Integral offset angle in the PID loop. The O-Term will never go over these limits."},
-profilesErrorRotation = {t="If turned on, the I-term can transfer between pitch and roll axis during pirouetting. Increase the performance of overall piro related maneuvers. This is sometimes referred to as Piro compensation."},
-profilesPIDBandwidth = {t="PID Loop overall bandwidth in Hz"},
-profilesPIDBandwidthDtermCutoff = {t="D-term cutoff in Hz"},
-profilesPIDBandwidthBtermCutoff = {t="B-term cutoff in Hz"},
+--
+-- accelerometer.lua
+--
+accelerometerTrim = { t = "Use to trim if the heli drifts in one of the stabilized modes (angle, horizon, etc.)." },
+
+
+--
+-- profile.lua
+--
+profilesErrorDecayGround = { t="Bleeds off the current controller error when the craft is not airborne to stop the craft tipping over." },
+profilesErrorDecayGroundCyclicTime = { t="Time constant for bleeding off cyclic I-term. Higher will stabilize hover, lower will drift." },
+profilesErrorDecayGroundCyclicLimit = { t="Maximum bleed-off speed for cyclic I-term." },
+profilesErrorDecayGroundYawTime = { t="Time constant for bleeding off yaw I-term." },
+profilesErrorDecayGroundYawLimit = { t="Maximum bleed-off speed for yaw I-term." },
+
 profilesErrorLimit = { t="Hard limit for the angle error in the PID loop. The absolute error and thus the I-term will never go above these limits." },
-profilesErrorRotation = { t="Rotates the current Roll and Pitch Error Terms around Yaw when the craft rotates. This is sometimes called Piro Compensation." },
-profilesItermRelax = { t="Limits the accumulation of I-term when fast movements happen. This helps in the reduction of bounceback at the end of rolls and other fast movements." },
-profilesItermRelaxType = { t="Choose the axes in which this is active. <br><strong>RP:</strong> Roll, Pitch <br><strong>RPY:</strong> Roll, Pitch, Yaw." },
-profilesAcroTrainerGain = { t="Acro Trainer gain. Acro trainer Mode is not self leveling but does limit the maximum pitch/roll angle. This determines how aggressively the helicopter tilts back to the maximum angle (if exceeded) while in Acro Trainer Mode" },
-profilesAcroTrainerLimit = { t="Acro Trainer angle limit. Acro Trainer mode does not self level (like Angle or Horizon Modes); however, it does limit the maximum angle the helicopter will pitch/roll to" },
-profilesAngleModeGain = { t="Angle Mode leveling gain. This determines how aggressively the helicopter tilts back to level while in Angle Mode" },
-profilesAngleModeLimit = { t="Angle Mode maximum angle. Helicopter is limited to this angle when in Angle mode" },
-profilesHorizonModeGain = { t="Horizon Mode leveling gain. This determines how aggressively the helicopter tilts back to level while in Horizon Mode" },
-profilesYawCenterOffset = { t="Center Offset for tail motor or servo" },
-profilesYawStopGainCW = { t="Stop gain (PD) for clock-wise rotation. Typical range 50..200." },
-profilesYawStopGainCCW = { t="Stop gain (PD) for counter clock-wise rotation. Typical range 50..200." },
-profilesYawPrecompCutoff = { t="Frequency limit for all yaw precompensation actions" },
-profilesYawFFCyclicGain = { t="Gain value for cyclic feedforward mixed into yaw" },
-profilesYawFFCollectiveGain = { t="Gain value for collective feedforward mixed into yaw" },
-profilesYawFFImpulseGain = { t="Gain value for collective impulse feedforward mixed into yaw" },
-profilesyawFFImpulseDecay = { t="Decay time for collective impulse feedforward mixed into yaw" },
-profilesPitchFFCollective = { t="Compensation for the pitching up tendency in collective pitch pumps." },
-profilesPitchFFCollectiveGain = { t="Amount of collective mixed into the elevator control." },
-profilesCyclicCrossCoupling = { t="Cyclic Cross-Coupling compensation removes the aileron (roll) wobble when only elevator is applied." },
-profilesCyclicCrossCouplingGain = { t="Amount of compensation applied for Pitch-to-Roll decoupling." },
-profilesCyclicCrossCouplingRatio = { t="Amount of Roll-to-Pitch compensation needed, vs. Pitch-to-Roll." },
+
+profilesErrorHSIOffsetLimit = { t="Hard limit for the High Speed Integral offset angle in the PID loop. The O-term will never go over these limits." },
+
+profilesErrorRotation = { t="Rotates the current roll and pitch error terms around taw when the craft rotates. This is sometimes called Piro Compensation." },
+
+profilesItermRelaxType = { t="Choose the axes in which this is active. RP: Roll, Pitch. RPY: Roll, Pitch, Yaw." },
+
+profilesItermRelax = { t="Helps reduce bounce back after fast stick movements. Can cause inconsistency in small stick movements if too low." },
+
+profilesYawStopGainCW = { t="Stop gain (PD) for clockwise rotation." },
+profilesYawStopGainCCW = { t="Stop gain (PD) for counter-clockwise rotation." },
+
+profilesYawPrecompCutoff = { t="Frequency limit for all yaw precompensation actions." },
+profilesYawFFCyclicGain = { t="Cyclic feedforward mixed into yaw (cyclic-to-yaw precomp)." },
+profilesYawFFCollectiveGain = { t="Collective feedforward mixed into yaw (collective-to-yaw precomp)." },
+
+profilesYawFFImpulseGain = { t="An extra boost of yaw precomp on collective input." },
+profilesyawFFImpulseDecay = { t="Decay time for the extra yaw precomp on collective input." },
+
+profilesPitchFFCollective = { t="Increasing will compensate for the pitching up motion caused by tail drag when climbing." },
+
+profilesPIDBandwidth = { t="PID loop overall bandwidth in Hz." },
+profilesPIDBandwidthDtermCutoff = { t="D-term cutoff in Hz." },
+profilesPIDBandwidthBtermCutoff = { t="B-term cutoff in Hz." },
+
+profilesCyclicCrossCouplingGain = { t="Amount of compensation applied for pitch-to-roll decoupling." },
+profilesCyclicCrossCouplingRatio = { t="Amount of roll-to-pitch compensation needed, vs. pitch-to-roll." },
 profilesCyclicCrossCouplingCutoff = { t="Frequency limit for the compensation. Higher value will make the compensation action faster." },
-profilesRescueFlipMode = { t="If rescue is activated while inverted, flip to upright - or remain inverted" },
-profilesRescueLevelGain = { t="Gain to determine how agressively the heli levels during rescue." },
-profilesRescueFlipGain = { t="Gain to determine how agressively the heli flips during inverted rescue." },
-profilesRescueMaxRate = { t="Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates." },
-profilesRescueMaxAccel = { t="Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration." },
+
+profilesAcroTrainerGain = { t="Determines how aggressively the helicopter tilts back to the maximum angle (if exceeded) while in Acro Trainer Mode." },
+profilesAcroTrainerLimit = { t="Limit the maximum angle the helicopter will pitch/roll to while in Acro Trainer Mode." },
+
+profilesAngleModeGain = { t="Determines how aggressively the helicopter tilts back to level while in Angle Mode." },
+profilesAngleModeLimit = { t="Limit the maximum angle the helicopter will pitch/roll to while in Angle mode." },
+
+profilesHorizonModeGain = { t="Determines how aggressively the helicopter tilts back to level while in Horizon Mode." },
+
+
+--
+-- pids.lua
+--
+
+profilesProportional = { t="How tightly the system tracks the desired setpoint." },
+profilesIntegral = { t="How tightly the system holds it's position." },
+profilesHSI = { t="Used to prevent the craft from pitching up when flying at speed." },
+profilesDerivative = { t="Strength of dampening to any motion on the system, including external influences. Also reduces overshoot." },
+profilesFeedforward = { t="Helps push P-term based on stick input. Increasing will make response more sharp, but can cause overshoot." },
+profilesBoost = { t="Additional boost on the feedforward to make the heli react more to quick stick movements." },
+
+--profilesYawCenterOffset = { t="Center Offset for tail motor or servo." },
+--profilesPitchFFCollectiveGain = { t="Amount of collective mixed into the elevator control." },
+--profilesCyclicCrossCoupling = { t="Cyclic Cross-Coupling compensation removes the aileron (roll) wobble when only elevator is applied." },
+
+
+--
+-- rates.lua
+--
+profilesRatesDynamicsTime = { t="Increase or decrease the response time of the rate to smooth heli movements." },
+profilesRatesDynamicsAcc = { t="Maximum acceleration of the craft in response to a stick movement." },
+
+
+--
+-- profile_rescue.lua
+--
+profilesRescueFlipMode = { t="If rescue is activated while inverted, flip to upright - or remain inverted." },
+
 profilesRescuePullupCollective = { t="Collective value for pull-up climb." },
-profilesRescuePullupTime = { t="Rescue pull-up time. When Rescue activated Helicopter will apply pull-up collective for this time period before moving to flip or climb stage.", units="s" },
-profilesRescueClimbCollective = { t="Collective value for rescue climb" },
-profilesRescueClimbTime = { t="Length of time the <i>climb collective</i> is applied before switching to hover.", units="s" },
-profilesRescueHoverCollective = { t="Collective value for Hover" },
-profilesRescueExitTime = { t="Collective is rate limited during this period to provide smooth transition to normal flight. This limits rapid application of negative collective if the Helicopter has rolled during rescue", units="s" },
-profilesRescueFlipTime = { t="Timeout for flip failure. If the helicopter is in rescue and is trying to flip to upright and does not do with the Rescue Flip Time, rescue will be aborted", units="s" },
-profilesRescueHoverAltitude = { t="Hovering altitude after rescue action" },
-profilesRescueAltitudePGain = { t="P-gain for altitude control" },
-profilesRescueAltitudeIGain = { t="I-gain for altitude control" },
-profilesRescueAltitudeDGain = { t="D-gain for altitude control (vario)" },
-profilesRescueMaxCollective = { t="Maximum Collective to apply for altitude control" },
+profilesRescuePullupTime = { t="When rescue is activated, helicopter will apply pull-up collective for this time period before moving to flip or climb stage." },
+
+profilesRescueClimbCollective = { t="Collective value for rescue climb." },
+profilesRescueClimbTime = { t="Length of time the climb collective is applied before switching to hover." },
+
+profilesRescueHoverCollective = { t="Collective value for hover." },
+
+profilesRescueFlipTime = { t="If the helicopter is in rescue and is trying to flip to upright and does not within this time, rescue will be aborted." },
+profilesRescueExitTime = { t="This limits rapid application of negative collective if the helicopter has rolled during rescue." },
+
+profilesRescueLevelGain = { t="Determine how agressively the heli levels during rescue." },
+profilesRescueFlipGain = { t="Determine how agressively the heli flips during inverted rescue." },
+
+profilesRescueMaxRate = { t="Limit rescue roll/pitch rate. Larger helicopters may need slower rotation rates." },
+
+profilesRescueMaxAccel = { t="Limit how fast the helicopter accelerates into a roll/pitch. Larger helicopters may need slower acceleration." },
+
+--profilesRescueHoverAltitude = { t="Hovering altitude after rescue action." },
+--profilesRescueAltitudePGain = { t="P-gain for altitude control." },
+--profilesRescueAltitudeIGain = { t="I-gain for altitude control." },
+--profilesRescueAltitudeDGain = { t="D-gain for altitude control (vario)." },
+--profilesRescueMaxCollective = { t="Maximum Collective to apply for altitude control." },
 
 
-gyroDynamicNotchCount = { t="Select the number of dynamic notch filters. If used standalone without the RPM filters, 4-6 is recommended. With the RPM filters, 2-4 is recommended." },
-gyroDynamicNotchQ = { t="The Q factor adjusts how wide the dynamic notch filters are. A higher value makes it narrower and more selective, and a lower value makes it wider and broader. Values between 2.0 and 4.0 are recommended. A value lower than 2.0 will greatly increase filter delay and may degrade flight performance." },
-gyroDynamicNotchMinHz = { t="Set this to the lowest incoming noise frequency that is needed to be filtered. Should be lower than main rotor frequency, but no lower that 20Hz, which is eqivalent to 1200rpm." },
-gyroDynamicNotchMaxHz = { t="Set this to the highest incoming noise frequency that is needed to be filtered. Should be 10-20% higher than the max tail rotor frequency, but no higher than 250Hz, if filter rate is 1k. If filter rate is 2k or higher, then 330-500 Hz can be used, especially for smaller helis with a motorised tail (higher range means less precision and lower performance)." },
-gyroRpmFilterMainRotorMinRPM = { t="Minimum Main Rotor RPM accepted by the filters" },
-gyroRpmFilterTailRotorMinRPM = { t="Minimum Tail Rotor RPM accepted by the filters" },
-gyroLowpassFilterCutoff = {t="Lowpass filter cutoff frequency in Hz"},
-gyroLowpassFilterCenter = {t="Center frequency to which the notch is applied"},
-gyroLowpassFilterDynamicCutoff = {t="Dynamic filter min/max cutoff in Hz"},
+--
+-- filters.lua
+--
+gyroLowpassFilterCutoff = { t="Lowpass filter cutoff frequency in Hz." },
+gyroLowpassFilterDynamicCutoff = { t="Dynamic filter min/max cutoff in Hz." },
+gyroLowpassFilterCenter = { t="Center frequency to which the notch is applied." },
+gyroDynamicNotchCount = { t="Without RPM filters, 4-6 is recommended. With the RPM filters, 2-4 is recommended." },
+gyroDynamicNotchQ = { t="Values between 2 and 4 recommended. Lower than 2 will increase filter delay and may degrade flight performance." },
+gyroDynamicNotchMinHz = { t="Lowest incoming noise frequency to be filtered. Should be slightly below lowest main rotor fundamental, but no less than 20Hz." },
+gyroDynamicNotchMaxHz = { t="Highest incoming noise frequency to be filtered. Should be 10-20% above highest tail rotor fundamental." },
 
-vtxFrequencyChannel = { t="If you enable this, the Configurator will let you select a frequency in place of the habitual band/channel. For this to work your VTX must support this feature." },
-vtxBand = { t="You can select here the band for your VTX" },
-vtxChannel = { t="You can select here the channel for your VTX" },
-vtxFrequency = { t="You can select here the frequency for your VTX if it is supported" },
-vtxPower = { t="This is the power selected for the VTX. It can be modified if the $t(vtxPitMode.message) or the $t(vtxLowPowerDisarm.message) is enabled" },
-vtxPitMode = { t="When enabled, the VTX enters in a very low power mode to let the quad be on at the bench without disturbing other pilots. Usually the range of this mode is less than 5m.<br /><br />NOTE: Some protocols, like SmartAudio, can't enable Pit Mode via software after power-up." },
-vtxPitModeFrequency = { t="Frequency at which the Pit Mode changes when enabled." },
-vtxLowPowerDisarm = { t="When enabled, the VTX uses the lowest available power when disarmed (except if a failsafe has occurred)." },
-vtxTablePowerLevels = { t="This defines the number of power levels supported by your VTX" },
+--gyroRpmFilterMainRotorMinRPM = { t="Minimum Main Rotor RPM accepted by the filters." },
+--gyroRpmFilterTailRotorMinRPM = { t="Minimum Tail Rotor RPM accepted by the filters." },
 
-configurationPidProcessDenom = { t="The maximum frequency for the PID loop is limited by the CPU processing power. The Realtime Load should not exceed 70% with the selected loop speed." },
-configurationGyroUse32kHz = { t="32 kHz gyro update frequency is only possible if the gyro chip supports it (currently MPU6500, MPU9250, and ICM20xxx if connected over SPI). If in doubt, consult the specification for your board." },
-configurationAccHardware = { t="Enables the Accelerometer. This is required for all stabilisation modes: Angle, Horizon, Acro Trainer and Rescue." },
-configurationBaroHardware = { t="Enables the Barometer (if available). Altitude is currently not used in Flight Control. It is informative only, available via the Telemetry." },
-configurationMagHardware = { t="Enables the Magnetometer (if available). Compass direction is currently not used in Flight Control. It is informative only, available via the Telemetry." },
 
-blackboxMode = { t="<strong>OFF:</strong> Disable logging.<br><br><strong>NORMAL:</strong> Enable logging when both ARMED and BLACKBOX switch are active.<br><br><strong>ARMED:</strong> Enable logging when ARMED.<br><br><strong>SWITCH:</strong> Enable logging when BLACKBOX switch is active." },
-blackboxDevice = { t="<strong>No Logging:</strong> Disable logging.<br><br><strong>Onboard Flash:</strong> Log to the onboard flash chip (if available).<br><br><strong>SD Card:</strong> Log to the onboard SD card (if available).<br><br><strong>Serial Port:</strong> Log to an external logger device (e.g OpenLager) connected to a serial port. The serial port must to be configured to 'Blackbox Logging' on the <strong>Configuration</strong> tab." },
-blackboxRateOfLogging = { t="The log data is saved to the log device with this rate. For logging to an external device, lower speed may be required." },
-blackboxDebugMode = { t="Choose what <i>extra</i> data is being logged. If enabled, eight extra debug items are added to the Blackbox Log." },
-blackboxDebugAxis = { t="Choose which <i>axis</i> is being debugged. Applies to some of the debug modes." },
+--vtxFrequencyChannel = { t="If you enable this, the Configurator will let you select a frequency in place of the habitual band/channel. For this to work your VTX must support this feature." },
+--vtxBand = { t="You can select here the band for your VTX." },
+--vtxChannel = { t="You can select here the channel for your VTX." },
+--vtxFrequency = { t="You can select here the frequency for your VTX if it is supported." },
+--vtxPower = { t="This is the power selected for the VTX. It can be modified if the $t(vtxPitMode.message) or the $t(vtxLowPowerDisarm.message) is enabled." },
+--vtxPitMode = { t="When enabled, the VTX enters in a very low power mode to let the quad be on at the bench without disturbing other pilots. Usually the range of this mode is less than 5m.<br /><br />NOTE: Some protocols, like SmartAudio, can't enable Pit Mode via software after power-up." },
+--vtxPitModeFrequency = { t="Frequency at which the Pit Mode changes when enabled." },
+--vtxLowPowerDisarm = { t="When enabled, the VTX uses the lowest available power when disarmed (except if a failsafe has occurred)." },
+--vtxTablePowerLevels = { t="This defines the number of power levels supported by your VTX." },
+
+--configurationPidProcessDenom = { t="The maximum frequency for the PID loop is limited by the CPU processing power. The Realtime Load should not exceed 70% with the selected loop speed." },
+--configurationGyroUse32kHz = { t="32 kHz gyro update frequency is only possible if the gyro chip supports it (currently MPU6500, MPU9250, and ICM20xxx if connected over SPI). If in doubt, consult the specification for your board." },
+--configurationAccHardware = { t="Enables the Accelerometer. This is required for all stabilisation modes: Angle, Horizon, Acro Trainer and Rescue." },
+--configurationBaroHardware = { t="Enables the Barometer (if available). Altitude is currently not used in Flight Control. It is informative only, available via the Telemetry." },
+--configurationMagHardware = { t="Enables the Magnetometer (if available). Compass direction is currently not used in Flight Control. It is informative only, available via the Telemetry." },
+
+--blackboxMode = { t="<strong>OFF:</strong> Disable logging.<br><br><strong>NORMAL:</strong> Enable logging when both ARMED and BLACKBOX switch are active.<br><br><strong>ARMED:</strong> Enable logging when ARMED.<br><br><strong>SWITCH:</strong> Enable logging when BLACKBOX switch is active." },
+--blackboxDevice = { t="<strong>No Logging:</strong> Disable logging.<br><br><strong>Onboard Flash:</strong> Log to the onboard flash chip (if available).<br><br><strong>SD Card:</strong> Log to the onboard SD card (if available).<br><br><strong>Serial Port:</strong> Log to an external logger device (e.g OpenLager) connected to a serial port. The serial port must to be configured to 'Blackbox Logging' on the <strong>Configuration</strong> tab." },
+--blackboxRateOfLogging = { t="The log data is saved to the log device with this rate. For logging to an external device, lower speed may be required." },
+--blackboxDebugMode = { t="Choose what <i>extra</i> data is being logged. If enabled, eight extra debug items are added to the Blackbox Log." },
+--blackboxDebugAxis = { t="Choose which <i>axis</i> is being debugged. Applies to some of the debug modes." },
 }
