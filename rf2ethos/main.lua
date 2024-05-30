@@ -489,6 +489,8 @@ function rf2ethos.msgBoxhelp(str,qr)
     displayhelp = true
 
     local w, h = lcd.getWindowSize()
+
+	
     if w < 500 then
         boxW = w
     else
@@ -634,30 +636,33 @@ end
 local function event(widget, category, value, x, y)
     print("Event received:", category, value, x, y)
 
-	
-
-	if uiState == uiStatus.pages then
-		if value == 35 then	
-				ResetRates = false
-				rf2ethos.openMainMenu()
-			return true
+	if displayhelp ~= true then
+		if uiState == uiStatus.pages then
+			if value == 35 then	
+					ResetRates = false
+					rf2ethos.openMainMenu()
+				return true
+			end
+			if value == KEY_ENTER_LONG then
+					triggerSAVE = true
+					system.killEvents(KEY_ENTER_BREAK)
+					return true
+			end
 		end
-		if value == KEY_ENTER_LONG then
-				triggerSAVE = true
+		
+		if uiState == uiStatus.MainMenu then
+			if value == KEY_ENTER_LONG then
 				system.killEvents(KEY_ENTER_BREAK)
 				return true
-		end
-	end
-	
-	if uiState == uiStatus.MainMenu then
-		if value == KEY_ENTER_LONG then
-			system.killEvents(KEY_ENTER_BREAK)
-			return true
+			end
 		end
 	end
 	
     if displayhelp == true then
+		
+	
 		local w, h = lcd.getWindowSize()
+		
 		if w < 500 then
 			boxW = w
 		else
@@ -677,7 +682,7 @@ local function event(widget, category, value, x, y)
 		buttonW = tsizeW + (radio.buttonPadding * 2)
 		buttonH = tsizeH + (radio.buttonPadding * 2)
 
-		if ((value == KEY_ENTER_FIRST) or (  (value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
+		if ((value == KEY_ENTER_FIRST) or (value == 35) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
 			lcd.invalidate()	
 			displayhelp = false
 			displayhelpMsg = nil
@@ -1011,7 +1016,7 @@ function wakeup(widget)
                 isLoading = false
                 wasLoading = true
 
-                createForm = true
+                --createForm = true
             end
         end
 
