@@ -11,7 +11,7 @@ local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even
 
 local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg boxes in sim mode
 
-local ENABLE_help = true
+local ENABLE_HELP = true
 
 
 apiVersion = 0
@@ -437,143 +437,54 @@ function rf2ethos.openPagehelp(helpdata,section)
 	else
 		txtData = helpdata[section]["TEXT"]
 	end	
-
-	--forcing dialog for X14 due to focus bug
-	-- all this will change once better/help dialogs are available in 
-	if environment.board == "X14" or environment.board == "X14S"  then
-		-- popup option to use in future once more
-		-- granular option appear	
-
-		local message = ""
-
-		
-		for k,v in ipairs(txtData) do
-			message = message .. v .. "\n\n"
-		end
-
-        local buttons = {
-			{
-                label = "CLOSE",
-                action = function()
-                    return true
-                end
-            }
-        }
-		form.openDialog("Help - " .. lastTitle, message, buttons,1)
+	local qr = helpdata[section]["qrCODE"]
 
 
-	else
-		-- home spun popup
-		local message = ""
-		for k,v in ipairs(txtData) do
-			v = rf2ethos.wrap(v, radio.helpTxtWrap, "", "")
-			message = message .. v .. "\n\n"
-		end		
-		
-		form.clear()
-		displayhelpMsg = message
-		displayhelpQr = helpdata[section]["qrCODE"]
-		displayhelp = true		
-		
+	local message = ""
+
+	-- wrap text because of image on right
+	for k,v in ipairs(txtData) do
+		message = message .. rf2ethos.wrap(v,radio.helpTxtWrap) .. "\n\n"
 	end
-
-		
-end
-
-
-
-
-function rf2ethos.msgBoxhelp(str,qr)
-    lcd.font(FONT_STD)
-
-    displayhelp = true
-
-    local w, h = lcd.getWindowSize()
-
 	
-    if w < 500 then
-        boxW = w
-    else
-       boxW = w - math.floor((w * 2) / 100)
-    end
-    if h < 200 then
-        boxH = h - 2
-    else
-        boxH = h - math.floor((h * 4) / 100)		
-    end
+	local buttons = {
+		{
+			label = "CLOSE",
+			action = function()
+				return true
+			end
+		}
+	}
+	local LCD_W, LCD_H = rf2ethos.getWindowSize()
+	
+	local bitmap = lcd.loadBitmap(qr)
+	
+	form.openDialog({
+	  width=LCD_W,
+	  title="Help - " .. lastTitle,
+	  message=message, 
+	  buttons=buttons, 
+	  wakeup=function()
+			   --lcd.invalidate()
+			 end,  
+	  paint=function() 
+			  local w, h = lcd.getWindowSize()
+			  local left = w * 0.75
 
-    boxH = boxH -- radio.buttonPadding * 5
-    boxW = boxW -- (radio.buttonPadding * 10)
-
-    -- draw the backgrf2status.round
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the border
-    lcd.color(lcd.RGB(40, 40, 40))
-    lcd.drawRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH)
-
-    -- draw the title
-    if isDARKMODE then
-        lcd.color(lcd.RGB(48, 48, 48))
-    else
-        lcd.color(lcd.RGB(160, 160, 160))
-    end
-    lcd.drawFilledRectangle(w / 2 - boxW / 2, h / 2 - boxH / 2, boxW, boxH / 7)
-
-    -- title text
-    str_title = "Help - ".. lastTitle
-    tsizeW, tsizeH = lcd.getTextSize(str_title)
-    str_offset = (boxH / 7) / 2 - tsizeH / 2
-    if isDARKMODE then
-        lcd.color(lcd.RGB(255, 255, 255, 1))
-    else
-        lcd.color(lcd.RGB(90, 90, 90))
-    end
-    lcd.drawText((w / 2 - boxW / 2) + str_offset, h / 2 - boxH / 2 + str_offset, str_title)
-
-    -- display message
-	lcd.font(FONT_S)
-    tsizeW, tsizeH = lcd.getTextSize(str)
-    lcd.drawText((w / 2 - boxW / 2)+radio.buttonPadding, h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding, str)
-
-	-- display qrCODE
-	if qr ~= nil then
-			local bitmap = lcd.loadBitmap(qr)
+			  local qw = radio.helpQrCodeSize
+			  local qh = radio.helpQrCodeSize
 			
-			local qw = radio.helpQrCodeSize
-			local qh = radio.helpQrCodeSize
+			  local qy = radio.buttonPadding			
+			  local qx = LCD_W - qw - radio.buttonPadding/2
+			  lcd.drawBitmap(qx,qy,bitmap,qw,qh)	
+
+
+			end,
+	  options=TEXT_LEFT
+	})	
 			
-			local qy = h / 2 - boxH / 2 + boxH / 7 + radio.buttonPadding			
-			local qx = boxW - qw - radio.buttonPadding/2
-			lcd.drawBitmap(qx,qy,bitmap,qw,qh)	
-
-	end
-
-
-    -- create a button
-	lcd.font(FONT_STD)
-    str_exit = "CLOSE"
-    tsizeW, tsizeH = lcd.getTextSize(str_exit)
-    buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-    buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-
-    lcd.color(lcd.RGB(248, 176, 56))
-    lcd.drawFilledRectangle(buttonX, buttonY, tsizeW + radio.buttonPadding, tsizeH + radio.buttonPadding)
-
-    if isDARKMODE then
-        lcd.color(lcd.RGB(64, 64, 64))
-    else
-        lcd.color(lcd.RGB(208, 208, 208))
-    end
-    lcd.drawText(buttonX + radio.buttonPadding / 2, buttonY + radio.buttonPadding / 2, str_exit)
-
-    return
 end
+
 
 function rf2ethos.wrap(str, limit, indent, indent1)
   indent = indent or ""
@@ -1157,7 +1068,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	local section
 	local page
 	
-	if ENABLE_help == true then
+	if ENABLE_HELP == true then
 		help =  assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/help/pages.lua"))()
 		section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
 		page = lastSubPage	
@@ -1177,7 +1088,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	end
 	print (environment.board)
 	if environment.board == "X10EXPRESS" or environment.board == "X14" or environment.board == "X14S" then
-		ENABLE_help = false
+		ENABLE_HELP = false
 		helpWidth = 0
 	end
 
@@ -1204,7 +1115,21 @@ function rf2ethos.navigationButtons(x, y, w, h)
                 end
             }
         }
-        form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
+			form.openDialog({
+			  width=LCD_W,
+			  title="SAVE SETTINGS TO FBL",
+			  message="Save current page to flight controller", 
+			  buttons=buttons, 
+			  wakeup=function()
+					 end,  
+			  paint=function() 
+					end,
+			  options=TEXT_LEFT
+			})		
+		else
+			form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+		end	
     end)	
     form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = buttonW, h = h}, "RELOAD", function()
         local buttons = {
@@ -1223,9 +1148,23 @@ function rf2ethos.navigationButtons(x, y, w, h)
                 end
             }
         }
-        form.openDialog("RELOAD", "Reload data from flight controller", buttons)
+		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
+			form.openDialog({
+			  width=LCD_W,
+			  title="RELOAD",
+			  message="Reload data from flight controller", 
+			  buttons=buttons, 
+			  wakeup=function()
+					 end,  
+			  paint=function() 
+					end,
+			  options=TEXT_LEFT
+			})		
+		else		
+			form.openDialog("RELOAD", "Reload data from flight controller", buttons)
+		end	
     end)
-	if ENABLE_help == true then
+	if ENABLE_HELP == true then
 		if helpWidth > 0 then
 				form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
 					rf2ethos.openPagehelp(help.data,section)
@@ -2617,7 +2556,7 @@ local function create()
 	
 	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < 158 then
 		print("< 158  : help functions disabled")
-		ENABLE_help = false
+		ENABLE_HELP = false
 	end
 	
 
