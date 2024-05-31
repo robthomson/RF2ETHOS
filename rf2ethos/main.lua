@@ -598,69 +598,27 @@ end
 local function event(widget, category, value, x, y)
     print("Event received:", category, value, x, y)
 
-	if displayhelp ~= true then
-		if uiState == uiStatus.pages then
-			if value == 35 then	
-					ResetRates = false
-					rf2ethos.openMainMenu()
-				return true
-			end
-			if value == KEY_ENTER_LONG then
-					triggerSAVE = true
-					system.killEvents(KEY_ENTER_BREAK)
-					return true
-			end
+	if uiState == uiStatus.pages then
+		if value == 35 then	
+				ResetRates = false
+				rf2ethos.openMainMenu()
+			return true
 		end
-		
-		if uiState == uiStatus.MainMenu then
-			if value == KEY_ENTER_LONG then
+		if value == KEY_ENTER_LONG then
+				triggerSAVE = true
 				system.killEvents(KEY_ENTER_BREAK)
 				return true
-			end
 		end
 	end
 	
-    if displayhelp == true then
-		
+	if uiState == uiStatus.MainMenu then
+		if value == KEY_ENTER_LONG then
+			system.killEvents(KEY_ENTER_BREAK)
+			return true
+		end
+	end
 	
-		local w, h = lcd.getWindowSize()
-		
-		if w < 500 then
-			boxW = w
-		else
-			boxW = w - math.floor((w * 2) / 100)
-		end
-		if h < 200 then
-			boxH = h - 2
-		else
-			boxH = h - math.floor((h * 4) / 100)
-		end
-		boxH = boxH -- radio.buttonPadding * 5
-		boxW = boxW -- (radio.buttonPadding * 10)
-		str_exit = "CLOSE"
-		tsizeW, tsizeH = lcd.getTextSize(str_exit)
-		buttonX = ((w / 2 - boxW / 2) + boxW) - tsizeW - (radio.buttonPadding * 2)
-		buttonY = ((h / 2 - boxH / 2) + boxH) - tsizeH - (radio.buttonPadding * 2)
-		buttonW = tsizeW + (radio.buttonPadding * 2)
-		buttonH = tsizeH + (radio.buttonPadding * 2)
-
-		if ((value == KEY_ENTER_FIRST) or (value == 35) or ((value == TOUCH_END) and ((x > buttonX and x < buttonX + buttonW) and (y > buttonY)))) then
-			lcd.invalidate()	
-			displayhelp = false
-			displayhelpMsg = nil
-			displayhelpQr = nil
-			wasLoading = true  -- a trick to force form to reload
-			createForm = true
-			closinghelp = true
-			uiState = uiStatus.pages
-	
-			print("Closing help")
-			return (true)
-
-		end
-	else
-		displayhelp = false
-	end	
+   
     return false
 end
 
@@ -749,7 +707,18 @@ function rf2ethos.wakeupForm()
                 end
             }
         }
-        form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
+		form.openDialog({
+		  width=LCD_W,
+		  title="SAVE SETTINGS TO FBL",
+		  message="Save current page to flight controller", 
+		  buttons=buttons, 
+		  wakeup=function()
+				 end,  
+		  paint=function() 
+				end,
+		  options=TEXT_LEFT
+		})		
+
 		
 		triggerSAVE = false
 	end
@@ -773,30 +742,6 @@ function rf2ethos.wakeupForm()
 		end		
     end	
 
-
-	--[[
-    if lastScript == "rates.lua" and lastSubPage == 1 then
-        if Page.fields then
-            local v = Page.fields[13].value
-            if v ~= nil then
-                activeRateTable = math.floor(v)
-            end
-
-            if activeRateTable ~= nil then
-                if activeRateTable ~= RateTable then
-                    RateTable = activeRateTable
-                    --collectgarbage()
-                    --reloadRates = true
-                    --wasSaving = true
-                    wasReloading = true
-                    createForm = true
-					print("here")
-                end
-            end
-        end
-    end
-	]]--
-	
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
         -- print("Form invalidation disabled....")
@@ -1847,14 +1792,15 @@ function rf2ethos.openPageSERVOS(idx, title, script)
             line = form.addLine("Servo")
             field = form.addChoiceField(line, nil, convertPageValueTable(servoTable), function()
                 value = rf2ethos.lastChangedServo
-                Page.fields[1].value = value
+				if Page == nil then
+                    wasReloading = true
+                    createForm = true
+				else 
+					Page.fields[1].value = value
+				end	
                 return value
             end, function(value)
-                Page.servoChanged(Page, value)
-                -- trigger RELOAD
-                --wasSaving = true
-                --createForm = true
-				--
+                Page.servoChanged(Page, value)					
                 return true
             end)
         else
