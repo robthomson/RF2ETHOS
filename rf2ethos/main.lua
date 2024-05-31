@@ -41,6 +41,7 @@ local saveTimeout, saveMaxRetries, MainMenu, Page, init, popupMenu, requestTimeo
 createForm = false
 local isSaving = false
 local wasSaving = false
+local wasReloading = false
 local closinghelp = false
 local linkUPTime
 
@@ -96,11 +97,49 @@ protocol = nil
 radio = nil
 sensor = nil
 
+
+local progressDialog = false
+local progressDialogDisplay = false
+local progressDialogClose = false
+
+local saveDialog = false
+local saveDialogDisplay = false
+local saveDialogClose = false
+
+
 rf2ethos = {}
 
 
 
 local translations = {en = "RF2 ETHOS"}
+
+
+local function showSaving()
+	saveDialogDisplay = true
+	saveDialog = form.openProgressDialog("Saving...", "Saving data...")
+	saveDialog:value(0)
+end
+
+local function closeSaving()
+	saveDialogDisplay = false
+	saveDialog:close()
+
+end
+
+
+
+local function showLoading()
+	progressDialogDisplay = true
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+end
+
+local function closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
+end
 
 local function name(widget)
     local locale = system.getLocale()
@@ -174,12 +213,24 @@ end
 function rf2ethos.dataBindFields()
 
     if Page.fields ~= nil and Page.values ~= nil then
+	
+		
+	
         for i = 1, #Page.fields do
+
+
+			if progressDialogDisplay == true then
+				local percent = (i / #Page.fields) * 100
+				progressDialog:value(percent)	
+			end	
+
+				
             if #Page.values >= Page.minBytes then
                 local f = Page.fields[i]
                 if f.vals then
                     f.value = 0
                     for idx = 1, #f.vals do
+										
 						local raw_val
 						if ESC_MODE == true then
 							raw_val = Page.values[f.vals[idx] + mspHeaderBytes] or 0
@@ -276,7 +327,7 @@ local function processMspReply(cmd, rx_buf, err)
 			if DEBUG_msp == true then
              print("Postload executed")
 			end 
-        end
+        end	
         mspDataLoaded = true
         lcdNeedsInvalidate = true
 		ESC_UNKNOWN = false		
@@ -465,7 +516,7 @@ function rf2ethos.openPagehelp(helpdata,section)
 	  message=message, 
 	  buttons=buttons, 
 	  wakeup=function()
-			   --lcd.invalidate()
+			   lcd.invalidate()
 			 end,  
 	  paint=function() 
 			  local w, h = lcd.getWindowSize()
@@ -640,43 +691,42 @@ function paint()
         end
     end
 
-	if displayhelp == true then
-		rf2ethos.msgBoxhelp(displayhelpMsg,displayhelpQr)
-	end
-	
-	
-    if isSaving then
-        if pageState >= pageStatus.saving then
-            -- print(saveMsg)
-            local saveMsg = ""
-            if pageState == pageStatus.saving then
-                saveMsg = "Saving..."
-                if saveRetries > 0 then
-                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
-                end
-            elseif pageState == pageStatus.eepromWrite then
-                saveMsg = "Updating..."
-                if saveRetries > 0 then
-                    saveMsg = "Retry #" .. string.format("%u", saveRetries)
-                end
-            elseif pageState == pageStatus.rebooting then
-                saveMsg = "Rebooting..."
-            end
-            rf2ethos.msgBox(saveMsg)
-        else
-            isSaving = false
-        end
-    end
 
-    if isLoading == true and uiState ~= uiStatus.mainMenu then
-        if environment.simulation ~= true then
-            rf2ethos.msgBox("Loading...")
-        end
-    end
 end
+
 
 function rf2ethos.wakeupForm()
 
+    if isSaving then
+        if pageState >= pageStatus.saving then
+			if saveDialogDisplay == false then
+				showSaving()
+				saveDialog:value(10)
+			end
+            local saveMsg = ""
+            if pageState == pageStatus.saving then
+				saveDialog:value(50)
+                saveDialog:message("Saving...")
+                if saveRetries > 0 then
+                    saveDialog:message("Retry #" .. string.format("%u", saveRetries))
+                end
+            elseif pageState == pageStatus.eepromWrite then
+				saveDialog:value(80)
+                saveDialog:message("Updating...")
+                if saveRetries > 0 then
+                    saveDialog:message("Updating...Retry #" .. string.format("%u", saveRetries))
+					saveDialog:value(90)
+                end
+            elseif pageState == pageStatus.rebooting then
+                saveMsg = saveDialog:message("Rebooting...")
+            end
+
+			
+        else
+            isSaving = false
+			saveDialogDisplay = false
+        end		
+    end
 
 
 	-- trigger save
@@ -723,6 +773,8 @@ function rf2ethos.wakeupForm()
 		end		
     end	
 
+
+	--[[
     if lastScript == "rates.lua" and lastSubPage == 1 then
         if Page.fields then
             local v = Page.fields[13].value
@@ -733,21 +785,24 @@ function rf2ethos.wakeupForm()
             if activeRateTable ~= nil then
                 if activeRateTable ~= RateTable then
                     RateTable = activeRateTable
-                    collectgarbage()
-                    -- reloadRates = true
-                    wasSaving = true
+                    --collectgarbage()
+                    --reloadRates = true
+                    --wasSaving = true
+                    wasReloading = true
                     createForm = true
+					print("here")
                 end
             end
         end
     end
-
+	]]--
+	
     if telemetryState ~= 1 or (pageState >= pageStatus.saving) then
         -- we dont refresh as busy doing other stuff
         -- print("Form invalidation disabled....")
     else
         if (isSaving == false and wasSaving == false) or (isLoading == false and wasLoading == false) then
-            form.invalidate()
+            --form.invalidate()
         end
     end
 end
@@ -768,6 +823,7 @@ function wakeup(widget)
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
+
 
 	if exitAPP == true then
 		exitAPP = false
@@ -865,8 +921,8 @@ function wakeup(widget)
         end
     elseif (pageState >= pageStatus.saving) and closinghelp == false then
 		--print(">= pageStatus.saving")	
-        form.clear()
-        createForm = true
+        --form.clear()
+        --createForm = true
     else
         if createForm == true then
 			--print("createForm == true")
@@ -875,19 +931,8 @@ function wakeup(widget)
 			end
             if wasSaving == true or environment.simulation == true then
                 wasSaving = false
-                if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
-                elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-                elseif lastScript == "servos.lua" then
-                    rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
-				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-					rf2ethos.openPageESCToolLoader(ESC_MFG)					
-				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-					rf2ethos.openESCFormLoader(ESC_MFG,ESC_SCRIPT)			
-                else
-                    rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-                end
+				saveDialog:value(100)
+				closeSaving()						
             elseif wasLoading == true or environment.simulation == true then
 				--print("wasLoading == true")
                 wasLoading = false
@@ -904,11 +949,26 @@ function wakeup(widget)
                 else
                     rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
                 end
+			elseif wasReloading == true or environment.simulation == true then
+					if lastScript == "pids.lua" or lastIdx == 1 then
+						rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
+					elseif lastScript == "rates.lua" and lastSubPage == 1 then
+						rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+					elseif lastScript == "servos.lua" then
+						rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+						rf2ethos.openPageESCToolLoader(ESC_MFG)					
+					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+						rf2ethos.openESCFormLoader(ESC_MFG,ESC_SCRIPT)			
+					else
+						rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+					end			
             elseif reloadRates == true or environment.simulation == true then
 				--print("reloadRates == true")
                 rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif reloadServos == true then
 				--print("reloadServos == true")
+				closeLoading()
                 rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
             else
 				--print("openMainMenu")
@@ -954,7 +1014,7 @@ function wakeup(widget)
 		end
 	end	
 	
-	
+	rf2ethos.wakeupForm()
 	
 end
 
@@ -1137,7 +1197,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-                    wasSaving = true
+                    wasReloading = true
                     createForm = true
                     return true
                 end
@@ -1646,10 +1706,6 @@ end
 
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 
-	--if subpage == nil then
-	--	subpage = 'nil'
-	--end
-	--print("Script: " .. script .. " Subpage:" .. subpage)
 
     uiState = uiStatus.pages
     mspDataLoaded = false
@@ -1657,7 +1713,8 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    form.clear()
+	showLoading()
+
 
     lastIdx = idx
     lastSubPage = subpage
@@ -1715,7 +1772,8 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
         rf2ethos.navigationButtons(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
-    lcdNeedsInvalidate = true
+	
+	closeLoading()
 end
 
 function rf2ethos.openPageSERVOSLoader(idx, title, script)
@@ -1726,14 +1784,14 @@ function rf2ethos.openPageSERVOSLoader(idx, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    form.clear()
+    showLoading()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-    lcdNeedsInvalidate = true
+    --lcdNeedsInvalidate = true
     isLoading = true
 
     if environment.simulation == true then
@@ -1794,8 +1852,9 @@ function rf2ethos.openPageSERVOS(idx, title, script)
             end, function(value)
                 Page.servoChanged(Page, value)
                 -- trigger RELOAD
-                wasSaving = true
-                createForm = true
+                --wasSaving = true
+                --createForm = true
+				--
                 return true
             end)
         else
@@ -1839,7 +1898,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
         end
     end
 
-    lcdNeedsInvalidate = true
+    closeLoading()
 end
 
 function rf2ethos.openPagePIDLoader(idx, title, script)
@@ -1850,7 +1909,7 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    form.clear()
+    showLoading()
 
     lastIdx = idx
     lastSubPage = subpage
@@ -1970,7 +2029,7 @@ function rf2ethos.openPagePID(idx, title, script)
         end
     end
 
-    lcdNeedsInvalidate = true
+    closeLoading()
 end
 
 
@@ -2184,7 +2243,7 @@ function rf2ethos.openESCFormLoader(folder,script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
-    form.clear()
+    showLoading()
 
     --lastIdx = idx
     --lastTitle = title
@@ -2268,7 +2327,7 @@ function rf2ethos.openESCForm(folder,script)
         rf2ethos.navigationButtonsEscForm(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
-    lcdNeedsInvalidate = true
+    closeLoading()
 
 end
 
@@ -2282,24 +2341,44 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    form.clear()
+    showLoading()
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
+	lastPage = script
 
-    lcdNeedsInvalidate = true
     isLoading = true
+
 
     if environment.simulation == true then
         rf2ethos.openPageRATES(idx, subpage, title, script)
     end
 
-    print("Finished: rf2ethos.openPageRATES")
+    print("Finished: rf2ethos.openPageRATESLoader")
 end
 
 function rf2ethos.openPageRATES(idx, subpage, title, script)
+
+
+   if Page.fields then
+		local v = Page.fields[13].value
+		if v ~= nil then
+			activeRateTable = math.floor(v)
+		end
+
+		if activeRateTable ~= nil then
+			if activeRateTable ~= RateTable then
+				RateTable = activeRateTable
+				closeLoading()
+				rf2ethos.openPageRATESLoader(idx, subpage, title, script)
+				
+			end
+		end
+    end
+
+
     local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     uiState = uiStatus.pages
@@ -2415,7 +2494,9 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    lcdNeedsInvalidate = true
+    closeLoading()
+	
+
 end
 
 local function getSection(id, sections)
@@ -2562,10 +2643,7 @@ local function create()
 
     MainMenu = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages.lua"))()
 
-    -- force page to get pickup data as it loads in
-    form.onWakeup(function()
-        rf2ethos.wakeupForm()
-    end)
+
 
     rf2ethos.openMainMenu()
 end
