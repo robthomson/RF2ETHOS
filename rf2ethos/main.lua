@@ -1575,7 +1575,6 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 	progressDialog:value(0)
 	progressDialog:closeAllowed(false)
 
-
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
@@ -1592,6 +1591,13 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 end
 
 function rf2ethos.openPageDefault(idx, subpage, title, script)
+
+	
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
 
     local fieldAR = {}
@@ -1630,12 +1636,7 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
         rf2ethos.navigationButtons(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
-	
-	if progressDialogDisplay == true then
-		progressDialogWatchDog = nil
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
+
 end
 
 function rf2ethos.openPageSERVOSLoader(idx, title, script)
@@ -1668,6 +1669,11 @@ end
 
 function rf2ethos.openPageSERVOS(idx, title, script)
 
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
     reloadServos = false
 
@@ -1758,11 +1764,6 @@ function rf2ethos.openPageSERVOS(idx, title, script)
         end
     end
 
-	if progressDialogDisplay == true then
-		progressDialogWatchDog = nil
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
 end
 
 function rf2ethos.openPagePIDLoader(idx, title, script)
@@ -1795,6 +1796,12 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
 end
 
 function rf2ethos.openPagePID(idx, title, script)
+
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
 
     uiState = uiStatus.pages
@@ -1898,11 +1905,7 @@ function rf2ethos.openPagePID(idx, title, script)
         end
     end
 
-	if progressDialogDisplay == true then
-		progressDialogWatchDog = nil
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
+
 end
 
 
@@ -2138,7 +2141,11 @@ end
 --
 function rf2ethos.openESCForm(folder,script)
 
-
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
 
     local fieldAR = {}
@@ -2201,11 +2208,7 @@ function rf2ethos.openESCForm(folder,script)
         rf2ethos.navigationButtonsEscForm(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
-	if progressDialogDisplay == true then
-		progressDialogWatchDog = nil
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
+
 
 end
 
@@ -2242,6 +2245,12 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 end
 
 function rf2ethos.openPageRATES(idx, subpage, title, script)
+
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
 
    if Page.fields then
@@ -2376,11 +2385,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-	if progressDialogDisplay == true then
-		progressDialogWatchDog = nil
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
+
 	
 
 end
@@ -2538,6 +2543,8 @@ local function create()
     MainMenu = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages.lua"))()
 
     rf2ethos.openMainMenu()
+
+	
 end
 
 local function close()
