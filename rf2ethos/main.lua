@@ -60,6 +60,9 @@ local fieldHelpTxt = nil
 
 local mspDataLoaded = false
 
+local LCD_W
+local LCD_H
+
 reloadServos = false
 
 defaultRateTable = 4 -- ACTUAL
@@ -469,7 +472,9 @@ function rf2ethos.openPagehelp(helpdata,section)
 			end
 		}
 	}
-	local LCD_W, LCD_H = rf2ethos.getWindowSize()
+
+	
+	
 	
 	local bitmap = lcd.loadBitmap(qr)
 	
@@ -481,7 +486,8 @@ function rf2ethos.openPagehelp(helpdata,section)
 	  wakeup=function()
 			 end,  
 	  paint=function() 
-			  local w, h = lcd.getWindowSize()
+			  local w = LCD_W
+			  local h = LCD_H
 			  local left = w * 0.75
 
 			  local qw = radio.helpQrCodeSize
@@ -558,7 +564,8 @@ end
 
 
 function rf2ethos.clearScreen()
-    local w, h = lcd.getWindowSize()
+	local w = LCD_W
+	local h = LCD_H
     if isDARKMODE then
         lcd.color(lcd.RGB(40, 40, 40))
     else
@@ -872,7 +879,7 @@ function wakeup(widget)
             }
         }
 		form.openDialog({
-		  width=LCD_W,
+		  width=nil,
 		  title="SAVE SETTINGS TO FBL",
 		  message="Save current page to flight controller", 
 		  buttons=buttons, 
@@ -1038,8 +1045,10 @@ function rf2ethos.navigationButtons(x, y, w, h)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-                    wasReloading = true
-                    createForm = true
+					if environment.simulation ~= true then
+						wasReloading = true
+						createForm = true
+					end
                     return true
                 end
             }, {
@@ -1050,7 +1059,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
             }
         }
 		form.openDialog({
-		  width=LCD_W,
+		  width=nil,
 		  title="RELOAD",
 		  message="Reload data from flight controller", 
 		  buttons=buttons, 
@@ -1160,7 +1169,8 @@ local function getInlinePositions(f)
 	
 	local inline_size = tmp_inline_size * inline_multiplier
 
-    local w, h = lcd.getWindowSize()
+	local w = LCD_W
+	local h = LCD_H
     local colStart
 
     local padding = 5
@@ -1526,7 +1536,8 @@ local function fieldLabel(f, i, l)
 end
 
 local function fieldHeader(title)
-    local w, h = lcd.getWindowSize()
+	local w = LCD_W
+	local h = LCD_H
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
@@ -1576,7 +1587,7 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 end
 
 function rf2ethos.openPageDefault(idx, subpage, title, script)
-    local LCD_W, LCD_H = rf2ethos.getWindowSize()
+
 
     local fieldAR = {}
 
@@ -1651,7 +1662,7 @@ function rf2ethos.openPageSERVOSLoader(idx, title, script)
 end
 
 function rf2ethos.openPageSERVOS(idx, title, script)
-    local LCD_W, LCD_H = rf2ethos.getWindowSize()
+
 
     reloadServos = false
 
@@ -1659,8 +1670,8 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
     local numPerRow = 2
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
-
+	local windowWidth = LCD_W
+	local windowHeight = LCD_H
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
     local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
@@ -1779,7 +1790,7 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
 end
 
 function rf2ethos.openPagePID(idx, title, script)
-    local LCD_W, LCD_H = rf2ethos.getWindowSize()
+
 
     uiState = uiStatus.pages
 
@@ -1907,7 +1918,9 @@ function rf2ethos.openPageESC(idx, title, script)
 	ESC = {}
 
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
+    local windowWidth = LCD_W
+	local windowHeight = LCD_H
+
     local y = radio.buttonPaddingTop
 
     form.clear()
@@ -2010,7 +2023,8 @@ function rf2ethos.openPageESCTool(folder)
     --uiState = uiStatus.mainMenu
 	uiState = uiStatus.pages
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
+    local windowWidth = LCD_W
+	local windowHeight = LCD_H
 
 
     local y = radio.buttonPaddingTop
@@ -2121,17 +2135,18 @@ function rf2ethos.openESCForm(folder,script)
 
 
 
-    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     local fieldAR = {}
     uiState = uiStatus.pages
     longPage = false
 	form.clear()
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
+    local windowWidth = LCD_W
+	local windowHeight = LCD_H
     local y = radio.buttonPaddingTop
 
-    local w, h = lcd.getWindowSize()
+    local w = LCD_W
+	local h = LCD_H
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
@@ -2245,7 +2260,6 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     end
 
 
-    local LCD_W, LCD_H = rf2ethos.getWindowSize()
 
     uiState = uiStatus.pages
 
@@ -2368,7 +2382,6 @@ end
 
 local function getSection(id, sections)
     for i, v in ipairs(sections) do
-        print(v)
         if id ~= nil then
             if v.section == id then
                 return v
@@ -2388,7 +2401,8 @@ function rf2ethos.openMainMenu()
 
     local numPerRow = 3
 
-    local windowWidth, windowHeight = lcd.getWindowSize()
+    local windowWidth = LCD_W
+	local windowHeight = LCD_H
 
     local padding = radio.buttonPadding
     local h = radio.buttonHeight
@@ -2482,6 +2496,9 @@ function rf2ethos.openMainMenu()
 end
 
 local function create()
+
+	LCD_W, LCD_H = rf2ethos.getWindowSize()
+
     protocol = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/protocols.lua"))()
     radio = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/radios.lua"))().msp
     assert(rf2ethos.loadScriptrf2ethos(protocol.mspTransport))()
