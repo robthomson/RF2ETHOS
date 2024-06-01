@@ -1169,6 +1169,8 @@ local function getInlinePositions(f)
 	
 	local inline_size = tmp_inline_size * inline_multiplier
 
+
+
 	local w = LCD_W
 	local h = LCD_H
     local colStart
@@ -1181,7 +1183,9 @@ local function getInlinePositions(f)
     local eH = radio.buttonHeight
     local eY = radio.buttonPaddingTop
     local posX
+	lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)
+	
 
     if f.inline == 5 then
         posX = w - fieldW * 9 - tsizeW - padding
@@ -1390,6 +1394,7 @@ local function fieldNumber(f, i)
                 f.t = f.t2
             end
         end
+		
 
         local p = getInlinePositions(f)
         posText = p.posText
