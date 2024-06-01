@@ -627,7 +627,7 @@ function wakeup(widget)
 				nolinkDialogValue = 0	
 			end
         end
-		
+
 		if nolinkDialogDisplay == true or telemetryState == 1 then
 		
 			if telemetryState == 1 then
@@ -637,14 +637,14 @@ function wakeup(widget)
 			end
 			if nolinkDialogValue > 100 then
 				noLinkDialog:close()
+				nolinkDialogValue = 0
 				nolinkDialogDisplay = false
 				if telemetryState ~= 1 then
 					exitAPP = true
-				end
+				end	
 			end
 			noLinkDialog:value(nolinkDialogValue)
-		end
-		
+		end			
     end	
 	
 	-- some watchdogs to enable close buttons on save and progress if they time-out
@@ -666,22 +666,6 @@ function wakeup(widget)
 		end	
 	end
 	
-	--[[
-	-- check we have a valid link and timeout the comms if we dont
-	if environment.simulation ~= true then
-		if telemetryState ~= 1 then
-				if linkUPTime ~= nil then
-					if (os.clock() - linkUPTime) > 10 then
-							system.exit()
-					end
-				else
-					linkUPTime = os.clock()
-				end
-		else
-				linkUPTime = os.clock()
-		end
-	end		
-	]]--
 
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
@@ -2545,6 +2529,8 @@ local function close()
 	noRFMsg = false
 	linkUPTime = nil
 	nolinkDialogDisplay = false
+	nolinkDialogValue = 0
+	telemetryState = nil
     system.exit()
     return true
 end
