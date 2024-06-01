@@ -2,16 +2,14 @@
 local environment = system.getVersion()
 
 local LUA_VERSION = "2.0 - 240229"
-local ETHOS_VERSION = 157
-local ETHOS_VERSION_STR = "ETHOS < V1.5.7"
+local ETHOS_VERSION = 1510
+local ETHOS_VERSION_STR = "ETHOS < V1.5.10"
 
 local DEBUG_msp = false				-- display msp messages
 local DEBUG_mspVALUES = false  		-- display values received from valid msp
 local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even if not detected
 
 local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg boxes in sim mode
-
-local ENABLE_HELP = true
 
 
 apiVersion = 0
@@ -74,7 +72,7 @@ local enterEvent = nil
 local enterEventTime
 local callCreate = true
 local lastPage
-
+local lastSection = nil
 local lastIdx = nil
 local lastSubPage = nil
 local lastTitle = nil
@@ -86,8 +84,6 @@ local ESC_SCRIPT = nil
 local ESC_UNKNOWN = false	
 local ESC_NOTREADYCOUNT = 0
 		
-lcdNeedsInvalidate = false
-
 displayhelp = false
 displayhelpMsg = nil
 displayhelpQr = nil
@@ -100,11 +96,11 @@ sensor = nil
 
 local progressDialog = false
 local progressDialogDisplay = false
-local progressDialogClose = false
+local progressDialogWatchDog = nil
 
 local saveDialog = false
 local saveDialogDisplay = false
-local saveDialogClose = false
+local saveDialogWatchDog = nil
 
 
 rf2ethos = {}
@@ -113,33 +109,6 @@ rf2ethos = {}
 
 local translations = {en = "RF2 ETHOS"}
 
-
-local function showSaving()
-	saveDialogDisplay = true
-	saveDialog = form.openProgressDialog("Saving...", "Saving data...")
-	saveDialog:value(0)
-end
-
-local function closeSaving()
-	saveDialogDisplay = false
-	saveDialog:close()
-
-end
-
-
-
-local function showLoading()
-	progressDialogDisplay = true
-	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-	progressDialog:value(0)
-end
-
-local function closeLoading()
-	if progressDialogDisplay == true then
-		progressDialogDisplay = false
-		progressDialog:close()
-	end
-end
 
 local function name(widget)
     local locale = system.getLocale()
@@ -205,7 +174,6 @@ local function invalidatePages()
     pageState = pageStatus.display
     saveTS = 0
     collectgarbage()
-    lcdNeedsInvalidate = true
 end
 
 
@@ -286,7 +254,6 @@ local function processMspReply(cmd, rx_buf, err)
             -- If we're not already trying to write to eeprom from a previous save, then we're done.
             invalidatePages()
         end
-        lcdNeedsInvalidate = true
     elseif cmd == uiMsp.eepromWrite then
         if Page.reboot then
             rebootFc()
@@ -299,14 +266,12 @@ local function processMspReply(cmd, rx_buf, err)
 		ESC_NOTREADYCOUNT = ESC_NOTREADYCOUNT + 1
 		if ESC_NOTREADYCOUNT >= 5 then
 			ESC_UNKNOWN = true	
-			mspDataLoaded = true		
-			lcdNeedsInvalidate = true			
+			mspDataLoaded = true				
 		end
 
     elseif ESC_MODE == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
 		ESC_UNKNOWN = true
         mspDataLoaded = true		
-		lcdNeedsInvalidate = true
 		if DEBUG_msp == true then
 			print("ESC not recognized")
 		end
@@ -329,7 +294,6 @@ local function processMspReply(cmd, rx_buf, err)
 			end 
         end	
         mspDataLoaded = true
-        lcdNeedsInvalidate = true
 		ESC_UNKNOWN = false		
 		ESC_NOTREADYCOUNT = 0
     end
@@ -415,9 +379,6 @@ local function updateTelemetryState()
 		telemetryState = telemetryStatus.ok
 	end
 
-	if oldTelemetryState ~= telemetryState then
-		lcdNeedsInvalidate = true
-	end
 
 end
 
@@ -460,8 +421,6 @@ function rf2ethos.saveValue(currentField)
     if environment.simulation == true then
         return
     end
-
-
 
     local f = Page.fields[currentField]
     local scale = f.scale or 1
@@ -516,7 +475,6 @@ function rf2ethos.openPagehelp(helpdata,section)
 	  message=message, 
 	  buttons=buttons, 
 	  wakeup=function()
-			   lcd.invalidate()
 			 end,  
 	  paint=function() 
 			  local w, h = lcd.getWindowSize()
@@ -589,14 +547,12 @@ function rf2ethos.msgBox(str, border)
     end
     lcd.drawText((w / 2) - tsizeW / 2, (h / 2) - tsizeH / 2, str)
 
-    lcdNeedsInvalidate = true
-
     return
 end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    print("Event received:", category, value, x, y)
+    --print("Event received:", category, value, x, y)
 
 	if uiState == uiStatus.pages then
 		if value == 35 then	
@@ -613,7 +569,7 @@ local function event(widget, category, value, x, y)
 	
 	if uiState == uiStatus.MainMenu then
 		if value == KEY_ENTER_LONG then
-			system.killEvents(KEY_ENTER_BREAK)
+			system.killEvents(KEY_ENTER_BREAK)		
 			return true
 		end
 	end
@@ -652,14 +608,226 @@ function paint()
 
 end
 
+function rf2ethos.clearScreen()
+    local w, h = lcd.getWindowSize()
+    if isDARKMODE then
+        lcd.color(lcd.RGB(40, 40, 40))
+    else
+        lcd.color(lcd.RGB(240, 240, 240))
+    end
+    lcd.drawFilledRectangle(0, 0, w, h)
+end
 
-function rf2ethos.wakeupForm()
+-- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
+function wakeup(widget)
+
+	-- exit app called : quick abort
+	-- as we dont need to run the rest of the stuff
+	if exitAPP == true then
+		exitAPP = false
+		form.invalidate()
+		system.exit()
+		return
+	end
+	
+	-- some watchdogs to enable close buttons on save and progress if they time-out
+	if saveDialogDisplay == true then
+		if saveDialogWatchDog ~= nil then
+			if (os.clock() - saveDialogWatchDog) > 10 then
+					saveDialog:message("Error.. we timed out")
+					saveDialog:closeAllowed(true)
+			end	
+		end	
+	end
+
+	if progressDialogDisplay == true then
+		if progressDialogWatchDog ~= nil then
+			if (os.clock() - progressDialogWatchDog) > 10 then
+					progressDialog:message("Error.. we timed out")
+					progressDialog:closeAllowed(true)
+			end	
+		end	
+	end
+	
+	-- check we have a valid link and timeout the comms if we dont
+	if environment.simulation ~= true then
+		if telemetryState ~= 1 then
+				if linkUPTime ~= nil then
+					if (os.clock() - linkUPTime) > 10 then
+							system.exit()
+					end
+				else
+					linkUPTime = os.clock()
+				end
+		else
+				linkUPTime = os.clock()
+		end
+	end		
+
+    -- Process outgoing TX packets and check for incoming frames
+    -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
+    -- Process outgoing TX packets and check for incoming frames
+    -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
+    updateTelemetryState()
+
+    if uiState == uiStatus.init then
+        -- print("Init")
+        local prevInit
+        if init ~= nil then
+            prevInit = init.t
+        end
+        init = init or assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ui_init.lua"))()
+
+        local initSuccess = init.f()
+
+        --print(initSuccess)
+
+        if prevInit ~= init.t then
+            -- Update initialization message
+        end
+        if not initSuccess then
+            -- waiting on api version to finish successfully.
+            return 0
+        end
+        init = nil
+        invalidatePages()
+        uiState = prevUiState or uiStatus.mainMenu
+        prevUiState = nil
+    elseif uiState == uiStatus.pages then
+        if prevUiState ~= uiState then
+            prevUiState = uiState
+        end
+
+        if pageState == pageStatus.saving then
+            if (saveTS + saveTimeout) < os.clock() then
+                if saveRetries < saveMaxRetries then
+                    saveSettings()
+                else
+					-- Saving failed for some reason
+					saveDialog:message("Error - failed to write data")
+                    saveDialog:closeAllowed(true)
+                    invalidatePages()
+                end
+                -- drop through to processMspReply to send msp_SET and see if we've received a response to this yet.
+            end
+        elseif pageState == pageStatus.eepromWrite then
+            if (saveTS + saveTimeout) < os.clock() then
+                if saveRetries < saveMaxRetries then
+                    eepromWrite()
+                else
+                    -- print("Failed to write to eeprom!")
+                    invalidatePages()
+                end
+                -- drop through to processMspReply to send msp_SET and see if we've received a response to this yet.
+            end
+        end
+        if not Page then
+			if ESC_MODE == true then
+				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()			
+			else 
+				if lastPage ~= nil then
+				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. lastPage))()
+				end
+				ESC_MFG = nil
+				ESC_SCRIPT = nil
+				ESC_MODE = false
+			end	
+            collectgarbage()
+        end
+		if Page ~= nil then
+			if not Page.values and pageState == pageStatus.display then
+				requestPage()
+			end
+		end	
+    end
+
+    mspProcessTxQ()
+    processMspReply(mspPollReply())
+    lastEvent = nil
+
+    -- handle some display stuff to bring form in and out of focus for no rf link
+    if telemetryState ~= 1 and closinghelp == false then
+        if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
+            form.clear()
+            createForm = true
+        end
+    else
+        if createForm == true then
+            if wasSaving == true or environment.simulation == true then
+                wasSaving = false
+				saveDialog:value(100)
+				saveDialogDisplay = false
+				saveDialogWatchDog = nil
+				saveDialog:close()	
+				rf2ethos.resetServos() -- this must run after save settings				
+            elseif wasLoading == true or environment.simulation == true then
+                wasLoading = false
+                if lastScript == "pids.lua" or lastIdx == 1 then
+                    rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
+                elseif lastScript == "rates.lua" and lastSubPage == 1 then
+                    rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
+                elseif lastScript == "servos.lua" then
+                    rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
+				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCTool(ESC_MFG)
+				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+					rf2ethos.openESCForm(ESC_MFG,ESC_SCRIPT)
+                else
+                    rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                end
+			elseif wasReloading == true or environment.simulation == true then
+					if lastScript == "pids.lua" or lastIdx == 1 then
+						rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
+					elseif lastScript == "rates.lua" and lastSubPage == 1 then
+						rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+					elseif lastScript == "servos.lua" then
+						rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+						rf2ethos.openPageESCToolLoader(ESC_MFG)					
+					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+						rf2ethos.openESCFormLoader(ESC_MFG,ESC_SCRIPT)			
+					else
+						rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+					end			
+            elseif reloadRates == true or environment.simulation == true then
+                rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+            elseif reloadServos == true then
+				if progressDialogDisplay == true then
+					progressDialogWatchDog = nil
+					progressDialogDisplay = false
+					progressDialog:close()
+				end
+                rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+            else
+                rf2ethos.openMainMenu()
+            end
+            createForm = false
+        else
+            createForm = false
+        end
+
+        if uiState ~= uiStatus.mainMenu then
+            if environment.simulation == true or mspDataLoaded == true then
+                mspDataLoaded = false
+                isLoading = false
+                wasLoading = true
+				if environment.simulation ~= true then
+					createForm = true
+				end
+            end
+        end
+
+    end
 
     if isSaving then
         if pageState >= pageStatus.saving then
 			if saveDialogDisplay == false then
-				showSaving()
+				saveDialogDisplay = true
+				saveDialogWatchDog = os.clock()
+				saveDialog = form.openProgressDialog("Saving...", "Saving data...")
+				saveDialog:value(0)
 				saveDialog:value(10)
+				saveDialog:closeAllowed(false)
 			end
             local saveMsg = ""
             if pageState == pageStatus.saving then
@@ -683,6 +851,7 @@ function rf2ethos.wakeupForm()
         else
             isSaving = false
 			saveDialogDisplay = false
+			saveDialogWatchDog = nil
         end		
     end
 
@@ -749,221 +918,10 @@ function rf2ethos.wakeupForm()
         if (isSaving == false and wasSaving == false) or (isLoading == false and wasLoading == false) then
             --form.invalidate()
         end
-    end
-end
-
-function rf2ethos.clearScreen()
-    local w, h = lcd.getWindowSize()
-    if isDARKMODE then
-        lcd.color(lcd.RGB(40, 40, 40))
-    else
-        lcd.color(lcd.RGB(240, 240, 240))
-    end
-    lcd.drawFilledRectangle(0, 0, w, h)
-end
-
--- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
-function wakeup(widget)
-    -- Process outgoing TX packets and check for incoming frames
-    -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
-    -- Process outgoing TX packets and check for incoming frames
-    -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
-
-
-	if exitAPP == true then
-		exitAPP = false
-		form.invalidate()
-		system.exit()
-		return
-	end
-
-    updateTelemetryState()
-
-    if uiState == uiStatus.init then
-        -- print("Init")
-        local prevInit
-        if init ~= nil then
-            prevInit = init.t
-        end
-        init = init or assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ui_init.lua"))()
-
-        local initSuccess = init.f()
-
-        --print(initSuccess)
-
-        if prevInit ~= init.t then
-            -- Update initialization message
-            lcdNeedsInvalidate = true
-        end
-        if not initSuccess then
-            -- waiting on api version to finish successfully.
-
-            return 0
-        end
-        init = nil
-        invalidatePages()
-        uiState = prevUiState or uiStatus.mainMenu
-        prevUiState = nil
-    elseif uiState == uiStatus.mainMenu then
-        -- print("Menu")
-    elseif uiState == uiStatus.pages then
-        if prevUiState ~= uiState then
-            --lcdNeedsInvalidate = true
-            prevUiState = uiState
-        end
-
-        if pageState == pageStatus.saving then
-            if (saveTS + saveTimeout) < os.clock() then
-                if saveRetries < saveMaxRetries then
-                    saveSettings()
-                    lcdNeedsInvalidate = true
-                else
-                    -- print("Failed to write page values!")
-                    invalidatePages()
-                end
-                -- drop through to processMspReply to send msp_SET and see if we've received a response to this yet.
-            end
-        elseif pageState == pageStatus.eepromWrite then
-            if (saveTS + saveTimeout) < os.clock() then
-                if saveRetries < saveMaxRetries then
-                    eepromWrite()
-                    --lcdNeedsInvalidate = true
-                else
-                    -- print("Failed to write to eeprom!")
-                    invalidatePages()
-                end
-                -- drop through to processMspReply to send msp_SET and see if we've received a response to this yet.
-            end
-        end
-        if not Page then
-            -- print("Reloading data : " .. lastPage)
-			if ESC_MODE == true then
-				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()			
-			else 
-				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. lastPage))()
-				ESC_MFG = nil
-				ESC_SCRIPT = nil
-				ESC_MODE = false
-			end	
-            collectgarbage()
-        end
-        if not Page.values and pageState == pageStatus.display then
-            requestPage()
-        end
-    end
-
-    mspProcessTxQ()
-    processMspReply(mspPollReply())
-    lastEvent = nil
-
-    -- handle some display stuff to bring form in and out of focus for no rf link
-    if telemetryState ~= 1 and closinghelp == false then
-		--print("No telemetry")
-        -- we have no telemetry - hide the form
-        if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
-            form.clear()
-            createForm = true
-        end
-    elseif (pageState >= pageStatus.saving) and closinghelp == false then
-		--print(">= pageStatus.saving")	
-        --form.clear()
-        --createForm = true
-    else
-        if createForm == true then
-			--print("createForm == true")
-			if closinghelp == true then  -- this is a bit messy but it essentially enables trh
-				closinghelp = false
-			end
-            if wasSaving == true or environment.simulation == true then
-                wasSaving = false
-				saveDialog:value(100)
-				closeSaving()						
-            elseif wasLoading == true or environment.simulation == true then
-				--print("wasLoading == true")
-                wasLoading = false
-                if lastScript == "pids.lua" or lastIdx == 1 then
-                    rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
-                elseif lastScript == "rates.lua" and lastSubPage == 1 then
-                    rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
-                elseif lastScript == "servos.lua" then
-                    rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
-				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-					rf2ethos.openPageESCTool(ESC_MFG)
-				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-					rf2ethos.openESCForm(ESC_MFG,ESC_SCRIPT)
-                else
-                    rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
-                end
-			elseif wasReloading == true or environment.simulation == true then
-					if lastScript == "pids.lua" or lastIdx == 1 then
-						rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
-					elseif lastScript == "rates.lua" and lastSubPage == 1 then
-						rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-					elseif lastScript == "servos.lua" then
-						rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
-					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-						rf2ethos.openPageESCToolLoader(ESC_MFG)					
-					elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-						rf2ethos.openESCFormLoader(ESC_MFG,ESC_SCRIPT)			
-					else
-						rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-					end			
-            elseif reloadRates == true or environment.simulation == true then
-				--print("reloadRates == true")
-                rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-            elseif reloadServos == true then
-				--print("reloadServos == true")
-				closeLoading()
-                rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
-            else
-				--print("openMainMenu")
-                rf2ethos.openMainMenu()
-            end
-            createForm = false
-        else
-            createForm = false
-        end
-
-        if uiState ~= uiStatus.mainMenu then
-            if environment.simulation == true or mspDataLoaded == true then
-                --print("Got the data...")
-                mspDataLoaded = false
-
-                isLoading = false
-                wasLoading = true
-
-				if environment.simulation ~= true then
-					createForm = true
-				end
-            end
-        end
-
-    end
-		
-	if lcdNeedsInvalidate == true then
-		lcd.invalidate()
-		lcdNeedsInvalidate  = false
-	end
-	
-	if environment.simulation ~= true then
-		if telemetryState ~= 1 then
-				if linkUPTime ~= nil then
-					if (os.clock() - linkUPTime) > 10 then
-							system.exit()
-					end
-				else
-					linkUPTime = os.clock()
-				end
-		else
-				linkUPTime = os.clock()
-		end
-	end	
-	
-	rf2ethos.wakeupForm()
+    end	
 	
 end
 
--- local rf2ethos.openMainMenu
 
 local function convertPageValueTable(tbl)
     local thetable = {}
@@ -1073,68 +1031,29 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	local section
 	local page
 	
-	if ENABLE_HELP == true then
-		help =  assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/help/pages.lua"))()
-		section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
-		page = lastSubPage	
-		if page == nil then
-			section = section
-		else
-			section = section .. '_' .. page
-		end
 
-		if help.data[section] then
-			helpWidth = w - (w * 20)/100
-		else
-			helpWidth = 0	
-		end
+	help =  assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/help/pages.lua"))()
+	section = string.gsub(lastScript, ".lua" ,"") -- remove .lua
+	page = lastSubPage	
+	if page == nil then
+		section = section
+	else
+		section = section .. '_' .. page
+	end
+
+	if help.data[section] then
+		helpWidth = w - (w * 20)/100
 	else
 		helpWidth = 0	
 	end
-	print (environment.board)
-	if environment.board == "X10EXPRESS" or environment.board == "X14" or environment.board == "X14S" then
-		ENABLE_HELP = false
-		helpWidth = 0
-	end
+
 
 	form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
         rf2ethos.openMainMenu()
     end)
     form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*2, y = y, w = buttonW, h = h}, "SAVE", function()
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    isSaving = true
-                    wasSaving = true
-                    rf2ethos.resetRates()
-                    rf2ethos.debugSave()
-                    saveSettings()
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-			form.openDialog({
-			  width=LCD_W,
-			  title="SAVE SETTINGS TO FBL",
-			  message="Save current page to flight controller", 
-			  buttons=buttons, 
-			  wakeup=function()
-					 end,  
-			  paint=function() 
-					end,
-			  options=TEXT_LEFT
-			})		
-		else
-			form.openDialog("SAVE SETTINGS TO FBL", "Save current page to flight controller", buttons)
-		end	
+        triggerSAVE = true		
     end)	
     form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = buttonW, h = h}, "RELOAD", function()
         local buttons = {
@@ -1153,28 +1072,22 @@ function rf2ethos.navigationButtons(x, y, w, h)
                 end
             }
         }
-		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-			form.openDialog({
-			  width=LCD_W,
-			  title="RELOAD",
-			  message="Reload data from flight controller", 
-			  buttons=buttons, 
-			  wakeup=function()
-					 end,  
-			  paint=function() 
-					end,
-			  options=TEXT_LEFT
-			})		
-		else		
-			form.openDialog("RELOAD", "Reload data from flight controller", buttons)
-		end	
+		form.openDialog({
+		  width=LCD_W,
+		  title="RELOAD",
+		  message="Reload data from flight controller", 
+		  buttons=buttons, 
+		  wakeup=function()
+				 end,  
+		  paint=function() 
+				end,
+		  options=TEXT_LEFT
+		})		
     end)
-	if ENABLE_HELP == true then
-		if helpWidth > 0 then
-				form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
-					rf2ethos.openPagehelp(help.data,section)
-				end)	
-		end	
+	if helpWidth > 0 then
+			form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
+				rf2ethos.openPagehelp(help.data,section)
+			end)	
 	end	
 end
 
@@ -1340,6 +1253,14 @@ local function defaultRates(x)
     defaults[5] = {180, 180, 180, 205, 36, 36, 36, 104.16, 0, 0, 0, 0} -- QUICK
 
     return defaults[x]
+end
+
+-- when saving - we have to force a reload of data of servos due to way you
+-- write one servo - and essentially loose Pages
+function rf2ethos.resetServos()
+	if lastScript == "servos.lua" then	
+		rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+	end
 end
 
 function rf2ethos.resetRates()
@@ -1556,16 +1477,13 @@ local function fieldNumber(f, i)
         field:step(f.step)
     end
 	
-	-- help only exists in new 1510 and above
-	--print(tonumber(rf2ethos.sensorMakeNumber(environment.version)))
-	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-		if f.help ~= nil then
-			if fieldHelpTxt[f.help]['t'] ~= nil then
-				local helpTxt = fieldHelpTxt[f.help]['t']	
-				field:help(helpTxt)
-			end
-		end	
-	end
+	if f.help ~= nil then
+		if fieldHelpTxt[f.help]['t'] ~= nil then
+			local helpTxt = fieldHelpTxt[f.help]['t']	
+			field:help(helpTxt)
+		end
+	end	
+
 	
 	
 end
@@ -1658,15 +1576,17 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-	showLoading()
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
-
-    lcdNeedsInvalidate = true
 
     isLoading = true
 
@@ -1718,7 +1638,11 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
     end
 
 	
-	closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 end
 
 function rf2ethos.openPageSERVOSLoader(idx, title, script)
@@ -1729,14 +1653,17 @@ function rf2ethos.openPageSERVOSLoader(idx, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    showLoading()
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
 
-    --lcdNeedsInvalidate = true
     isLoading = true
 
     if environment.simulation == true then
@@ -1799,8 +1726,8 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 					Page.fields[1].value = value
 				end	
                 return value
-            end, function(value)
-                Page.servoChanged(Page, value)					
+            end, function(value)			
+                Page.servoChanged(Page, value)				
                 return true
             end)
         else
@@ -1828,23 +1755,21 @@ function rf2ethos.openPageSERVOS(idx, title, script)
                 if f.unit ~= nil then
                     field:suffix(f.unit)
                 end
-				-- help only exists in new 1510 and above
-				--print(tonumber(rf2ethos.sensorMakeNumber(environment.version)))
-				if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-					if f.help ~= nil then
-						if fieldHelpTxt[f.help]['t'] ~= nil then
-							local helpTxt = fieldHelpTxt[f.help]['t']	
-							field:help(helpTxt)
-						end
-					end	
-				end
-					
-				
+				if f.help ~= nil then
+					if fieldHelpTxt[f.help]['t'] ~= nil then
+						local helpTxt = fieldHelpTxt[f.help]['t']	
+						field:help(helpTxt)
+					end
+				end				
             end
         end
     end
 
-    closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 end
 
 function rf2ethos.openPagePIDLoader(idx, title, script)
@@ -1855,14 +1780,18 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    showLoading()
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
     lastIdx = idx
     lastSubPage = subpage
     lastTitle = title
     lastScript = script
+	lastPage = script
 
-    lcdNeedsInvalidate = true
     isLoading = true
 
     if environment.simulation == true then
@@ -1882,8 +1811,12 @@ function rf2ethos.openPagePID(idx, title, script)
     form.clear()
 
     fieldHeader(title)
-
-    local numCols = #Page.cols
+	local numCols
+	if Page.cols ~= nil then
+		numCols = #Page.cols
+	else
+		numCols = 6 
+	end
     local screenWidth = LCD_W - 10
     local padding = 10
     local paddingTop = radio.buttonPaddingTop
@@ -1956,14 +1889,11 @@ function rf2ethos.openPagePID(idx, title, script)
         if f.unit ~= nil then
             field:suffix(f.unit)
         end
-		-- help only exists in new 1510 and above
-		if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-			if f.help ~= nil then
-				if fieldHelpTxt[f.help]['t'] ~= nil then
-					local helpTxt = fieldHelpTxt[f.help]['t']	
-					field:help(helpTxt)
-				end
-			end	
+		if f.help ~= nil then
+			if fieldHelpTxt[f.help]['t'] ~= nil then
+				local helpTxt = fieldHelpTxt[f.help]['t']	
+				field:help(helpTxt)
+			end
 		end		
     end
 
@@ -1975,7 +1905,11 @@ function rf2ethos.openPagePID(idx, title, script)
         end
     end
 
-    closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 end
 
 
@@ -2075,7 +2009,6 @@ function rf2ethos.openPageESCToolLoader(folder)
     --lastTitle = title
     --lastScript = script
 
-    lcdNeedsInvalidate = true
 
     isLoading = true
 
@@ -2189,13 +2122,11 @@ function rf2ethos.openESCFormLoader(folder,script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
-    showLoading()
-
-    --lastIdx = idx
-    --lastTitle = title
-    --lastScript = script
-
-    lcdNeedsInvalidate = true
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
     isLoading = true
 	
@@ -2273,7 +2204,11 @@ function rf2ethos.openESCForm(folder,script)
         rf2ethos.navigationButtonsEscForm(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
     end
 
-    closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 
 end
 
@@ -2287,7 +2222,11 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
-    showLoading()
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
     lastIdx = idx
     lastSubPage = subpage
@@ -2317,7 +2256,11 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 		if activeRateTable ~= nil then
 			if activeRateTable ~= RateTable then
 				RateTable = activeRateTable
-				closeLoading()
+				if progressDialogDisplay == true then
+					progressDialogWatchDog = nil
+					progressDialogDisplay = false
+					progressDialog:close()
+				end
 				rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 				
 			end
@@ -2420,14 +2363,11 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
             if f.step ~= nil then
                 field:step(f.step)
             end
-			-- help only exists in new 1510 and above
-			if tonumber(rf2ethos.sensorMakeNumber(environment.version)) > 159 then
-				if f.help ~= nil then
-					if fieldHelpTxt[f.help]['t'] ~= nil then
-						local helpTxt = fieldHelpTxt[f.help]['t']	
-						field:help(helpTxt)
-					end
-				end	
+			if f.help ~= nil then
+				if fieldHelpTxt[f.help]['t'] ~= nil then
+					local helpTxt = fieldHelpTxt[f.help]['t']	
+					field:help(helpTxt)
+				end
 			end			
         end
     end
@@ -2440,7 +2380,11 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    closeLoading()
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
 	
 
 end
@@ -2479,35 +2423,40 @@ function rf2ethos.openMainMenu()
 
 
    
-	local MENU_EXPANSION = false
-	local sc = 0
+	local MENU_EXPANSION = true
+	local sc 
 	local panel
 
 
 	form.clear()
 	
-
-		
-		
+	_G["rf2ethosMenuPanels"] = {}	
     for idx, value in ipairs(MainMenu.sections) do
 	
-	
-	
-	
+		local sc = value.section
+
 		if MENU_EXPANSION ~= true then
 			-- just a line with a title
-			panel = form.addLine(value.title)
+			_G["rf2ethosMenuPanels"][sc] =  form.addLine(value.title)
 		else
 			-- or an expansion panel
-			panel = form.addExpansionPanel(value.title)
-			if sc ==  0 then
-				panel:open(true) 
+
+			_G["rf2ethosMenuPanels"][sc] = form.addExpansionPanel(value.title)
+			
+			if lastSection == nil then
+				if sc ==  1 then
+					_G["rf2ethosMenuPanels"][sc]:open(true) 
+				else
+					_G["rf2ethosMenuPanels"][sc]:open(false) 
+				end
 			else
-				panel:open(false) 
+				if lastSection == sc then
+					_G["rf2ethosMenuPanels"][sc]:open(true) 
+				else
+					_G["rf2ethosMenuPanels"][sc]:open(false) 
+				end
 			end
 		end
-		sc = sc + 1
-
 
         lc = 0
         for pidx, pvalue in ipairs(MainMenu.pages) do
@@ -2516,7 +2465,7 @@ function rf2ethos.openMainMenu()
 					if MENU_EXPANSION ~= true then
 						line = form.addLine("")
 					else
-						line = form.addLine("",panel)
+						line = form.addLine("",_G["rf2ethosMenuPanels"][sc])
 					end
                     x = padding
                 end
@@ -2526,6 +2475,9 @@ function rf2ethos.openMainMenu()
                 end
 
                 form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
+				
+					lastSection = value.section	
+					
                     if pvalue.script == "pids.lua" then
                         rf2ethos.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
                     elseif pvalue.script == "servos.lua" then
@@ -2546,6 +2498,8 @@ function rf2ethos.openMainMenu()
                 end
             end
         end
+
+
     end
 end
 
@@ -2581,11 +2535,6 @@ local function create()
     lastEvent = nil
     apiVersion = 0
 	
-	if tonumber(rf2ethos.sensorMakeNumber(environment.version)) < 158 then
-		print("< 158  : help functions disabled")
-		ENABLE_HELP = false
-	end
-	
 
     MainMenu = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages.lua"))()
 
@@ -2595,8 +2544,6 @@ local function create()
 end
 
 local function close()
-    -- print("Close")
-	dialogOPEN = false	
 	ESC_MODE = false
 	ESC_MFG = nil
 	ESC_SCRIPT = nil
@@ -2617,7 +2564,6 @@ local icon = lcd.loadMask("/scripts/rf2ethos/RF.png")
 
 local function init()
     system.registerSystemTool({event = event, paint = paint, name = name, icon = icon, create = create, wakeup = wakeup, close = close})
-    --system.compile("/scripts/rf2ethos/main.lua")
 end
 
 return {init = init}
