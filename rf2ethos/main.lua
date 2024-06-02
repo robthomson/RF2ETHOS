@@ -461,7 +461,7 @@ function rf2ethos.openPagehelp(helpdata,section)
 
 	-- wrap text because of image on right
 	for k,v in ipairs(txtData) do
-		message = message .. rf2ethos.wrap(v,radio.helpTxtWrap) .. "\n\n"
+		message = message .. v .. "\n\n"
 	end
 	
 	local buttons = {
@@ -505,18 +505,59 @@ function rf2ethos.openPagehelp(helpdata,section)
 end
 
 
-function rf2ethos.wrap(str, limit, indent, indent1)
-  indent = indent or ""
-  indent1 = indent1 or indent
-  limit = limit or 79
-  local here = 1-#indent1
-  return indent1..str:gsub("(%s+)()(%S+)()",
-  function(sp, st, word, fi)
-	if fi-here > limit then
-	  here = st - #indent
-	  return "\n"..indent..word
-	end
-  end)
+function rf2ethos.wrap(text, limit)
+    --local font = love.graphics.getFont()
+    local lines = {{ width = 0 }}
+    local advance = 0
+    local lastSpaceAdvance = 0
+
+    local function append (word, space)
+        local wordAdvance = lcd.getTextSize(word)
+        local spaceAdvance = lcd.getTextSize(space)
+        local words = lines[#lines]
+        if advance + wordAdvance > limit then
+            words.width = (words.width or 0) - lastSpaceAdvance
+            advance = wordAdvance + spaceAdvance
+            lines[#lines + 1] = { width = advance, word, space }
+        else
+            advance = advance + wordAdvance + spaceAdvance
+            words.width = advance
+            words[#words + 1] = word
+            words[#words + 1] = space
+        end
+        lastSpaceAdvance = spaceAdvance
+    end
+
+    local function appendFrag (frag, isFirst)
+        if isFirst then
+            append(frag, '')
+        else
+            local wordAdvance = font:getWidth(frag)
+            lines[#lines + 1] = { width = wordAdvance, frag }
+            advance = wordAdvance
+        end
+    end
+
+    local leadSpace = text:match '^ +'
+
+    if leadSpace then
+        append('', leadSpace)
+    end
+
+    for word, space in text:gmatch '([^ ]+)( *)' do
+        if word:match '\n' then
+            local isFirst = true
+            for frag in (word .. '\n'):gmatch '([^\n]*)\n' do
+                appendFrag(frag, isFirst)
+                isFirst = false
+            end
+            append('', space)
+        else
+            append(word, space)
+        end
+    end
+
+    return lines
 end
 
 
