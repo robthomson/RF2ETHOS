@@ -461,7 +461,7 @@ function rf2ethos.openPagehelp(helpdata,section)
 
 	-- wrap text because of image on right
 	for k,v in ipairs(txtData) do
-		message = message .. v .. "\n\n"
+		message = message .. rf2ethos.wrap(v,radio.helpTxtWrap) .. "\n\n"
 	end
 	
 	local buttons = {
@@ -505,59 +505,18 @@ function rf2ethos.openPagehelp(helpdata,section)
 end
 
 
-function rf2ethos.wrap(text, limit)
-    --local font = love.graphics.getFont()
-    local lines = {{ width = 0 }}
-    local advance = 0
-    local lastSpaceAdvance = 0
-
-    local function append (word, space)
-        local wordAdvance = lcd.getTextSize(word)
-        local spaceAdvance = lcd.getTextSize(space)
-        local words = lines[#lines]
-        if advance + wordAdvance > limit then
-            words.width = (words.width or 0) - lastSpaceAdvance
-            advance = wordAdvance + spaceAdvance
-            lines[#lines + 1] = { width = advance, word, space }
-        else
-            advance = advance + wordAdvance + spaceAdvance
-            words.width = advance
-            words[#words + 1] = word
-            words[#words + 1] = space
-        end
-        lastSpaceAdvance = spaceAdvance
-    end
-
-    local function appendFrag (frag, isFirst)
-        if isFirst then
-            append(frag, '')
-        else
-            local wordAdvance = font:getWidth(frag)
-            lines[#lines + 1] = { width = wordAdvance, frag }
-            advance = wordAdvance
-        end
-    end
-
-    local leadSpace = text:match '^ +'
-
-    if leadSpace then
-        append('', leadSpace)
-    end
-
-    for word, space in text:gmatch '([^ ]+)( *)' do
-        if word:match '\n' then
-            local isFirst = true
-            for frag in (word .. '\n'):gmatch '([^\n]*)\n' do
-                appendFrag(frag, isFirst)
-                isFirst = false
-            end
-            append('', space)
-        else
-            append(word, space)
-        end
-    end
-
-    return lines
+function rf2ethos.wrap(str, limit, indent, indent1)
+  indent = indent or ""
+  indent1 = indent1 or indent
+  limit = limit or 79
+  local here = 1-#indent1
+  return indent1..str:gsub("(%s+)()(%S+)()",
+  function(sp, st, word, fi)
+	if fi-here > limit then
+	  here = st - #indent
+	  return "\n"..indent..word
+	end
+  end)
 end
 
 
@@ -803,7 +762,8 @@ function wakeup(widget)
 			saveDialogDisplay = false
 			saveDialogWatchDog = nil
 			saveDialog:close()	
-			rf2ethos.resetServos() -- this must run after save settings				
+			rf2ethos.resetServos() -- this must run after save settings		
+			rf2ethos.resetCopyProfiles() -- this must run after save settings	
 		elseif wasLoading == true or environment.simulation == true then
 			wasLoading = false
 			if lastScript == "pids.lua" or lastIdx == 1 then
@@ -1292,6 +1252,14 @@ end
 function rf2ethos.resetServos()
 	if lastScript == "servos.lua" then	
 		rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+	end
+end
+
+-- when saving - we have to force a reload of data of copy-profiles due to way you
+-- write one servo - and essentially loose Pages
+function rf2ethos.resetCopyProfiles()
+	if lastScript == "copy_profiles.lua" then	
+		rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
 	end
 end
 

@@ -16,7 +16,7 @@ labels[#labels + 1] = {t = "", label = "ar2", inline_size = 40.15}
 fields[#fields + 1] = {t = "Timeout", help="govAutoTimeout", inline = 1, label = "ar2", min = 0, max = 600, unit = "s", default = 0, vals = {14, 15}, decimals = 1, scale = 10}
 
 labels[#labels + 1] = {t = "", label = "ar3", inline_size = 40.15}
-fields[#fields + 1] = {t = "Min Entry", help="govAutoMinEntryTime", inline = 1, label = "ar3", min = 0, max = 600, unit = "s", default = 50, vals = {18, 19}, decimals = 1, scale = 10}
+fields[#fields + 1] = {t = "Min Entry", help="govAutoMinEntryTime", inline = 1, label = "ar3", min = 0, max = 100, unit = "s", default = 50, vals = {18, 19}, decimals = 1, scale = 10}
 
 fields[#fields + 1] = {t = "Zero throttle Timeout", t2="Zero Thr. Timeout", help="govZeroThrottleTimeout", min = 0, max = 100, unit = "s", default = 30, vals = {10, 11}, decimals = 1, scale = 10}
 fields[#fields + 1] = {t = "HS signal timeout", help="govLostHeadspeedTimeout", min = 0, max = 100, unit = "s",  default = 10, vals = {12, 13}, decimals = 1, scale = 10}
