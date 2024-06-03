@@ -1099,7 +1099,18 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 end
             }
         }
-        form.openDialog("SAVE SETTINGS TO ESC", "Save current page to ESC", buttons)
+		form.openDialog({
+		  width=nil,
+		  title="SAVE SETTINGS TO ESC",
+		  message="Save current page to ESC", 
+		  buttons=buttons, 
+		  wakeup=function()
+				 end,  
+		  paint=function() 
+				end,
+		  options=TEXT_LEFT
+		})	
+
     end)
     form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "RELOAD", function()
         local buttons = {
@@ -1107,9 +1118,11 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-					ESC_NOTREADYCOUNT = 0					
-                    wasSaving = true
-                    createForm = true
+					if environment.simulation ~= true then
+						ESC_NOTREADYCOUNT = 0					
+						wasReloading = true
+						createForm = true
+					end
                     return true
                 end
             }, {
@@ -1119,7 +1132,17 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 end
             }
         }
-        form.openDialog("REFRESH", "Reload data from flight controller", buttons)
+		form.openDialog({
+		  width=nil,
+		  title="REFRESH",
+		  message="Reload configuration from ESC", 
+		  buttons=buttons, 
+		  wakeup=function()
+				 end,  
+		  paint=function() 
+				end,
+		  options=TEXT_LEFT
+		})	
     end)
 end
 
@@ -1989,7 +2012,11 @@ end
 -- a then pass on to the actual form display function
 function rf2ethos.openPageESCToolLoader(folder)
 
-
+	progressDialogDisplay = true
+	progressDialogWatchDog = os.clock()
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from ESC")
+	progressDialog:value(0)
+	progressDialog:closeAllowed(false)
 
 	ESC_MFG = folder
 	ESC_SCRIPT = nil
@@ -2003,7 +2030,7 @@ function rf2ethos.openPageESCToolLoader(folder)
 	
 
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/esc_info.lua"))()
-    form.clear()
+    --form.clear()
 
     --lastIdx = idx
     --lastTitle = title
@@ -2026,6 +2053,14 @@ end
 function rf2ethos.openPageESCTool(folder)
 
 	print("rf2ethos.openPageESCTool")
+
+
+	if progressDialogDisplay == true then
+		progressDialogWatchDog = nil
+		progressDialogDisplay = false
+		progressDialog:close()
+	end
+
 
     ESC.init = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
 
@@ -2226,7 +2261,7 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 
 	progressDialogDisplay = true
 	progressDialogWatchDog = os.clock()
-	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from ESC.")
 	progressDialog:value(0)
 	progressDialog:closeAllowed(false)
 

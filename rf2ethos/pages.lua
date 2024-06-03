@@ -22,7 +22,7 @@ pages[#pages + 1] = {title = "Mixer", section = 4, script = "mixer.lua"}
 pages[#pages + 1] = {title = "Accelerometer", section = 4, script = "accelerometer.lua"}
 pages[#pages + 1] = {title = "Filters", section = 4, script = "filters.lua"}
 pages[#pages + 1] = {title = "Governor", section = 4, script = "governor.lua"}
---pages[#pages + 1] = {title = "ESC", section = 4, script = "esc.lua"}
+pages[#pages + 1] = {title = "ESC", section = 4, script = "esc.lua"}
 
 
 
