@@ -1,16 +1,4 @@
 return {
---configurationFeatures = { t="<strong>Note:</strong> Not all features are supported by all flight controllers. If you enable a specific feature, and it is disabled after you hit 'Save and Reboot', it means that this feature is not supported." },
---configurationSerialPorts = { t="Select function and speed for each serial port (UART)." },
---configurationRSSI = { t="RSSI is a measurement of signal strength and is very handy so you know when your aircraft is going out of range or if it is suffering RF interference." },
---configurationBoardAlignment = { t="Arbitrary board rotation allows mounting the FC sideways / upside down / rotated etc. When using external sensors, use the sensor alignments to define sensor position independent from the board orientation." },
---configurationAccelTrims = { t="The Accelerometer Trims provide fine tuning to the horizon level, which can be used to decrease drift while in stabilized modes, such as Angle or Rescue." },
---configurationBeeper = { t="Enable or disable when to sound the Buzzer." },
---configurationGPSGalileo = { t="When enabled, this removes the QZSS system (Japanese) and replaces it for the Galileo system (European)." },
---configurationGPSHomeOnce = { t="When enabled, only the first arm after the battery is connected will be used as home point. If not enabled, every time the quad is armed, the home point will be updated." },
-
-
---receiverBars = { t="Shows the raw RC channels from the receiver exactly the way they are received. Please select the channel map, i.e. the corrent function for each RC channel." },
-
 
 --
 -- servos.lua
@@ -22,10 +10,6 @@ servoScaleNeg = { t="Servo negative scaling." },
 servoScalePos = { t="Servo positive scaling." },
 servoRate = { t="Servo PWM rate." },
 servoSpeed = { t="Servo motion speed in milliseconds." },
---servoReverse = { t="Servo reverse." },
---servoGeometryCorrection = { t="Servo geometry correction." },
---servoOverride = { t="Servo override for adjusting center and limits." },
-
 
 --
 -- mixer.lua
@@ -36,13 +20,12 @@ mixerCollectiveGeoCorrection = { t="Adjust if there is too much negative collect
 mixerTotalPitchLimit = { t="Maximum amount of combined cyclic and collective blade pitch." },
 mixerSwashPhase = { t="Phase offset for the swashplate controls." },
 mixerTailMotorIdle = { t="Minimum throttle signal sent to the tail motor. This should be set just high enough that the motor does not stop." },
-mixerTailMotorCenterTrim = { t="Set tail motor throttle value for zero yaw command." },
+mixerTailMotorCenterTrim = { t="Sets tail rotor trim for 0 yaw for variable pitch, or tail motor throttle for 0 yaw for motorized." },
 
 
 --
 -- governor.lua
 --
---govMode = { t="<strong>OFF:</strong> Govenor is disabled and the throttle from the Tx is passed through to the ESC.<br><br><strong>PASSTHROUGH:</strong> Throttle passthrough from the Tx, with slow spoolup and autorotation control.<br><br><strong>STANDARD:</strong> Motor speed is controlled by the FC. Equivalent to a typical ESC Governor.<br><br><strong>MODE1:</strong> Like STANDARD but with Collective and Cyclic Precompensation (i.e. collective changes are proactively changing the throttle, just like a throttle curve in the Tx).<br><br><strong>MODE2:</strong> Like MODE1, but with proactive battery voltage sag compensation. Requires fast voltage measurement." },
 govHandoverThrottle = { t="Governor activates above this %. Below this the input throttle is passed to the ESC." },
 govStartupTime = { t="Time constant for slow startup, in seconds, measuring the time from zero to full headspeed." },
 govSpoolupTime = { t="Time constant for slow spoolup, in seconds, measuring the time from zero to full headspeed." },

@@ -505,21 +505,6 @@ function rf2ethos.openPagehelp(helpdata,section)
 end
 
 
-function rf2ethos.wrap(str, limit, indent, indent1)
-  indent = indent or ""
-  indent1 = indent1 or indent
-  limit = limit or 79
-  local here = 1-#indent1
-  return indent1..str:gsub("(%s+)()(%S+)()",
-  function(sp, st, word, fi)
-	if fi-here > limit then
-	  here = st - #indent
-	  return "\n"..indent..word
-	end
-  end)
-end
-
-
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
     --print("Event received:", category, value, x, y)
@@ -926,7 +911,7 @@ local function convertPageValueTable(tbl,inc)
         thetable[idx][2] = idx + inc
     end
 	
-	rf2ethos.print_r(thetable)
+
 	
     return thetable
 end

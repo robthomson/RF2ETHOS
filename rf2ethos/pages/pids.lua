@@ -20,8 +20,8 @@ fields[#fields + 1] = {help="profilesIntegral", row = 2, col = 2, min = 0, max =
 fields[#fields + 1] = {help="profilesIntegral", row = 3, col = 2, min = 0, max = 1000, default = 50, vals = {19, 20}}
 
 -- O
-fields[#fields + 1] = {help="profilesHSI", row = 1, col = 5, min = 0, max = 1000, default = 0, vals = {31, 32}}
-fields[#fields + 1] = {help="profilesHSI", row = 2, col = 5, min = 0, max = 1000, default = 0, vals = {33, 34}}
+fields[#fields + 1] = {help="profilesHSI", row = 1, col = 5, min = 0, max = 1000, default = 25, vals = {31, 32}}
+fields[#fields + 1] = {help="profilesHSI", row = 2, col = 5, min = 0, max = 1000, default = 25, vals = {33, 34}}
 
 -- D
 fields[#fields + 1] = {help="profilesDerivative", row = 1, col = 3, min = 0, max = 1000, default = 10, vals = {5, 6}}

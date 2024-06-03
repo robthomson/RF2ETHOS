@@ -27,8 +27,8 @@ fields[#fields + 1] = {t = "Col. trim %", help="mixerSwashTrim", label = "line7"
 labels[#labels + 1] = {t = "Motorised tail", label = "line8", inline_size = 40.15}
 fields[#fields + 1] = {t = "Idle throttle%", help="mixerTailMotorIdle", t2="Idle Thr%", label = "line8", inline = 1, min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"}
 
-labels[#labels + 1] = {t = "", label = "line9", inline_size = 40.15}
-fields[#fields + 1] = {t = "Center trim", help="mixerTailMotorCenterTrim", label = "line9", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10}
+
+fields[#fields + 1] = {t = "Center trim", help="mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10}
 
 return {
     read = 42, -- msp_MIXER_CONFIG
