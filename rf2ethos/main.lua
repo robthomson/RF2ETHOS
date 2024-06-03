@@ -139,7 +139,7 @@ local function saveSettings()
 			payload[2] = 0
 		end
         if Page.preSave then
-            payload = Page.preSave(Page)
+            payload = Page.preSave(Page)		
         end
         saveTS = os.clock()
         if pageState == pageStatus.saving then
@@ -638,7 +638,7 @@ function wakeup(widget)
 		if nolinkDialogDisplay == true or telemetryState == 1 then
 		
 			if telemetryState == 1 then
-				nolinkDialogValue = nolinkDialogValue + 10
+				nolinkDialogValue = nolinkDialogValue + 20
 			else
 				nolinkDialogValue = nolinkDialogValue + 1
 			end
@@ -908,8 +908,13 @@ function wakeup(widget)
 end
 
 
-local function convertPageValueTable(tbl)
+local function convertPageValueTable(tbl,inc)
     local thetable = {}
+	
+	if inc == nil then
+		inc = 0
+	end
+	
     if tbl[0] ~= nil then
         thetable[0] = {}
         thetable[0][1] = tbl[0]
@@ -918,8 +923,11 @@ local function convertPageValueTable(tbl)
     for idx, value in ipairs(tbl) do
         thetable[idx] = {}
         thetable[idx][1] = value
-        thetable[idx][2] = idx
+        thetable[idx][2] = idx + inc
     end
+	
+	rf2ethos.print_r(thetable)
+	
     return thetable
 end
 
@@ -1337,7 +1345,7 @@ local function fieldChoice(f, i)
         postText = nil
     end
 
-    field = form.addChoiceField(line, posField, convertPageValueTable(f.table), function()
+    field = form.addChoiceField(line, posField, convertPageValueTable(f.table,f.tableIdxInc), function()
         local value = rf2ethos.getFieldValue(f)
 	
         return value
