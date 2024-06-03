@@ -461,7 +461,7 @@ function rf2ethos.openPagehelp(helpdata,section)
 
 	-- wrap text because of image on right
 	for k,v in ipairs(txtData) do
-		message = message .. rf2ethos.wrap(v,radio.helpTxtWrap) .. "\n\n"
+		message = message .. v .. "\n\n"
 	end
 	
 	local buttons = {
