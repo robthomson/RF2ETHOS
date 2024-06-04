@@ -42,6 +42,7 @@ local wasSaving = false
 local wasReloading = false
 local closinghelp = false
 local linkUPTime
+local SAVE_FAILED = false
 
 local lastLabel = nil
 local NewRateTable
@@ -55,6 +56,7 @@ wasLoading = false
 local exitAPP = false
 local noRFMsg = false
 local triggerSAVE = false
+local triggerESCRELOAD = false
 
 local fieldHelpTxt = nil
 
@@ -642,8 +644,7 @@ function wakeup(widget)
 	-- some watchdogs to enable close buttons on save and progress if they time-out
 	if saveDialogDisplay == true then
 		if saveDialogWatchDog ~= nil then
-			if (os.clock() - saveDialogWatchDog) > 10 then
-					saveDialog:message("Error.. we timed out")
+			if (os.clock() - saveDialogWatchDog) > 30 then
 					saveDialog:closeAllowed(true)
 			end	
 		end	
@@ -651,7 +652,7 @@ function wakeup(widget)
 
 	if progressDialogDisplay == true then
 		if progressDialogWatchDog ~= nil then
-			if (os.clock() - progressDialogWatchDog) > 10 then
+			if (os.clock() - progressDialogWatchDog) > 20 then
 					progressDialog:message("Error.. we timed out")
 					progressDialog:closeAllowed(true)
 			end	
@@ -699,6 +700,7 @@ function wakeup(widget)
                     saveSettings()
                 else
 					-- Saving failed for some reason
+					SAVE_FAILED = true
 					saveDialog:message("Error - failed to write data")
                     saveDialog:closeAllowed(true)
                     invalidatePages()
@@ -746,7 +748,10 @@ function wakeup(widget)
 			saveDialog:value(100)
 			saveDialogDisplay = false
 			saveDialogWatchDog = nil
-			saveDialog:close()	
+			if SAVE_FAILED == false then
+				saveDialog:close()	
+				SAVE_FAILED = false
+			end
 			rf2ethos.resetServos() -- this must run after save settings		
 			rf2ethos.resetCopyProfiles() -- this must run after save settings	
 		elseif wasLoading == true or environment.simulation == true then
@@ -810,6 +815,7 @@ function wakeup(widget)
     if isSaving then
         if pageState >= pageStatus.saving then
 			if saveDialogDisplay == false then
+				SAVE_FAILED = false
 				saveDialogDisplay = true
 				saveDialogWatchDog = os.clock()
 				saveDialog = form.openProgressDialog("Saving...", "Saving data...")
@@ -878,6 +884,11 @@ function wakeup(widget)
 
 		
 		triggerSAVE = false
+	end
+
+	if triggerESCRELOAD == true then
+		triggerESCRELOAD = false
+		rf2ethos.openESCFormLoader(ESC_MFG,ESC_SCRIPT)
 	end
 
 
@@ -1075,7 +1086,7 @@ end
 function rf2ethos.navigationButtonsEscForm(x, y, w, h)
     form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
         ResetRates = false
-		ESC_MODE = false
+		ESC_MODE = true
 		ESC_NOTREADYCOUNT = 0
 		 collectgarbage()
         rf2ethos.openPageESCTool(ESC_MFG)
@@ -1119,9 +1130,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
                 action = function()
                     -- trigger RELOAD
 					if environment.simulation ~= true then
-						ESC_NOTREADYCOUNT = 0					
-						wasReloading = true
-						createForm = true
+						triggerESCRELOAD = true
 					end
                     return true
                 end
