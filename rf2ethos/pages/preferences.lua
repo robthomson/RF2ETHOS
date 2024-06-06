@@ -1,0 +1,5 @@
+-- this file does nothing as preferences are in the main.lua
+-- function rf2ethos.openPagePreferences()
+--
+-- it is kept for consitency in the pages.lua script
+-- and potential that in the future we may way to use it.

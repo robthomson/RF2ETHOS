@@ -28,5 +28,7 @@ pages[#pages + 1] = {title = "ESC", section = 4, script = "esc.lua"}
 
 sections[#sections + 1] = {title = "Tools", section = 5, open = false}
 pages[#pages + 1] = {title = "Copy profiles", section = 5, script = "copy_profiles.lua"}
+pages[#pages + 1] = {title = "Preferences", section = 5, script = "preferences.lua"}
+
 
 return {pages = pages, sections = sections}

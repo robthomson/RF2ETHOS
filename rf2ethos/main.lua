@@ -60,6 +60,9 @@ local triggerESCRELOAD = false
 
 local fieldHelpTxt = nil
 
+local profileswitchLast
+local rateswitchLast
+
 local mspDataLoaded = false
 
 local LCD_W
@@ -69,7 +72,8 @@ reloadServos = false
 
 defaultRateTable = 4 -- ACTUAL
 
-
+local expPanelParam
+local buttonsperrowParam
 
 -- New variables for Ethos version
 local screenTitle = nil
@@ -509,9 +513,52 @@ end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
-    --print("Event received:", category, value, x, y)
+    print("Event received:", category, value, x, y)
+
+
+
+	-- close esc main type selection menu
+	if ESC_MODE == true and ESC_MFG == nil and ESC_SCRIPT == nil then
+		if category == 5 then
+				ResetRates = false
+				rf2ethos.openMainMenu()
+				ESC_MODE = false
+				ESC_MFG = nil
+				ESC_SCRIPT = nil
+			return true		
+		end		
+	end
+	-- close esc pages menu
+	if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+		if category == 5 then
+				ResetRates = false
+				rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
+				ESC_MODE = false
+				ESC_MFG = nil
+				ESC_SCRIPT = nil
+			return true		
+		end		
+	end
+	-- close esc pages menu
+	if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+		if category == 5 then
+				ResetRates = false
+				rf2ethos.openPageESCToolLoader(ESC_MFG)
+				ESC_MODE = false
+				ESC_MFG = nil
+				ESC_SCRIPT = nil
+			return true		
+		end		
+	end	
+	
+
 
 	if uiState == uiStatus.pages then
+		if category == 5 then
+				ResetRates = false
+				rf2ethos.openMainMenu()
+			return true		
+		end	
 		if value == 35 then	
 				ResetRates = false
 				rf2ethos.openMainMenu()
@@ -522,6 +569,7 @@ local function event(widget, category, value, x, y)
 				system.killEvents(KEY_ENTER_BREAK)
 				return true
 		end
+
 	end
 	
 	if uiState == uiStatus.MainMenu then
@@ -563,6 +611,7 @@ end
 
 -- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
 function wakeup(widget)
+
 
 	-- exit app called : quick abort
 	-- as we dont need to run the rest of the stuff
@@ -608,7 +657,99 @@ function wakeup(widget)
 		end
     end	
 
-	
+	-- capture profile switching and trigger a reload if needs be
+
+	if 
+		(lastPage == "pids.lua" or 
+		lastPage == "profile.lua" or
+		lastPage == "profile_governor.lua" or
+		lastPage == "profile_rescue.lua" ) and 
+		ESC_MODE ~= true
+		then
+		if profileswitchParam ~= nil then
+		
+			if profileswitchParam:value() ~= profileswitchLast then
+		
+				if progressDialogDisplay ==  true or saveDialogDisplay == true then
+					-- switch has been toggled mid flow - this is bad.. clean upd
+					if progressDialogDisplay ==  true then
+							progressDialog:close()
+					end
+					if saveDialogDisplay ==  true then
+							saveDialog:close()
+					end
+					form.clear()
+					wasReloading = true
+					createForm = true							
+					wasSaving = false
+					wasLoading = false
+					reloadRates = false
+					reloadServos = false
+				
+				else
+		
+					profileswitchLast = profileswitchParam:value()
+					-- trigger RELOAD
+					print("Profile switch reload")
+					if environment.simulation ~= true then
+						wasReloading = true
+						createForm = true							
+						wasSaving = false
+						wasLoading = false
+						reloadRates = false
+						reloadServos = false
+					end
+					return true
+					
+				end	
+			end
+		end
+	end
+
+	-- capture profile switching and trigger a reload if needs be
+	if 
+		lastPage == "rates.lua" and ESC_MODE ~= true
+		then
+		if rateswitchParam ~= nil then
+			if rateswitchParam:value() ~= rateswitchLast then
+
+				if progressDialogDisplay ==  true or saveDialogDisplay == true then
+					-- switch has been toggled mid flow - this is bad.. clean upd
+					if progressDialogDisplay ==  true then
+							progressDialog:close()
+					end
+					if saveDialogDisplay ==  true then
+							saveDialog:close()
+					end
+					form.clear()
+					wasReloading = true
+					createForm = true							
+					wasSaving = false
+					wasLoading = false
+					reloadRates = false
+					reloadServos = false
+				else			
+					rateswitchLast = rateswitchParam:value()
+
+					-- trigger RELOAD
+					print("Rate switch reload")
+					if environment.simulation ~= true then
+						wasSaving = false
+						wasLoading = false
+						reloadServos = false
+						wasReloading = false
+						
+						createForm = true
+						reloadRates = true
+					end
+					return true
+				end	
+
+
+			end
+		end
+	end	
+
 	
 	-- check telemetry state and overlay dialog if not linked
     if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
@@ -659,6 +800,10 @@ function wakeup(widget)
 		end	
 	end
 	
+	
+
+
+
 
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
@@ -742,8 +887,10 @@ function wakeup(widget)
     processMspReply(mspPollReply())
     lastEvent = nil
 
+
 	if createForm == true then
 		if wasSaving == true or environment.simulation == true then
+			rf2ethos.profileSwitchCheck()
 			wasSaving = false
 			saveDialog:value(100)
 			saveDialogDisplay = false
@@ -756,6 +903,8 @@ function wakeup(widget)
 			rf2ethos.resetCopyProfiles() -- this must run after save settings	
 		elseif wasLoading == true or environment.simulation == true then
 			wasLoading = false
+			rf2ethos.profileSwitchCheck()
+			
 			if lastScript == "pids.lua" or lastIdx == 1 then
 				rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
 			elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -770,6 +919,7 @@ function wakeup(widget)
 				rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
 			end
 		elseif wasReloading == true or environment.simulation == true then
+				wasReloading = false
 				if lastScript == "pids.lua" or lastIdx == 1 then
 					rf2ethos.openPagePIDLoader(lastIdx, lastTitle, lastScript)
 				elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -783,6 +933,7 @@ function wakeup(widget)
 				else
 					rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
 				end			
+				rf2ethos.profileSwitchCheck()
 		elseif reloadRates == true or environment.simulation == true then
 			rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
 		elseif reloadServos == true then
@@ -858,6 +1009,8 @@ function wakeup(widget)
                 action = function()
                     isSaving = true
                     wasSaving = true
+					
+					triggerSAVE = false
                     rf2ethos.resetRates()
                     rf2ethos.debugSave()
                     saveSettings()
@@ -866,6 +1019,7 @@ function wakeup(widget)
             }, {
                 label = "CANCEL",
                 action = function()
+					triggerSAVE = false
                     return true
                 end
             }
@@ -1053,6 +1207,11 @@ function rf2ethos.navigationButtons(x, y, w, h)
 					if environment.simulation ~= true then
 						wasReloading = true
 						createForm = true
+						
+						wasSaving = false
+						wasLoading = false
+						reloadRates = false
+						reloadServos = false						
 					end
                     return true
                 end
@@ -1594,6 +1753,205 @@ local function fieldHeader(title)
     rf2ethos.navigationButtons(w, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
 end
 
+
+function rf2ethos.loadPreference(preference)
+	-- open preference file
+	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
+
+	print("Read Preference:  " .. file)
+
+	local f
+	f = io.open(file,"rb")
+	if f ~= nil then
+		--file exists
+		local rData
+		c = 0
+		tc = 1
+		rData = io.read(f,"l")
+		io.close(f)		
+
+		return rData
+	end
+
+end
+
+function rf2ethos.storePreference(preference,value)
+	-- open preference file
+	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
+
+	if value == nil then
+		value = ""
+	end
+
+	if type(value) == "boolean" then
+		if value == true then
+			value = 0
+		else
+			value = 1
+		end
+	end
+	
+	if type(value) == "userdata" then
+		value = value:name()
+	end
+
+	print("Write Preference: " .. file .. " [" .. value .. "]")
+	
+	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
+	
+	
+	--then write current data
+	local f
+	f = io.open(file,'w')
+	f:write(value .. "\n")
+	io.close(f)
+
+end
+
+
+function rf2ethos.openPagePreferences()
+    uiState = uiStatus.pages
+
+    form.clear()
+
+	local w = LCD_W
+	local h = LCD_H
+    -- column starts at 59.4% of w
+    padding = 5
+    colStart = math.floor((w * 59.4) / 100)
+    if radio.navButtonOffset ~= nil then
+        colStart = colStart - radio.navButtonOffset
+    end
+
+    if radio.buttonWidth == nil then
+        buttonW = (w - colStart) / 3 - padding
+    else
+        buttonW = radio.buttonWidth
+    end
+    buttonH = radio.buttonHeight
+	
+	local x = w
+
+    line = form.addLine("Preferences")
+	form.addTextButton(line, {x = x - (buttonW + padding)*1, y = radio.buttonPaddingTop, w = buttonW, h = buttonH}, "MENU", function()
+        rf2ethos.openMainMenu()
+    end)
+
+
+	-- display all preference below
+	local menu = form.addExpansionPanel("Main menu")
+	menu:open(false) 
+	
+	
+	expPanelParam = rf2ethos.loadPreference("expansionpanel")
+	if expPanelParam == "0" then
+		expPanelParam = true
+	else
+		expPanelParam = false
+	end
+	
+		
+    line = menu:addLine("Expansion panels")
+    form.addBooleanField(
+        line,
+        nil,
+        function()
+            return expPanelParam
+        end,
+        function(newValue)
+            expPanelParam = newValue
+			rf2ethos.storePreference("expansionpanel",newValue)			
+        end
+    )	
+
+
+	buttonsperrowParam = rf2ethos.loadPreference("buttonsperrow")
+	if buttonsperrowParam == "" or buttonsperrowParam == nil then
+		buttonsperrowParam = 3
+	end	
+    line = menu:addLine("Buttons per row")
+    form.addChoiceField(
+        line,
+        nil,
+        {
+            {"1", 1}, 
+			{"2", 2},
+            {"3", 3},
+            {"4", 4},
+        },
+        function()
+            return buttonsperrowParam
+        end,
+        function(newValue)
+            buttonsperrowParam = newValue
+			rf2ethos.storePreference("buttonsperrow",newValue)		
+        end
+    )
+
+	-- Switch commands
+	local triggers = form.addExpansionPanel("Triggers")
+	triggers:open(false) 
+	
+	
+	-- PROFILE
+	profileswitchParam = rf2ethos.loadPreference("profileswitch")
+	if profileswitchParam ~= nil then
+		local s = rf2ethos.explode (profileswitchParam, ",")
+		profileswitchParam = system.getSource({category=s[1], member=s[2]})
+	end
+
+    line = triggers:addLine("Switch profile")	
+    form.addSourceField(
+		line, 
+		nil, 
+		function() 
+				return profileswitchParam
+		end, 
+		function(newValue) 
+				profileswitchParam = newValue 
+				local member = profileswitchParam:member()
+				local category = profileswitchParam:category()
+				rf2ethos.storePreference("profileswitch",category..","..member)	
+		end
+	)
+
+	rateswitchParam = rf2ethos.loadPreference("rateswitch")
+	if rateswitchParam ~= nil then
+		local s = rf2ethos.explode (rateswitchParam, ",")
+		rateswitchParam = system.getSource({category=s[1], member=s[2]})
+	end
+
+    line = triggers:addLine("Switch rates")	
+    form.addSourceField(
+		line, 
+		nil, 
+		function() 
+				return rateswitchParam
+		end, 
+		function(newValue) 
+				rateswitchParam = newValue 
+				local member = rateswitchParam:member()
+				local category = rateswitchParam:category()
+				rf2ethos.storePreference("rateswitch",category..","..member)	
+		end
+	)
+
+
+
+
+end
+
+function rf2ethos.explode (inputstr, sep)
+        if sep == nil then
+                sep = "%s"
+        end
+        local t={}
+        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+                table.insert(t, str)
+        end
+        return t
+end
+
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
 
 
@@ -1838,6 +2196,7 @@ function rf2ethos.openPagePID(idx, title, script)
 	end
 
 
+
     uiState = uiStatus.pages
 
     longPage = false
@@ -1959,6 +2318,7 @@ function rf2ethos.openPageESC(idx, title, script)
 	
 	ESC = {}
 
+	ESC_MODE=true
 
     local windowWidth = LCD_W
 	local windowHeight = LCD_H
@@ -2270,7 +2630,7 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 
 	progressDialogDisplay = true
 	progressDialogWatchDog = os.clock()
-	progressDialog = form.openProgressDialog("Loading...", "Loading data from ESC.")
+	progressDialog = form.openProgressDialog("Loading...", "Loading data from flight controller.")
 	progressDialog:value(0)
 	progressDialog:closeAllowed(false)
 
@@ -2291,6 +2651,8 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
 end
 
 function rf2ethos.openPageRATES(idx, subpage, title, script)
+
+
 
 	if progressDialogDisplay == true then
 		progressDialogWatchDog = nil
@@ -2319,6 +2681,12 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 		end
     end
 
+
+	rateswitchParam = rf2ethos.loadPreference("rateswitch")
+	if rateswitchParam ~= nil then
+		local s = rf2ethos.explode (rateswitchParam, ",")
+		rateswitchParam = system.getSource({category=s[1], member=s[2]})
+	end
 
 
     uiState = uiStatus.pages
@@ -2455,7 +2823,16 @@ function rf2ethos.openMainMenu()
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
 
-    local numPerRow = 3
+
+
+    local numPerRow
+	numPerRow = rf2ethos.loadPreference("buttonsperrow")
+	if numPerRow == nil or numPerRow == "" then
+		numPerRow = 3
+	end
+	if type(numPerRow) == "string" then
+		numPerRow = tonumber(numPerRow)
+	end
 
     local windowWidth = LCD_W
 	local windowHeight = LCD_H
@@ -2467,10 +2844,14 @@ function rf2ethos.openMainMenu()
 
     local y = radio.buttonPaddingTop
 
-
-
-   
-	local MENU_EXPANSION = true
+	local MENU_EXPANSION 
+	
+	local doExp = rf2ethos.loadPreference("expansionpanel")
+	if doExp == "0" then
+		MENU_EXPANSION = true
+	else
+		MENU_EXPANSION = false
+	end
 	local sc 
 	local panel
 
@@ -2533,7 +2914,9 @@ function rf2ethos.openMainMenu()
                     elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
                         rf2ethos.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     elseif pvalue.script == "esc.lua" then
-                        rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)						
+                        rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)		
+					elseif pvalue.script == "preferences.lua" then
+						rf2ethos.openPagePreferences()
                     else
                         rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                     end
@@ -2550,6 +2933,17 @@ function rf2ethos.openMainMenu()
 
     end
 end
+
+function rf2ethos.profileSwitchCheck()
+	profileswitchParam = rf2ethos.loadPreference("profileswitch")
+	if profileswitchParam ~= nil then
+		local s = rf2ethos.explode (profileswitchParam, ",")
+		profileswitchParam = system.getSource({category=s[1], member=s[2]})
+		profileswitchLast = profileswitchParam:value()
+	end
+end
+
+
 
 local function create()
 

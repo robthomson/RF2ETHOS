@@ -21,6 +21,8 @@ escinfo[#escinfo + 1] = { t = ""}
 escinfo[#escinfo + 1] = { t = ""}
 escinfo[#escinfo + 1] = { t = ""}
 
+
+
 return {
     read        = 217, -- msp_ESC_PARAMETERS
     eepromWrite = false,
