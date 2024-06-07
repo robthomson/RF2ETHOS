@@ -891,6 +891,7 @@ function wakeup(widget)
 	if createForm == true then
 		if wasSaving == true or environment.simulation == true then
 			rf2ethos.profileSwitchCheck()
+			rf2ethos.rateSwitchCheck()
 			wasSaving = false
 			saveDialog:value(100)
 			saveDialogDisplay = false
@@ -904,7 +905,7 @@ function wakeup(widget)
 		elseif wasLoading == true or environment.simulation == true then
 			wasLoading = false
 			rf2ethos.profileSwitchCheck()
-			
+			rf2ethos.rateSwitchCheck()
 			if lastScript == "pids.lua" or lastIdx == 1 then
 				rf2ethos.openPagePID(lastIdx, lastTitle, lastScript)
 			elseif lastScript == "rates.lua" and lastSubPage == 1 then
@@ -934,6 +935,7 @@ function wakeup(widget)
 					rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
 				end			
 				rf2ethos.profileSwitchCheck()
+				rf2ethos.rateSwitchCheck()
 		elseif reloadRates == true or environment.simulation == true then
 			rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
 		elseif reloadServos == true then
@@ -2943,7 +2945,14 @@ function rf2ethos.profileSwitchCheck()
 	end
 end
 
-
+function rf2ethos.rateSwitchCheck()
+	rateswitchParam = rf2ethos.loadPreference("rateswitch")
+	if rateswitchParam ~= nil then
+		local s = rf2ethos.explode (rateswitchParam, ",")
+		rateswitchParam = system.getSource({category=s[1], member=s[2]})
+		rateswitchLast = rateswitchParam:value()
+	end
+end
 
 local function create()
 
