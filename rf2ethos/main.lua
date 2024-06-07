@@ -74,6 +74,8 @@ defaultRateTable = 4 -- ACTUAL
 
 local expPanelParam
 local buttonsperrowParam
+local buttonstyleParam
+local buttonlinesParam
 
 -- New variables for Ethos version
 local screenTitle = nil
@@ -1368,7 +1370,7 @@ local function getInlinePositions(f)
     local eX
     local eW = fieldW - padding
     local eH = radio.buttonHeight
-    local eY = radio.buttonPaddingTop
+    local eY = radio.linePaddingTop
     local posX
 	lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)
@@ -1752,7 +1754,7 @@ local function fieldHeader(title)
     end
     buttonH = radio.buttonHeight
     line = form.addLine(title)
-    rf2ethos.navigationButtons(w, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+    rf2ethos.navigationButtons(w, radio.linePaddingTop, buttonW, radio.buttonHeight)
 end
 
 
@@ -1805,7 +1807,7 @@ function rf2ethos.storePreference(preference,value)
 	--then write current data
 	local f
 	f = io.open(file,'w')
-	f:write(value .. "\n")
+	f:write(value)
 	io.close(f)
 
 end
@@ -1835,14 +1837,37 @@ function rf2ethos.openPagePreferences()
 	local x = w
 
     line = form.addLine("Preferences")
-	form.addTextButton(line, {x = x - (buttonW + padding)*1, y = radio.buttonPaddingTop, w = buttonW, h = buttonH}, "MENU", function()
+	form.addTextButton(line, {x = x - (buttonW + padding)*1, y = radio.linePaddingTop, w = buttonW, h = buttonH}, "MENU", function()
         rf2ethos.openMainMenu()
     end)
 
+--[[
 
 	-- display all preference below
 	local menu = form.addExpansionPanel("Main menu")
 	menu:open(false) 
+
+
+	menustyleParam = rf2ethos.loadPreference("menustyle")
+	if menustyleParam == "" or menustyleParam == nil then
+		menustyleParam = 1
+	end	
+    line = menu:addLine("Menu style")
+    form.addChoiceField(
+        line,
+        nil,
+        {
+            {"Graphical Buttons", 1}, 
+			{"Text Buttons", 2},
+        },
+        function()
+            return menustyleParam
+        end,
+        function(newValue)
+            menustyleParam = newValue
+			rf2ethos.storePreference("menustyle",newValue)		
+        end
+    )
 	
 	
 	expPanelParam = rf2ethos.loadPreference("expansionpanel")
@@ -1864,7 +1889,28 @@ function rf2ethos.openPagePreferences()
             expPanelParam = newValue
 			rf2ethos.storePreference("expansionpanel",newValue)			
         end
-    )	
+    )
+
+	buttonlinesParam = rf2ethos.loadPreference("buttonlines")
+	if buttonlinesParam == "0" then
+		buttonlinesParam = true
+	else
+		buttonlinesParam = false
+	end
+	
+		
+    line = menu:addLine("Hide lines")
+    form.addBooleanField(
+        line,
+        nil,
+        function()
+            return buttonlinesParam
+        end,
+        function(newValue)
+            buttonlinesParam = newValue
+			rf2ethos.storePreference("buttonlines",newValue)			
+        end
+    )		
 
 
 	buttonsperrowParam = rf2ethos.loadPreference("buttonsperrow")
@@ -1880,6 +1926,10 @@ function rf2ethos.openPagePreferences()
 			{"2", 2},
             {"3", 3},
             {"4", 4},
+            {"5", 5},
+			{"6", 6},
+			{"7", 7},
+			{"8", 8},
         },
         function()
             return buttonsperrowParam
@@ -1889,6 +1939,8 @@ function rf2ethos.openPagePreferences()
 			rf2ethos.storePreference("buttonsperrow",newValue)		
         end
     )
+	
+	]]--
 
 	-- Switch commands
 	local triggers = form.addExpansionPanel("Triggers")
@@ -2027,7 +2079,7 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
 
     if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2ethos.navigationButtons(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
     end
 
 
@@ -2081,7 +2133,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
     local h = radio.buttonHeight
     local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
 
-    local y = radio.buttonPaddingTop
+    local y = radio.linePaddingTop
 
     longPage = false
 
@@ -2214,7 +2266,7 @@ function rf2ethos.openPagePID(idx, title, script)
 	end
     local screenWidth = LCD_W - 10
     local padding = 10
-    local paddingTop = radio.buttonPaddingTop
+    local paddingTop = radio.linePaddingTop
     local h = radio.buttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
@@ -2296,7 +2348,7 @@ function rf2ethos.openPagePID(idx, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
         end
     end
 
@@ -2325,7 +2377,7 @@ function rf2ethos.openPageESC(idx, title, script)
     local windowWidth = LCD_W
 	local windowHeight = LCD_H
 
-    local y = radio.buttonPaddingTop
+    local y = radio.linePaddingTop
 
     form.clear()
 
@@ -2333,7 +2385,7 @@ function rf2ethos.openPageESC(idx, title, script)
 
    buttonW = 100
    x = windowWidth - buttonW
-   form.addTextButton(line, {x = x, y = radio.buttonPaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
+   form.addTextButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
         ResetRates = false
 		lastIdx = nil
 		lastPage = nil
@@ -2443,7 +2495,7 @@ function rf2ethos.openPageESCTool(folder)
 	local windowHeight = LCD_H
 
 
-    local y = radio.buttonPaddingTop
+    local y = radio.linePaddingTop
 
     form.clear()
 
@@ -2451,7 +2503,7 @@ function rf2ethos.openPageESCTool(folder)
 
    buttonW = 100
    x = windowWidth - buttonW
-   form.addTextButton(line, {x = x, y = radio.buttonPaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
+   form.addTextButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
         ResetRates = false
 		ESC_NOTREADYCOUNT = 0
 		ESC_UNKNOWN = false
@@ -2563,7 +2615,7 @@ function rf2ethos.openESCForm(folder,script)
 
     local windowWidth = LCD_W
 	local windowHeight = LCD_H
-    local y = radio.buttonPaddingTop
+    local y = radio.linePaddingTop
 
     local w = LCD_W
 	local h = LCD_H
@@ -2582,7 +2634,7 @@ function rf2ethos.openESCForm(folder,script)
     buttonH = radio.buttonHeight
     line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName .. ' / ' .. Page.title)
    
-    rf2ethos.navigationButtonsEscForm(colStart, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+    rf2ethos.navigationButtonsEscForm(colStart, radio.linePaddingTop, buttonW, radio.buttonHeight)
 
 
 	if Page.escinfo then
@@ -2613,7 +2665,7 @@ function rf2ethos.openESCForm(folder,script)
 
     if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2ethos.navigationButtonsEscForm(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtonsEscForm(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
     end
 
 
@@ -2702,7 +2754,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     local numCols = #Page.cols
     local screenWidth = LCD_W - 10
     local padding = 10
-    local paddingTop = radio.buttonPaddingTop
+    local paddingTop = radio.linePaddingTop
     local h = radio.buttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
@@ -2797,7 +2849,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.buttonPaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
         end
     end
 
@@ -2816,6 +2868,7 @@ local function getSection(id, sections)
     end
 end
 
+
 function rf2ethos.openMainMenu()
 
     if tonumber(rf2ethos.sensorMakeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
@@ -2826,103 +2879,64 @@ function rf2ethos.openMainMenu()
     uiState = uiStatus.mainMenu
 
 
-
-    local numPerRow
-	numPerRow = rf2ethos.loadPreference("buttonsperrow")
-	if numPerRow == nil or numPerRow == "" then
-		numPerRow = 3
-	end
-	if type(numPerRow) == "string" then
-		numPerRow = tonumber(numPerRow)
-	end
-
-    local windowWidth = LCD_W
-	local windowHeight = LCD_H
-
-    local padding = radio.buttonPadding
-    local h = radio.buttonHeight
-    local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
-    -- local x = 0
-
-    local y = radio.buttonPaddingTop
-
-	local MENU_EXPANSION 
+	local buttonW = radio.buttonWidth
+	local buttonH = radio.buttonHeight
+	local padding = radio.buttonPadding
+	local numPerRow = radio.buttonsPerRow
 	
-	local doExp = rf2ethos.loadPreference("expansionpanel")
-	if doExp == "0" then
-		MENU_EXPANSION = true
-	else
-		MENU_EXPANSION = false
-	end
 	local sc 
 	local panel
 
 
 	form.clear()
-	
-	_G["rf2ethosMenuPanels"] = {}	
+
     for idx, value in ipairs(MainMenu.sections) do
 	
 		local sc = value.section
 
-		if MENU_EXPANSION ~= true then
-			-- just a line with a title
-			_G["rf2ethosMenuPanels"][sc] =  form.addLine(value.title)
-		else
-			-- or an expansion panel
-
-			_G["rf2ethosMenuPanels"][sc] = form.addExpansionPanel(value.title)
-			
-			if lastSection == nil then
-				if sc ==  1 then
-					_G["rf2ethosMenuPanels"][sc]:open(true) 
-				else
-					_G["rf2ethosMenuPanels"][sc]:open(false) 
-				end
-			else
-				if lastSection == sc then
-					_G["rf2ethosMenuPanels"][sc]:open(true) 
-				else
-					_G["rf2ethosMenuPanels"][sc]:open(false) 
-				end
-			end
-		end
+		form.addLine(value.title)
 
         lc = 0
         for pidx, pvalue in ipairs(MainMenu.pages) do
             if pvalue.section == value.section then
-                if lc == 0 then
-					if MENU_EXPANSION ~= true then
-						line = form.addLine("")
-					else
-						line = _G["rf2ethosMenuPanels"][sc]:addLine("",true)
-					end
-                    x = padding
-                end
+			
 
-                if lc >= 0 then
-                    x = (w + padding) * lc
-                end
-
-
-                form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
+				if lc == 0 then
+					y = form.height() + radio.buttonPadding
+				end
 				
-					lastSection = value.section	
-					
-                    if pvalue.script == "pids.lua" then
-                        rf2ethos.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
-                    elseif pvalue.script == "servos.lua" then
-                        rf2ethos.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
-                    elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-                        rf2ethos.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-                    elseif pvalue.script == "esc.lua" then
-                        rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)		
-					elseif pvalue.script == "preferences.lua" then
-						rf2ethos.openPagePreferences()
-                    else
-                        rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
-                    end
-                end)
+				
+                if lc >= 0 then
+                    x = (buttonW + padding) * lc
+                end
+				
+				local gfx_button
+				gfx_button = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+
+				form.addButton(line, 
+								{x = x, y = y, w = buttonW, h = buttonH}, 
+								{text=pvalue.title, 
+								icon=gfx_button, 
+								options=FONT_S,
+								paint=function() 
+								
+									  end, 
+								press=function() 
+									if pvalue.script == "pids.lua" then
+										rf2ethos.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
+									elseif pvalue.script == "servos.lua" then
+										rf2ethos.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
+									elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
+										rf2ethos.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+									elseif pvalue.script == "esc.lua" then
+										rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)		
+									elseif pvalue.script == "preferences.lua" then
+										rf2ethos.openPagePreferences()
+									else
+										rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+									end									
+									   end}
+								)
 
                 lc = lc + 1
 
@@ -2935,6 +2949,7 @@ function rf2ethos.openMainMenu()
 
     end
 end
+
 
 function rf2ethos.profileSwitchCheck()
 	profileswitchParam = rf2ethos.loadPreference("profileswitch")
