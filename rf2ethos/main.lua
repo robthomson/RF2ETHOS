@@ -56,12 +56,14 @@ wasLoading = false
 local exitAPP = false
 local noRFMsg = false
 local triggerSAVE = false
+local triggerRELOAD = false
 local triggerESCRELOAD = false
 
 local fieldHelpTxt = nil
 
 local profileswitchLast
 local rateswitchLast
+local iconsizeParam
 
 local mspDataLoaded = false
 
@@ -1043,6 +1045,46 @@ function wakeup(widget)
 		
 		triggerSAVE = false
 	end
+	
+	if triggerRELOAD == true then
+		local buttons = {
+				{
+					label = "        OK        ",
+					action = function()
+						-- trigger RELOAD
+						if environment.simulation ~= true then
+							wasReloading = true
+							createForm = true
+							
+							wasSaving = false
+							wasLoading = false
+							reloadRates = false
+							reloadServos = false						
+						end
+						return true
+					end
+				}, {
+					label = "CANCEL",
+					action = function()
+						return true
+					end
+				}
+			}
+			form.openDialog({
+			  width=nil,
+			  title="RELOAD",
+			  message="Reload data from flight controller", 
+			  buttons=buttons, 
+			  wakeup=function()
+					 end,  
+			  paint=function() 
+					end,
+			  options=TEXT_LEFT
+			})	
+
+		triggerRELOAD = false			
+	end	
+	
 
 	if triggerESCRELOAD == true then
 		triggerESCRELOAD = false
@@ -1195,127 +1237,173 @@ function rf2ethos.navigationButtons(x, y, w, h)
 	end
 
 
-	form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, "MENU", function()
-        ResetRates = false
-        rf2ethos.openMainMenu()
-    end)
-    form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding)*2, y = y, w = buttonW, h = h}, "SAVE", function()
-        triggerSAVE = true		
-    end)	
-    form.addTextButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = buttonW, h = h}, "RELOAD", function()
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    -- trigger RELOAD
-					if environment.simulation ~= true then
-						wasReloading = true
-						createForm = true
-						
-						wasSaving = false
-						wasLoading = false
-						reloadRates = false
-						reloadServos = false						
-					end
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-		form.openDialog({
-		  width=nil,
-		  title="RELOAD",
-		  message="Reload data from flight controller", 
-		  buttons=buttons, 
-		  wakeup=function()
-				 end,  
-		  paint=function() 
-				end,
-		  options=TEXT_LEFT
-		})		
-    end)
+	form.addButton(line, 
+					{x = x - (helpWidth + padding) - (w + padding)*3, y = y, w = w, h = h}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+							ResetRates = false
+							rf2ethos.openMainMenu()															
+						  end}
+					)	
+	
+	form.addButton(line, 
+					{x = x - (helpWidth + padding) - (w + padding)*2, y = y, w = buttonW, h = h}, 
+					{text="SAVE", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+							triggerSAVE = true														
+						  end}
+					)
+
+
+	form.addButton(line, 
+					{x = x - (helpWidth + padding) - (w + padding), y = y, w = buttonW, h = h}, 
+					{text="RELOAD", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+							triggerRELOAD = true														
+						  end}
+					)
+
 	if helpWidth > 0 then
-			form.addTextButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, "?", function()
-				rf2ethos.openPagehelp(help.data,section)
-			end)	
+
+		form.addButton(line, 
+						{x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, 
+						{text="?", 
+						icon=nil, 
+						options=FONT_S,
+						paint=function() 
+							  end, 
+						press=function() 
+								rf2ethos.openPagehelp(help.data,section)														
+							  end}
+						)
+		
 	end	
+
 end
 
 
 function rf2ethos.navigationButtonsEscForm(x, y, w, h)
-    form.addTextButton(line, {x = x, y = y, w = w, h = h}, "MENU", function()
-        ResetRates = false
-		ESC_MODE = true
-		ESC_NOTREADYCOUNT = 0
-		 collectgarbage()
-        rf2ethos.openPageESCTool(ESC_MFG)
-    end)
-    form.addTextButton(line, {x = colStart + buttonW + padding, y = y, w = buttonW, h = h}, "SAVE", function()
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    isSaving = true
-                    wasSaving = true
-					ESC_NOTREADYCOUNT = 0					
-                    rf2ethos.debugSave()
-                    saveSettings()
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-		form.openDialog({
-		  width=nil,
-		  title="SAVE SETTINGS TO ESC",
-		  message="Save current page to ESC", 
-		  buttons=buttons, 
-		  wakeup=function()
-				 end,  
-		  paint=function() 
-				end,
-		  options=TEXT_LEFT
-		})	
 
-    end)
-    form.addTextButton(line, {x = colStart + (buttonW + padding) * 2, y = y, w = buttonW, h = h}, "RELOAD", function()
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    -- trigger RELOAD
-					if environment.simulation ~= true then
-						triggerESCRELOAD = true
-					end
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-		form.openDialog({
-		  width=nil,
-		  title="REFRESH",
-		  message="Reload configuration from ESC", 
-		  buttons=buttons, 
-		  wakeup=function()
-				 end,  
-		  paint=function() 
-				end,
-		  options=TEXT_LEFT
-		})	
-    end)
+	local buttonW = w
+	local padding = 5
+	local helpWidth = 0
+
+
+	form.addButton(line, 
+					{x = x - buttonW - padding - buttonW - padding - buttonW - padding, y = y, w = w, h = h}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+						ResetRates = false
+						ESC_MODE = true
+						ESC_NOTREADYCOUNT = 0
+						 collectgarbage()
+						rf2ethos.openPageESCTool(ESC_MFG)															
+						  end}
+					)
+					
+
+	
+	form.addButton(line, 
+					{x = x - buttonW - padding - buttonW - padding, y = y, w = buttonW, h = h}, 
+					{text="SAVE", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+
+							local buttons = {
+										{
+											label = "        OK        ",
+											action = function()
+												isSaving = true
+												wasSaving = true
+												ESC_NOTREADYCOUNT = 0					
+												rf2ethos.debugSave()
+												saveSettings()
+												return true
+											end
+										}, {
+											label = "CANCEL",
+											action = function()
+												return true
+											end
+										}
+									}
+									form.openDialog({
+									  width=nil,
+									  title="SAVE SETTINGS TO ESC",
+									  message="Save current page to ESC", 
+									  buttons=buttons, 
+									  wakeup=function()
+											 end,  
+									  paint=function() 
+											end,
+									  options=TEXT_LEFT
+									})
+
+															
+						  end}
+					)
+
+	form.addButton(line, 
+					{x = x - buttonW - padding, y = y, w = buttonW, h = h}, 
+					{text="RELOAD", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+
+						local buttons = {
+							{
+								label = "        OK        ",
+								action = function()
+									-- trigger RELOAD
+									if environment.simulation ~= true then
+										triggerESCRELOAD = true
+									end
+									return true
+								end
+							}, {
+								label = "CANCEL",
+								action = function()
+									return true
+								end
+							}
+						}
+						form.openDialog({
+						  width=nil,
+						  title="REFRESH",
+						  message="Reload configuration from ESC", 
+						  buttons=buttons, 
+						  wakeup=function()
+								 end,  
+						  paint=function() 
+								end,
+						  options=TEXT_LEFT
+						})	
+
+															
+						  end}
+					)	
+	
 end
 
 
@@ -1369,7 +1457,7 @@ local function getInlinePositions(f)
 
     local eX
     local eW = fieldW - padding
-    local eH = radio.buttonHeight
+    local eH = radio.navbuttonHeight
     local eY = radio.linePaddingTop
     local posX
 	lcd.font(FONT_STD)
@@ -1752,9 +1840,10 @@ local function fieldHeader(title)
     else
         buttonW = radio.buttonWidth
     end
-    buttonH = radio.buttonHeight
+    buttonH = radio.navbuttonHeight
+	
     line = form.addLine(title)
-    rf2ethos.navigationButtons(w, radio.linePaddingTop, buttonW, radio.buttonHeight)
+    rf2ethos.navigationButtons(w, radio.linePaddingTop, buttonW, buttonH)
 end
 
 
@@ -1832,120 +1921,48 @@ function rf2ethos.openPagePreferences()
     else
         buttonW = radio.buttonWidth
     end
-    buttonH = radio.buttonHeight
+    buttonH = radio.navbuttonHeight
 	
 	local x = w
 
     line = form.addLine("Preferences")
-	form.addTextButton(line, {x = x - (buttonW + padding)*1, y = radio.linePaddingTop, w = buttonW, h = buttonH}, "MENU", function()
-        rf2ethos.openMainMenu()
-    end)
+	
+	form.addButton(line, 
+					{x = x - (buttonW + padding)*1, y = radio.linePaddingTop, w = buttonW, h = buttonH}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+								rf2ethos.openMainMenu()							
+						  end}
+					)
 
---[[
 
-	-- display all preference below
-	local menu = form.addExpansionPanel("Main menu")
-	menu:open(false) 
-
-
-	menustyleParam = rf2ethos.loadPreference("menustyle")
-	if menustyleParam == "" or menustyleParam == nil then
-		menustyleParam = 1
-	end	
-    line = menu:addLine("Menu style")
+	iconsizeParam = rf2ethos.loadPreference("iconsize")
+	if iconsizeParam == nil or iconsizeParam == "" then
+		iconsizeParam = 1
+	end
+    line = form.addLine("Button style")
     form.addChoiceField(
         line,
         nil,
         {
-            {"Graphical Buttons", 1}, 
-			{"Text Buttons", 2},
+            {"Text", 0},
+            {"Small image", 1},
+            {"Large images", 2},
         },
         function()
-            return menustyleParam
+            return iconsizeParam
         end,
         function(newValue)
-            menustyleParam = newValue
-			rf2ethos.storePreference("menustyle",newValue)		
-        end
-    )
-	
-	
-	expPanelParam = rf2ethos.loadPreference("expansionpanel")
-	if expPanelParam == "0" then
-		expPanelParam = true
-	else
-		expPanelParam = false
-	end
-	
-		
-    line = menu:addLine("Expansion panels")
-    form.addBooleanField(
-        line,
-        nil,
-        function()
-            return expPanelParam
-        end,
-        function(newValue)
-            expPanelParam = newValue
-			rf2ethos.storePreference("expansionpanel",newValue)			
+            iconsizeParam = newValue
+			rf2ethos.storePreference("iconsize",iconsizeParam)	
         end
     )
 
-	buttonlinesParam = rf2ethos.loadPreference("buttonlines")
-	if buttonlinesParam == "0" then
-		buttonlinesParam = true
-	else
-		buttonlinesParam = false
-	end
-	
-		
-    line = menu:addLine("Hide lines")
-    form.addBooleanField(
-        line,
-        nil,
-        function()
-            return buttonlinesParam
-        end,
-        function(newValue)
-            buttonlinesParam = newValue
-			rf2ethos.storePreference("buttonlines",newValue)			
-        end
-    )		
 
-
-	buttonsperrowParam = rf2ethos.loadPreference("buttonsperrow")
-	if buttonsperrowParam == "" or buttonsperrowParam == nil then
-		buttonsperrowParam = 3
-	end	
-    line = menu:addLine("Buttons per row")
-    form.addChoiceField(
-        line,
-        nil,
-        {
-            {"1", 1}, 
-			{"2", 2},
-            {"3", 3},
-            {"4", 4},
-            {"5", 5},
-			{"6", 6},
-			{"7", 7},
-			{"8", 8},
-        },
-        function()
-            return buttonsperrowParam
-        end,
-        function(newValue)
-            buttonsperrowParam = newValue
-			rf2ethos.storePreference("buttonsperrow",newValue)		
-        end
-    )
-	
-	]]--
-
-	-- Switch commands
-	local triggers = form.addExpansionPanel("Triggers")
-	triggers:open(false) 
-	
 	
 	-- PROFILE
 	profileswitchParam = rf2ethos.loadPreference("profileswitch")
@@ -1954,7 +1971,7 @@ function rf2ethos.openPagePreferences()
 		profileswitchParam = system.getSource({category=s[1], member=s[2]})
 	end
 
-    line = triggers:addLine("Switch profile")	
+    line = form.addLine("Switch profile")	
     form.addSourceField(
 		line, 
 		nil, 
@@ -1975,7 +1992,7 @@ function rf2ethos.openPagePreferences()
 		rateswitchParam = system.getSource({category=s[1], member=s[2]})
 	end
 
-    line = triggers:addLine("Switch rates")	
+    line = form.addLine("Switch rates")	
     form.addSourceField(
 		line, 
 		nil, 
@@ -1989,7 +2006,6 @@ function rf2ethos.openPagePreferences()
 				rf2ethos.storePreference("rateswitch",category..","..member)	
 		end
 	)
-
 
 
 
@@ -2077,9 +2093,9 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
     end
     -- display menu at footer
 
-    if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
+    if formLineCnt * (radio.navbuttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
     end
 
 
@@ -2130,7 +2146,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 	local windowWidth = LCD_W
 	local windowHeight = LCD_H
     local padding = radio.buttonPadding
-    local h = radio.buttonHeight
+    local h = radio.navbuttonHeight
     local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
 
     local y = radio.linePaddingTop
@@ -2267,7 +2283,7 @@ function rf2ethos.openPagePID(idx, title, script)
     local screenWidth = LCD_W - 10
     local padding = 10
     local paddingTop = radio.linePaddingTop
-    local h = radio.buttonHeight
+    local h = radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
     local positions = {}
@@ -2348,7 +2364,7 @@ function rf2ethos.openPagePID(idx, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
         end
     end
 
@@ -2385,14 +2401,23 @@ function rf2ethos.openPageESC(idx, title, script)
 
    buttonW = 100
    x = windowWidth - buttonW
-   form.addTextButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
-        ResetRates = false
-		lastIdx = nil
-		lastPage = nil
-		lastSubPage = nil
-		ESC_MODE = false
-        rf2ethos.openMainMenu()
-    end)  
+   
+   
+	form.addButton(line, 
+					{x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+						lastIdx = nil
+						lastPage = nil
+						lastSubPage = nil
+						ESC_MODE = false
+					    rf2ethos.openMainMenu()															
+						  end}
+					)  
    
 
     local ESCMenu = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
@@ -2400,7 +2425,7 @@ function rf2ethos.openPageESC(idx, title, script)
     local numPerRow = 2
 
     local padding = radio.buttonPadding
-    local h = radio.buttonHeight
+    local h = radio.navbuttonHeight
     local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
     -- local x = 0
 	lc = 0
@@ -2414,10 +2439,18 @@ function rf2ethos.openPageESC(idx, title, script)
 			x = padding + (w + padding) * lc
 		end
 
-		form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
-				rf2ethos.openPageESCToolLoader(pvalue.folder)
-		end)
 
+		form.addButton(line, 
+						{x = x, y = y, w = w, h = h}, 
+						{text=pvalue.title, 
+						icon=nil, 
+						options=FONT_S,
+						paint=function() 
+							  end, 
+						press=function() 
+									rf2ethos.openPageESCToolLoader(pvalue.folder)							
+							  end}
+						)
 
 		lc = lc + 1
 
@@ -2503,15 +2536,26 @@ function rf2ethos.openPageESCTool(folder)
 
    buttonW = 100
    x = windowWidth - buttonW
-   form.addTextButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.buttonHeight}, "MENU", function()
-        ResetRates = false
-		ESC_NOTREADYCOUNT = 0
-		ESC_UNKNOWN = false
-		lastIdx = nil
-		lastPage = nil
-		lastSubPage = nil
-        rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
-    end)  
+
+	
+	form.addButton(line, 
+					{x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+							ResetRates = false
+							ESC_NOTREADYCOUNT = 0
+							ESC_UNKNOWN = false
+							lastIdx = nil
+							lastPage = nil
+							lastSubPage = nil
+							rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)													
+						  end}
+					)
+			
    
     ESC.pages = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
 
@@ -2531,7 +2575,7 @@ function rf2ethos.openPageESCTool(folder)
     local numPerRow = 1
 
     local padding = radio.buttonPadding
-    local h = radio.buttonHeight
+    local h = radio.navbuttonHeight
     local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
     -- local x = 0
 	lc = 0
@@ -2545,9 +2589,20 @@ function rf2ethos.openPageESCTool(folder)
 			x = padding + (w + padding) * lc
 		end
 
-		field = form.addTextButton(line, {x = x, y = y, w = w, h = h}, pvalue.title, function()
-				rf2ethos.openESCFormLoader(folder,pvalue.script)
-		end)
+
+		field = form.addButton(line, 
+								{x = x, y = y, w = w, h = h}, 
+								{text=pvalue.title, 
+								icon=nil, 
+								options=FONT_S,
+								paint=function() 
+								      end, 
+								press=function() 
+										rf2ethos.openESCFormLoader(folder,pvalue.script)
+								      end}
+								)	
+		
+		
 		if ESC_UNKNOWN == true and DEBUG_BADESC_ENABLE == false then
 			field:enable(false)
 		end
@@ -2631,10 +2686,10 @@ function rf2ethos.openESCForm(folder,script)
     else
         buttonW = radio.buttonWidth
     end
-    buttonH = radio.buttonHeight
+    buttonH = radio.navbuttonHeight
     line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName .. ' / ' .. Page.title)
    
-    rf2ethos.navigationButtonsEscForm(colStart, radio.linePaddingTop, buttonW, radio.buttonHeight)
+    rf2ethos.navigationButtonsEscForm(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
 
 
 	if Page.escinfo then
@@ -2663,9 +2718,9 @@ function rf2ethos.openESCForm(folder,script)
     end
     -- display menu at footer
 
-    if formLineCnt * (radio.buttonHeight + radio.buttonPadding) > LCD_H then
+    if formLineCnt * (radio.navbuttonHeight + radio.buttonPadding) > LCD_H then
         line = form.addLine("")
-        rf2ethos.navigationButtonsEscForm(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
+        rf2ethos.navigationButtonsEscForm(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
     end
 
 
@@ -2755,7 +2810,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     local screenWidth = LCD_W - 10
     local padding = 10
     local paddingTop = radio.linePaddingTop
-    local h = radio.buttonHeight
+    local h = radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
     local positions = {}
@@ -2849,7 +2904,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
     if Page.longPage ~= nil then
         if Page.longPage == true then
             line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.buttonHeight)
+            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
         end
     end
 
@@ -2878,17 +2933,52 @@ function rf2ethos.openMainMenu()
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
 
+	-- size of buttons
+	iconsizeParam = rf2ethos.loadPreference("iconsize")
+	if iconsizeParam == nil or iconsizeParam == "" then
+		iconsizeParam = 1
+	else
+		iconsizeParam = tonumber(iconsizeParam)
+	end
 
-	local buttonW = radio.buttonWidth
-	local buttonH = radio.buttonHeight
-	local padding = radio.buttonPadding
-	local numPerRow = radio.buttonsPerRow
+
+	local buttonW
+	local buttonH
+	local padding
+	local numPerRow
+
+
+	-- TEXT ICONS
+	if iconsizeParam == 0 then
+		padding = radio.buttonPaddingSmall
+		buttonW = (LCD_W - padding) / radio.buttonsPerRow - padding
+		buttonH = radio.navbuttonHeight
+		numPerRow = radio.buttonsPerRow			
+	end
+	-- SMALL ICONS
+	if iconsizeParam == 1 then
+
+		padding = radio.buttonPaddingSmall
+		buttonW = radio.buttonWidthSmall
+		buttonH = radio.buttonHeightSmall
+		numPerRow = radio.buttonsPerRowSmall			
+	end
+	-- LARGE ICONS
+	if iconsizeParam == 2 then
+
+		padding = radio.buttonPadding
+		buttonW = radio.buttonWidth
+		buttonH = radio.buttonHeight
+		numPerRow = radio.buttonsPerRow		
+	end
+
+
 	
 	local sc 
 	local panel
 
-
 	form.clear()
+	local gfx_buttons = {}
 
     for idx, value in ipairs(MainMenu.sections) do
 	
@@ -2902,7 +2992,15 @@ function rf2ethos.openMainMenu()
 			
 
 				if lc == 0 then
-					y = form.height() + radio.buttonPadding
+					if iconsizeParam == 0 then
+						y = form.height() + radio.buttonPaddingSmall	
+					end
+					if iconsizeParam == 1 then
+						y = form.height() + radio.buttonPaddingSmall
+					end
+					if iconsizeParam == 2 then
+						y = form.height() + radio.buttonPadding					
+					end
 				end
 				
 				
@@ -2910,13 +3008,16 @@ function rf2ethos.openMainMenu()
                     x = (buttonW + padding) * lc
                 end
 				
-				local gfx_button
-				gfx_button = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+				if iconsizeParam ~= 0 then
+				    --gfx_buttons[lc] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+				else
+					gfx_buttons[lc] = nil
+				end
 
 				form.addButton(line, 
 								{x = x, y = y, w = buttonW, h = buttonH}, 
 								{text=pvalue.title, 
-								icon=gfx_button, 
+								icon=gfx_buttons[lc], 
 								options=FONT_S,
 								paint=function() 
 								
