@@ -25,6 +25,7 @@ function getEscType(page)
     return table.concat(tt)
 end
 
+--[[
 function getUInt(page, vals)
     local v = 0
     for idx=1, #vals do
@@ -34,10 +35,12 @@ function getUInt(page, vals)
     end
     return v
 end
+]]--
 
 
 return { 
 	toolName = toolName,
+	powerCycle = true,
 	mspSignature = mspSignature,
 	mspHeaderBytes = mspHeaderBytes,
 	mspBytes = mspBytes,	

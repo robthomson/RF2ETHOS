@@ -34,6 +34,7 @@ end
 
 return {
 		toolName = toolName,
+		powerCycle = false,
 		mspSignature = mspSignature,
 		mspHeaderBytes = mspHeaderBytes,
 		mspBytes = mspBytes,

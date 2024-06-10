@@ -14,7 +14,7 @@ local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg box
 
 apiVersion = 0
 
-
+local gfx_buttons = {}
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
 local pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
@@ -58,6 +58,9 @@ local noRFMsg = false
 local triggerSAVE = false
 local triggerRELOAD = false
 local triggerESCRELOAD = false
+local triggerESCMAINMENU = false
+local escPowerCycle = false
+local escPowerCycleAnimation
 
 local fieldHelpTxt = nil
 
@@ -754,37 +757,63 @@ function wakeup(widget)
 		end
 	end	
 
-	
-	-- check telemetry state and overlay dialog if not linked
-    if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
-        if telemetryState ~= 1 then
-			if nolinkDialogDisplay == false then
-				nolinkDialogDisplay = true
-				noLinkDialog = form.openProgressDialog("Connecting", "Waiting for a link to the flight controller")
-				noLinkDialog:closeAllowed(false)	
-				noLinkDialog:value(0)	
-				nolinkDialogValue = 0	
-			end
-        end
 
-		if nolinkDialogDisplay == true or telemetryState == 1 then
-		
-			if telemetryState == 1 then
-				nolinkDialogValue = nolinkDialogValue + 20
-			else
-				nolinkDialogValue = nolinkDialogValue + 1
+
+	-- check telemetry state and overlay dialog if not linked
+
+	if escPowerCycle == true then
+		-- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
+		-- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
+		-- INIT CONFIG MODE
+	else
+		if environment.simulation ~= true or SIM_ENABLE_RSSI == true  then
+			if telemetryState ~= 1 then
+				if nolinkDialogDisplay == false then
+					nolinkDialogDisplay = true
+					noLinkDialog = form.openProgressDialog("Connecting", "Waiting for a link to the flight controller")
+					noLinkDialog:closeAllowed(false)	
+					noLinkDialog:value(0)	
+					nolinkDialogValue = 0	
+				end
 			end
-			if nolinkDialogValue > 100 then
-				noLinkDialog:close()
-				nolinkDialogValue = 0
-				nolinkDialogDisplay = false
-				if telemetryState ~= 1 then
-					exitAPP = true
-				end	
-			end
-			noLinkDialog:value(nolinkDialogValue)
-		end			
-    end	
+
+			if nolinkDialogDisplay == true or telemetryState == 1 then
+			
+				if telemetryState == 1 then
+					nolinkDialogValue = nolinkDialogValue + 20
+				else
+					nolinkDialogValue = nolinkDialogValue + 1
+				end
+				if nolinkDialogValue > 100 then
+					noLinkDialog:close()
+					nolinkDialogValue = 0
+					nolinkDialogDisplay = false
+					if telemetryState ~= 1 then
+						exitAPP = true
+					end	
+				end
+				noLinkDialog:value(nolinkDialogValue)
+			end			
+		end	
+	end
+	
+	if triggerESCMAINMENU == true then
+				triggerESCMAINMENU = false
+				ESC_MODE = false
+				escPowerCycle = false
+				ResetRates = false
+				ESC_NOTREADYCOUNT = 0
+				ESC_UNKNOWN = false
+				lastIdx = nil
+				lastPage = nil
+				lastSubPage = nil
+						
+				
+				rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)	
+			
+				
+	end
+	
 	
 	-- some watchdogs to enable close buttons on save and progress if they time-out
 	if saveDialogDisplay == true then
@@ -795,14 +824,20 @@ function wakeup(widget)
 		end	
 	end
 
-	if progressDialogDisplay == true then
-		if progressDialogWatchDog ~= nil then
-			if (os.clock() - progressDialogWatchDog) > 20 then
-					progressDialog:message("Error.. we timed out")
-					progressDialog:closeAllowed(true)
+	if escPowerCycle == true then
+		-- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
+		-- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
+		-- INIT CONFIG MODE
+	else
+		if progressDialogDisplay == true then
+			if progressDialogWatchDog ~= nil then
+				if (os.clock() - progressDialogWatchDog) > 20 then
+						progressDialog:message("Error.. we timed out")
+						progressDialog:closeAllowed(true)
+				end	
 			end	
-		end	
-	end
+		end
+	end	
 	
 	
 
@@ -869,7 +904,11 @@ function wakeup(widget)
         end
         if not Page then
 			if ESC_MODE == true then
-				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()			
+				if ESC_SCRIPT ~= nil then
+					Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()
+				else
+					print("ESC_SCRIPT is not present so cannot load as expected")
+				end
 			else 
 				if lastPage ~= nil then
 				Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. lastPage))()
@@ -2382,6 +2421,8 @@ function rf2ethos.openPageESC(idx, title, script)
     uiState = uiStatus.mainMenu
 
 
+	escPowerCycle = false
+
     lastIdx = idx
     lastTitle = title
     lastScript = script
@@ -2483,14 +2524,10 @@ function rf2ethos.openPageESCToolLoader(folder)
     mspDataLoaded = false
 
     ESC.init = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
+	escPowerCycle = ESC.init.powerCycle
 	
-
     Page = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/esc_info.lua"))()
-    --form.clear()
 
-    --lastIdx = idx
-    --lastTitle = title
-    --lastScript = script
 
 
     isLoading = true
@@ -2519,25 +2556,24 @@ function rf2ethos.openPageESCTool(folder)
 
 
     ESC.init = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
-
-	--mspDataLoaded = false
-    --uiState = uiStatus.mainMenu
+	escPowerCycle = ESC.init.powerCycle
+		
 	uiState = uiStatus.pages
 
-    local windowWidth = LCD_W
+	local windowWidth = LCD_W
 	local windowHeight = LCD_H
 
 
-    local y = radio.linePaddingTop
+	local y = radio.linePaddingTop
 
-    form.clear()
+	form.clear()
 
    line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName)
 
    buttonW = 100
    x = windowWidth - buttonW
 
-	
+		
 	form.addButton(line, 
 					{x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, 
 					{text="MENU", 
@@ -2546,38 +2582,54 @@ function rf2ethos.openPageESCTool(folder)
 					paint=function() 
 						  end, 
 					press=function() 
-							ResetRates = false
-							ESC_NOTREADYCOUNT = 0
-							ESC_UNKNOWN = false
-							lastIdx = nil
-							lastPage = nil
-							lastSubPage = nil
-							rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)													
+							triggerESCMAINMENU = true
 						  end}
 					)
 			
    
-    ESC.pages = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
+	ESC.pages = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
+
 
 	if Page.escinfo then
 		local model 	= Page.escinfo[1].t
 		local version 	= Page.escinfo[2].t
 		local fw 		= Page.escinfo[3].t
 		
-		if model == "" or version == "" then
+		if model == "" or version == "" then	
 			model = "UNKNOWN ESC"
 		end
 		
-		line = form.addLine(model .. " " .. version .. " " .. fw)	
+		if escPowerCycle == true and model == "UNKNOWN ESC" then
+		
+					
+			if escPowerCycleAnimation == nil or escPowerCycleAnimation == "-" or escPowerCycleAnimation == "" then
+				escPowerCycleAnimation = "+"
+			else
+				escPowerCycleAnimation = "-"
+			end
+
+			line = form.addLine("Please power cycle the ESC. ")	
+			form.addStaticText(line, nil, escPowerCycleAnimation)
+			
+
+		else
+			line = form.addLine(model .. " " .. version .. " " .. fw)	
+		
+			
+		end
 	end
 
 
-    local numPerRow = 1
 
-    local padding = radio.buttonPadding
-    local h = radio.navbuttonHeight
-    local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
-    -- local x = 0
+
+
+
+	local numPerRow = 1
+
+	local padding = radio.buttonPadding
+	local h = radio.navbuttonHeight
+	local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
+	-- local x = 0
 	lc = 0
 	for pidx, pvalue in ipairs(ESC.pages) do
 		if lc == 0 then
@@ -2596,10 +2648,10 @@ function rf2ethos.openPageESCTool(folder)
 								icon=nil, 
 								options=FONT_S,
 								paint=function() 
-								      end, 
+									  end, 
 								press=function() 
 										rf2ethos.openESCFormLoader(folder,pvalue.script)
-								      end}
+									  end}
 								)	
 		
 		
@@ -2615,6 +2667,7 @@ function rf2ethos.openPageESCTool(folder)
 		end
 	end
 
+
 end
 
 -- preload the page for the specic module of esc and display
@@ -2626,7 +2679,7 @@ function rf2ethos.openESCFormLoader(folder,script)
 	ESC_MFG = folder
 	ESC_SCRIPT = script
 	ESC_MODE = true
-
+	
 
     uiState = uiStatus.pages
     mspDataLoaded = false
@@ -2932,6 +2985,7 @@ function rf2ethos.openMainMenu()
 
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
+	escPowerCycle = false
 
 	-- size of buttons
 	iconsizeParam = rf2ethos.loadPreference("iconsize")
@@ -2978,7 +3032,7 @@ function rf2ethos.openMainMenu()
 	local panel
 
 	form.clear()
-	local gfx_buttons = {}
+
 
     for idx, value in ipairs(MainMenu.sections) do
 	
@@ -3009,7 +3063,9 @@ function rf2ethos.openMainMenu()
                 end
 				
 				if iconsizeParam ~= 0 then
-				    --gfx_buttons[lc] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+					if gfx_buttons[lc] == nil then
+						gfx_buttons[lc] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+					end
 				else
 					gfx_buttons[lc] = nil
 				end
@@ -3114,6 +3170,7 @@ end
 
 local function close()
 	ESC_MODE = false
+	escPowerCycle = false
 	ESC_MFG = nil
 	ESC_SCRIPT = nil
     pageLoaded = 100
