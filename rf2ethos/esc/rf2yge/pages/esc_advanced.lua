@@ -75,14 +75,18 @@ escinfo[#escinfo + 1] = { t = "---"}
 
 labels[#labels + 1] = { t = "ESC",                     }
 
-fields[#fields + 1] = { t = "Min Start Power (%)",    min = 0, max = 26, vals = { 47, 48 } }
-fields[#fields + 1] = { t = "Max Start Power (%)",    min = 0, max = 31, vals = { 49, 50 } }
+fields[#fields + 1] = { t = "Min Start Power",    min = 0, max = 26, vals = { 47, 48 },unit="%" }
+fields[#fields + 1] = { t = "Max Start Power",    min = 0, max = 31, vals = { 49, 50 },unit="%" }
 fields[#fields + 1] = { t = "Startup Response",       min = 0, max = #startupResponse, vals = { 9, 10 }, table = startupResponse }
 fields[#fields + 1] = { t = "Throttle Response",      min = 0, max = #throttleResponse, vals = { 15, 16 }, table = throttleResponse }
 
 fields[#fields + 1] = { t = "Motor Timing",           min = 0, max = #motorTiming, vals = { 7, 8 }, table=motorTiming }
 fields[#fields + 1] = { t = "Active Freewheel",       min = 0, max = #freewheel, vals = { 21, 22 }, table = freewheel }
 fields[#fields + 1] = { t = "F3C Autorotation",       min = 0, max = 1, vals = { 53 }, table = offOn }
+
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
 
 return {
     read        = 217, -- msp_ESC_PARAMETERS
@@ -99,17 +103,13 @@ return {
     svFlags     = 0,
 
     postLoad = function(self)
-        -- esc type
-        local l = self.escinfo[1]
-        l.t = getEscTypeLabel(self.values)
 
-        -- SN
-        l = self.escinfo[2]
-        l.t = getUInt(self, { 29, 30, 31, 32 })
-
-        -- FW ver
-        l = self.escinfo[3]
-        l.t = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)
+		local model = getEscTypeLabel(self.values)
+		local version = getUInt(self, { 29, 30, 31, 32 })
+		local firmware = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)	
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
 
         -- motor timing
         local f = self.fields[5]

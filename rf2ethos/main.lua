@@ -124,11 +124,58 @@ local badversionDisplay = false
 
 
 rf2ethos = {}
-
+bit32 = {}
 
 
 local translations = {en = "RF2 ETHOS"}
 
+
+function bit32.bor(a,b)
+	 return (a | b) << 0
+end
+
+function bit32.lshift(x, n)
+    return x << n
+end
+
+function bit32.rshift(x, n)
+    return math.floor(x / 2^n)
+end
+
+function bit32.band(a, b)
+    local result = 0
+    local mask = 1
+    
+    for i = 0, 31 do
+        if (a & (mask << i)) > 0 and (b & (mask << i)) > 0 then
+            result = result | (mask << i)
+        end
+    end
+    
+    return result
+end
+
+function bit32.extract(number, field, width)
+
+	if width == nil then
+		width = 1
+	end
+
+    return (number >> field) & ((1 << width) - 1)
+end
+
+function bit32.replace(number, value, start, width)
+
+	if width == nil then
+		width = 1
+	end
+
+    local mask = 2^width - 1
+    local shifted_value = value << start
+    local shifted_mask = mask << start
+    local masked_number = number & ~shifted_mask
+    return masked_number | shifted_value
+end
 
 local function name(widget)
     local locale = system.getLocale()
@@ -818,7 +865,7 @@ function wakeup(widget)
 	-- some watchdogs to enable close buttons on save and progress if they time-out
 	if saveDialogDisplay == true then
 		if saveDialogWatchDog ~= nil then
-			if (os.clock() - saveDialogWatchDog) > 30 then
+			if (os.clock() - saveDialogWatchDog) > 60 then
 					saveDialog:closeAllowed(true)
 			end	
 		end	
@@ -831,7 +878,7 @@ function wakeup(widget)
 	else
 		if progressDialogDisplay == true then
 			if progressDialogWatchDog ~= nil then
-				if (os.clock() - progressDialogWatchDog) > 20 then
+				if (os.clock() - progressDialogWatchDog) > 60 then
 						progressDialog:message("Error.. we timed out")
 						progressDialog:closeAllowed(true)
 				end	

@@ -6,7 +6,7 @@ local escinfo = {}
 -- update pole count label text
 local function updatePoles(self)
     local f = self.fields[3]
-    local l = self.labels[4]
+    --local l = self.labels[4]
     l.t = f.value * 2
 end
 
@@ -14,16 +14,15 @@ end
 local function updateRatio(self)
     local fm = self.fields[4]
     local fp = self.fields[5]
-    local l = self.labels[5]
+    --local l = self.labels[5]
     local v = fp.value ~= 0 and fm.value / fp.value or 0
     l.t = string.format("%.2f", v)..":1"
 end
 
 
-
-escinfo[#escinfo + 1] = { t = "---"}
-escinfo[#escinfo + 1] = { t = "---"}
-escinfo[#escinfo + 1] = { t = "---"}
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
 
 labels[#labels + 1] = { t = "ESC",                     }
 
@@ -55,22 +54,17 @@ return {
     updateRatio = updateRatio,
 
     postLoad = function(self)
-        -- esc type
-        local l = self.escinfo[1]
-        l.t = getEscTypeLabel(self.values)
-
-        -- SN
-        l = self.escinfo[2]
-        l.t = getUInt(self, { 29, 30, 31, 32 })
-
-        -- FW ver
-        l = self.escinfo[3]
-        l.t = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)
+		local model = getEscTypeLabel(self.values)
+		local version = getUInt(self, { 29, 30, 31, 32 })
+		local firmware = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)	
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
 
         -- update pole count
-        self.updatePoles(self)
+        --self.updatePoles(self)
 
         -- update gear ratio
-        self.updateRatio(self)
+        --self.updateRatio(self)
     end,
 }

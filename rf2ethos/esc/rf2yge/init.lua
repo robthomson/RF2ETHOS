@@ -32,10 +32,14 @@ escFlags = {
     bec12v = 3,
 }
 
+
+
+
 function getEscTypeLabel(values)
     local idx = bit32.bor(bit32.lshift(values[mspHeaderBytes + 24], 8), values[mspHeaderBytes + 23])
     return escType[idx] or "YGE ESC ("..idx..")"
 end
+
 
 function getUInt(page, vals)
     local v = 0

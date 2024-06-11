@@ -33,9 +33,9 @@ return {
 
     postLoad = function(self)
 
-		local model = getText(self, 49, 64)
-		local version = getText(self, 17, 32)
-		local firmware = getText(self, 1, 16)			
+		local model = getEscTypeLabel(self.values)
+		local version = getUInt(self, { 29, 30, 31, 32 })
+		local firmware = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)	
 		self.escinfo[1].t = model
 		self.escinfo[2].t = version	
 		self.escinfo[3].t = firmware

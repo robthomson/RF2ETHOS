@@ -46,7 +46,7 @@ labels[#labels + 1] = { t = "", label="esc2", inline_size=40.6  }
 fields[#fields + 1] = { t = "Direction",              inline=1, label="esc2", min = 0, max = 1, vals = { 53 }, table = direction }
 
 labels[#labels + 1] = { t = "", label="esc3", inline_size=40.6  }
-fields[#fields + 1] = { t = "BEC",                    inline=1, label="esc3", min = 55, max = 84, vals = { 5, 6 }, scale = 10 }
+fields[#fields + 1] = { t = "BEC",                    inline=1, label="esc3", unit="v", min = 55, max = 84, vals = { 5, 6 }, scale = 10, decimals=1 }
 
 labels[#labels + 1] = { t = "Limits", label="limits1", inline_size=40.6  }
 fields[#fields + 1] = { t = "Cutoff Handling",        inline=1, label="limits1", min = 0, max = #cuttoff, vals = { 17, 18 }, table = cuttoff }
@@ -56,6 +56,12 @@ fields[#fields + 1] = { t = "Cutoff Cell Voltage",    inline=1, label="limits2",
 
 labels[#labels + 1] = { t = "", label="limits3" , inline_size=40.6   }
 fields[#fields + 1] = { t = "Current Limit (A)",      inline=1, label="limits3", min = 1, max = 65500, scale = 100, mult = 100, vals = { 55, 56 } }
+
+
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
+escinfo[#escinfo + 1] = { t = ""}
+
 
 return {
     read        = 217, -- msp_ESC_PARAMETERS
@@ -71,17 +77,13 @@ return {
     svFlags     = 0,
 
     postLoad = function(self)
-        -- esc type
-        local l = self.escinfo[1]
-        l.t = getEscTypeLabel(self.values)
-
-        -- SN
-        l = self.escinfo[2]
-        l.t = getUInt(self, { 29, 30, 31, 32 })
-
-        -- FW ver
-        l = self.escinfo[3]
-        l.t = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)
+	
+		local model = getEscTypeLabel(self.values)
+		local version = getUInt(self, { 29, 30, 31, 32 })
+		local firmware = string.format("%.5f", getUInt(self, { 25, 26, 27, 28 }) / 100000)	
+		self.escinfo[1].t = model
+		self.escinfo[2].t = version	
+		self.escinfo[3].t = firmware
 
         -- direction
         -- save flags, changed bit will be applied in pre-save
