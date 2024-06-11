@@ -3064,18 +3064,19 @@ function rf2ethos.openMainMenu()
                     x = (buttonW + padding) * lc
                 end
 				
+				
 				if iconsizeParam ~= 0 then
-					if gfx_buttons[lc] == nil then
-						gfx_buttons[lc] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+					if gfx_buttons[pidx] == nil then
+						gfx_buttons[pidx] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
 					end
 				else
-					gfx_buttons[lc] = nil
+					gfx_buttons[pidx] = nil
 				end
 
 				form.addButton(line, 
 								{x = x, y = y, w = buttonW, h = buttonH}, 
 								{text=pvalue.title, 
-								icon=gfx_buttons[lc], 
+								icon=gfx_buttons[pidx], 
 								options=FONT_S,
 								paint=function() 
 								
