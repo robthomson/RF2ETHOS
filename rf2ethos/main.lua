@@ -2595,10 +2595,10 @@ function rf2ethos.openPageESCTool(folder)
 		local version 	= Page.escinfo[2].t
 		local fw 		= Page.escinfo[3].t
 		
-		if model == "" or version == "" then	
+		if model == "" then	
 			model = "UNKNOWN ESC"
 		end
-		
+			
 		if escPowerCycle == true and model == "UNKNOWN ESC" then
 		
 					
@@ -2608,12 +2608,14 @@ function rf2ethos.openPageESCTool(folder)
 				escPowerCycleAnimation = "-"
 			end
 
-			line = form.addLine("Please power cycle the ESC. ")	
-			form.addStaticText(line, nil, escPowerCycleAnimation)
+			line = form.addLine("")	
+			form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation )
 			
 
 		else
-			line = form.addLine(model .. " " .. version .. " " .. fw)	
+			line = form.addLine("")	
+			form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, model .. " " .. version .. " " .. fw)
+
 		
 			
 		end

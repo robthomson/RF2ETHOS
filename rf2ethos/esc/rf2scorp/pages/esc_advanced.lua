@@ -47,8 +47,8 @@ return {
     postLoad = function(self)
 
 		local model = getEscType(self)
-		local version = "version" -- "v"..getUInt(self, { 59, 60 })
-		local firmware = "firware" --string.format("%08X", getUInt(self, { 55, 56, 57, 58 }))		
+		local version = "v"..getUInt(self, { 59, 60 })
+		local firmware = string.format("%08X", getUInt(self, { 55, 56, 57, 58 }))		
 		self.escinfo[1].t = model
 		self.escinfo[2].t = version	
 		self.escinfo[3].t = firmware

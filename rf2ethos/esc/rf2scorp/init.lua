@@ -25,17 +25,25 @@ function getEscType(page)
     return table.concat(tt)
 end
 
---[[
+
 function getUInt(page, vals)
     local v = 0
     for idx=1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
-        raw_val = bit32.lshift(raw_val, (idx-1)*8)
-        v = bit32.bor(v, raw_val)
+		
+		--raw_val = bit32.lshift(raw_val, (idx-1)*8)
+        --v = bit32.bor(v, raw_val)
+		
+        raw_val = raw_val << (idx-1)*8
+		v = (v | raw_val) << 0
+		
+		print(v)
+		
+
     end
     return v
 end
-]]--
+
 
 
 return { 
