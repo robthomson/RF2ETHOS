@@ -55,7 +55,7 @@ labels[#labels + 1] = { t = "", label="limits2" , inline_size=40.6  }
 fields[#fields + 1] = { t = "Cutoff Cell Voltage",    inline=1, label="limits2", min = 0, max = #cuttoffVoltage, vals = { 19, 20 }, table = cuttoffVoltage }
 
 labels[#labels + 1] = { t = "", label="limits3" , inline_size=40.6   }
-fields[#fields + 1] = { t = "Current Limit (A)",      inline=1, label="limits3", min = 1, max = 65500, scale = 100, mult = 100, vals = { 55, 56 } }
+fields[#fields + 1] = { t = "Current Limit",      units="A", inline=1, label="limits3", min = 1, max = 65500, scale = 100, xmult = 100, vals = { 55, 56 } }
 
 
 escinfo[#escinfo + 1] = { t = ""}

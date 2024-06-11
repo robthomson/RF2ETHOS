@@ -6,7 +6,7 @@ local ETHOS_VERSION = 1510
 local ETHOS_VERSION_STR = "ETHOS < V1.5.10"
 
 local DEBUG_msp = false				-- display msp messages
-local DEBUG_mspVALUES = false  		-- display values received from valid msp
+local DEBUG_mspVALUES = true  		-- display values received from valid msp
 local DEBUG_BADESC_ENABLE = false  	-- enable ability to get into esc menus even if not detected
 
 local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg boxes in sim mode
@@ -15,6 +15,7 @@ local SIM_ENABLE_RSSI = false	-- set this to true to enable debugging of msg box
 apiVersion = 0
 
 local gfx_buttons = {}
+local esc_buttons = {}
 local uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 
 local pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
@@ -2457,7 +2458,7 @@ function rf2ethos.openPagePID(idx, title, script)
 
 end
 
-
+--[[
 -- display the list of known esc types
 -- /scripts/rf2ethos/pages/esc.lua
 function rf2ethos.openPageESC(idx, title, script)
@@ -2469,6 +2470,46 @@ function rf2ethos.openPageESC(idx, title, script)
 
 
 	escPowerCycle = false
+
+
+	-- size of buttons
+	iconsizeParam = rf2ethos.loadPreference("iconsize")
+	if iconsizeParam == nil or iconsizeParam == "" then
+		iconsizeParam = 1
+	else
+		iconsizeParam = tonumber(iconsizeParam)
+	end
+
+	local buttonW
+	local buttonH
+	local padding
+	local numPerRow
+
+
+	-- TEXT ICONS
+	if iconsizeParam == 0 then
+		padding = radio.buttonPaddingSmall
+		buttonW = (LCD_W - padding) / radio.buttonsPerRow - padding
+		buttonH = radio.navbuttonHeight
+		numPerRow = radio.buttonsPerRow			
+	end
+	-- SMALL ICONS
+	if iconsizeParam == 1 then
+
+		padding = radio.buttonPaddingSmall
+		buttonW = radio.buttonWidthSmall
+		buttonH = radio.buttonHeightSmall
+		numPerRow = radio.buttonsPerRowSmall			
+	end
+	-- LARGE ICONS
+	if iconsizeParam == 2 then
+
+		padding = radio.buttonPadding
+		buttonW = radio.buttonWidth
+		buttonH = radio.buttonHeight
+		numPerRow = radio.buttonsPerRow		
+	end
+
 
     lastIdx = idx
     lastTitle = title
@@ -2517,21 +2558,41 @@ function rf2ethos.openPageESC(idx, title, script)
     local w = (windowWidth - (padding * numPerRow) - padding - 5) / numPerRow
     -- local x = 0
 	lc = 0
+	
+	
 	for pidx, pvalue in ipairs(ESCMenu.pages) do
+
 		if lc == 0 then
-			line = form.addLine("")
-			x = padding
+			if iconsizeParam == 0 then
+				y = form.height() + radio.buttonPaddingSmall	
+			end
+			if iconsizeParam == 1 then
+				y = form.height() + radio.buttonPaddingSmall
+			end
+			if iconsizeParam == 2 then
+				y = form.height() + radio.buttonPadding					
+			end
 		end
+	
 
 		if lc >= 1 then
 			x = padding + (w + padding) * lc
 		end
 
+				
+		if iconsizeParam ~= 0 then
+			if esc_buttons[pidx] == nil then
+				esc_buttons[pidx] = lcd.loadMask("/scripts/rf2ethos/gfx/esc/" .. pvalue.image)
+			end
+		else
+			esc_buttons[pidx] = nil
+		end
 
+		
 		form.addButton(line, 
-						{x = x, y = y, w = w, h = h}, 
+						{x = x, y = y, w = buttonW, h = buttonH}, 
 						{text=pvalue.title, 
-						icon=nil, 
+						icon=esc_buttons[pidx], 
 						options=FONT_S,
 						paint=function() 
 							  end, 
@@ -2551,6 +2612,160 @@ function rf2ethos.openPageESC(idx, title, script)
 
 end
 
+
+]]--
+
+
+function rf2ethos.openPageESC(idx, title, script)
+
+    if tonumber(rf2ethos.sensorMakeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
+        return
+    end
+
+    mspDataLoaded = false
+    uiState = uiStatus.mainMenu
+	escPowerCycle = false
+
+	form.clear()
+
+
+    lastIdx = idx
+    lastTitle = title
+    lastScript = script
+	
+	ESC = {}
+
+	ESC_MODE=true
+
+	-- size of buttons
+	iconsizeParam = rf2ethos.loadPreference("iconsize")
+	if iconsizeParam == nil or iconsizeParam == "" then
+		iconsizeParam = 1
+	else
+		iconsizeParam = tonumber(iconsizeParam)
+	end
+
+    local windowWidth = LCD_W
+	local windowHeight = LCD_H
+	local padding = radio.buttonPadding
+
+	
+	local sc 
+	local panel
+
+
+   form.addLine(title)
+
+   buttonW = 100
+   x = windowWidth - buttonW
+   
+   
+	form.addButton(line, 
+					{x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, 
+					{text="MENU", 
+					icon=nil, 
+					options=FONT_S,
+					paint=function() 
+						  end, 
+					press=function() 
+						lastIdx = nil
+						lastPage = nil
+						lastSubPage = nil
+						ESC_MODE = false
+					    rf2ethos.openMainMenu()															
+						  end}
+					)  
+
+
+
+	
+	local buttonW
+	local buttonH
+	local padding
+	local numPerRow
+
+
+
+	-- TEXT ICONS
+	if iconsizeParam == 0 then
+		padding = radio.buttonPaddingSmall
+		buttonW = (LCD_W - padding) / radio.buttonsPerRow - padding
+		buttonH = radio.navbuttonHeight
+		numPerRow = radio.buttonsPerRow			
+	end
+	-- SMALL ICONS
+	if iconsizeParam == 1 then
+
+		padding = radio.buttonPaddingSmall
+		buttonW = radio.buttonWidthSmall
+		buttonH = radio.buttonHeightSmall
+		numPerRow = radio.buttonsPerRowSmall			
+	end
+	-- LARGE ICONS
+	if iconsizeParam == 2 then
+
+		padding = radio.buttonPadding
+		buttonW = radio.buttonWidth
+		buttonH = radio.buttonHeight
+		numPerRow = radio.buttonsPerRow		
+	end
+
+
+    local ESCMenu = assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/pages/" .. script))()
+
+	local lc = 0
+	
+        for pidx, pvalue in ipairs(ESCMenu.pages) do
+
+				if lc == 0 then
+					if iconsizeParam == 0 then
+						y = form.height() + radio.buttonPaddingSmall	
+					end
+					if iconsizeParam == 1 then
+						y = form.height() + radio.buttonPaddingSmall
+					end
+					if iconsizeParam == 2 then
+						y = form.height() + radio.buttonPadding					
+					end
+				end
+				
+				
+                if lc >= 0 then
+                    x = (buttonW + padding) * lc
+                end
+				
+				
+				if iconsizeParam ~= 0 then
+					if esc_buttons[pidx] == nil then
+						esc_buttons[pidx] = lcd.loadMask("/scripts/rf2ethos/gfx/esc/" .. pvalue.image)
+					end
+				else
+					esc_buttons[pidx] = nil
+				end
+
+				form.addButton(line, 
+								{x = x, y = y, w = buttonW, h = buttonH}, 
+								{text=pvalue.title, 
+								icon=esc_buttons[pidx], 
+								options=FONT_S,
+								paint=function() 
+								
+									  end, 
+								press=function() 
+									rf2ethos.openPageESCToolLoader(pvalue.folder)									
+									   end}
+								)
+
+                lc = lc + 1
+
+                if lc == numPerRow then
+                    lc = 0
+                end
+
+        end
+
+
+end
 
 -- preload the page for the specic module of esc and display
 -- a then pass on to the actual form display function
