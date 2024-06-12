@@ -10,11 +10,7 @@ local supportedProtocols = {
         saveTimeout = 5.0,
         pageReqTimeout = 0.8
     },
-    crsf = {mspTransport = "/scripts/rf2ethos/msp/crsf.lua", 
-			maxTxBufferSize = 8, 
-			maxRxBufferSize = 58, 
-			saveMaxRetries = 4, 
-			saveTimeout = 1.5, pageReqTimeout = 0.8},
+    crsf = {mspTransport = "/scripts/rf2ethos/msp/crsf.lua", maxTxBufferSize = 8, maxRxBufferSize = 58, saveMaxRetries = 4, saveTimeout = 1.5, pageReqTimeout = 0.8},
     simulation = {mspTransport = "/scripts/rf2ethos/msp/simulation.lua", maxTxBufferSize = 8, maxRxBufferSize = 58, saveMaxRetries = 2, saveTimeout = 1.5, pageReqTimeout = 0.8}
 }
 

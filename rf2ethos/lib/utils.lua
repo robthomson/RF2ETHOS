@@ -1,63 +1,59 @@
-
 local utils = {}
 
-
 -- save a value to preferences
-function utils.storePreference(preference,value)
-	-- open preference file
-	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
+function utils.storePreference(preference, value)
+    -- open preference file
+    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
 
-	if value == nil then
-		value = ""
-	end
+    if value == nil then
+        value = ""
+    end
 
-	if type(value) == "boolean" then
-		if value == true then
-			value = 0
-		else
-			value = 1
-		end
-	end
-	
-	if type(value) == "userdata" then
-		value = value:name()
-	end
+    if type(value) == "boolean" then
+        if value == true then
+            value = 0
+        else
+            value = 1
+        end
+    end
 
-	print("Write Preference: " .. file .. " [" .. value .. "]")
-	
-	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
-	
-	
-	--then write current data
-	local f
-	f = io.open(file,'w')
-	f:write(value)
-	io.close(f)
+    if type(value) == "userdata" then
+        value = value:name()
+    end
+
+    print("Write Preference: " .. file .. " [" .. value .. "]")
+
+    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+
+    -- then write current data
+    local f
+    f = io.open(file, 'w')
+    f:write(value)
+    io.close(f)
 
 end
 
 -- retrieve a value from preferences
 function utils.loadPreference(preference)
-	-- open preference file
-	file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"	
+    -- open preference file
+    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
 
-	print("Read Preference:  " .. file)
+    print("Read Preference:  " .. file)
 
-	local f
-	f = io.open(file,"rb")
-	if f ~= nil then
-		--file exists
-		local rData
-		c = 0
-		tc = 1
-		rData = io.read(f,"l")
-		io.close(f)		
+    local f
+    f = io.open(file, "rb")
+    if f ~= nil then
+        -- file exists
+        local rData
+        c = 0
+        tc = 1
+        rData = io.read(f, "l")
+        io.close(f)
 
-		return rData
-	end
+        return rData
+    end
 
 end
-
 
 function utils.getSection(id, sections)
     for i, v in ipairs(sections) do
@@ -70,15 +66,15 @@ function utils.getSection(id, sections)
 end
 
 -- explode a string
-function utils.explode (inputstr, sep)
-        if sep == nil then
-                sep = "%s"
-        end
-        local t={}
-        for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
-                table.insert(t, str)
-        end
-        return t
+function utils.explode(inputstr, sep)
+    if sep == nil then
+        sep = "%s"
+    end
+    local t = {}
+    for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
+        table.insert(t, str)
+    end
+    return t
 end
 
 function utils.round(number, precision)
@@ -91,11 +87,10 @@ function utils.round(number, precision)
     return number
 end
 
-
 -- clear the screen when using lcd functions
 function utils.clearScreen()
-	local w = LCD_W
-	local h = LCD_H
+    local w = LCD_W
+    local h = LCD_H
     if isDARKMODE then
         lcd.color(lcd.RGB(40, 40, 40))
     else
@@ -125,7 +120,7 @@ end
 -- simple wrapper - long term will enable 
 -- dynamic compilation
 function utils.loadScript(script)
-    --system.compile(script)
+    -- system.compile(script)
     return loadfile(script)
 end
 
@@ -133,7 +128,6 @@ end
 function utils.getTime()
     return os.clock() * 100
 end
-
 
 function utils.scaleValue(value, f)
     local v
@@ -145,7 +139,6 @@ function utils.scaleValue(value, f)
     return v
 end
 
-
 function utils.decimalInc(dec)
     local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
 
@@ -155,7 +148,6 @@ function utils.decimalInc(dec)
         return decTable[dec]
     end
 end
-
 
 -- rate table defaults
 function utils.defaultRates(x)
@@ -180,18 +172,17 @@ function utils.defaultRates(x)
     return defaults[x]
 end
 
-
 -- set positions of form elements
-function utils.getInlinePositions(f,Page)
-    local tmp_inline_size = utils.getInlineSize(f.label,Page)	
-	local inline_multiplier = radio.inlinesize_mult
-	
-	local inline_size = tmp_inline_size * inline_multiplier
+function utils.getInlinePositions(f, Page)
+    local tmp_inline_size = utils.getInlineSize(f.label, Page)
+    local inline_multiplier = radio.inlinesize_mult
 
-	LCD_W, LCD_H = utils.getWindowSize()
+    local inline_size = tmp_inline_size * inline_multiplier
 
-	local w = LCD_W
-	local h = LCD_H
+    LCD_W, LCD_H = utils.getWindowSize()
+
+    local w = LCD_W
+    local h = LCD_H
     local colStart
 
     local padding = 5
@@ -202,9 +193,8 @@ function utils.getInlinePositions(f,Page)
     local eH = radio.navbuttonHeight
     local eY = radio.linePaddingTop
     local posX
-	lcd.font(FONT_STD)
+    lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)
-	
 
     if f.inline == 5 then
         posX = w - fieldW * 9 - tsizeW - padding
@@ -243,26 +233,23 @@ function utils.getInlinePositions(f,Page)
     return ret
 end
 
-
-
 -- find size of elements
-function utils.getInlineSize(id,Page)
+function utils.getInlineSize(id, Page)
     for i, v in ipairs(Page.labels) do
         if id ~= nil then
             if v.label == id then
-				local size
+                local size
                 if v.inline_size == nil then
                     size = 13.6
                 else
                     size = v.inline_size
-                end				
-				return size
-				
+                end
+                return size
+
             end
         end
     end
 end
-
 
 -- write text at given ordinates on screen
 function utils.writeText(x, y, str)
@@ -273,7 +260,6 @@ function utils.writeText(x, y, str)
     end
     lcd.drawText(x, y, str)
 end
-
 
 -- print a table out to debug console
 function utils.print_r(node)
@@ -354,7 +340,6 @@ function utils.print_r(node)
     print(output_str)
 end
 
-
 -- convert a string to a nunber
 function utils.makeNumber(x)
     if x == nil or x == "" then
@@ -370,16 +355,15 @@ function utils.makeNumber(x)
     return x
 end
 
-
 -- used to take tables from format used in pages
 -- and convert them to an ethos forms format
-function utils.convertPageValueTable(tbl,inc)
+function utils.convertPageValueTable(tbl, inc)
     local thetable = {}
-	
-	if inc == nil then
-		inc = 0
-	end
-	
+
+    if inc == nil then
+        inc = 0
+    end
+
     if tbl[0] ~= nil then
         thetable[0] = {}
         thetable[0][1] = tbl[0]
@@ -393,6 +377,5 @@ function utils.convertPageValueTable(tbl,inc)
 
     return thetable
 end
-
 
 return utils

@@ -4,9 +4,8 @@ local labels = {}
 local fields = {}
 
 fields[#fields + 1] = {t = "Profile type", min = 0, max = 1, vals = {1}, table = {[0] = "PID", "Rate"}}
-fields[#fields + 1] = {t = "Source profile", min = 0, max = 5, vals = {3}, tableIdxInc=-1, table = {"1", "2", "3", "4", "5", "6"}}
-fields[#fields + 1] = {t = "Dest. profile", min = 0, max = 5, vals = {2},  tableIdxInc=-1, table = {"1", "2", "3", "4", "5", "6"}}
-
+fields[#fields + 1] = {t = "Source profile", min = 0, max = 5, vals = {3}, tableIdxInc = -1, table = {"1", "2", "3", "4", "5", "6"}}
+fields[#fields + 1] = {t = "Dest. profile", min = 0, max = 5, vals = {2}, tableIdxInc = -1, table = {"1", "2", "3", "4", "5", "6"}}
 
 return {
     read = 101, -- msp_STATUS

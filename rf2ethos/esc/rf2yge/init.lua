@@ -3,7 +3,7 @@ moduleName = "RF2YGE"
 moduleTitle = "YGE ESC v0.42"
 
 escType = {
-    [848]  = "YGE 35 LVT BEC",
+    [848] = "YGE 35 LVT BEC",
     [1616] = "YGE 65 LVT BEC",
     [2128] = "YGE 85 LVT BEC",
     [2384] = "YGE 95 LVT BEC",
@@ -22,30 +22,21 @@ escType = {
     [4689] = "YGE Saphir 125",
     [4928] = "YGE Opto 135",
     [9552] = "YGE Opto 255",
-    [16464]= "YGE Opto 405",
+    [16464] = "YGE Opto 405"
 }
 
-escFlags = {
-    spinDirection = 0,
-    f3cAuto = 1,
-    keepMah = 2,
-    bec12v = 3,
-}
-
-
-
+escFlags = {spinDirection = 0, f3cAuto = 1, keepMah = 2, bec12v = 3}
 
 function getEscTypeLabel(values)
     local idx = bit32.bor(bit32.lshift(values[mspHeaderBytes + 24], 8), values[mspHeaderBytes + 23])
-    return escType[idx] or "YGE ESC ("..idx..")"
+    return escType[idx] or "YGE ESC (" .. idx .. ")"
 end
-
 
 function getUInt(page, vals)
     local v = 0
-    for idx=1, #vals do
+    for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
-        raw_val = bit32.lshift(raw_val, (idx-1)*8)
+        raw_val = bit32.lshift(raw_val, (idx - 1) * 8)
         v = bit32.bor(v, raw_val)
     end
     return v
@@ -65,14 +56,6 @@ mspBytes = 66
 
 apiVersion = 0
 mcuId = nil
---runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
+-- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 
-
-
-
-return {
-	toolName = toolName,
-	mspSignature = mspSignature,
-	mspHeaderBytes = mspHeaderBytes,
-	mspBytes = mspBytes,	
-}
+return {toolName = toolName, mspSignature = mspSignature, mspHeaderBytes = mspHeaderBytes, mspBytes = mspBytes}
