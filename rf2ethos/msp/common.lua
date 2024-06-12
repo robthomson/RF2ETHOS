@@ -141,8 +141,8 @@ function mspPollReply()
         return 1, "ababababababababababababababababsa", 1
     end
 
-    local startTime = rf2ethos.getTime()
-    while (rf2ethos.getTime() - startTime < 5) do
+    local startTime = utils.getTime()
+    while (utils.getTime() - startTime < 5) do
         local mspData = protocol.mspPoll()
         if mspData ~= nil and mspReceivedReply(mspData) then
             mspLastReq = 0

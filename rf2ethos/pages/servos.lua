@@ -1,4 +1,4 @@
-local template = assert(rf2ethos.loadScriptrf2ethos(radio.template))()
+local template = assert(utils.loadScript(radio.template))()
 
 local labels = {}
 local fields = {}

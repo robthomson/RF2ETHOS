@@ -1,4 +1,4 @@
-local template = assert(rf2ethos.loadScriptrf2ethos(radio.template))()
+local template = assert(utils.loadScript(radio.template))()
 
 local labels = {}
 local fields = {}
@@ -190,6 +190,6 @@ return {
     rTableName = rTableName,
     flagRateChange = function(self)
         -- print("We need to reset the rates tables on save")
-        ResetRates = true
+        resetRates = true
     end
 }

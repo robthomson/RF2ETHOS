@@ -9,7 +9,7 @@ local function init()
     if rf2ethos.getRSSI() == 0 then
         returnTable.t = "Waiting for connection"
     elseif not apiVersionReceived then
-        getApiVersion = getApiVersion or assert(rf2ethos.loadScriptrf2ethos("/scripts/rf2ethos/api_version.lua"))()
+        getApiVersion = getApiVersion or assert(utils.loadScript("/scripts/rf2ethos/api_version.lua"))()
         returnTable.t = getApiVersion.t
         apiVersionReceived = getApiVersion.f()
         if apiVersionReceived then
