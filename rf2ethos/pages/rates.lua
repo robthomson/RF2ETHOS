@@ -185,6 +185,7 @@ return {
     minBytes = 25,
     labels = labels,
     fields = fields,
+	refreshswitch = true,	
     rows = rows,
     cols = cols,
     rTableName = rTableName,

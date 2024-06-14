@@ -36,6 +36,7 @@ return {
     write = 147, -- msp_SET_RESCUE_PROFILE
     title = "Profile - Rescue",
     reboot = false,
+	refreshswitch = true,	
     eepromWrite = true,
     minBytes = 28,
     labels = labels,

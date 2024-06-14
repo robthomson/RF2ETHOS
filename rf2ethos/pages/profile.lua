@@ -92,6 +92,7 @@ return {
     read = 94, -- msp_PID_PROFILE
     write = 95, -- msp_SET_PID_PROFILE
     title = "Profile - Advanced",
+	refreshswitch = true,
     reboot = false,
     eepromWrite = true,
     minBytes = 41,

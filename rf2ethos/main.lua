@@ -454,6 +454,9 @@ end
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 local function event(widget, category, value, x, y)
     print("Event received:", category, value, x, y)
+	
+
+	
     -- close esc main type selection menu
     if ESC_MODE == true and ESC_MFG == nil and ESC_SCRIPT == nil then
         if category == 5 then
@@ -467,7 +470,7 @@ local function event(widget, category, value, x, y)
     end
     -- close esc pages menu
     if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-        if category == 5 then
+        if category == 5 or value == 35 then
             resetRates = false
             rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
             ESC_MODE = false
@@ -478,7 +481,7 @@ local function event(widget, category, value, x, y)
     end
     -- close esc pages menu
     if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-        if category == 5 then
+        if category == 5 or value == 35  then
             resetRates = false
             rf2ethos.openPageESCToolLoader(ESC_MFG)
             ESC_MODE = false
@@ -489,7 +492,7 @@ local function event(widget, category, value, x, y)
     end
 
     if uiState == uiStatus.pages then
-        if category == 5 then
+        if category == 5 or value == 35  then
             resetRates = false
             rf2ethos.openMainMenu()
             return true
@@ -562,89 +565,102 @@ function wakeup(widget)
 
         end
     end
+	
+	
+
 
     -- capture profile switching and trigger a reload if needs be
-    if (lastPage == "pids.lua" or lastPage == "profile.lua" or lastPage == "profile_governor.lua" or lastPage == "profile_rescue.lua") and ESC_MODE ~= true then
-        if profileswitchParam ~= nil then
 
-            if profileswitchParam:value() ~= profileswitchLast then
+	if Page ~= nil then
+		if Page.refreshswitch == true then
 
-                if progressDialogDisplay == true or saveDialogDisplay == true then
-                    -- switch has been toggled mid flow - this is bad.. clean upd
-                    if progressDialogDisplay == true then
-                        progressDialog:close()
-                    end
-                    if saveDialogDisplay == true then
-                        saveDialog:close()
-                    end
-                    form.clear()
-                    wasReloading = true
-                    createForm = true
-                    wasSaving = false
-                    wasLoading = false
-                    reloadRates = false
-                    reloadServos = false
+				if lastPage ~= "rates.lua"  then
+					if profileswitchParam ~= nil then
 
-                else
+						if profileswitchParam:value() ~= profileswitchLast then
 
-                    profileswitchLast = profileswitchParam:value()
-                    -- trigger RELOAD
-                    print("Profile switch reload")
-                    if environment.simulation ~= true then
-                        wasReloading = true
-                        createForm = true
-                        wasSaving = false
-                        wasLoading = false
-                        reloadRates = false
-                        reloadServos = false
-                    end
-                    return true
+							if progressDialogDisplay == true or saveDialogDisplay == true then
+								-- switch has been toggled mid flow - this is bad.. clean upd
+								if progressDialogDisplay == true then
+									progressDialog:close()
+								end
+								if saveDialogDisplay == true then
+									saveDialog:close()
+								end
+								form.clear()
+								wasReloading = true
+								createForm = true
+								wasSaving = false
+								wasLoading = false
+								reloadRates = false
+								reloadServos = false
 
-                end
-            end
-        end
-    end
+							else
 
-    -- capture profile switching and trigger a reload if needs be
-    if lastPage == "rates.lua" and ESC_MODE ~= true then
-        if rateswitchParam ~= nil then
-            if rateswitchParam:value() ~= rateswitchLast then
+								profileswitchLast = profileswitchParam:value()
+								-- trigger RELOAD
+								print("Profile switch reload")
+								if environment.simulation ~= true then
+									wasReloading = true
+									createForm = true
+									wasSaving = false
+									wasLoading = false
+									reloadRates = false
+									reloadServos = false
+								end
+								return true
 
-                if progressDialogDisplay == true or saveDialogDisplay == true then
-                    -- switch has been toggled mid flow - this is bad.. clean upd
-                    if progressDialogDisplay == true then
-                        progressDialog:close()
-                    end
-                    if saveDialogDisplay == true then
-                        saveDialog:close()
-                    end
-                    form.clear()
-                    wasReloading = true
-                    createForm = true
-                    wasSaving = false
-                    wasLoading = false
-                    reloadRates = false
-                    reloadServos = false
-                else
-                    rateswitchLast = rateswitchParam:value()
+							end
+						end
+					end
+				end
 
-                    -- trigger RELOAD
-                    print("Rate switch reload")
-                    if environment.simulation ~= true then
-                        wasSaving = false
-                        wasLoading = false
-                        reloadServos = false
-                        wasReloading = false
+				-- capture profile switching and trigger a reload if needs be
+				if lastPage == "rates.lua" then
+					if rateswitchParam ~= nil then
+						if rateswitchParam:value() ~= rateswitchLast then
 
-                        createForm = true
-                        reloadRates = true
-                    end
-                    return true
-                end
+							if progressDialogDisplay == true or saveDialogDisplay == true then
+								-- switch has been toggled mid flow - this is bad.. clean upd
+								if progressDialogDisplay == true then
+									progressDialog:close()
+								end
+								if saveDialogDisplay == true then
+									saveDialog:close()
+								end
+								form.clear()
+								wasReloading = true
+								createForm = true
+								wasSaving = false
+								wasLoading = false
+								reloadRates = false
+								reloadServos = false
+							else
+								rateswitchLast = rateswitchParam:value()
 
-            end
-        end
-    end
+								-- trigger RELOAD
+								print("Rate switch reload")
+								if environment.simulation ~= true then
+									wasSaving = false
+									wasLoading = false
+									reloadServos = false
+									wasReloading = false
+
+									createForm = true
+									reloadRates = true
+								end
+								return true
+							end
+
+						end
+					end
+				end
+
+		end
+	end
+
+
+
 
     -- check telemetry state and overlay dialog if not linked
     if escPowerCycle == true then
@@ -1033,7 +1049,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
         helpWidth = 0
     end
 
-    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
+    field = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1044,6 +1060,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
             rf2ethos.openMainMenu()
         end
     })
+	field:focus()
 
     form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = buttonW, h = h}, {
         text = "SAVE",
@@ -1090,7 +1107,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
     local padding = 5
     local helpWidth = 0
 
-    form.addButton(line, {x = x - buttonW - padding - buttonW - padding - buttonW - padding, y = y, w = w, h = h}, {
+    field = form.addButton(line, {x = x - buttonW - padding - buttonW - padding - buttonW - padding, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1104,6 +1121,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.openPageESCTool(ESC_MFG)
         end
     })
+	field:focus()
 
     form.addButton(line, {x = x - buttonW - padding - buttonW - padding, y = y, w = buttonW, h = h}, {
         text = "SAVE",
@@ -1512,7 +1530,7 @@ function rf2ethos.openPagePreferences()
 
     line = form.addLine("Preferences")
 
-    form.addButton(line, {x = x - (buttonW + padding) * 1, y = radio.linePaddingTop, w = buttonW, h = buttonH}, {
+    field = form.addButton(line, {x = x - (buttonW + padding) * 1, y = radio.linePaddingTop, w = buttonW, h = buttonH}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1522,6 +1540,7 @@ function rf2ethos.openPagePreferences()
             rf2ethos.openMainMenu()
         end
     })
+	field:focus()
 
     iconsizeParam = utils.loadPreference("iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
@@ -1636,12 +1655,7 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
             fieldNumber(f, i)
         end
     end
-    -- display menu at footer
 
-    if formLineCnt * (radio.navbuttonHeight + radio.buttonPadding) > LCD_H then
-        line = form.addLine("")
-        rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
-    end
 
 end
 
@@ -1902,13 +1916,7 @@ function rf2ethos.openPagePID(idx, title, script)
         end
     end
 
-    -- display menu at footer
-    if Page.longPage ~= nil then
-        if Page.longPage == true then
-            line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
-        end
-    end
+
 
 end
 
@@ -1952,7 +1960,7 @@ function rf2ethos.openPageESC(idx, title, script)
     buttonW = 100
     x = windowWidth - buttonW
 
-    form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
+    field = form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1966,6 +1974,7 @@ function rf2ethos.openPageESC(idx, title, script)
             rf2ethos.openMainMenu()
         end
     })
+	field:focus()
 
     local buttonW
     local buttonH
@@ -2108,7 +2117,7 @@ function rf2ethos.openPageESCTool(folder)
     buttonW = 100
     x = windowWidth - buttonW
 
-    form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
+    field = form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -2118,6 +2127,7 @@ function rf2ethos.openPageESCTool(folder)
             triggerESCMAINMENU = true
         end
     })
+	field:focus()
 
     ESC.pages = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
 
@@ -2324,12 +2334,7 @@ function rf2ethos.openESCForm(folder, script)
             fieldNumber(f, i)
         end
     end
-    -- display menu at footer
 
-    if formLineCnt * (radio.navbuttonHeight + radio.buttonPadding) > LCD_H then
-        line = form.addLine("")
-        rf2ethos.navigationButtonsEscForm(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
-    end
 
 end
 
@@ -2498,13 +2503,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    -- display menu at footer
-    if Page.longPage ~= nil then
-        if Page.longPage == true then
-            line = form.addLine("")
-            rf2ethos.navigationButtons(LCD_W, radio.linePaddingTop, buttonW, radio.navbuttonHeight)
-        end
-    end
+
 
 end
 
@@ -2513,6 +2512,9 @@ function rf2ethos.openMainMenu()
     if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
     end
+
+	-- reset page to nil as should be nil on this page
+	Page = nil
 
     mspDataLoaded = false
     uiState = uiStatus.mainMenu

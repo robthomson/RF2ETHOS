@@ -44,6 +44,7 @@ return {
     title = "PIDs",
     reboot = false,
     eepromWrite = true,
+	refreshswitch = true,	
     minBytes = 34,
     fields = fields,
     rows = rows,

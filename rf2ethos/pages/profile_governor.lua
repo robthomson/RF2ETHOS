@@ -27,6 +27,7 @@ return {
     write = 149, -- msp_SET_GOVERNOR_PROFILE
     title = "Profile - Governor",
     reboot = false,
+	refreshswitch = true,	
     eepromWrite = true,
     minBytes = 13,
     labels = labels,
