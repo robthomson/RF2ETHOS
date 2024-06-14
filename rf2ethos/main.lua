@@ -1034,6 +1034,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
     local section
     local page
 
+
     help = assert(utils.loadScript("/scripts/rf2ethos/help/pages.lua"))()
     section = string.gsub(lastScript, ".lua", "") -- remove .lua
     page = lastSubPage
@@ -1062,7 +1063,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
     })
 	field:focus()
 
-    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = buttonW, h = h}, {
+    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
         text = "SAVE",
         icon = nil,
         options = FONT_S,
@@ -1073,7 +1074,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
         end
     })
 
-    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = buttonW, h = h}, {
+    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = w, h = h}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -1103,11 +1104,11 @@ end
 
 function rf2ethos.navigationButtonsEscForm(x, y, w, h)
 
-    local buttonW = w
+
     local padding = 5
     local helpWidth = 0
 
-    field = form.addButton(line, {x = x - buttonW - padding - buttonW - padding - buttonW - padding, y = y, w = w, h = h}, {
+    field = form.addButton(line, {x = x - w - padding - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1123,7 +1124,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
     })
 	field:focus()
 
-    form.addButton(line, {x = x - buttonW - padding - buttonW - padding, y = y, w = buttonW, h = h}, {
+    form.addButton(line, {x = x - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "SAVE",
         icon = nil,
         options = FONT_S,
@@ -1164,7 +1165,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
         end
     })
 
-    form.addButton(line, {x = x - buttonW - padding, y = y, w = buttonW, h = h}, {
+    form.addButton(line, {x = x - w - padding, y = y, w = w, h = h}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -1497,7 +1498,7 @@ local function fieldHeader(title)
     if radio.buttonWidth == nil then
         buttonW = (w - colStart) / 3 - padding
     else
-        buttonW = radio.buttonWidth
+        buttonW = radio.menuButtonWidth
     end
     buttonH = radio.navbuttonHeight
 
