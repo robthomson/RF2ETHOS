@@ -574,7 +574,7 @@ function wakeup(widget)
 	if Page ~= nil then
 		if Page.refreshswitch == true then
 
-				if lastPage ~= "rates.lua"  then
+				if lastPage ~= "rates.lua" then
 					if profileswitchParam ~= nil then
 
 						if profileswitchParam:value() ~= profileswitchLast then
@@ -1057,7 +1057,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-            resetRates = false
+			resetRates = false
             rf2ethos.openMainMenu()
         end
     })
@@ -1506,8 +1506,17 @@ local function fieldHeader(title)
     rf2ethos.navigationButtons(w, radio.linePaddingTop, buttonW, buttonH)
 end
 
-function rf2ethos.openPagePreferences()
-    uiState = uiStatus.pages
+function rf2ethos.openPagePreferences(idx,title,script)
+	uiState = uiStatus.mainMenu  -- 
+    mspDataLoaded = false
+
+
+    lastIdx = idx
+    lastSubPage = nil
+    lastTitle = title
+    lastScript = script
+    isLoading = false
+	Page = nil
 
     form.clear()
 
@@ -2139,6 +2148,9 @@ function rf2ethos.openPageESCTool(folder)
 
         if model == "" then
             model = "UNKNOWN ESC"
+			ESC_UNKNOWN = true
+		else
+			ESC_UNKNOWN = false
         end
 
         if escPowerCycle == true and model == "UNKNOWN ESC" then
@@ -2224,7 +2236,7 @@ function rf2ethos.openPageESCTool(folder)
             esctool_buttons[pvalue.image] = nil
         end
 
-        form.addButton(nil, {x = x, y = y, w = buttonW, h = buttonH}, {
+        field = form.addButton(nil, {x = x, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = esctool_buttons[pvalue.image],
             options = FONT_S,
@@ -2235,6 +2247,10 @@ function rf2ethos.openPageESCTool(folder)
                 rf2ethos.openESCFormLoader(folder, pvalue.script)
             end
         })
+		
+		if ESC_UNKNOWN == true and DEBUG_BADESC_ENABLE == false then
+			field:enable(false)
+		end		
 
         lc = lc + 1
 
@@ -2614,7 +2630,7 @@ function rf2ethos.openMainMenu()
                         elseif pvalue.script == "esc.lua" then
                             rf2ethos.openPageESC(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "preferences.lua" then
-                            rf2ethos.openPagePreferences()
+                            rf2ethos.openPagePreferences(pidx, pvalue.title, pvalue.script)
                         else
                             rf2ethos.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                         end
@@ -2690,20 +2706,27 @@ local function create()
 
 end
 
+function rf2ethos.resetState()
+
+		ESC_MODE = false
+		escPowerCycle = false
+		ESC_MFG = nil
+		resetRates = false
+		ESC_SCRIPT = nil
+		pageLoaded = 100
+		pageTitle = nil
+		pageFile = nil
+		exitAPP = false
+		noRFMsg = false
+		linkUPTime = nil
+		nolinkDialogDisplay = false
+		nolinkDialogValue = 0
+		telemetryState = nil
+
+end
+
 local function close()
-    ESC_MODE = false
-    escPowerCycle = false
-    ESC_MFG = nil
-    ESC_SCRIPT = nil
-    pageLoaded = 100
-    pageTitle = nil
-    pageFile = nil
-    exitAPP = false
-    noRFMsg = false
-    linkUPTime = nil
-    nolinkDialogDisplay = false
-    nolinkDialogValue = 0
-    telemetryState = nil
+	rf2ethos.resetState()
     system.exit()
     return true
 end
