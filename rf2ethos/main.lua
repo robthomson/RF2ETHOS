@@ -459,12 +459,12 @@ local function event(widget, category, value, x, y)
 	
     -- close esc main type selection menu
     if ESC_MODE == true and ESC_MFG == nil and ESC_SCRIPT == nil then
-        if category == 5 then
+        if category == 5 or value == 35 then
             resetRates = false
-            rf2ethos.openMainMenu()
             ESC_MODE = false
             ESC_MFG = nil
             ESC_SCRIPT = nil
+            rf2ethos.openMainMenu()			
             return true
         end
     end
@@ -472,21 +472,22 @@ local function event(widget, category, value, x, y)
     if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
         if category == 5 or value == 35 then
             resetRates = false
-            rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
-            ESC_MODE = false
+            ESC_MODE = true
             ESC_MFG = nil
             ESC_SCRIPT = nil
+            rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)			
             return true
         end
     end
-    -- close esc pages menu
+    -- close esc tool menu
     if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
         if category == 5 or value == 35  then
             resetRates = false
-            rf2ethos.openPageESCToolLoader(ESC_MFG)
-            ESC_MODE = false
-            ESC_MFG = nil
-            ESC_SCRIPT = nil
+            ESC_MODE = true
+			ESC_SCRIPT = nil
+            ESC_NOTREADYCOUNT = 0
+            collectgarbage()
+            rf2ethos.openPageESCTool(ESC_MFG)
             return true
         end
     end
@@ -1931,6 +1932,8 @@ function rf2ethos.openPagePID(idx, title, script)
 end
 
 function rf2ethos.openPageESC(idx, title, script)
+
+	print("openPageESC")
 
     if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
