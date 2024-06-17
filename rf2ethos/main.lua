@@ -90,6 +90,7 @@ local lastTitle = nil
 local lastScript = nil
 
 local ESC_MODE = false
+local ESC_MENUSTATE = 0
 local ESC_MFG = nil
 local ESC_SCRIPT = nil
 local ESC_UNKNOWN = false
@@ -458,7 +459,7 @@ local function event(widget, category, value, x, y)
 
 	
     -- close esc main type selection menu
-    if ESC_MODE == true and ESC_MFG == nil and ESC_SCRIPT == nil then
+    if ESC_MENUSTATE == 1 then
         if category == 5 or value == 35 then
             resetRates = false
             ESC_MODE = false
@@ -469,7 +470,7 @@ local function event(widget, category, value, x, y)
         end
     end
     -- close esc pages menu
-    if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+    if ESC_MENUSTATE == 2 then
         if category == 5 or value == 35 then
             resetRates = false
             ESC_MODE = true
@@ -480,7 +481,7 @@ local function event(widget, category, value, x, y)
         end
     end
     -- close esc tool menu
-    if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+    if ESC_MENUSTATE == 3 then
         if category == 5 or value == 35  then
             resetRates = false
             ESC_MODE = true
@@ -1106,6 +1107,8 @@ end
 function rf2ethos.navigationButtonsEscForm(x, y, w, h)
 
 
+
+
     local padding = 5
     local helpWidth = 0
 
@@ -1508,7 +1511,7 @@ local function fieldHeader(title)
 end
 
 function rf2ethos.openPagePreferences(idx,title,script)
-	uiState = uiStatus.mainMenu  -- 
+	uiState = uiStatus.pages
     mspDataLoaded = false
 
 
@@ -1934,6 +1937,8 @@ end
 function rf2ethos.openPageESC(idx, title, script)
 
 	print("openPageESC")
+	
+	ESC_MENUSTATE = 1
 
     if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
@@ -2106,6 +2111,8 @@ end
 function rf2ethos.openPageESCTool(folder)
 
     print("rf2ethos.openPageESCTool")
+	
+	ESC_MENUSTATE = 2
 
     if progressDialogDisplay == true then
         progressDialogWatchDog = nil
@@ -2295,6 +2302,8 @@ end
 
 --
 function rf2ethos.openESCForm(folder, script)
+
+	ESC_MENUSTATE = 3
 
     if progressDialogDisplay == true then
         progressDialogWatchDog = nil
@@ -2539,6 +2548,7 @@ function rf2ethos.openMainMenu()
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
     escPowerCycle = false
+	ESC_MENUSTATE = 0
 
     -- size of buttons
     iconsizeParam = utils.loadPreference("iconsize")
