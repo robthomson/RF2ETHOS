@@ -661,9 +661,6 @@ function wakeup(widget)
 		end
 	end
 
-
-
-
     -- check telemetry state and overlay dialog if not linked
     if escPowerCycle == true then
         -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
@@ -1514,6 +1511,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
 	uiState = uiStatus.pages
     mspDataLoaded = false
 
+	
 
     lastIdx = idx
     lastSubPage = nil
@@ -1551,6 +1549,10 @@ function rf2ethos.openPagePreferences(idx,title,script)
         paint = function()
         end,
         press = function()
+            lastIdx = nil
+            lastPage = nil
+            lastSubPage = nil
+            ESC_MODE = false		
             rf2ethos.openMainMenu()
         end
     })
@@ -2541,6 +2543,15 @@ function rf2ethos.openMainMenu()
     if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
     end
+
+	-- clear all nav vars
+    lastIdx = nil
+    lastSubPage = nil
+    lastTitle = nil
+    lastScript = nil
+    lastPage = nil
+	
+	
 
 	-- reset page to nil as should be nil on this page
 	Page = nil
