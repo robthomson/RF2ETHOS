@@ -28,6 +28,7 @@ RF2ETHOS has an integrated help system to tell you what the purpose of the field
 
 RF2ETHOS has an integrated help system to tell you what the purpose of the field is that you are editing.
 
+---
 
 Like what you see.  Consider donating..
 
