@@ -13,6 +13,15 @@ Fully supported is:
 
 ---
 
+**NATIVE ETHOS DATA ENTRY**
+
+<img src="https://github.com/robthomson/RF2ETHOS/blob/main/git/rf2ethos-pids.png?raw=true" width="800" alt="HELP PAGE">
+<img src="https://github.com/robthomson/RF2ETHOS/blob/main/git/rf2ethos-other.png?raw=true" width="800" alt="HELP PAGE">
+
+RF2ETHOS has an integrated help system to tell you what the purpose of the field is that you are editing.
+
+---
+
 **RF2ETHOS HELP**
 
 <img src="https://github.com/robthomson/RF2ETHOS/blob/main/git/rf2ethos-help.png?raw=true" width="800" alt="HELP PAGE">
