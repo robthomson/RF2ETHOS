@@ -102,7 +102,9 @@ function MspQueueController:add(message)
 		rf2ethos.print("Queueing command "..message.command.." at position "..#self.messageQueue + 1)
 		self.messageQueue[#self.messageQueue + 1] =  message
 		return self
-	end	
+	else
+		rf2ethos.print("Received a nil message to add to queue??")
+	end
 end
 
 return MspQueueController.new()
