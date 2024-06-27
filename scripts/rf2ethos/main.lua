@@ -49,6 +49,7 @@ local closinghelp = false
 local linkUPTime
 createForm = false
 
+
 local lastLabel = nil
 local NewRateTable
 RateTable = nil
@@ -99,6 +100,10 @@ local ESC_NOTREADYCOUNT = 0
 local progressDialog = false
 local progressDialogDisplay = false
 local progressDialogWatchDog = nil
+local progressDialogPercent = 0
+
+
+
 
 local saveDialog = false
 local saveDialogDisplay = false
@@ -666,6 +671,19 @@ function wakeup(widget)
         -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
         -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
         -- INIT CONFIG MODE
+		if progressDialogDisplay == true then
+
+				if progressDialogPercent >= 100 or ESC_UNKNOWN == false then
+					progressDialogPercent = 0
+					progressDialogDisplay = false
+					progressDialog:close()
+				end
+				progressDialog:value(progressDialogPercent)
+				progressDialog:message("Please power cycle the ESC")
+				
+				progressDialogPercent = progressDialogPercent + 1
+				end
+	
     else
         if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             if telemetryState ~= 1 then
@@ -847,7 +865,7 @@ function wakeup(widget)
             elseif lastScript == "servos.lua" then
                 rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
             elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-                rf2ethos.openPageESCTool(ESC_MFG)
+					rf2ethos.openPageESCTool(ESC_MFG)
             elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
                 rf2ethos.openESCForm(ESC_MFG, ESC_SCRIPT)
             else
@@ -2081,6 +2099,8 @@ end
 -- a then pass on to the actual form display function
 function rf2ethos.openPageESCToolLoader(folder)
 
+	print("rf2ethos.openPageESCToolLoader")
+
     progressDialogDisplay = true
     progressDialogWatchDog = os.clock()
     progressDialog = form.openProgressDialog("Loading...", "Loading data from ESC")
@@ -2112,20 +2132,40 @@ end
 -- /scripts/rf2ethos/ESC/<TYPE>/pages.lua
 function rf2ethos.openPageESCTool(folder)
 
+
     print("rf2ethos.openPageESCTool")
 	
-	ESC_MENUSTATE = 2
 
     if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
+	
+		if escPowerCycle ~= true then
+			progressDialogWatchDog = nil
+			progressDialogDisplay = false
+			progressDialog:close()
+		end
+		
     end
 
-    ESC.init = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
-    escPowerCycle = ESC.init.powerCycle
+    --ESC.init = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
+    --escPowerCycle = ESC.init.powerCycle
 
-    uiState = uiStatus.pages
+
+	--if escPowerCycle == true or escPowerCycle == nil then
+	--	uiState = uiStatus.pages
+	--else
+		uiState = uiStatus.MainMenu
+	--end
+	
+	--[[
+	if escPowerCycle == true or escPowerCycle == nil then
+		progressDialogDisplayESC = true
+		progressDialogWatchDogESC = os.clock()
+		progressDialogESC = form.openProgressDialog("Please power cycle your ESC...", "Waiting for esc...")
+		progressDialogESC:value(0)
+		progressDialogESC:closeAllowed(false)
+	end
+	]]--
+
 
     local windowWidth = LCD_W
     local windowHeight = LCD_H
@@ -2165,22 +2205,22 @@ function rf2ethos.openPageESCTool(folder)
 			ESC_UNKNOWN = false
         end
 
-        if escPowerCycle == true and model == "UNKNOWN ESC" then
+       -- if escPowerCycle == true and model == "UNKNOWN ESC" then
 
-            if escPowerCycleAnimation == nil or escPowerCycleAnimation == "-" or escPowerCycleAnimation == "" then
-                escPowerCycleAnimation = "+"
-            else
-                escPowerCycleAnimation = "-"
-            end
+         --   if escPowerCycleAnimation == nil or escPowerCycleAnimation == "-" or escPowerCycleAnimation == "" then
+        --        escPowerCycleAnimation = "+"
+        --    else
+        --        escPowerCycleAnimation = "-"
+        --    end
 
-            line = form.addLine("")
-            form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation)
+        --    line = form.addLine("")
+        --    form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation)
 
-        else
+        --else
             line = form.addLine("")
             form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, model .. " " .. version .. " " .. fw)
 
-        end
+        --end
     end
 
     local buttonW
