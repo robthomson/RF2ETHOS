@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(rf2ethos.radio.template))()
+local template = assert(utils.loadScript(radio.template))()
 
 local labels = {}
 local fields = {}
@@ -101,7 +101,7 @@ elseif RateTable == 4 then
     rTableName = "ACTUAL"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
 
-    if rf2ethos.radio.text == 2 then
+    if radio.text == 2 then
         cols = {"Cntr. Sens.", "Max Rate", "Expo"}
     else
         cols = {"Center Sensitivity", "Max Rate", "Expo"}
@@ -185,7 +185,6 @@ return {
     minBytes = 25,
     labels = labels,
     fields = fields,
-	simulatorResponse = { 4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0 },
 	refreshswitch = true,	
     rows = rows,
     cols = cols,

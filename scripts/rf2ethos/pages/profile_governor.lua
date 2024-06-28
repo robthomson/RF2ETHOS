@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(rf2ethos.radio.template))()
+local template = assert(utils.loadScript(radio.template))()
 local labels = {}
 local fields = {}
 
@@ -31,6 +31,5 @@ return {
     eepromWrite = true,
     minBytes = 13,
     labels = labels,
-    fields = fields,
-	simulatorResponse = { 208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100 },
+    fields = fields
 }
