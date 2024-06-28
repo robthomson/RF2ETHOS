@@ -49,7 +49,6 @@ local closinghelp = false
 local linkUPTime
 createForm = false
 
-
 local lastLabel = nil
 local NewRateTable
 RateTable = nil
@@ -100,10 +99,6 @@ local ESC_NOTREADYCOUNT = 0
 local progressDialog = false
 local progressDialogDisplay = false
 local progressDialogWatchDog = nil
-local progressDialogPercent = 0
-
-
-
 
 local saveDialog = false
 local saveDialogDisplay = false
@@ -671,19 +666,6 @@ function wakeup(widget)
         -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
         -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
         -- INIT CONFIG MODE
-		if progressDialogDisplay == true then
-
-				if progressDialogPercent >= 100 or ESC_UNKNOWN == false then
-					progressDialogPercent = 0
-					progressDialogDisplay = false
-					progressDialog:close()
-				end
-				progressDialog:value(progressDialogPercent)
-				progressDialog:message("Please power cycle the ESC")
-				
-				progressDialogPercent = progressDialogPercent + 1
-				end
-	
     else
         if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             if telemetryState ~= 1 then
@@ -841,7 +823,21 @@ function wakeup(widget)
     processMspReply(mspPollReply())
 
     if createForm == true then
-        if wasSaving == true or environment.simulation == true then
+		if ESC_MODE == true then
+			if wasLoading == true or environment.simulation == true then
+				if ESC_MFG ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCTool(ESC_MFG)
+				elseif ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+					rf2ethos.openESCForm(ESC_MFG, ESC_SCRIPT)	
+				end
+			elseif wasReloading == true or environment.simulation == true then
+				if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCToolLoader(ESC_MFG)
+				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+					rf2ethos.openESCFormLoader(ESC_MFG, ESC_SCRIPT)
+				end
+			end
+        elseif wasSaving == true or environment.simulation == true then
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
             wasSaving = false
@@ -864,12 +860,8 @@ function wakeup(widget)
                 rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif lastScript == "servos.lua" then
                 rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
-            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-					rf2ethos.openPageESCTool(ESC_MFG)
-            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-                rf2ethos.openESCForm(ESC_MFG, ESC_SCRIPT)
             else
-                rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+					rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
             end
         elseif wasReloading == true or environment.simulation == true then
             wasReloading = false
@@ -879,10 +871,6 @@ function wakeup(widget)
                 rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif lastScript == "servos.lua" then
                 rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
-            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-                rf2ethos.openPageESCToolLoader(ESC_MFG)
-            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-                rf2ethos.openESCFormLoader(ESC_MFG, ESC_SCRIPT)
             else
                 rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             end
@@ -1078,7 +1066,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
             rf2ethos.openMainMenu()
         end
     })
-	field:focus()
+	--field:focus()
 
     form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
         text = "SAVE",
@@ -1141,7 +1129,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.openPageESCTool(ESC_MFG)
         end
     })
-	field:focus()
+	--field:focus()
 
     form.addButton(line, {x = x - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "SAVE",
@@ -1574,7 +1562,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
             rf2ethos.openMainMenu()
         end
     })
-	field:focus()
+	--field:focus()
 
     iconsizeParam = utils.loadPreference("iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
@@ -1654,11 +1642,7 @@ end
 
 function rf2ethos.openPageDefault(idx, subpage, title, script)
 
-    if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
-    end
+
 
     local fieldAR = {}
 
@@ -1690,6 +1674,12 @@ function rf2ethos.openPageDefault(idx, subpage, title, script)
         end
     end
 
+
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
+    end
 
 end
 
@@ -1723,11 +1713,7 @@ end
 
 function rf2ethos.openPageSERVOS(idx, title, script)
 
-    if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
-    end
+
 
     reloadServos = false
 
@@ -1818,6 +1804,13 @@ function rf2ethos.openPageSERVOS(idx, title, script)
         end
     end
 
+
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
+    end
+
 end
 
 function rf2ethos.openPagePIDLoader(idx, title, script)
@@ -1851,11 +1844,6 @@ end
 
 function rf2ethos.openPagePID(idx, title, script)
 
-    if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
-    end
 
     uiState = uiStatus.pages
 
@@ -1950,6 +1938,11 @@ function rf2ethos.openPagePID(idx, title, script)
         end
     end
 
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
+    end
 
 
 end
@@ -2012,7 +2005,7 @@ function rf2ethos.openPageESC(idx, title, script)
             rf2ethos.openMainMenu()
         end
     })
-	field:focus()
+	--field:focus()
 
     local buttonW
     local buttonH
@@ -2099,8 +2092,6 @@ end
 -- a then pass on to the actual form display function
 function rf2ethos.openPageESCToolLoader(folder)
 
-	print("rf2ethos.openPageESCToolLoader")
-
     progressDialogDisplay = true
     progressDialogWatchDog = os.clock()
     progressDialog = form.openProgressDialog("Loading...", "Loading data from ESC")
@@ -2133,39 +2124,21 @@ end
 function rf2ethos.openPageESCTool(folder)
 
 
+
     print("rf2ethos.openPageESCTool")
 	
+	ESC_MENUSTATE = 2
 
-    if progressDialogDisplay == true then
-	
-		if escPowerCycle ~= true then
-			progressDialogWatchDog = nil
-			progressDialogDisplay = false
-			progressDialog:close()
-		end
-		
-    end
+
 
     --ESC.init = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
     --escPowerCycle = ESC.init.powerCycle
 
-
-	--if escPowerCycle == true or escPowerCycle == nil then
-	--	uiState = uiStatus.pages
-	--else
+	if escPowerCycle == true then
+		uiState = uiStatus.pages
+	else	
 		uiState = uiStatus.MainMenu
-	--end
-	
-	--[[
-	if escPowerCycle == true or escPowerCycle == nil then
-		progressDialogDisplayESC = true
-		progressDialogWatchDogESC = os.clock()
-		progressDialogESC = form.openProgressDialog("Please power cycle your ESC...", "Waiting for esc...")
-		progressDialogESC:value(0)
-		progressDialogESC:closeAllowed(false)
 	end
-	]]--
-
 
     local windowWidth = LCD_W
     local windowHeight = LCD_H
@@ -2189,7 +2162,7 @@ function rf2ethos.openPageESCTool(folder)
             triggerESCMAINMENU = true
         end
     })
-	field:focus()
+	--field:focus()
 
     ESC.pages = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
 
@@ -2205,22 +2178,23 @@ function rf2ethos.openPageESCTool(folder)
 			ESC_UNKNOWN = false
         end
 
-       -- if escPowerCycle == true and model == "UNKNOWN ESC" then
+        if escPowerCycle == true and model == "UNKNOWN ESC" then
 
-         --   if escPowerCycleAnimation == nil or escPowerCycleAnimation == "-" or escPowerCycleAnimation == "" then
-        --        escPowerCycleAnimation = "+"
-        --    else
-        --        escPowerCycleAnimation = "-"
-        --    end
+            if escPowerCycleAnimation == nil or escPowerCycleAnimation == "-" or escPowerCycleAnimation == "" then
+                escPowerCycleAnimation = "+"
+            else
+                escPowerCycleAnimation = "-"
+            end
 
-        --    line = form.addLine("")
-        --    form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation)
+            line = form.addLine("")
+            form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation)
 
-        --else
+        else
+	
             line = form.addLine("")
             form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, model .. " " .. version .. " " .. fw)
 
-        --end
+        end
     end
 
     local buttonW
@@ -2230,6 +2204,7 @@ function rf2ethos.openPageESCTool(folder)
 
     -- size of buttons
     iconsizeParam = utils.loadPreference("iconsize")
+	
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     else
@@ -2288,6 +2263,7 @@ function rf2ethos.openPageESCTool(folder)
             esctool_buttons[pvalue.image] = nil
         end
 
+
         field = form.addButton(nil, {x = x, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = esctool_buttons[pvalue.image],
@@ -2310,6 +2286,12 @@ function rf2ethos.openPageESCTool(folder)
             lc = 0
         end
 
+    end
+
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
     end
 
 end
@@ -2347,11 +2329,7 @@ function rf2ethos.openESCForm(folder, script)
 
 	ESC_MENUSTATE = 3
 
-    if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
-    end
+
 
     local fieldAR = {}
     uiState = uiStatus.pages
@@ -2406,6 +2384,11 @@ function rf2ethos.openESCForm(folder, script)
         end
     end
 
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
+    end
 
 end
 
@@ -2440,11 +2423,7 @@ end
 
 function rf2ethos.openPageRATES(idx, subpage, title, script)
 
-    if progressDialogDisplay == true then
-        progressDialogWatchDog = nil
-        progressDialogDisplay = false
-        progressDialog:close()
-    end
+
 
     if Page.fields then
         local v = Page.fields[13].value
@@ -2574,7 +2553,11 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-
+    if progressDialogDisplay == true then
+        progressDialogWatchDog = nil
+        progressDialogDisplay = false
+        progressDialog:close()
+    end
 
 end
 
