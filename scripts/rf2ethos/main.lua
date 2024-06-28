@@ -41,7 +41,7 @@ local MainMenu
 local Page
 local init
 local requestTimeout
---local rssiSensor
+local rssiSensor
 local isSaving = false
 local wasSaving = false
 local wasReloading = false
@@ -134,7 +134,28 @@ local function name(widget)
     return translations[locale] or translations["en"]
 end
 
-
+--[[
+local function saveSettings()
+    if Page.values then
+        local payload = Page.values
+        if ESC_MODE == true then
+            payload[2] = 0
+        end
+        if Page.preSave then
+            payload = Page.preSave(Page)
+        end
+        saveTS = os.clock()
+        if pageState == pageStatus.saving then
+            saveRetries = saveRetries + 1
+        else
+            -- print("Attempting to write page values...")
+            pageState = pageStatus.saving
+            saveRetries = 0
+        end
+        protocol.mspWrite(Page.write, payload)
+    end
+end
+]]--
 
 local mspSaveSettings =
 {
@@ -175,14 +196,25 @@ rf2ethos.settingsSaved = function()
     elseif pageState ~= pageStatus.eepromWrite then
         -- If we're not already trying to write to eeprom from a previous save, then we're done.
         invalidatePages()
-		
-		-- flag this job as now done!
 		wasSaving = true
 		createForm = true
     end
 end
 
 
+--[[
+local function eepromWrite()
+    saveTS = os.clock()
+    if pageState == pageStatus.eepromWrite then
+        saveRetries = saveRetries + 1
+    else
+        -- print("Attempting to write to eeprom...")
+        pageState = pageStatus.eepromWrite
+        saveRetries = 0
+    end
+    protocol.mspRead(uiMsp.eepromWrite)
+end
+]]--
 
 local mspEepromWrite =
 {
@@ -197,6 +229,18 @@ local mspEepromWrite =
 }
 
 
+--[[
+local function rebootFc()
+    -- Only sent once.  I think a response may come back from FC if successful?
+    -- May want to either check for that and repeat if not, or check for loss of telemetry to confirm, etc.
+    -- TODO: Implement an auto-retry?  Right now if the command gets lost then there's just no reboot and no notice.
+    -- print("Attempting to reboot the FC (one shot)...")
+    saveTS = os.clock()
+    pageState = pageStatus.rebooting
+    protocol.mspRead(uiMsp.reboot)
+    -- https://github.com/rotorflight/rotorflight-firmware/blob/9a5b86d915df557ff320f30f1376cb8ce9377157/src/main/msp/msp.c#L1853
+end
+]]--
 local function rebootFc()
     rf2ethos.print("Attempting to reboot the FC...")
     pageState = pageStatus.rebooting
@@ -311,9 +355,9 @@ rf2ethos.getRSSI = function()
         return 100
     end
 
-    if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() then
+    if rssiSensor ~= nil and rssiSensor:state() then
         -- this will return the last known value if nothing is received
-        return rf2ethos.rssiSensor:value()
+        return rssiSensor:value()
     end
     -- return 0 if no telemetry signal to match OpenTX
     return 0
@@ -711,7 +755,7 @@ function wakeup(widget)
     -- some watchdogs to enable close buttons on save and progress if they time-out
     if saveDialogDisplay == true then
         if saveDialogWatchDog ~= nil then
-            if (os.clock() - saveDialogWatchDog) > 20 then
+            if (os.clock() - saveDialogWatchDog) > 60 then
                 saveDialog:closeAllowed(true)
             end
         end
@@ -724,7 +768,7 @@ function wakeup(widget)
     else
         if progressDialogDisplay == true then
             if progressDialogWatchDog ~= nil then
-                if (os.clock() - progressDialogWatchDog) > 20 then
+                if (os.clock() - progressDialogWatchDog) > 60 then
                     progressDialog:message("Error.. we timed out")
                     progressDialog:closeAllowed(true)
                 end
@@ -748,7 +792,7 @@ function wakeup(widget)
 
         local initSuccess = init.f()
 
-        print(initSuccess)
+        -- print(initSuccess)
 
         if prevInit ~= init.t then
             -- Update initialization message
@@ -1607,7 +1651,6 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-
     Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
@@ -2394,7 +2437,6 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-
     Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
     collectgarbage()
 
@@ -2565,8 +2607,6 @@ function rf2ethos.openMainMenu()
         return
     end
 
-
-
 	-- clear all nav vars
     lastIdx = nil
     lastSubPage = nil
@@ -2735,9 +2775,11 @@ local function create()
 
     rf2ethos.protocol = assert(utils.loadScript("/scripts/rf2ethos/protocols.lua"))()
     rf2ethos.radio = assert(utils.loadScript("/scripts/rf2ethos/radios.lua"))().msp
+
     rf2ethos.mspQueue = assert(utils.loadScript("/scripts/rf2ethos/msp/mspQueue.lua"))()
     rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries
     rf2ethos.mspHelper = assert(utils.loadScript("/scripts/rf2ethos/msp/mspHelper.lua"))()
+
     assert(utils.loadScript(rf2ethos.protocol.mspTransport))()
     assert(utils.loadScript("/scripts/rf2ethos/msp/common.lua"))()
 	
@@ -2746,6 +2788,20 @@ local function create()
 
     fieldHelpTxt = assert(utils.loadScript("/scripts/rf2ethos/help/fields.lua"))()
 
+    sensor = sport.getSensor({primId = 0x32})
+    rssiSensor = system.getSource("RSSI")
+    if not rssiSensor then
+        rssiSensor = system.getSource("RSSI 2.4G")
+        if not rssiSensor then
+            rssiSensor = system.getSource("RSSI 900M")
+            if not rssiSensor then
+                rssiSensor = system.getSource("Rx RSSI1")
+                if not rssiSensor then
+                    rssiSensor = system.getSource("Rx RSSI2")
+                end
+            end
+        end
+    end
 
     -- Initial var setting
     saveTimeout = rf2ethos.protocol.saveTimeout
