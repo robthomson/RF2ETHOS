@@ -68,8 +68,10 @@ local triggerSAVE = false
 local triggerRELOAD = false
 local triggerESCRELOAD = false
 local triggerESCMAINMENU = false
+local triggerESCLOADER = false
 local escPowerCycle = false
 local escPowerCycleAnimation
+local escPowerCycleLoader = 0
 
 local fieldHelpTxt = nil
 
@@ -568,7 +570,37 @@ function wakeup(widget)
         end
     end
 	
-	
+
+	-- ESC LOADER
+	if triggerESCLOADER == true then
+		if progressDialogDisplay ~= true then
+			-- we will prob never hit this loop in reality
+			progressDialogDisplay = true
+			progressDialogWatchDog = os.clock()
+			progressDialog = form.openProgressDialog("Searching...", "Please power cycle the esc")
+			progressDialog:value(0)
+			progressDialog:closeAllowed(false)	
+		else
+			-- this is where we should hit
+			
+			if escPowerCycleLoader <= 95 then
+				progressDialog:message("Please power cycle the esc")
+			else
+				progressDialog:message("Aborting...")
+			end
+			progressDialog:value(escPowerCycleLoader)
+			
+			escPowerCycleLoader = escPowerCycleLoader + 1
+			
+			if escPowerCycleLoader == 100 then
+				escPowerCycleLoader = 0
+				progressDialog:close()
+				triggerESCMAINMENU = true
+			end
+
+		
+		end
+	end
 
 
     -- capture profile switching and trigger a reload if needs be
@@ -2136,6 +2168,7 @@ function rf2ethos.openPageESCTool(folder)
 
 	if escPowerCycle == true then
 		uiState = uiStatus.pages
+		triggerESCLOADER = true
 	else	
 		uiState = uiStatus.MainMenu
 	end
@@ -2190,7 +2223,7 @@ function rf2ethos.openPageESCTool(folder)
             form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, "Please power cycle the speed controller " .. escPowerCycleAnimation)
 
         else
-	
+			triggerESCLOADER = false
             line = form.addLine("")
             form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, model .. " " .. version .. " " .. fw)
 
@@ -2288,7 +2321,7 @@ function rf2ethos.openPageESCTool(folder)
 
     end
 
-    if progressDialogDisplay == true then
+    if progressDialogDisplay == true and triggerESCLOADER ~= true then
         progressDialogWatchDog = nil
         progressDialogDisplay = false
         progressDialog:close()
