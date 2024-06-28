@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(radio.template))()
+local template = assert(utils.loadScript(rf2ethos.radio.template))()
 
 local fields = {}
 local rows = {}
@@ -47,6 +47,7 @@ return {
 	refreshswitch = true,	
     minBytes = 34,
     fields = fields,
+	simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0 },
     rows = rows,
     cols = cols
 }
