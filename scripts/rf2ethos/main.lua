@@ -257,7 +257,7 @@ local function processMspReply(cmd, rx_buf, err)
         ESC_NOTREADYCOUNT = ESC_NOTREADYCOUNT + 1
         if ESC_NOTREADYCOUNT >= 5 then
             ESC_UNKNOWN = true
-            mspDataLoaded = true
+            mspDataLoaded = true		
         end
 
     elseif ESC_MODE == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
@@ -287,6 +287,8 @@ local function processMspReply(cmd, rx_buf, err)
         mspDataLoaded = true
         ESC_UNKNOWN = false
         ESC_NOTREADYCOUNT = 0
+		
+		
     end
 
 end
@@ -601,7 +603,7 @@ function wakeup(widget)
 		
 		end
 	end
-
+	
 
     -- capture profile switching and trigger a reload if needs be
 
@@ -854,22 +856,8 @@ function wakeup(widget)
     mspProcessTxQ()
     processMspReply(mspPollReply())
 
-    if createForm == true then
-		if ESC_MODE == true then
-			if wasLoading == true or environment.simulation == true then
-				if ESC_MFG ~= nil and ESC_SCRIPT == nil then
-					rf2ethos.openPageESCTool(ESC_MFG)
-				elseif ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-					rf2ethos.openESCForm(ESC_MFG, ESC_SCRIPT)	
-				end
-			elseif wasReloading == true or environment.simulation == true then
-				if ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
-					rf2ethos.openPageESCToolLoader(ESC_MFG)
-				elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
-					rf2ethos.openESCFormLoader(ESC_MFG, ESC_SCRIPT)
-				end
-			end
-        elseif wasSaving == true or environment.simulation == true then
+if createForm == true then
+        if wasSaving == true or environment.simulation == true then
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
             wasSaving = false
@@ -892,8 +880,12 @@ function wakeup(widget)
                 rf2ethos.openPageRATES(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif lastScript == "servos.lua" then
                 rf2ethos.openPageSERVOS(lastIdx, lastTitle, lastScript)
+            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+					rf2ethos.openPageESCTool(ESC_MFG)
+            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+                rf2ethos.openESCForm(ESC_MFG, ESC_SCRIPT)
             else
-					rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
+                rf2ethos.openPageDefault(lastIdx, lastSubPage, lastTitle, lastScript)
             end
         elseif wasReloading == true or environment.simulation == true then
             wasReloading = false
@@ -903,6 +895,10 @@ function wakeup(widget)
                 rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             elseif lastScript == "servos.lua" then
                 rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT == nil then
+                rf2ethos.openPageESCToolLoader(ESC_MFG)
+            elseif ESC_MODE == true and ESC_MFG ~= nil and ESC_SCRIPT ~= nil then
+                rf2ethos.openESCFormLoader(ESC_MFG, ESC_SCRIPT)
             else
                 rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
             end
@@ -995,10 +991,19 @@ function wakeup(widget)
                 end
             }
         }
+		local theTitle
+		local theMsg
+		if ESC_MODE == true then
+			theTitle = "SAVE SETTINGS TO ESC"
+			theMsg = "Save current page to the speed controller"
+		else
+			theTitle = "SAVE SETTINGS TO FBL"
+			theMsg = "Save current page to flight controller"
+		end
         form.openDialog({
             width = nil,
-            title = "SAVE SETTINGS TO FBL",
-            message = "Save current page to flight controller",
+            title = theTitle,
+            message = theMsg,
             buttons = buttons,
             wakeup = function()
             end,
@@ -1098,7 +1103,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
             rf2ethos.openMainMenu()
         end
     })
-	--field:focus()
+	field:focus()
 
     form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
         text = "SAVE",
@@ -1161,7 +1166,7 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.openPageESCTool(ESC_MFG)
         end
     })
-	--field:focus()
+	field:focus()
 
     form.addButton(line, {x = x - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "SAVE",
@@ -1170,37 +1175,8 @@ function rf2ethos.navigationButtonsEscForm(x, y, w, h)
         paint = function()
         end,
         press = function()
-
-            local buttons = {
-                {
-                    label = "        OK        ",
-                    action = function()
-                        isSaving = true
-                        wasSaving = true
-                        ESC_NOTREADYCOUNT = 0
-                        rf2ethos.debugSave()
-                        saveSettings()
-                        return true
-                    end
-                }, {
-                    label = "CANCEL",
-                    action = function()
-                        return true
-                    end
-                }
-            }
-            form.openDialog({
-                width = nil,
-                title = "SAVE SETTINGS TO ESC",
-                message = "Save current page to ESC",
-                buttons = buttons,
-                wakeup = function()
-                end,
-                paint = function()
-                end,
-                options = TEXT_LEFT
-            })
-
+						ESC_NOTREADYCOUNT = 0
+						triggerSAVE = true
         end
     })
 
@@ -1550,7 +1526,6 @@ function rf2ethos.openPagePreferences(idx,title,script)
     mspDataLoaded = false
 
 	
-
     lastIdx = idx
     lastSubPage = nil
     lastTitle = title
@@ -1594,7 +1569,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
             rf2ethos.openMainMenu()
         end
     })
-	--field:focus()
+	field:focus()
 
     iconsizeParam = utils.loadPreference("iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
@@ -2021,7 +1996,7 @@ function rf2ethos.openPageESC(idx, title, script)
     form.addLine(title)
 
     buttonW = 100
-    x = windowWidth - buttonW
+    local x = windowWidth - buttonW
 
     field = form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
         text = "MENU",
@@ -2037,7 +2012,7 @@ function rf2ethos.openPageESC(idx, title, script)
             rf2ethos.openMainMenu()
         end
     })
-	--field:focus()
+	field:focus()
 
     local buttonW
     local buttonH
@@ -2071,6 +2046,7 @@ function rf2ethos.openPageESC(idx, title, script)
     local ESCMenu = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
 
     local lc = 0
+	local bx = 0
 
     for pidx, pvalue in ipairs(ESCMenu.pages) do
 
@@ -2087,7 +2063,7 @@ function rf2ethos.openPageESC(idx, title, script)
         end
 
         if lc >= 0 then
-            x = (buttonW + padding) * lc
+            bx = (buttonW + padding) * lc
         end
 
         if iconsizeParam ~= 0 then
@@ -2098,7 +2074,7 @@ function rf2ethos.openPageESC(idx, title, script)
             esc_buttons[pidx] = nil
         end
 
-        form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
+        form.addButton(line, {x = bx, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = esc_buttons[pidx],
             options = FONT_S,
@@ -2183,7 +2159,7 @@ function rf2ethos.openPageESCTool(folder)
     line = form.addLine(lastTitle .. ' / ' .. ESC.init.toolName)
 
     buttonW = 100
-    x = windowWidth - buttonW
+    local x = windowWidth - buttonW
 
     field = form.addButton(line, {x = x, y = radio.linePaddingTop, w = buttonW, h = radio.navbuttonHeight}, {
         text = "MENU",
@@ -2195,7 +2171,7 @@ function rf2ethos.openPageESCTool(folder)
             triggerESCMAINMENU = true
         end
     })
-	--field:focus()
+	field:focus()
 
     ESC.pages = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
 
@@ -2226,7 +2202,7 @@ function rf2ethos.openPageESCTool(folder)
 			triggerESCLOADER = false
             line = form.addLine("")
             form.addStaticText(line, {x = 0, y = radio.linePaddingTop, w = LCD_W, h = radio.buttonHeight}, model .. " " .. version .. " " .. fw)
-
+			
         end
     end
 
@@ -2269,6 +2245,7 @@ function rf2ethos.openPageESCTool(folder)
     end
 
     local lc = 0
+	local bx = 0
 
     for pidx, pvalue in ipairs(ESC.pages) do
 
@@ -2285,7 +2262,7 @@ function rf2ethos.openPageESCTool(folder)
         end
 
         if lc >= 0 then
-            x = (buttonW + padding) * lc
+            bx = (buttonW + padding) * lc
         end
 
         if iconsizeParam ~= 0 then
@@ -2296,13 +2273,12 @@ function rf2ethos.openPageESCTool(folder)
             esctool_buttons[pvalue.image] = nil
         end
 
-
-        field = form.addButton(nil, {x = x, y = y, w = buttonW, h = buttonH}, {
+		print("x = ".. bx..", y = ".. y..", w = ".. buttonW.. ", h = ".. buttonH)
+        field = form.addButton(nil, {x = bx, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = esctool_buttons[pvalue.image],
             options = FONT_S,
             paint = function()
-
             end,
             press = function()
                 rf2ethos.openESCFormLoader(folder, pvalue.script)
@@ -2327,11 +2303,14 @@ function rf2ethos.openPageESCTool(folder)
         progressDialog:close()
     end
 
+
 end
 
 -- preload the page for the specic module of esc and display
 -- a then pass on to the actual form display function
 function rf2ethos.openESCFormLoader(folder, script)
+
+	print("rf2ethos.openESCFormLoader")
 
     ESC_MFG = folder
     ESC_SCRIPT = script
@@ -2360,9 +2339,9 @@ end
 --
 function rf2ethos.openESCForm(folder, script)
 
+	print("rf2ethos.openESCForm")
+
 	ESC_MENUSTATE = 3
-
-
 
     local fieldAR = {}
     uiState = uiStatus.pages

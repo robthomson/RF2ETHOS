@@ -30,9 +30,7 @@ return {
     labels = labels,
     fields = fields,
     escinfo = escinfo,
-
     svFlags = 0,
-
     postLoad = function(self)
 
         local model = getEscType(self)
