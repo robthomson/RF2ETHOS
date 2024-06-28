@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(radio.template))()
+local template = assert(utils.loadScript(rf2ethos.radio.template))()
 
 local labels = {}
 local fields = {}
@@ -23,6 +23,7 @@ return {
     minBytes = 33,
     labels = labels,
     fields = fields,
+	simulatorResponse = { 4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0},
     postRead = function(self)
         self.servoCount = self.values[1]
         if rf2ethos.lastServoCount ~= self.servoCount then

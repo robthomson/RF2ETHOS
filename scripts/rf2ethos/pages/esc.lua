@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(radio.template))()
+local template = assert(utils.loadScript(rf2ethos.radio.template))()
 
 local pages = {}
 

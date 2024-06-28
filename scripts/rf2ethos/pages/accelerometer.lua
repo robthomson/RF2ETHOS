@@ -1,4 +1,4 @@
-local template = assert(utils.loadScript(radio.template))()
+local template = assert(utils.loadScript(rf2ethos.radio.template))()
 
 local labels = {}
 local fields = {}
@@ -15,5 +15,6 @@ return {
     title = "Accelerometer",
     minBytes = 4,
     labels = labels,
-    fields = fields
+    fields = fields,
+	simulatorResponse = { 0, 0, 0, 0 },
 }
