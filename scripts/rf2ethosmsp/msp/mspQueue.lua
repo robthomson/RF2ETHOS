@@ -43,16 +43,16 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    --rf2ethos.print("retryCount: "..self.retryCount)
+    --print("retryCount: "..self.retryCount)
 
     if not rf2ethos.runningInSimulator then
-        if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 0.5 < rf2ethos.clock() then
+        if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 0.5 < os.clock() then
             if self.currentMessage.payload then
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
             else
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, {})
             end
-            self.lastTimeCommandSent = rf2ethos.clock()
+            self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
         end
 
@@ -60,7 +60,7 @@ function MspQueueController:processQueue()
         cmd, buf, err = mspPollReply()
     else
         if not self.currentMessage.simulatorResponse then
-            rf2ethos.print("No simulator response for command "..tostring(self.currentMessage.command))
+            print("No simulator response for command "..tostring(self.currentMessage.command))
             self.currentMessage = nil
             return
         end
@@ -69,10 +69,10 @@ function MspQueueController:processQueue()
         err = nil
     end
 
-    if cmd then rf2ethos.print("Received cmd: "..tostring(cmd)) end
+    if cmd then print("Received cmd: "..tostring(cmd)) end
 
     if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) then -- 68 = MSP_REBOOT
-        --rf2ethos.print("Received: {" .. joinTableItems(buf, ", ") .. "}")
+        --print("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end
@@ -99,12 +99,10 @@ end
 function MspQueueController:add(message)
 	if message ~= nil then
 		message = deepCopy(message)
-		rf2ethos.print("Queueing command "..message.command.." at position "..#self.messageQueue + 1)
+		print("Queueing command "..message.command.." at position "..#self.messageQueue + 1)
 		self.messageQueue[#self.messageQueue + 1] =  message
 		return self
-	else
-		rf2ethos.print("Received a nil message to add to queue??")
-	end
+	end	
 end
 
 return MspQueueController.new()

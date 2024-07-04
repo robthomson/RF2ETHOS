@@ -1,4 +1,3 @@
-local template = assert(utils.loadScript(rf2ethos.radio.template))()
 
 local labels = {}
 local fields = {}
@@ -37,6 +36,5 @@ return {
     title = "Mixer",
     minBytes = 19,
     labels = labels,
-    fields = fields,
-	simulatorResponse = { 0, 0, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+    fields = fields
 }

@@ -1,9 +1,10 @@
+
 local utils = {}
 
 -- save a value to preferences
 function utils.storePreference(preference, value)
     -- open preference file
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file = preference .. ".cfg"
 
     if value == nil then
         value = ""
@@ -23,7 +24,7 @@ function utils.storePreference(preference, value)
 
     print("Write Preference: " .. file .. " [" .. value .. "]")
 
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file =  preference .. ".cfg"
 
     -- then write current data
     local f
@@ -36,7 +37,7 @@ end
 -- retrieve a value from preferences
 function utils.loadPreference(preference)
     -- open preference file
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file = preference .. ".cfg"
 
     print("Read Preference:  " .. file)
 
@@ -175,7 +176,7 @@ end
 -- set positions of form elements
 function utils.getInlinePositions(f, Page)
     local tmp_inline_size = utils.getInlineSize(f.label, Page)
-    local inline_multiplier = rf2ethos.radio.inlinesize_mult
+    local inline_multiplier = radio.inlinesize_mult
 
     local inline_size = tmp_inline_size * inline_multiplier
 
@@ -190,8 +191,8 @@ function utils.getInlinePositions(f, Page)
 
     local eX
     local eW = fieldW - padding
-    local eH = rf2ethos.radio.navbuttonHeight
-    local eY = rf2ethos.radio.linePaddingTop
+    local eH = radio.navbuttonHeight
+    local eY = radio.linePaddingTop
     local posX
     lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)

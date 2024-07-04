@@ -1,6 +1,5 @@
 -- All RF2 globals should be stored in the rf2 table, to avoid conflict with globals from other scripts.
 rf2ethos = {
-    baseDir = "/scripts/rf2ethos/",
     runningInSimulator = system:getVersion().simulation,
 
     sportTelemetryPop = function()
@@ -48,13 +47,6 @@ rf2ethos = {
         return true
     end,
 
-    loadScript = function(script)
-        -- loadScript also works on 1.5.9, but is undocumented (?)
-        if not rf2ethos.startsWith(script, rf2ethos.baseDir) then
-            script = rf2ethos.baseDir..script
-        end
-        return loadfile(script)
-    end,
 
     getWindowSize = function()
         return lcd.getWindowSize()
@@ -64,7 +56,7 @@ rf2ethos = {
     end,
 
     log = function(str)
-        local f = io.open("/scrips/rf2ethos/rf2ethos.log", 'a')
+        local f = io.open("/LOGS/rf2ethos.log", 'a')
         io.write(f, tostring(str) .. "\n")
         io.close(f)
     end,
@@ -76,5 +68,3 @@ rf2ethos = {
 
     clock = os.clock,
 }
-
-
