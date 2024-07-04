@@ -1,9 +1,10 @@
+
 local utils = {}
 
 -- save a value to preferences
 function utils.storePreference(preference, value)
     -- open preference file
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file = preference .. ".cfg"
 
     if value == nil then
         value = ""
@@ -23,7 +24,7 @@ function utils.storePreference(preference, value)
 
     print("Write Preference: " .. file .. " [" .. value .. "]")
 
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file =  preference .. ".cfg"
 
     -- then write current data
     local f
@@ -36,7 +37,7 @@ end
 -- retrieve a value from preferences
 function utils.loadPreference(preference)
     -- open preference file
-    file = "/scripts/rf2ethos/preferences/" .. preference .. ".cfg"
+    file = preference .. ".cfg"
 
     print("Read Preference:  " .. file)
 

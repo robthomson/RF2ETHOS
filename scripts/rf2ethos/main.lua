@@ -1,4 +1,8 @@
 -- RotorFlight + ETHOS LUA configuration
+
+local TOOL_NAME = "RF2ETHOS"
+local TOOL_DIR = "/scripts/rf2ethos/"
+
 local environment = system.getVersion()
 
 local LUA_VERSION = "2.0 - 240229"
@@ -119,12 +123,12 @@ radio = nil
 sensor = nil
 
 rf2ethos = {}
-bit32 = assert(loadfile("/scripts/rf2ethos/lib/bit32.lua"))()
+bit32 = assert(loadfile(TOOL_DIR .. "lib/bit32.lua"))()
 
 utils = {}
-utils = assert(loadfile("/scripts/rf2ethos/lib/utils.lua"))()
+utils = assert(loadfile(TOOL_DIR .. "lib/utils.lua"))()
 
-local translations = {en = "RF2 ETHOS"}
+local translations = {en = TOOL_NAME}
 
 local function name(widget)
     local locale = system.getLocale()
@@ -411,7 +415,7 @@ function rf2ethos.openPagehelp(helpdata, section)
     else
         txtData = helpdata[section]["TEXT"]
     end
-    local qr = helpdata[section]["qrCODE"]
+    local qr = TOOL_DIR .. helpdata[section]["qrCODE"]
 
     local message = ""
 
@@ -777,13 +781,14 @@ function wakeup(widget)
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
     updateTelemetryState()
 
+	--[[
     if uiState == uiStatus.init then
-        -- print("Init")
+        print("Init")
         local prevInit
         if init ~= nil then
             prevInit = init.t
         end
-        init = init or assert(utils.loadScript("/scripts/rf2ethos/ui_init.lua"))()
+        init = init or assert(loadfile(TOOL_DIR .. "ui_init.lua"))()
 
         local initSuccess = init.f()
 
@@ -800,7 +805,9 @@ function wakeup(widget)
         invalidatePages()
         uiState = prevUiState or uiStatus.mainMenu
         prevUiState = nil
-    elseif uiState == uiStatus.pages then
+    else
+	]]--
+	if uiState == uiStatus.pages then
         if prevUiState ~= uiState then
             prevUiState = uiState
         end
@@ -832,13 +839,13 @@ function wakeup(widget)
         if not Page then
             if ESC_MODE == true then
                 if ESC_SCRIPT ~= nil then
-                    Page = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()
+                    Page = assert(loadfile(TOOL_DIR .. "ESC/" .. ESC_MFG .. "/pages/" .. ESC_SCRIPT))()
                 else
                     print("ESC_SCRIPT is not present so cannot load as expected")
                 end
             else
                 if lastPage ~= nil then
-                    Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. lastPage))()
+                    Page = assert(loadfile(TOOL_DIR .. "pages/" .. lastPage))()
                 end
                 ESC_MFG = nil
                 ESC_SCRIPT = nil
@@ -1077,7 +1084,7 @@ function rf2ethos.navigationButtons(x, y, w, h)
     local page
 
 
-    help = assert(utils.loadScript("/scripts/rf2ethos/help/pages.lua"))()
+    help = assert(loadfile(TOOL_DIR .. "help/pages.lua"))()
     section = string.gsub(lastScript, ".lua", "") -- remove .lua
     page = lastSubPage
     if page == nil then
@@ -1571,7 +1578,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
     })
 	field:focus()
 
-    iconsizeParam = utils.loadPreference("iconsize")
+    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     end
@@ -1580,11 +1587,11 @@ function rf2ethos.openPagePreferences(idx,title,script)
         return iconsizeParam
     end, function(newValue)
         iconsizeParam = newValue
-        utils.storePreference("iconsize", iconsizeParam)
+        utils.storePreference(TOOL_DIR .. "/preferences/iconsize", iconsizeParam)
     end)
 
     -- PROFILE
-    profileswitchParam = utils.loadPreference("profileswitch")
+    profileswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
     if profileswitchParam ~= nil then
         local s = utils.explode(profileswitchParam, ",")
         profileswitchParam = system.getSource({category = s[1], member = s[2]})
@@ -1597,10 +1604,10 @@ function rf2ethos.openPagePreferences(idx,title,script)
         profileswitchParam = newValue
         local member = profileswitchParam:member()
         local category = profileswitchParam:category()
-        utils.storePreference("profileswitch", category .. "," .. member)
+        utils.storePreference(TOOL_DIR .. "/preferences/profileswitch", category .. "," .. member)
     end)
 
-    rateswitchParam = utils.loadPreference("rateswitch")
+    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
         local s = utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
@@ -1613,7 +1620,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
         rateswitchParam = newValue
         local member = rateswitchParam:member()
         local category = rateswitchParam:category()
-        utils.storePreference("rateswitch", category .. "," .. member)
+        utils.storePreference(TOOL_DIR .. "/preferences/rateswitch", category .. "," .. member)
     end)
 
 end
@@ -1623,7 +1630,7 @@ function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
+    Page = assert(loadfile(TOOL_DIR .. "pages/" .. script))()
     collectgarbage()
 
     progressDialogDisplay = true
@@ -1695,7 +1702,7 @@ function rf2ethos.openPageSERVOSLoader(idx, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
+    Page = assert(loadfile(TOOL_DIR .. "pages/" .. script))()
     collectgarbage()
 
     progressDialogDisplay = true
@@ -1825,7 +1832,7 @@ function rf2ethos.openPagePIDLoader(idx, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
+    Page = assert(loadfile(TOOL_DIR .. "pages/" .. script))()
     collectgarbage()
 
     progressDialogDisplay = true
@@ -1979,7 +1986,7 @@ function rf2ethos.openPageESC(idx, title, script)
     ESC_MODE = true
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference("iconsize")
+    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     else
@@ -2043,7 +2050,7 @@ function rf2ethos.openPageESC(idx, title, script)
         numPerRow = radio.buttonsPerRow
     end
 
-    local ESCMenu = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
+    local ESCMenu = assert(loadfile(TOOL_DIR .. "pages/" .. script))()
 
     local lc = 0
 	local bx = 0
@@ -2068,7 +2075,7 @@ function rf2ethos.openPageESC(idx, title, script)
 
         if iconsizeParam ~= 0 then
             if esc_buttons[pidx] == nil then
-                esc_buttons[pidx] = lcd.loadMask("/scripts/rf2ethos/gfx/esc/" .. pvalue.image)
+                esc_buttons[pidx] = lcd.loadMask(TOOL_DIR .. "gfx/esc/" .. pvalue.image)
             end
         else
             esc_buttons[pidx] = nil
@@ -2113,10 +2120,10 @@ function rf2ethos.openPageESCToolLoader(folder)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    ESC.init = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
+    ESC.init = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/init.lua"))()
     escPowerCycle = ESC.init.powerCycle
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/esc_info.lua"))()
+    Page = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/esc_info.lua"))()
 
     isLoading = true
 
@@ -2139,7 +2146,7 @@ function rf2ethos.openPageESCTool(folder)
 
 
 
-    --ESC.init = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/init.lua"))()
+    --ESC.init = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/init.lua"))()
     --escPowerCycle = ESC.init.powerCycle
 
 	if escPowerCycle == true then
@@ -2173,7 +2180,7 @@ function rf2ethos.openPageESCTool(folder)
     })
 	field:focus()
 
-    ESC.pages = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/pages.lua"))()
+    ESC.pages = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/pages.lua"))()
 
     if Page.escinfo then
         local model = Page.escinfo[1].t
@@ -2212,7 +2219,7 @@ function rf2ethos.openPageESCTool(folder)
     local numPerRow
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference("iconsize")
+    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
 	
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
@@ -2267,7 +2274,7 @@ function rf2ethos.openPageESCTool(folder)
 
         if iconsizeParam ~= 0 then
             if esctool_buttons[pvalue.image] == nil then
-                esctool_buttons[pvalue.image] = lcd.loadMask("/scripts/rf2ethos/gfx/esc/" .. pvalue.image)
+                esctool_buttons[pvalue.image] = lcd.loadMask(TOOL_DIR .. "gfx/esc/" .. pvalue.image)
             end
         else
             esctool_buttons[pvalue.image] = nil
@@ -2319,7 +2326,7 @@ function rf2ethos.openESCFormLoader(folder, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/ESC/" .. folder .. "/pages/" .. script))()
+    Page = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
     progressDialogDisplay = true
@@ -2409,7 +2416,7 @@ function rf2ethos.openPageRATESLoader(idx, subpage, title, script)
     uiState = uiStatus.pages
     mspDataLoaded = false
 
-    Page = assert(utils.loadScript("/scripts/rf2ethos/pages/" .. script))()
+    Page = assert(loadfile(TOOL_DIR .. "pages/" .. script))()
     collectgarbage()
 
     progressDialogDisplay = true
@@ -2457,7 +2464,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    rateswitchParam = utils.loadPreference("rateswitch")
+    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
         local s = utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
@@ -2597,7 +2604,7 @@ function rf2ethos.openMainMenu()
 	ESC_MENUSTATE = 0
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference("iconsize")
+    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     else
@@ -2666,7 +2673,7 @@ function rf2ethos.openMainMenu()
 
                 if iconsizeParam ~= 0 then
                     if gfx_buttons[pidx] == nil then
-                        gfx_buttons[pidx] = lcd.loadMask("/scripts/rf2ethos/gfx/menu/" .. pvalue.image)
+                        gfx_buttons[pidx] = lcd.loadMask(TOOL_DIR .. "gfx/menu/" .. pvalue.image)
                     end
                 else
                     gfx_buttons[pidx] = nil
@@ -2708,7 +2715,7 @@ function rf2ethos.openMainMenu()
 end
 
 function rf2ethos.profileSwitchCheck()
-    profileswitchParam = utils.loadPreference("profileswitch")
+    profileswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
     if profileswitchParam ~= nil then
         local s = utils.explode(profileswitchParam, ",")
         profileswitchParam = system.getSource({category = s[1], member = s[2]})
@@ -2717,7 +2724,7 @@ function rf2ethos.profileSwitchCheck()
 end
 
 function rf2ethos.rateSwitchCheck()
-    rateswitchParam = utils.loadPreference("rateswitch")
+    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
         local s = utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
@@ -2729,12 +2736,12 @@ local function create()
 
     LCD_W, LCD_H = utils.getWindowSize()
 
-    protocol = assert(utils.loadScript("/scripts/rf2ethos/protocols.lua"))()
-    radio = assert(utils.loadScript("/scripts/rf2ethos/radios.lua"))().msp
-    assert(utils.loadScript(protocol.mspTransport))()
-    assert(utils.loadScript("/scripts/rf2ethos/msp/common.lua"))()
+    protocol = assert(loadfile(TOOL_DIR .. "protocols.lua"))()
+    radio = assert(loadfile(TOOL_DIR .. "radios.lua"))().msp
+    assert(loadfile(TOOL_DIR .. protocol.mspTransport))()
+    assert(loadfile(TOOL_DIR .. "msp/common.lua"))()
 
-    fieldHelpTxt = assert(utils.loadScript("/scripts/rf2ethos/help/fields.lua"))()
+    fieldHelpTxt = assert(loadfile(TOOL_DIR .. "help/fields.lua"))()
 
     sensor = sport.getSensor({primId = 0x32})
     rssiSensor = system.getSource("RSSI")
@@ -2759,7 +2766,7 @@ local function create()
     init = nil
     apiVersion = 0
 
-    MainMenu = assert(utils.loadScript("/scripts/rf2ethos/pages.lua"))()
+    MainMenu = assert(loadfile(TOOL_DIR .. "pages.lua"))()
 
     rf2ethos.openMainMenu()
 
@@ -2790,7 +2797,7 @@ local function close()
     return true
 end
 
-local icon = lcd.loadMask("/scripts/rf2ethos/RF.png")
+local icon = lcd.loadMask(TOOL_DIR .. "RF.png")
 
 local function init()
     system.registerSystemTool({event = event, name = name, icon = icon, create = create, wakeup = wakeup, close = close})

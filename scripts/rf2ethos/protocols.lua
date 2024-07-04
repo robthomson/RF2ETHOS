@@ -2,7 +2,7 @@ local environment = system.getVersion()
 
 local supportedProtocols = {
     smartPort = {
-        mspTransport = "/scripts/rf2ethos/msp/sp.lua",
+        mspTransport = "msp/sp.lua",
         push = rf2ethos.sportTelemetryPush,
         maxTxBufferSize = 6,
         maxRxBufferSize = 6,
@@ -10,8 +10,22 @@ local supportedProtocols = {
         saveTimeout = 5.0,
         pageReqTimeout = 0.8
     },
-    crsf = {mspTransport = "/scripts/rf2ethos/msp/crsf.lua", maxTxBufferSize = 8, maxRxBufferSize = 58, saveMaxRetries = 4, saveTimeout = 1.5, pageReqTimeout = 0.8},
-    simulation = {mspTransport = "/scripts/rf2ethos/msp/simulation.lua", maxTxBufferSize = 8, maxRxBufferSize = 58, saveMaxRetries = 2, saveTimeout = 1.5, pageReqTimeout = 0.8}
+    crsf = {
+		mspTransport = "msp/crsf.lua", 
+		maxTxBufferSize = 8, 
+		maxRxBufferSize = 58, 
+		saveMaxRetries = 4, 
+		saveTimeout = 1.5, 
+		pageReqTimeout = 0.8
+		},
+    simulation = {
+		mspTransport = "msp/simulation.lua", 
+		maxTxBufferSize = 8, 
+		maxRxBufferSize = 58, 
+		saveMaxRetries = 2, 
+		saveTimeout = 1.5, 
+		pageReqTimeout = 0.8
+		}
 }
 
 local function getProtocol()

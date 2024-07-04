@@ -5,7 +5,6 @@ local supportedRadios = {
     -- TANDEM X20, TANDEM XE (800x480)
     ["784x406"] = {
         msp = {
-            template = "/scripts/rf2ethos/templates/784x406.lua",
             inlinesize_mult = 1,
             text = 1,
 			menuButtonWidth = 100,
@@ -26,7 +25,6 @@ local supportedRadios = {
     -- TANDEM X18, TWIN X Lite (480x320)
     ["472x288"] = {
         msp = {
-            template = "/scripts/rf2ethos/templates/472x288.lua",
             inlinesize_mult = 1.28,
             text = 2,
 			menuButtonWidth = 60,
@@ -47,7 +45,6 @@ local supportedRadios = {
     -- Horus X10, Horus X12 (480x272)
     ["472x240"] = {
         msp = {
-            template = "/scripts/rf2ethos/templates/472x240.lua",
             inlinesize_mult = 1.0715,
             text = 1,
 			menuButtonWidth = 60,
@@ -68,7 +65,6 @@ local supportedRadios = {
     -- Twin X14 (632x314)
     ["632x314"] = {
         msp = {
-            template = "/scripts/rf2ethos/templates/632x314.lua",
 			menuButtonWidth = 80,
             inlinesize_mult = 1.11,
             text = 2,

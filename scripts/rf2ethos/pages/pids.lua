@@ -1,4 +1,3 @@
-local template = assert(utils.loadScript(radio.template))()
 
 local fields = {}
 local rows = {}

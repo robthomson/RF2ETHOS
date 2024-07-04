@@ -1,8 +1,10 @@
+
+
 data = {}
 
 -- PIDS
 data["pids"] = {}
-data["pids"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/pids.png"
+data["pids"]["qrCODE"] = "gfx/qr/pids.png"
 data["pids"]["TEXT"] = {
     "Increase D, P, I in order until each wobbles, then back off.", "Set F for a good response in full stick flips and rolls.", "If necessary, tweak P:D ratio to set response damping to your liking.",
     "Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", "Increase B if you want sharper response."
@@ -11,7 +13,7 @@ data["pids"]["TEXT"] = {
 -- FLIGHT TUNING RATES
 data["rates_1"] = {}
 data["rates_1"]["table"] = {}
-data["rates_1"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/rates.png"
+data["rates_1"]["qrCODE"] = "gfx/qr/rates.png"
 data["rates_1"]["TEXT"] = {"Default: We keep this to make button appear for rates.", "We will use the sub keys below."}
 -- RATE TABLE NONE
 data["rates_1"]["table"][0] = {"All values are set to zero because no RATE TABLE is in use."}
@@ -48,7 +50,7 @@ data["rates_1"]["table"][5] = {
 
 -- FLIGHT TUNING - MAIN ROTOR
 data["profile_4"] = {}
-data["profile_4"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/mainrotor.png"
+data["profile_4"]["qrCODE"] = "gfx/qr/mainrotor.png"
 data["profile_4"]["TEXT"] = {
     "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing.", "Cross Coupling Gain: Removes roll coupling when only elevator is applied.",
     "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply.", "Cross Coupling Feq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster."
@@ -56,7 +58,7 @@ data["profile_4"]["TEXT"] = {
 
 -- FLIGHT TUNING - TAIL ROTOR
 data["profile_2"] = {}
-data["profile_2"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/tailrotor.png"
+data["profile_2"]["qrCODE"] = "gfx/qr/tailrotor.png"
 data["profile_2"]["TEXT"] = {
     "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even.",
     "Precomp Cutoff: Frequency limit for all yaw precompensation actions.", "Cyclic FF Gain: Tail precompensation for cyclic inputs.",
@@ -66,7 +68,7 @@ data["profile_2"]["TEXT"] = {
 
 -- FLIGHT TUNING - GOVERNOR
 data["profile_governor"] = {}
-data["profile_governor"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/governor.png"
+data["profile_governor"]["qrCODE"] = "gfx/qr/governor.png"
 data["profile_governor"]["TEXT"] = {
     "Full headspeed: Headspeed target when at 100% throttle input.", "PID master gain: How hard the governor works to hold the RPM.", "Gains: Fine tuning of the governor.",
     "Precomp: Governor precomp gain for yaw, cyclic, and collective inputs.", "Max throttle: The maximum throttle % the governor is allowed to use.",
@@ -75,7 +77,7 @@ data["profile_governor"]["TEXT"] = {
 
 -- ADVANCED TUNING - PID CONTROLLER
 data["profile_1"] = {}
-data["profile_1"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/pidcontroller.png"
+data["profile_1"]["qrCODE"] = "gfx/qr/pidcontroller.png"
 data["profile_1"]["TEXT"] = {
     "Error decay ground: PID decay to help prevent heli from tipping over when on the ground.", "Error limit: Angle limit for I-term.", "Offset limit: Angle limit for High Speed Integral (O-term).",
     "Error rotation: Allow errors to be shared between all axes.",
@@ -84,12 +86,12 @@ data["profile_1"]["TEXT"] = {
 
 -- ADVANCED TUNING - PID BANDWIDTH
 data["profile_3"] = {}
-data["profile_3"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/pidbandwidth.png"
+data["profile_3"]["qrCODE"] = "gfx/qr/pidbandwidth.png"
 data["profile_3"]["TEXT"] = {"PID Bandwidth: Overall bandwidth in HZ used by the PID loop.", "D-term cutoff: D-term cutoff frequency in HZ.", "B-term cutoff: B-term cutoff frequency in HZ."}
 
 -- ADVANCED TUNING - AUTO LEVEL
 data["profile_5"] = {}
-data["profile_5"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/autolevel.png"
+data["profile_5"]["qrCODE"] = "gfx/qr/autolevel.png"
 data["profile_5"]["TEXT"] = {
     "Acro Trainer: How aggressively the heli tilts back to level when flying in Acro Trainer Mode.", "Angle Mode: How aggressively the heli tilts back to level when flying in Angle Mode.",
     "Horizon Mode: How aggressively the heli tilts back to level when flying in Horizon Mode."
@@ -97,7 +99,7 @@ data["profile_5"]["TEXT"] = {
 
 -- ADVANCED TUNING - RESCUE
 data["profile_rescue"] = {}
-data["profile_rescue"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/rescue.png"
+data["profile_rescue"]["qrCODE"] = "gfx/qr/rescue.png"
 data["profile_rescue"]["TEXT"] = {
     "Flip to upright: Flip the heli upright when rescue is activated.", "Pull-up: How much collective and for how long to arrest the fall.",
     "Climb: How much collective to maintain a steady climb - and how long.", "Hover: How much collective to maintain a steady hover.",
@@ -107,7 +109,7 @@ data["profile_rescue"]["TEXT"] = {
 
 -- ADVANCED TUNING - RATES
 data["rates_2"] = {}
-data["rates_2"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/rates.png"
+data["rates_2"]["qrCODE"] = "gfx/qr/rates.png"
 data["rates_2"]["TEXT"] = {
     "Rates type: Choose the rate type you prefer flying with. Raceflight and Actual are the most straightforward.",
     "Dynamics: Applied regardless of rates type. Typically left on defaults but can be adjusted to smooth heli movements, like with scale helis."
@@ -115,7 +117,7 @@ data["rates_2"]["TEXT"] = {
 
 -- HARDWARE - SERVO
 data["servos"] = {}
-data["servos"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/servos.png"
+data["servos"]["qrCODE"] = "gfx/qr/servos.png"
 data["servos"]["TEXT"] = {
     "Servo: Select the servo you would like to edit.", "Center: Adjust the center position of the servo.", "Minimum/Maximum: Adjust the end points of the selected servo.",
     "Scale: Adjust the amount the servo moves for a given input.", "Rate: The frequency the servo runs best at - check with manufacturer.",
@@ -124,7 +126,7 @@ data["servos"]["TEXT"] = {
 
 -- HARDWARE - MIXER
 data["mixer"] = {}
-data["mixer"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/mixer.png"
+data["mixer"]["qrCODE"] = "gfx/qr/mixer.png"
 data["mixer"]["TEXT"] = {
     "Swashplate: Adust swash plate geometry, phase angles, and limits.",
     "Link trims: Use to trim out small leveling issues in your swash plate. Typically only used if the swash links are non-adjustable.",
@@ -133,12 +135,12 @@ data["mixer"]["TEXT"] = {
 
 -- HARDWARE - ACCELEROMETER
 data["accelerometer"] = {}
-data["accelerometer"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/board-alignment.png"
+data["accelerometer"]["qrCODE"] = "gfx/qr/board-alignment.png"
 data["accelerometer"]["TEXT"] = {"If your helicopter drifts forward, back, left, or right when in angle mode, use the trim values to compensate."}
 
 -- HARDWARE - FILTERS
 data["filters"] = {}
-data["filters"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/filters.png"
+data["filters"]["qrCODE"] = "gfx/qr/filters.png"
 data["filters"]["TEXT"] = {
     "Typically you would not edit this page without checking your Blackbox logs!", "Gyro lowpass: Lowpass filters for the gyro signal. Typically left at default.",
     "Gyro notch filters: Use for filtering specific frequency ranges. Typically not needed in most helis.",
@@ -147,7 +149,7 @@ data["filters"]["TEXT"] = {
 
 -- HARDWARE - GOVERNOR
 data["governor"] = {}
-data["governor"]["qrCODE"] = "/scripts/rf2ethos/gfx/qr/governor.png"
+data["governor"]["qrCODE"] = "gfx/qr/governor.png"
 data["governor"]["TEXT"] = {"These paramers apply globally to the governor - regardless of the profile in use.", "Broadly - each parameter is simply a time value in seconds for each governor action."}
 
 --[[
