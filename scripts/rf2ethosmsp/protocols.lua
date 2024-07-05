@@ -3,7 +3,7 @@ local supportedProtocols =
     smartPort =
     {
         mspTransport    = "msp/sp.lua",
-        push            = rf2ethosmsp.sportTelemetryPush,
+        push            = rf2ethos.sportTelemetryPush,
         maxTxBufferSize = 6,
         maxRxBufferSize = 6,
         maxRetries      = 3,

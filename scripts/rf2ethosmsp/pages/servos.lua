@@ -25,8 +25,8 @@ return {
 	simulatorResponse = { 4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0},	
     postRead = function(self)
         self.servoCount = self.values[1]
-        if rf2ethosmsp.lastServoCount ~= self.servoCount then
-            rf2ethosmsp.lastServoCount = self.servoCount
+        if rf2ethos.lastServoCount ~= self.servoCount then
+            rf2ethos.lastServoCount = self.servoCount
             -- createForm = true
             -- reloadServos = true
         end
@@ -38,10 +38,10 @@ return {
                 self.servoConfiguration[i][j] = self.values[1 + (i - 1) * 16 + j]
             end
         end
-        if rf2ethosmsp.lastChangedServo == nil then
-            rf2ethosmsp.lastChangedServo = 1
+        if rf2ethos.lastChangedServo == nil then
+            rf2ethos.lastChangedServo = 1
         end
-        self.setValues(self, rf2ethosmsp.lastChangedServo)
+        self.setValues(self, rf2ethos.lastChangedServo)
         self.minBytes = 1 + 16
     end,
     setValues = function(self, servoIndex)
@@ -52,8 +52,8 @@ return {
         end
     end,
     servoChanged = function(self, servoIndex)
-        rf2ethosmsp.lastChangedServo = servoIndex
-        self.setValues(self, rf2ethosmsp.lastChangedServo)
-        rf2ethosmsp.dataBindFields()
+        rf2ethos.lastChangedServo = servoIndex
+        self.setValues(self, rf2ethos.lastChangedServo)
+        rf2ethos.dataBindFields()
     end
 }
