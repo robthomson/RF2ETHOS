@@ -107,9 +107,11 @@ local progressDialog = false
 local progressDialogDisplay = false
 local progressDialogWatchDog = nil
 
+
 local saveDialog = false
 local saveDialogDisplay = false
 local saveDialogWatchDog = nil
+local saveDialogProgressCounter = 0 
 
 local nolinkDialog = false
 local nolinkDialogDisplay = false
@@ -871,12 +873,13 @@ function wakeup(widget)
             prevUiState = uiState
         end
 
+
         if pageState == pageStatus.saving then
             if (saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-				
                 if saveRetries < rf2ethos.protocol.maxRetries then
                     saveSettings()
 					saveRetries = saveRetries + 1
+					
                 else
                     -- Saving failed for some reason
                     saveFailed = true
@@ -888,10 +891,12 @@ function wakeup(widget)
             end
         elseif pageState == pageStatus.eepromWrite then
             if (saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-			               
+               
 				saveDialog:value(100)
 				saveDialog:close()						   
-				invalidatePages()		   
+				invalidatePages()	
+			else
+				saveDialogProgressCounter = saveDialogProgressCounter + 1		
             end
         end
         if not Page then
@@ -1008,6 +1013,7 @@ if createForm == true then
         if pageState >= pageStatus.saving then
             if saveDialogDisplay == false then
                 saveFailed = false
+				saveDialogProgressCounter = 0
                 saveDialogDisplay = true
                 saveDialogWatchDog = os.clock()
                 saveDialog = form.openProgressDialog("Saving...", "Saving data...")
@@ -1024,7 +1030,7 @@ if createForm == true then
                     saveDialog:message("Retry #" .. string.format("%u", saveRetries))
                 end
             elseif pageState == pageStatus.eepromWrite then
-                saveDialog:value(80)
+                saveDialog:value(60 + saveDialogProgressCounter)
                 saveDialog:message("Updating...")
                 if saveRetries > 0 then
                     saveDialog:message("Updating...Retry #" .. string.format("%u", saveRetries))

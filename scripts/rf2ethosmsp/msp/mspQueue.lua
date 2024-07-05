@@ -16,6 +16,7 @@ function MspQueueController:isProcessed()
     return not self.currentMessage and #self.messageQueue == 0
 end
 
+
 --[[
 function joinTableItems(table, delimiter)
     if table == nil or #table == 0 then return "" end
