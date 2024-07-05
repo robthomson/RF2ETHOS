@@ -100,7 +100,7 @@ elseif RateTable == 4 then
     rTableName = "ACTUAL"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
 
-    if rf2ethos.radio.text == 2 then
+    if rf2ethosmsp.radio.text == 2 then
         cols = {"Cntr. Sens.", "Max Rate", "Expo"}
     else
         cols = {"Center Sensitivity", "Max Rate", "Expo"}

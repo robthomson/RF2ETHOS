@@ -1,10 +1,10 @@
 -- All RF2 globals should be stored in the rf2 table, to avoid conflict with globals from other scripts.
-rf2ethos = {
+rf2ethosmsp = {
     runningInSimulator = system:getVersion().simulation,
 
     sportTelemetryPop = function()
         -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
-        local frame = rf2ethos.sensor:popFrame()
+        local frame = rf2ethosmsp.sensor:popFrame()
         if frame == nil then
             return nil, nil, nil, nil
         end
@@ -25,13 +25,13 @@ rf2ethos = {
         -- @param value     value
         -- @retval boolean  data queued in output buffer or not.
         -- @retval nil      incorrect telemetry protocol.  (added in 2.3.4)
-        return rf2ethos.sensor:pushFrame({physId=sensorId, primId=frameId, appId=dataId, value=value})
+        return rf2ethosmsp.sensor:pushFrame({physId=sensorId, primId=frameId, appId=dataId, value=value})
     end,
 
     getRSSI = function()
-        if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() then
+        if rf2ethosmsp.rssiSensor ~= nil and rf2ethosmsp.rssiSensor:state() then
             -- this will return the last known value if nothing is received
-            return rf2ethos.rssiSensor:value()
+            return rf2ethosmsp.rssiSensor:value()
         end
         -- return 0 if no telemetry signal to match OpenTX
         return 0
@@ -56,14 +56,14 @@ rf2ethos = {
     end,
 
     log = function(str)
-        local f = io.open("/LOGS/rf2ethos.log", 'a')
+        local f = io.open("/LOGS/rf2ethosmsp.log", 'a')
         io.write(f, tostring(str) .. "\n")
         io.close(f)
     end,
 
     print = function(str)
         print(tostring(str))
-        --rf2ethos.log(str)
+        --rf2ethosmsp.log(str)
     end,
 
     clock = os.clock,

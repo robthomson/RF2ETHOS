@@ -6,27 +6,27 @@ local REPLY_FRAME_ID   = 0x32
 
 local lastSensorId, lastFrameId, lastDataId, lastValue
 
-rf2ethos.protocol.mspSend = function(payload)
+rf2ethosmsp.protocol.mspSend = function(payload)
     local dataId = payload[1] + bit32.lshift(payload[2], 8)
     local value = 0
     for i = 3, #payload do
         value = value + bit32.lshift(payload[i], (i - 3) * 8)
     end
-    return rf2ethos.protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
+    return rf2ethosmsp.protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
 end
 
-rf2ethos.protocol.mspRead = function(cmd)
+rf2ethosmsp.protocol.mspRead = function(cmd)
     return mspSendRequest(cmd, {})
 end
 
-rf2ethos.protocol.mspWrite = function(cmd, payload)
+rf2ethosmsp.protocol.mspWrite = function(cmd, payload)
     return mspSendRequest(cmd, payload)
 end
 
 -- Discards duplicate data from lua input buffer
 local function smartPortTelemetryPop()
     while true do
-        local sensorId, frameId, dataId, value = rf2ethos.sportTelemetryPop()
+        local sensorId, frameId, dataId, value = rf2ethosmsp.sportTelemetryPop()
         if not sensorId then
             return nil
         elseif (lastSensorId == sensorId) and (lastFrameId == frameId) and (lastDataId == dataId) and (lastValue == value) then
@@ -41,7 +41,7 @@ local function smartPortTelemetryPop()
     end
 end
 
-rf2ethos.protocol.mspPoll = function()
+rf2ethosmsp.protocol.mspPoll = function()
     while true do
         local sensorId, frameId, dataId, value = smartPortTelemetryPop()
         if (sensorId == SMARTPORT_REMOTE_SENSOR_ID or sensorId == FPORT_REMOTE_SENSOR_ID) and frameId == REPLY_FRAME_ID then

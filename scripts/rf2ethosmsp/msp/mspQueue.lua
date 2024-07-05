@@ -45,12 +45,12 @@ function MspQueueController:processQueue()
     local cmd, buf, err
     --print("retryCount: "..self.retryCount)
 
-    if not rf2ethos.runningInSimulator then
+    if not rf2ethosmsp.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 0.5 < os.clock() then
             if self.currentMessage.payload then
-                rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
+                rf2ethosmsp.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
             else
-                rf2ethos.protocol.mspWrite(self.currentMessage.command, {})
+                rf2ethosmsp.protocol.mspWrite(self.currentMessage.command, {})
             end
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1

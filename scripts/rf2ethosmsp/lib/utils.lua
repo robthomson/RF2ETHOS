@@ -176,7 +176,7 @@ end
 -- set positions of form elements
 function utils.getInlinePositions(f, Page)
     local tmp_inline_size = utils.getInlineSize(f.label, Page)
-    local inline_multiplier = rf2ethos.radio.inlinesize_mult
+    local inline_multiplier = rf2ethosmsp.radio.inlinesize_mult
 
     local inline_size = tmp_inline_size * inline_multiplier
 
@@ -191,8 +191,8 @@ function utils.getInlinePositions(f, Page)
 
     local eX
     local eW = fieldW - padding
-    local eH = rf2ethos.radio.navbuttonHeight
-    local eY = rf2ethos.radio.linePaddingTop
+    local eH = rf2ethosmsp.radio.navbuttonHeight
+    local eY = rf2ethosmsp.radio.linePaddingTop
     local posX
     lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)

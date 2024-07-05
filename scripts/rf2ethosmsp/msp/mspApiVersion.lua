@@ -9,7 +9,7 @@ local function getApiVersion(callback, callbackParam)
         end,
         simulatorResponse = { 0, 12, 6 }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethosmsp.mspQueue:add(message)
 end
 
 return {
