@@ -864,20 +864,6 @@ function wakeup(widget)
     processMspReply(mspPollReply())
 
 if createForm == true then
-        if wasSaving == true or environment.simulation == true then
-            rf2ethos.profileSwitchCheck()
-            rf2ethos.rateSwitchCheck()
-            wasSaving = false
-            saveDialog:value(100)
-            saveDialogDisplay = false
-            saveDialogWatchDog = nil
-            if saveFailed == false then
-                saveDialog:close()
-                saveFailed = false
-            end
-            rf2ethos.resetServos() -- this must run after save settings		
-            rf2ethos.resetCopyProfiles() -- this must run after save settings
-		end
 
         if wasLoading == true or environment.simulation == true then
             wasLoading = false
@@ -925,6 +911,24 @@ if createForm == true then
         else
             rf2ethos.openMainMenu()
         end
+		
+        if wasSaving == true or environment.simulation == true then
+		
+            rf2ethos.profileSwitchCheck()
+            rf2ethos.rateSwitchCheck()
+            wasSaving = false
+            saveDialog:value(100)
+            saveDialogDisplay = false
+            saveDialogWatchDog = nil
+            if saveFailed == false then
+                saveDialog:close()
+                saveFailed = false
+            end
+			rf2ethos.resetServos() -- this must run after save settings		
+			rf2ethos.resetCopyProfiles() -- this must run after save settings
+		end		
+		
+		
         createForm = false
     else
         createForm = false
