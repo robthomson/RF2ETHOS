@@ -82,6 +82,7 @@ function MspQueueController:processQueue()
     end
 end
 
+
 local function deepCopy(original)
     local copy
     if type(original) == "table" then

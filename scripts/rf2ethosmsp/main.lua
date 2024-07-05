@@ -162,8 +162,11 @@ local mspSaveSettings =
 local mspLoadSettings =
 {
     processReply = function(self, buf)
-        print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
+        
         Page.values = buf
+		
+		print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
+		
         if Page.postRead then
             Page.postRead(Page)
         end
@@ -862,6 +865,7 @@ function wakeup(widget)
 				
                 if saveRetries < rf2ethos.protocol.maxRetries then
                     saveSettings()
+					saveRetries = saveRetries + 1
                 else
                     -- Saving failed for some reason
                     saveFailed = true
@@ -877,8 +881,6 @@ function wakeup(widget)
 				saveDialog:value(100)
 				saveDialog:close()						   
 				invalidatePages()		   
-			else
-				saveRetries = saveRetries + 1
             end
         end
         if not Page then
@@ -905,8 +907,6 @@ function wakeup(widget)
         end
     end
 	
-    rf2ethos.mspQueue:processQueue()
-
 if createForm == true then
 
         if wasSaving == true or environment.simulation == true then
@@ -1134,6 +1134,8 @@ if createForm == true then
             -- form.invalidate()
         end
     end
+
+	    rf2ethos.mspQueue:processQueue()
 
 end
 
