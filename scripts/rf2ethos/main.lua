@@ -36,6 +36,8 @@ local pageState = pageStatus.display
 
 local telemetryState
 
+
+local PageTmp = {}
 local saveTS = 0
 local saveRetries = 0
 local saveTimeout
@@ -865,7 +867,26 @@ function wakeup(widget)
 
 if createForm == true then
 
-        if wasLoading == true or environment.simulation == true then
+        if wasSaving == true or environment.simulation == true then
+		
+            rf2ethos.profileSwitchCheck()
+            rf2ethos.rateSwitchCheck()
+            wasSaving = false
+            saveDialog:value(100)
+            saveDialogDisplay = false
+            saveDialogWatchDog = nil
+            if saveFailed == false then
+                saveDialog:close()
+                saveFailed = false
+            end
+			rf2ethos.resetServos() -- this must run after save settings		
+			rf2ethos.resetCopyProfiles() -- this must run after save settings
+			
+			-- switch back the Page var to avoid having a page refresh!
+			Page = PageTmp
+
+
+        elseif wasLoading == true or environment.simulation == true then
             wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -912,21 +933,7 @@ if createForm == true then
             rf2ethos.openMainMenu()
         end
 		
-        if wasSaving == true or environment.simulation == true then
-		
-            rf2ethos.profileSwitchCheck()
-            rf2ethos.rateSwitchCheck()
-            wasSaving = false
-            saveDialog:value(100)
-            saveDialogDisplay = false
-            saveDialogWatchDog = nil
-            if saveFailed == false then
-                saveDialog:close()
-                saveFailed = false
-            end
-			rf2ethos.resetServos() -- this must run after save settings		
-			rf2ethos.resetCopyProfiles() -- this must run after save settings
-		end		
+	
 		
 		
         createForm = false
@@ -987,13 +994,18 @@ if createForm == true then
             {
                 label = "        OK        ",
                 action = function()
+				
+					-- store current Page in PageTmp for later use
+					-- to stop has having to do a 'reload' of the page.
+					PageTmp = Page
+				
                     isSaving = true
                     wasSaving = true
                     triggerSAVE = false
                     rf2ethos.resetRates()
                     rf2ethos.debugSave()
                     saveSettings()
-
+					
                     return true
                 end
             }, {
