@@ -162,7 +162,16 @@ local mspSaveSettings =
 local mspLoadSettings =
 {
     processReply = function(self, buf)
-        
+
+		-- every now and again we get a timeout / issue and 'page' does not exist.
+		-- result is dialog just breaks and hits the watchdog due to a script error in code
+		
+		if Page == nil then
+			print("Cant process as no Page exists")
+			mspDataLoaded = false
+			return
+		end
+	
         Page.values = buf
 		
 		print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
@@ -175,6 +184,8 @@ local mspLoadSettings =
             Page.postLoad(Page)
         end
 		mspDataLoaded = true
+		
+		
     end
 }
 
@@ -2658,7 +2669,7 @@ function rf2ethos.openMainMenu()
 	
 
 	-- reset page to nil as should be nil on this page
-	Page = nil
+	--Page = nil
 
     mspDataLoaded = false
     uiState = uiStatus.mainMenu
