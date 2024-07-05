@@ -299,7 +299,7 @@ local function processMspReply(cmd, rx_buf, err)
                     -- 1 extra byte - for esc signature?
                     print("Page is processing reply for cmd " .. tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. (Page.minBytes + 1))
                 else
-                    print("Page is processing reply for ESC cmd " .. tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes)
+                    print("Page is processing reply for cmd " .. tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes)
                 end
             end
         end
@@ -919,7 +919,9 @@ if createForm == true then
             end
             rf2ethos.resetServos() -- this must run after save settings		
             rf2ethos.resetCopyProfiles() -- this must run after save settings	
-        elseif wasLoading == true or environment.simulation == true then
+		end
+		
+        if wasLoading == true or environment.simulation == true then
             wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
