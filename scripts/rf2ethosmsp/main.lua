@@ -165,14 +165,6 @@ local mspLoadSettings =
 {
     processReply = function(self, buf)
 
-		-- every now and again we get a timeout / issue and 'page' does not exist.
-		-- result is dialog just breaks and hits the watchdog due to a script error in code
-		
-		if Page == nil then
-			print("Cant process as no Page exists")
-			mspDataLoaded = false
-			return
-		end
 	
         Page.values = buf
 		
@@ -944,7 +936,7 @@ if createForm == true then
 			Page = PageTmp
 
 	
-        elseif wasLoading == true or environment.simulation == true then
+        elseif (wasLoading == true and rf2ethos.mspQueue:isProcessed() ) or environment.simulation == true then
             wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -1024,17 +1016,17 @@ if createForm == true then
             end
             local saveMsg = ""
             if pageState == pageStatus.saving then
-                saveDialog:value(50)
+                saveDialog:value(0)
                 saveDialog:message("Saving...")
                 if saveRetries > 0 then
                     saveDialog:message("Retry #" .. string.format("%u", saveRetries))
                 end
             elseif pageState == pageStatus.eepromWrite then
-                saveDialog:value(60 + saveDialogProgressCounter)
+                saveDialog:value(saveDialogProgressCounter * 4)
                 saveDialog:message("Updating...")
                 if saveRetries > 0 then
                     saveDialog:message("Updating...Retry #" .. string.format("%u", saveRetries))
-                    saveDialog:value(90)
+                    --saveDialog:value(90)
                 end
             elseif pageState == pageStatus.rebooting then
                 saveMsg = saveDialog:message("Rebooting...")
@@ -1705,6 +1697,8 @@ function rf2ethos.openPagePreferences(idx,title,script)
 end
 
 function rf2ethos.openPageDefaultLoader(idx, subpage, title, script)
+
+	
 
     uiState = uiStatus.pages
     mspDataLoaded = false
@@ -2838,6 +2832,8 @@ local function create()
     assert(loadfile(rf2ethos.protocol.mspTransport))()
     assert(loadfile(TOOL_DIR .. "msp/common.lua"))()
 	
+
+
 
     fieldHelpTxt = assert(loadfile(TOOL_DIR .. "help/fields.lua"))()
 
