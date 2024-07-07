@@ -2803,16 +2803,22 @@ local function create()
 
     fieldHelpTxt = assert(loadfile(TOOL_DIR .. "help/fields.lua"))()
 
-    sensor = sport.getSensor({primId = 0x32})
-    rssiSensor = system.getSource("RSSI")
-    if not rssiSensor then
-        rssiSensor = system.getSource("RSSI 2.4G")
-        if not rssiSensor then
-            rssiSensor = system.getSource("RSSI 900M")
-            if not rssiSensor then
-                rssiSensor = system.getSource("Rx RSSI1")
-                if not rssiSensor then
-                    rssiSensor = system.getSource("Rx RSSI2")
+    rf2ethos.sensor = sport.getSensor({primId=0x32})
+    rf2ethos.rssiSensor = system.getSource("RSSI")
+    if not rf2ethos.rssiSensor then
+        rf2ethos.rssiSensor = system.getSource("RSSI 2.4G")
+        if not rf2ethos.rssiSensor then
+            rf2ethos.rssiSensor = system.getSource("RSSI 900M")
+            if not rf2ethos.rssiSensor then
+                rf2ethos.rssiSensor = system.getSource("Rx RSSI1")
+                if not rf2ethos.rssiSensor then
+                    rf2ethos.rssiSensor = system.getSource("Rx RSSI2")
+					if not rf2ethos.rssiSensor then
+						rf2ethos.rssiSensor = system.getSource("RSSI Int")
+							if not rf2ethos.rssiSensor then
+								rf2ethos.rssiSensor = system.getSource("RSSI Ext")
+							end						
+					end
                 end
             end
         end
