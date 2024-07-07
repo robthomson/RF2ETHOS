@@ -471,6 +471,12 @@ local function event(widget, category, value, x, y)
     -- close esc main type selection menu
     if ESC_MENUSTATE == 1 then
         if category == 5 or value == 35 then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end		
             resetRates = false
             ESC_MODE = false
             ESC_MFG = nil
@@ -482,6 +488,12 @@ local function event(widget, category, value, x, y)
     -- close esc pages menu
     if ESC_MENUSTATE == 2 then
         if category == 5 or value == 35 then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             resetRates = false
             ESC_MODE = true
             ESC_MFG = nil
@@ -493,6 +505,12 @@ local function event(widget, category, value, x, y)
     -- close esc tool menu
     if ESC_MENUSTATE == 3 then
         if category == 5 or value == 35  then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             resetRates = false
             ESC_MODE = true
 			ESC_SCRIPT = nil
@@ -505,16 +523,34 @@ local function event(widget, category, value, x, y)
 
     if uiState == uiStatus.pages then
         if category == 5 or value == 35  then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             resetRates = false
             rf2ethos.openMainMenu()
             return true
         end
         if value == 35 then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             resetRates = false
             rf2ethos.openMainMenu()
             return true
         end
         if value == KEY_ENTER_LONG then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             triggerSAVE = true
             system.killEvents(KEY_ENTER_BREAK)
             return true
@@ -524,6 +560,12 @@ local function event(widget, category, value, x, y)
 
     if uiState == uiStatus.MainMenu then
         if value == KEY_ENTER_LONG then
+			if progressDialogDisplay == true then
+				progressDialog:close()
+			end
+			if saveDialogDisplay == true then
+				saveDialog:close()
+			end			
             system.killEvents(KEY_ENTER_BREAK)
             return true
         end
