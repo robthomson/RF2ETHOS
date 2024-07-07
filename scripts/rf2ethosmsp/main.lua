@@ -2859,6 +2859,12 @@ local function create()
                 rf2ethos.rssiSensor = system.getSource("Rx RSSI1")
                 if not rf2ethos.rssiSensor then
                     rf2ethos.rssiSensor = system.getSource("Rx RSSI2")
+					if not rf2ethos.rssiSensor then
+						rf2ethos.rssiSensor = system.getSource("RSSI Int")
+							if not rf2ethos.rssiSensor then
+								rf2ethos.rssiSensor = system.getSource("RSSI Ext")
+							end						
+					end
                 end
             end
         end
