@@ -6,9 +6,9 @@ local supportedProtocols =
         push            = rf2ethos.sportTelemetryPush,
         maxTxBufferSize = 6,
         maxRxBufferSize = 6,
-        maxRetries      = 4,
+        maxRetries      = 5,
         saveTimeout     = 5.0,
-        pageReqTimeout  = 0.8,
+        pageReqTimeout  = 5,
     },
     crsf =
     {
