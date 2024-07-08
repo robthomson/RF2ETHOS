@@ -2813,6 +2813,12 @@ local function create()
                 rssiSensor = system.getSource("Rx RSSI1")
                 if not rssiSensor then
                     rssiSensor = system.getSource("Rx RSSI2")
+					if not rssiSensor then
+						rssiSensor = system.getSource("RSSI Int")
+							if not rssiSensor then
+								rssiSensor = system.getSource("RSSI Ext")
+							end						
+					end
                 end
             end
         end
