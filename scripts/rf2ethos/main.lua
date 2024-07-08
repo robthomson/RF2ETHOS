@@ -1,7 +1,7 @@
 -- RotorFlight + ETHOS LUA configuration
 
-local TOOL_NAME = "RF2ETHOSMSP"
-local TOOL_DIR = "/scripts/rf2ethosmsp/"
+local TOOL_NAME = "RF2ETHOS"
+local TOOL_DIR = "/scripts/rf2ethos/"
 
 local environment = system.getVersion()
 
