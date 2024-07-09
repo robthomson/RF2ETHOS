@@ -1,7 +1,7 @@
 -- RotorFlight + ETHOS LUA configuration
 
-local TOOL_NAME = "RF2ETHOSMSP"
-local TOOL_DIR = "/scripts/rf2ethosmsp/"
+local TOOL_NAME = "RF2ETHOS"
+local TOOL_DIR = "/scripts/rf2ethos/"
 
 local environment = system.getVersion()
 
@@ -39,7 +39,6 @@ local telemetryState
 
 local PageTmp = {}
 local saveTS = 0
-local saveRetries = 0
 local saveTimeout
 local saveMaxRetries
 local saveFailed = false
@@ -157,6 +156,9 @@ end
 local mspSaveSettings =
 {
     processReply = function(self, buf)
+	
+		print("mspSaveSettings")
+	
         rf2ethos.settingsSaved()
     end
 }
@@ -164,12 +166,8 @@ local mspSaveSettings =
 local mspLoadSettings =
 {
     processReply = function(self, buf)
-
-	
+        print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
         Page.values = buf
-		
-		print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
-		
         if Page.postRead then
             Page.postRead(Page)
         end
@@ -178,10 +176,9 @@ local mspLoadSettings =
             Page.postLoad(Page)
         end
 		mspDataLoaded = true
-		
-		
     end
 }
+
 
 rf2ethos.readPage = function()
     if type(Page.read) == "function" then
@@ -301,6 +298,7 @@ function rf2ethos.dataBindFields()
 end
 
 -- Run lcd.invalidate() if anything actionable comes back from it.
+--[[
 local function processMspReply(cmd, rx_buf, err)
     if Page and rx_buf ~= nil then
         if environment.simulation ~= true then
@@ -373,6 +371,8 @@ local function processMspReply(cmd, rx_buf, err)
     end
 
 end
+]]--
+
 
 local function requestPage()
     if not Page.reqTS or Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
@@ -382,7 +382,6 @@ local function requestPage()
         end
     end
 end
-
 
 -- Ethos: when the RF1 and RF2 system tools are both installed, RF1 tries to call getRSSI in RF2 and gets stuck.
 -- To avoid this, getRSSI is renamed in rf2ethos.
@@ -910,9 +909,9 @@ function wakeup(widget)
 
         if pageState == pageStatus.saving then
             if (saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-                if saveRetries < rf2ethos.protocol.maxRetries then
+                if rf2ethos.mspQueue.retryCount < rf2ethos.protocol.maxRetries then
                     saveSettings()
-					saveRetries = saveRetries + 1
+					rf2ethos.mspQueue.retryCount = rf2ethos.mspQueue.retryCount + 1
 					
                 else
                     -- Saving failed for some reason
@@ -950,11 +949,14 @@ function wakeup(widget)
             end
             collectgarbage()
         end
-        if Page ~= nil then
-            if not Page.values and pageState == pageStatus.display then
-                requestPage()
-            end
-        end
+        --if Page ~= nil then
+        --    if not Page.values and pageState == pageStatus.display then
+        --        requestPage()
+        --    end
+        --end
+        if not(Page.values or Page.isReady) and pageState == pageStatus.display then
+            requestPage()
+        end		
     end
 	
 if createForm == true then
@@ -1052,24 +1054,15 @@ if createForm == true then
                 saveDialogWatchDog = os.clock()
                 saveDialog = form.openProgressDialog("Saving...", "Saving data...")
                 saveDialog:value(0)
-                saveDialog:value(10)
                 saveDialog:closeAllowed(false)
-				saveRetries = 0
+				rf2ethos.mspQueue.retryCount = 0
             end
             local saveMsg = ""
             if pageState == pageStatus.saving then
-                saveDialog:value(0)
                 saveDialog:message("Saving...")
-                if saveRetries > 0 then
-                    saveDialog:message("Retry #" .. string.format("%u", saveRetries))
-                end
-            elseif pageState == pageStatus.eepromWrite then
+            elseif pageState == pageStatus.eepromWrite then		
                 saveDialog:value(saveDialogProgressCounter * 4)
-                saveDialog:message("Updating...")
-                if saveRetries > 0 then
-                    saveDialog:message("Updating...Retry #" .. string.format("%u", saveRetries))
-                    --saveDialog:value(90)
-                end
+                saveDialog:message("Saving...")
             elseif pageState == pageStatus.rebooting then
                 saveMsg = saveDialog:message("Rebooting...")
             end
@@ -2887,9 +2880,9 @@ local function create()
 
 
     -- Initial var setting
-    saveTimeout = rf2ethos.protocol.saveTimeout
-    saveMaxRetries = rf2ethos.protocol.saveMaxRetries
-    requestTimeout = rf2ethos.protocol.pageReqTimeout
+    --saveTimeout = rf2ethos.protocol.saveTimeout
+    --saveMaxRetries = rf2ethos.protocol.saveMaxRetries
+    --requestTimeout = rf2ethos.protocol.pageReqTimeout
     uiState = uiStatus.init
     init = nil
     apiVersion = 0
