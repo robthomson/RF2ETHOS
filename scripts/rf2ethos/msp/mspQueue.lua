@@ -71,14 +71,19 @@ function MspQueueController:processQueue()
     end
 
     if cmd then print("Received cmd: "..tostring(cmd)) end
-
-    if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) then -- 68 = MSP_REBOOT
+	
+	
+	if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) then -- 68 = MSP_REBOOT
         --print("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end
         self.currentMessage = nil
+	
     elseif self.retryCount > self.maxRetries then
+	
+	
+	
         self.currentMessage = nil
     end
 end

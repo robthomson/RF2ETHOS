@@ -36,6 +36,10 @@ escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
 
+function bitReplace(value, replaceValue, field)
+    return value & ~(1 << field) | ((replaceValue & 1) << field)
+end
+
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -80,6 +84,4 @@ return {
     end
 }
 
-function bitReplace(value, replaceValue, field)
-    return value & ~(1 << field) | ((replaceValue & 1) << field)
-end
+

@@ -125,7 +125,6 @@ radio = nil
 sensor = nil
 
 assert(loadfile(TOOL_DIR .. "rf2ethos.lua"))()
---bit32 = assert(loadfile(TOOL_DIR .. "lib/bit32.lua"))()
 
 utils = {}
 utils = assert(loadfile(TOOL_DIR .. "lib/utils.lua"))()
@@ -150,14 +149,11 @@ rf2ethos.settingsSaved = function()
         -- If we're not already trying to write to eeprom from a previous save, then we're done.
         invalidatePages()
     end
-    rf2ethos.lcdNeedsInvalidate = true
 end
 
 local mspSaveSettings =
 {
     processReply = function(self, buf)
-	
-		print("mspSaveSettings")
 	
         rf2ethos.settingsSaved()
     end
@@ -166,7 +162,12 @@ local mspSaveSettings =
 local mspLoadSettings =
 {
     processReply = function(self, buf)
-        print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
+		if ESC_MODE == true then
+			-- 1 extra byte - for esc signature?
+			print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes + 1)		
+		else
+			print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
+		end		
         Page.values = buf
         if Page.postRead then
             Page.postRead(Page)
@@ -174,8 +175,10 @@ local mspLoadSettings =
         rf2ethos.dataBindFields()
         if Page.postLoad then
             Page.postLoad(Page)
-        end
+        end	
+		print("mspDataLoaded = true")
 		mspDataLoaded = true
+
     end
 }
 
@@ -297,81 +300,6 @@ function rf2ethos.dataBindFields()
     end
 end
 
--- Run lcd.invalidate() if anything actionable comes back from it.
---[[
-local function processMspReply(cmd, rx_buf, err)
-    if Page and rx_buf ~= nil then
-        if environment.simulation ~= true then
-            if DEBUG_MSP == true then
-                if ESC_MODE == true then
-                    -- 1 extra byte - for esc signature?
-                    print("Page is processing reply for cmd " .. tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. (Page.minBytes + 1))
-                else
-                    print("Page is processing reply for cmd " .. tostring(cmd) .. " len rx_buf: " .. #rx_buf .. " expected: " .. Page.minBytes)
-                end
-            end
-        end
-    end
-    if not Page or not rx_buf then
-    elseif cmd == Page.write then
-        -- check if this page requires writing to eeprom to save (most do)
-        if Page.eepromWrite then
-            -- don't write again if we're already responding to earlier page.write()s
-            if pageState ~= pageStatus.eepromWrite then
-                eepromWrite()
-            end
-        elseif pageState ~= pageStatus.eepromWrite then
-            -- If we're not already trying to write to eeprom from a previous save, then we're done.
-            invalidatePages()
-        end
-    elseif cmd == uiMsp.eepromWrite then
-        if Page.reboot then
-            rebootFc()
-        end
-        invalidatePages()
-    elseif ESC_MODE == true and (cmd == Page.read and err) then
-        if DEBUG_MSP == true then
-            print("ESC not ready, waiting...")
-        end
-        ESC_NOTREADYCOUNT = ESC_NOTREADYCOUNT + 1
-        if ESC_NOTREADYCOUNT >= 5 then
-            ESC_UNKNOWN = true
-            mspDataLoaded = true		
-        end
-
-    elseif ESC_MODE == true and (cmd == Page.read and #rx_buf >= mspHeaderBytes and rx_buf[1] ~= mspSignature) then
-        ESC_UNKNOWN = true
-        mspDataLoaded = true
-        if DEBUG_MSP == true then
-            print("ESC not recognized")
-        end
-    elseif (cmd == Page.read) and (#rx_buf > 0) then
-        if DEBUG_MSP == true then
-            print("processMspReply:  Page.read and non-zero rx_buf")
-        end
-        Page.values = rx_buf
-        if Page.postRead then
-            if DEBUG_MSP == true then
-                print("Postread executed")
-            end
-            Page.postRead(Page)
-        end
-        rf2ethos.dataBindFields()
-        if Page.postLoad then
-            Page.postLoad(Page)
-            if DEBUG_MSP == true then
-                print("Postload executed")
-            end
-        end
-        mspDataLoaded = true
-        ESC_UNKNOWN = false
-        ESC_NOTREADYCOUNT = 0
-		
-		
-    end
-
-end
-]]--
 
 
 local function requestPage()
