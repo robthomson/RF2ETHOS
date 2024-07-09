@@ -28,7 +28,7 @@ escType = {
 escFlags = {spinDirection = 0, f3cAuto = 1, keepMah = 2, bec12v = 3}
 
 function getEscTypeLabel(values)
-    local idx = bit32.bor(bit32.lshift(values[mspHeaderBytes + 24], 8), values[mspHeaderBytes + 23])
+    local idx = (values[mspHeaderBytes + 24] * 256) + values[mspHeaderBytes + 23]
     return escType[idx] or "YGE ESC (" .. idx .. ")"
 end
 
@@ -36,8 +36,8 @@ function getUInt(page, vals)
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
-        raw_val = bit32.lshift(raw_val, (idx - 1) * 8)
-        v = bit32.bor(v, raw_val)
+        raw_val = raw_val * (256 ^ (idx - 1))
+        v = v + raw_val
     end
     return v
 end

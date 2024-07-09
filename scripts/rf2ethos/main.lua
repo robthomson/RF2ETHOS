@@ -125,7 +125,7 @@ radio = nil
 sensor = nil
 
 assert(loadfile(TOOL_DIR .. "rf2ethos.lua"))()
-bit32 = assert(loadfile(TOOL_DIR .. "lib/bit32.lua"))()
+--bit32 = assert(loadfile(TOOL_DIR .. "lib/bit32.lua"))()
 
 utils = {}
 utils = assert(loadfile(TOOL_DIR .. "lib/utils.lua"))()

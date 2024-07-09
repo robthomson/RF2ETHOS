@@ -50,7 +50,6 @@ return {
     svFlags = 0,
 
     postLoad = function(self)
-
         local model = getEscTypeLabel(self.values)
         local version = getUInt(self, {29, 30, 31, 32})
         local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
@@ -62,19 +61,25 @@ return {
         -- save flags, changed bit will be applied in pre-save
         local f = self.fields[2]
         self.svFlags = getPageValue(self, f.vals[1])
-        f.value = bit32.extract(f.value, escFlags.spinDirection)
+        f.value = (self.svFlags & (1 << escFlags.spinDirection)) ~= 0 and 1 or 0
 
         -- set BEC voltage max (8.4 or 12.3)
         f = self.fields[3]
-        f.max = bit32.extract(self.svFlags, escFlags.bec12v) == 0 and 84 or 123
+        f.max = (self.svFlags & (1 << escFlags.bec12v)) == 0 and 84 or 123
     end,
 
     preSave = function(self)
         -- direction
         -- apply bits to saved flags
         local f = self.fields[2]
-        setPageValue(self, f.vals[1], bit32.replace(self.svFlags, f.value, escFlags.spinDirection))
+        self.svFlags = bitReplace(self.svFlags, f.value, escFlags.spinDirection)
+
+        setPageValue(self, f.vals[1], self.svFlags)
 
         return self.values
     end
 }
+
+function bitReplace(value, replaceValue, field)
+    return value & ~(1 << field) | ((replaceValue & 1) << field)
+end
