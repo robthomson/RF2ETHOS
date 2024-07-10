@@ -24,17 +24,17 @@ escinfo[#escinfo + 1] = {t = ""}
 
 labels[#labels + 1] = {t = "ESC"}
 
-fields[#fields + 1] = {t = "P-Gain", min = 1, max = 10, vals = {11, 12}}
-fields[#fields + 1] = {t = "I-Gain", min = 1, max = 10, vals = {13, 14}}
+fields[#fields + 1] = {t = "P-Gain", min = 1, max = 10, vals = {mspHeaderBytes+11, mspHeaderBytes+12}}
+fields[#fields + 1] = {t = "I-Gain", min = 1, max = 10, vals = {mspHeaderBytes+13, mspHeaderBytes+14}}
 
-fields[#fields + 1] = {t = "Motor Pole Pairs", min = 1, max = 100, vals = {41, 42}, upd = updatePoles}
+fields[#fields + 1] = {t = "Motor Pole Pairs", min = 1, max = 100, vals = {mspHeaderBytes+41, mspHeaderBytes+42}, upd = updatePoles}
 labels[#labels + 1] = {t = "0"}
-fields[#fields + 1] = {t = "Main Teeth", min = 1, max = 1800, vals = {45, 46}, upd = updateRatio}
+fields[#fields + 1] = {t = "Main Teeth", min = 1, max = 1800, vals = {mspHeaderBytes+45, mspHeaderBytes+46}, upd = updateRatio}
 labels[#labels + 1] = {t = ":"}
-fields[#fields + 1] = {t = "Pinion Teeth", min = 1, max = 255, vals = {43, 44}}
+fields[#fields + 1] = {t = "Pinion Teeth", min = 1, max = 255, vals = {mspHeaderBytes+43, mspHeaderBytes+44}}
 
-fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {35, 36}}
-fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {37, 38}}
+fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {mspHeaderBytes+35, mspHeaderBytes+36}}
+fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes+37, mspHeaderBytes+38}}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -49,14 +49,34 @@ return {
 
     updatePoles = updatePoles,
     updateRatio = updateRatio,
-
+    preSave = function(self)
+        -- direction
+        -- apply bits to saved flags
+	end,	
+	postRead = function(self)
+        if self.values[1] ~= mspSignature then 
+            --self.values = nil
+			self.escinfo[1].t = ""		
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""			
+            return	
+		end
+	end,	
     postLoad = function(self)
         local model = getEscTypeLabel(self.values)
         local version = getUInt(self, {29, 30, 31, 32})
         local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
+        if self.values[1] ~= mspSignature then 
+            --self.values = nil
+			self.escinfo[1].t = ""		
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""			
+            return
+		else
+			self.escinfo[1].t = model
+			self.escinfo[2].t = version
+			self.escinfo[3].t = firmware		
+        end	
 
         -- update pole count
         -- self.updatePoles(self)

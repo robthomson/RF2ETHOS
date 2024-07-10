@@ -28,9 +28,6 @@ function getUInt(page, vals)
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
 
-        -- raw_val = bit32.lshift(raw_val, (idx-1)*8)
-        -- v = bit32.bor(v, raw_val)
-
         raw_val = raw_val << (idx - 1) * 8
         v = (v | raw_val) << 0
 

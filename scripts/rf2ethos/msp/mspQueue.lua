@@ -79,11 +79,7 @@ function MspQueueController:processQueue()
             self.currentMessage:processReply(buf)
         end
         self.currentMessage = nil
-	
     elseif self.retryCount > self.maxRetries then
-	
-	
-	
         self.currentMessage = nil
     end
 end

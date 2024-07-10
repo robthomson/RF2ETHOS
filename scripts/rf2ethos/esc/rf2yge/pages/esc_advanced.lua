@@ -22,14 +22,15 @@ escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "ESC"}
 
-fields[#fields + 1] = {t = "Min Start Power", min = 0, max = 26, vals = {47, 48}, unit = "%"}
-fields[#fields + 1] = {t = "Max Start Power", min = 0, max = 31, vals = {49, 50}, unit = "%"}
-fields[#fields + 1] = {t = "Startup Response", min = 0, max = #startupResponse, vals = {9, 10}, table = startupResponse}
-fields[#fields + 1] = {t = "Throttle Response", min = 0, max = #throttleResponse, vals = {15, 16}, table = throttleResponse}
+fields[#fields + 1] = {t = "Min Start Power", min = 0, max = 26, vals = {mspHeaderBytes+47, mspHeaderBytes+48}, unit = "%"}
+fields[#fields + 1] = {t = "Max Start Power", min = 0, max = 31, vals = {mspHeaderBytes+49, mspHeaderBytes+50}, unit = "%"}
+-- not sure this field exists?
+--fields[#fields + 1] = {t = "Startup Response", min = 0, max = #startupResponse, vals = {mspHeaderBytes+9, mspHeaderBytes+10}, table = startupResponse}
+fields[#fields + 1] = {t = "Throttle Response", min = 0, max = #throttleResponse, vals = {mspHeaderBytes+15, mspHeaderBytes+16}, table = throttleResponse}
 
-fields[#fields + 1] = {t = "Motor Timing", min = 0, max = #motorTiming, vals = {7, 8}, table = motorTiming}
-fields[#fields + 1] = {t = "Active Freewheel", min = 0, max = #freewheel, vals = {21, 22}, table = freewheel}
-fields[#fields + 1] = {t = "F3C Autorotation", min = 0, max = 1, vals = {53}, table = offOn}
+fields[#fields + 1] = {t = "Motor Timing", min = 0, max = #motorTiming, vals = {mspHeaderBytes+7, mspHeaderBytes+8}, table = motorTiming}
+fields[#fields + 1] = {t = "Active Freewheel", min = 0, max = #freewheel, vals = {mspHeaderBytes+21, mspHeaderBytes+22}, table = freewheel}
+fields[#fields + 1] = {t = "F3C Autorotation", min = 0, max = 1, vals = {mspHeaderBytes+53}, table = offOn}
 
 escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
@@ -56,37 +57,54 @@ return {
 
     svTiming = 0,
     svFlags = 0,
-
+	postRead = function(self)
+        if self.values[1] ~= mspSignature then 
+            --self.values = nil
+			self.escinfo[1].t = ""		
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""			
+            return	
+		end
+	end,
     postLoad = function(self)
         local model = getEscTypeLabel(self.values)
         local version = getUInt(self, {29, 30, 31, 32})
         local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
+        if self.values[1] ~= mspSignature then 
+            --self.values = nil
+			self.escinfo[1].t = ""		
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""			
+            return
+		else
+			self.escinfo[1].t = model
+			self.escinfo[2].t = version
+			self.escinfo[3].t = firmware		
+        end	
 
         -- motor timing
-        local f = self.fields[5]
-        self.svTiming = getPageValue(self, f.vals[2]) * 256 + getPageValue(self, f.vals[1])
-        f.value = motorTimingToUI[self.svTiming] or 0
+        --local f = self.fields[5]
+        --self.svTiming = getPageValue(self, f.vals[2]) * 256 + getPageValue(self, f.vals[1])
+        --f.value = motorTimingToUI[self.svTiming] or 0
 
         -- F3C autorotation
-        f = self.fields[7]
-        self.svFlags = getPageValue(self, f.vals[1])
-        f.value = bitExtract(f.value, escFlags.f3cAuto)
+        --f = self.fields[7]
+        --self.svFlags = getPageValue(self, f.vals[1])
+        --f.value = bitExtract(f.value, escFlags.f3cAuto)
     end,
 
     preSave = function(self)
+
         -- motor timing
-        f = self.fields[5]
-        local value = motorTimingFromUI[f.value] or 0
-        setPageValue(self, f.vals[1], value % 256)
-        setPageValue(self, f.vals[2], math.floor(value / 256))
+        --f = self.fields[5]
+        --local value = motorTimingFromUI[f.value] or 0
+        --setPageValue(self, f.vals[1], value % 256)
+        --setPageValue(self, f.vals[2], math.floor(value / 256))
 
         -- F3C autorotation
         -- apply bits to saved flags
-        f = self.fields[7]
-        setPageValue(self, f.vals[1], bitReplace(self.svFlags, f.value, escFlags.f3cAuto))
+        --f = self.fields[7]
+        --setPageValue(self, f.vals[1], bitReplace(self.svFlags, f.value, escFlags.f3cAuto))
 
         return self.values
     end

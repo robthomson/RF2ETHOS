@@ -37,7 +37,11 @@ return {
     labels = labels,
     fields = fields,
     escinfo = escinfo,
-
+    preSave = function(self)
+		self.values[2] = 0 -- save cmd	
+		
+        return self.values
+    end,
     postLoad = function(self)
         local model = getText(self, 49, 64)
         local version = getText(self, 17, 32)

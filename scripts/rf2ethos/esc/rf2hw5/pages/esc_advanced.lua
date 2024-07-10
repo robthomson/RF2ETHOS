@@ -46,6 +46,9 @@ return {
     end,
 
     preSave = function(self)
+	
+		self.values[2] = 0 -- save cmd
+		
         -- Startup Time
         local f = self.fields[3]
         setPageValue(self, 69, f.value - 4)

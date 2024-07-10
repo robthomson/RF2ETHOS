@@ -65,6 +65,8 @@ return {
     end,
 
     preSave = function(self)
+	
+		self.values[2] = 0 -- save cmd	
         -- BEC offset
         -- local f = self.fields[3]
         -- setPageValue(self, 68, f.value * 10 - 54)

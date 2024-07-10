@@ -162,12 +162,9 @@ local mspSaveSettings =
 local mspLoadSettings =
 {
     processReply = function(self, buf)
-		if ESC_MODE == true then
-			-- 1 extra byte - for esc signature?
-			print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes + 1)		
-		else
-			print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
-		end		
+
+		print("Page is processing reply for cmd "..tostring(self.command).." len buf: "..#buf.." expected: "..Page.minBytes)
+
         Page.values = buf
         if Page.postRead then
             Page.postRead(Page)
@@ -187,26 +184,9 @@ rf2ethos.readPage = function()
     if type(Page.read) == "function" then
         Page.read(Page)
     else
-        mspLoadSettings.command = Page.read
-        mspLoadSettings.simulatorResponse = Page.simulatorResponse
+        mspLoadSettings.command = Page.read		
+        mspLoadSettings.simulatorResponse = Page.simulatorResponse		
         rf2ethos.mspQueue:add(mspLoadSettings)
-    end
-end
-
-local function saveSettings()
-    if pageState ~= pageStatus.saving then
-        pageState = pageStatus.saving
-
-        if Page.values then
-            local payload = Page.values
-		
-            mspSaveSettings.command = Page.write
-            mspSaveSettings.payload = payload
-            mspSaveSettings.simulatorResponse = {}
-            rf2ethos.mspQueue:add(mspSaveSettings)
-        elseif type(Page.write) == "function" then
-            Page.write(Page)
-        end
     end
 end
 
@@ -216,10 +196,10 @@ local function saveSettings()
         saveTS = os.clock()
 
         if Page.values then
-            local payload = Page.values
-			if ESC_MODE == true then
-				payload[2] = 0
-			end				
+            local payload = Page.values	
+            if Page.preSave then
+                payload = Page.preSave(Page)
+            end				
             mspSaveSettings.command = Page.write
             mspSaveSettings.payload = payload
             mspSaveSettings.simulatorResponse = {}
@@ -263,38 +243,29 @@ local function invalidatePages()
     collectgarbage()
 end
 
+
 function rf2ethos.dataBindFields()
+    for i=1,#Page.fields do
 
-    if Page.fields ~= nil and Page.values ~= nil then
-
-        for i = 1, #Page.fields do
-
-            if progressDialogDisplay == true then
-                local percent = (i / #Page.fields) * 100
-                progressDialog:value(percent)
-            end
-
-            if #Page.values >= Page.minBytes then
-                local f = Page.fields[i]
-                if f.vals then
-                    f.value = 0
-                    for idx = 1, #f.vals do
-
-                        local raw_val
-                        if ESC_MODE == true then
-                            raw_val = Page.values[f.vals[idx] + mspHeaderBytes] or 0
-                        else
-                            raw_val = Page.values[f.vals[idx]] or 0
-                        end
-                        raw_val = raw_val << ((idx - 1) * 8)
-                        f.value = f.value | raw_val
-                    end
-                    local bits = #f.vals * 8
-                    if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
-                        f.value = f.value - (2 ^ bits)
-                    end
-                    f.value = f.value / (f.scale or 1)
+		if progressDialogDisplay == true then
+			local percent = (i / #Page.fields) * 100
+			progressDialog:value(percent)
+		end	
+	
+        if #Page.values >= Page.minBytes then
+            local f = Page.fields[i]
+            if f.vals then
+                f.value = 0
+                for idx=1, #f.vals do
+                    local raw_val = Page.values[f.vals[idx]] or 0
+                    raw_val = raw_val<<((idx-1)*8)
+                    f.value = f.value|raw_val
                 end
+                local bits = #f.vals * 8
+                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
+                    f.value = f.value - (2 ^ bits)
+                end
+                f.value = f.value/(f.scale or 1)
             end
         end
     end
@@ -375,11 +346,7 @@ function rf2ethos.saveValue(currentField)
     local step = f.step or 1
 
     for idx = 1, #f.vals do
-        if ESC_MODE == true then
-            Page.values[f.vals[idx] + mspHeaderBytes] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
-        else
-            Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
-        end
+        Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8)
     end
     if f.upd and Page.values then
         f.upd(Page)
@@ -781,11 +748,11 @@ function wakeup(widget)
         end
     end
 
-    if escPowerCycle == true then
+    --if escPowerCycle == true then
         -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG' 
         -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
         -- INIT CONFIG MODE
-    else
+    --else
         if progressDialogDisplay == true then
             if progressDialogWatchDog ~= nil then
                 if (os.clock() - progressDialogWatchDog) > 20 then
@@ -794,7 +761,7 @@ function wakeup(widget)
                 end
             end
         end
-    end
+    --end
 
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
