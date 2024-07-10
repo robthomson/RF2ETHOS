@@ -9,17 +9,17 @@ escinfo[#escinfo + 1] = {t = "---"}
 escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "Governor", label = "gov", inline_size = 13.4}
-fields[#fields + 1] = {t = "P-Gain", inline = 2, label = "gov", min = 0, max = 9, vals = {70}}
-fields[#fields + 1] = {t = "I-Gain", inline = 1, label = "gov", min = 0, max = 9, vals = {71}}
+fields[#fields + 1] = {t = "P-Gain", inline = 2, label = "gov", min = 0, max = 9, vals = {mspHeaderBytes+70}}
+fields[#fields + 1] = {t = "I-Gain", inline = 1, label = "gov", min = 0, max = 9, vals = {mspHeaderBytes+71}}
 
 labels[#labels + 1] = {t = "Soft Start", label = "start", inline_size = 40.6}
-fields[#fields + 1] = {t = "Startup Time", inline = 1, label = "start", units = "s", min = 4, max = 25, vals = {69}}
+fields[#fields + 1] = {t = "Startup Time", inline = 1, label = "start", units = "s", min = 4, max = 25, vals = {mspHeaderBytes+69}}
 
 labels[#labels + 1] = {t = "", label = "start2", inline_size = 40.6}
-fields[#fields + 1] = {t = "Restart Time", inline = 1, label = "start2", units = "s", min = 0, max = #restartTime, vals = {73}, table = restartTime}
+fields[#fields + 1] = {t = "Restart Time", inline = 1, label = "start2", units = "s", min = 0, max = #restartTime, vals = {mspHeaderBytes+73}, table = restartTime}
 
 labels[#labels + 1] = {t = "", label = "start3", inline_size = 40.6}
-fields[#fields + 1] = {t = "Auto Restart", inline = 1, label = "start3", units = "s", min = 0, max = 90, vals = {72}}
+fields[#fields + 1] = {t = "Auto Restart", inline = 1, label = "start3", units = "s", min = 0, max = 90, vals = {mspHeaderBytes+72}}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
