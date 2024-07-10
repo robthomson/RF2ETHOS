@@ -22,28 +22,30 @@ return {
     eepromWrite = false,
     reboot = false,
     title = "Debug",
-    minBytes = mspBytes,
+    minBytes = 50, --mspBytes,
     labels = labels,
     fields = fields,
     escinfo = escinfo,
 	postRead = function(self)
 		print("postRead")
-        if self.values[1] ~= mspSignature then 
+        if self.values[1] ~= mspSignature then
+            print("Invalid ESC signature detected.")
             self.values = nil
-			self.escinfo[1].t = ""		
+			self.escinfo[1].t = ""
 			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""			
+			self.escinfo[2].t = ""
 		end
 	end,
     postLoad = function(self)
 		print("postLoad")
+        if not self.values then return end
         local model = getEscType(self)
         local version = "v" .. getUInt(self, {59, 60})
         local firmware = string.format("%08X", getUInt(self, {55, 56, 57, 58}))
 
 		self.escinfo[1].t = model
 		self.escinfo[2].t = version
-		self.escinfo[3].t = firmware		
+		self.escinfo[3].t = firmware
 
     end
 }
