@@ -20,12 +20,12 @@ local function getApiVersion()
 
     if environment.simulation == true then
         apiVersionReceived = true
-        lastRunTS = utils.getTime()
+        lastRunTS = rf2ethos.utils.getTime()
         return "12.06"
     else
-        if not apiVersionReceived and (lastRunTS == 0 or lastRunTS + INTERVAL < utils.getTime()) then
+        if not apiVersionReceived and (lastRunTS == 0 or lastRunTS + INTERVAL < rf2ethos.utils.getTime()) then
             protocol.mspRead(msp_API_VERSION)
-            lastRunTS = utils.getTime()
+            lastRunTS = rf2ethos.utils.getTime()
         end
 
         mspProcessTxQ()

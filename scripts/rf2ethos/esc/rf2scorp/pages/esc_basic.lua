@@ -20,7 +20,8 @@ fields[#fields + 1] = {t = "ESC Mode", min = 0, max = #escMode, vals = {mspHeade
 fields[#fields + 1] = {t = "Rotation", min = 0, max = #rotation, vals = {mspHeaderBytes+37, mspHeaderBytes+38}, table = rotation}
 fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {mspHeaderBytes+35, mspHeaderBytes+36}, table = becVoltage}
 
-fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes+39, mspHeaderBytes+40}, table = teleProtocol}
+-- not a good idea to allow this to be changed
+--fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes+39, mspHeaderBytes+40}, table = teleProtocol}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS

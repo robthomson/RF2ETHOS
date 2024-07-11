@@ -126,14 +126,26 @@ sensor = nil
 
 assert(loadfile(TOOL_DIR .. "rf2ethos.lua"))()
 
-utils = {}
-utils = assert(loadfile(TOOL_DIR .. "lib/utils.lua"))()
+rf2ethos.utils = {}
+rf2ethos.utils = assert(loadfile(TOOL_DIR .. "lib/utils.lua"))()
 
 local translations = {en = TOOL_NAME}
 
 local function name(widget)
     local locale = system.getLocale()
     return translations[locale] or translations["en"]
+end
+
+local function rebootFc()
+
+    print("Attempting to reboot the FC...")
+    pageState = pageStatus.rebooting
+    rf2ethos.mspQueue:add({
+        command = 68, -- MSP_REBOOT
+        processReply = function(self, buf)
+            --invalidatePages()
+        end
+    })
 end
 
 local mspEepromWrite =
@@ -230,20 +242,6 @@ local function saveSettings()
 end
 
 
-
-
-
-local function rebootFc()
-    print("Attempting to reboot the FC...")
-    pageState = pageStatus.rebooting
-    rf2ethos.mspQueue:add({
-        command = 68, -- MSP_REBOOT
-        processReply = function(self, buf)
-            invalidatePages()
-        end
-    })
-end
-
 local function invalidatePages()
     Page = nil
     pageState = pageStatus.display
@@ -329,7 +327,7 @@ function rf2ethos.getFieldValue(f)
 
     if f.value ~= nil then
         if f.decimals ~= nil then
-            v = utils.round(f.value * utils.decimalInc(f.decimals))
+            v = rf2ethos.utils.round(f.value * rf2ethos.utils.decimalInc(f.decimals))
         else
             v = f.value
         end
@@ -539,7 +537,7 @@ function wakeup(widget)
     end
 
     -- ethos version
-    if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
+    if tonumber(rf2ethos.utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         if badversionDisplay == false then
             badversionDisplay = true
 
@@ -553,7 +551,7 @@ function wakeup(widget)
                 }
             }
 
-            if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < 1590 then
+            if tonumber(rf2ethos.utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < 1590 then
                 form.openDialog("Warning", ETHOS_VERSION_STR, buttons, 1)
             else
                 form.openDialog({
@@ -866,7 +864,7 @@ function wakeup(widget)
 
 	if createForm == true then
 
-        if wasSaving == true or environment.simulation == true then
+        if (wasSaving == true and rf2ethos.mspQueue:isProcessed()) or environment.simulation == true then
 
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -971,6 +969,19 @@ function wakeup(widget)
                 saveDialog:message("Saving...")
             elseif pageState == pageStatus.rebooting then
                 saveMsg = saveDialog:message("Rebooting...")
+				saveDialog:value(saveDialogProgressCounter * 4)
+				saveDialogProgressCounter = saveDialogProgressCounter + 1
+				
+				if saveDialogProgressCounter >= 100 then
+					saveDialog:close()
+					invalidatePages()
+					wasReloading = true
+					createForm = true
+					wasSaving = false
+					wasLoading = false
+					reloadRates = false
+					reloadServos = false
+				end
             end
 
         else
@@ -1251,10 +1262,16 @@ function rf2ethos.resetServos()
 end
 
 -- when saving - we have to force a reload of data of copy-profiles due to way you
--- write one servo - and essentially loose Pages
 function rf2ethos.resetCopyProfiles()
     if lastScript == "copy_profiles.lua" then
-        rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+		--invalidatePages
+        --rf2ethos.openPageDefaultLoader(lastIdx, lastSubPage, lastTitle, lastScript)
+		wasReloading = true
+		createForm = true
+		wasSaving = false
+		wasLoading = false
+		reloadRates = false
+		reloadServos = false
     end
 end
 
@@ -1263,7 +1280,7 @@ function rf2ethos.resetRates()
         if resetRates == true then
             NewRateTable = Page.fields[13].value
 
-            local newTable = utils.defaultRates(NewRateTable)
+            local newTable = rf2ethos.utils.defaultRates(NewRateTable)
 
             for k, v in pairs(newTable) do
                 local f = Page.fields[k]
@@ -1312,7 +1329,7 @@ local function fieldChoice(f, i)
             end
         end
 
-        local p = utils.getInlinePositions(f, Page)
+        local p = rf2ethos.utils.getInlinePositions(f, Page)
         posText = p.posText
         posField = p.posField
 
@@ -1333,7 +1350,7 @@ local function fieldChoice(f, i)
         postText = nil
     end
 
-    field = form.addChoiceField(line, posField, utils.convertPageValueTable(f.table, f.tableIdxInc), function()
+    field = form.addChoiceField(line, posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
         local value = rf2ethos.getFieldValue(f)
 
         return value
@@ -1350,7 +1367,7 @@ end
 function rf2ethos.saveFieldValue(f, value)
     if value ~= nil then
         if f.decimals ~= nil then
-            f.value = value / utils.decimalInc(f.decimals)
+            f.value = value / rf2ethos.utils.decimalInc(f.decimals)
         else
             f.value = value
         end
@@ -1380,7 +1397,7 @@ local function fieldNumber(f, i)
             end
         end
 
-        local p = utils.getInlinePositions(f, Page)
+        local p = rf2ethos.utils.getInlinePositions(f, Page)
         posText = p.posText
         posField = p.posField
 
@@ -1409,8 +1426,8 @@ local function fieldNumber(f, i)
         postText = nil
     end
 
-    minValue = utils.scaleValue(f.min, f)
-    maxValue = utils.scaleValue(f.max, f)
+    minValue = rf2ethos.utils.scaleValue(f.min, f)
+    maxValue = rf2ethos.utils.scaleValue(f.max, f)
     if f.mult ~= nil then
         minValue = minValue * f.mult
         maxValue = maxValue * f.mult
@@ -1434,7 +1451,7 @@ local function fieldNumber(f, i)
     end)
 
     if f.default ~= nil then
-        local default = f.default * utils.decimalInc(f.decimals)
+        local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
         if f.mult ~= nil then
             default = default * f.mult
         end
@@ -1591,7 +1608,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
     })
 	field:focus()
 
-    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
+    iconsizeParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     end
@@ -1600,13 +1617,13 @@ function rf2ethos.openPagePreferences(idx,title,script)
         return iconsizeParam
     end, function(newValue)
         iconsizeParam = newValue
-        utils.storePreference(TOOL_DIR .. "/preferences/iconsize", iconsizeParam)
+        rf2ethos.utils.storePreference(TOOL_DIR .. "/preferences/iconsize", iconsizeParam)
     end)
 
     -- PROFILE
-    profileswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
+    profileswitchParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
     if profileswitchParam ~= nil then
-        local s = utils.explode(profileswitchParam, ",")
+        local s = rf2ethos.utils.explode(profileswitchParam, ",")
         profileswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -1617,12 +1634,12 @@ function rf2ethos.openPagePreferences(idx,title,script)
         profileswitchParam = newValue
         local member = profileswitchParam:member()
         local category = profileswitchParam:category()
-        utils.storePreference(TOOL_DIR .. "/preferences/profileswitch", category .. "," .. member)
+        rf2ethos.utils.storePreference(TOOL_DIR .. "/preferences/profileswitch", category .. "," .. member)
     end)
 
-    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
+    rateswitchParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
-        local s = utils.explode(rateswitchParam, ",")
+        local s = rf2ethos.utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -1633,7 +1650,7 @@ function rf2ethos.openPagePreferences(idx,title,script)
         rateswitchParam = newValue
         local member = rateswitchParam:member()
         local category = rateswitchParam:category()
-        utils.storePreference(TOOL_DIR .. "/preferences/rateswitch", category .. "," .. member)
+        rf2ethos.utils.storePreference(TOOL_DIR .. "/preferences/rateswitch", category .. "," .. member)
     end)
 
 end
@@ -1785,7 +1802,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
         if i == 1 then
             line = form.addLine("Servo")
-            field = form.addChoiceField(line, nil, utils.convertPageValueTable(servoTable), function()
+            field = form.addChoiceField(line, nil, rf2ethos.utils.convertPageValueTable(servoTable), function()
                 value = rf2ethos.lastChangedServo
                 if Page == nil then
                     wasReloading = true
@@ -1809,7 +1826,7 @@ function rf2ethos.openPageSERVOS(idx, title, script)
                     rf2ethos.saveValue(i)
                 end)
                 if f.default ~= nil then
-                    local default = f.default * utils.decimalInc(f.decimals)
+                    local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                     if f.mult ~= nil then
                         default = default * f.mult
                     end
@@ -1930,8 +1947,8 @@ function rf2ethos.openPagePID(idx, title, script)
 
         pos = {x = posX + padding, y = posY, w = w - padding, h = h}
 
-        minValue = f.min * utils.decimalInc(f.decimals)
-        maxValue = f.max * utils.decimalInc(f.decimals)
+        minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
+        maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
         if f.mult ~= nil then
             minValue = minValue * f.mult
             maxValue = maxValue * f.mult
@@ -1945,7 +1962,7 @@ function rf2ethos.openPagePID(idx, title, script)
             rf2ethos.saveValue(i)
         end)
         if f.default ~= nil then
-            local default = f.default * utils.decimalInc(f.decimals)
+            local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
             if f.mult ~= nil then
                 default = default * f.mult
             end
@@ -1982,7 +1999,7 @@ function rf2ethos.openPageESC(idx, title, script)
 
 	ESC_MENUSTATE = 1
 
-    if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
+    if tonumber(rf2ethos.utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
     end
 
@@ -2001,7 +2018,7 @@ function rf2ethos.openPageESC(idx, title, script)
     ESC_MODE = true
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
+    iconsizeParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     else
@@ -2234,7 +2251,7 @@ function rf2ethos.openPageESCTool(folder)
     local numPerRow
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
+    iconsizeParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
 
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
@@ -2479,9 +2496,9 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
+    rateswitchParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
-        local s = utils.explode(rateswitchParam, ",")
+        local s = rf2ethos.utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -2539,8 +2556,8 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
 
             pos = {x = posX + padding, y = posY, w = w - padding, h = h}
 
-            minValue = f.min * utils.decimalInc(f.decimals)
-            maxValue = f.max * utils.decimalInc(f.decimals)
+            minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
+            maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
             if f.mult ~= nil then
                 minValue = minValue * f.mult
                 maxValue = maxValue * f.mult
@@ -2558,7 +2575,7 @@ function rf2ethos.openPageRATES(idx, subpage, title, script)
                 rf2ethos.saveValue(i)
             end)
             if f.default ~= nil then
-                local default = f.default * utils.decimalInc(f.decimals)
+                local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                 if f.mult ~= nil then
                     default = math.floor(default * f.mult)
                 end
@@ -2597,7 +2614,7 @@ end
 
 function rf2ethos.openMainMenu()
 
-    if tonumber(utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
+    if tonumber(rf2ethos.utils.makeNumber(environment.major .. environment.minor .. environment.revision)) < ETHOS_VERSION then
         return
     end
 
@@ -2619,7 +2636,7 @@ function rf2ethos.openMainMenu()
 	ESC_MENUSTATE = 0
 
     -- size of buttons
-    iconsizeParam = utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
+    iconsizeParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/iconsize")
     if iconsizeParam == nil or iconsizeParam == "" then
         iconsizeParam = 1
     else
@@ -2730,18 +2747,18 @@ function rf2ethos.openMainMenu()
 end
 
 function rf2ethos.profileSwitchCheck()
-    profileswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
+    profileswitchParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/profileswitch")
     if profileswitchParam ~= nil then
-        local s = utils.explode(profileswitchParam, ",")
+        local s = rf2ethos.utils.explode(profileswitchParam, ",")
         profileswitchParam = system.getSource({category = s[1], member = s[2]})
         profileswitchLast = profileswitchParam:value()
     end
 end
 
 function rf2ethos.rateSwitchCheck()
-    rateswitchParam = utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
+    rateswitchParam = rf2ethos.utils.loadPreference(TOOL_DIR .. "/preferences/rateswitch")
     if rateswitchParam ~= nil then
-        local s = utils.explode(rateswitchParam, ",")
+        local s = rf2ethos.utils.explode(rateswitchParam, ",")
         rateswitchParam = system.getSource({category = s[1], member = s[2]})
         rateswitchLast = rateswitchParam:value()
     end
@@ -2770,7 +2787,7 @@ local function create()
         end
     end
 
-    LCD_W, LCD_H = utils.getWindowSize()
+    LCD_W, LCD_H = rf2ethos.utils.getWindowSize()
 
     rf2ethos.protocol = assert(loadfile(TOOL_DIR .. "protocols.lua"))()
     rf2ethos.radio = assert(loadfile(TOOL_DIR .. "radios.lua"))().msp
