@@ -25,7 +25,7 @@ rf2ethos = {
         -- @param value     value
         -- @retval boolean  data queued in output buffer or not.
         -- @retval nil      incorrect telemetry protocol.  (added in 2.3.4)
-        return rf2ethos.sensor:pushFrame({physId=sensorId, primId=frameId, appId=dataId, value=value})
+        return rf2ethos.sensor:pushFrame({physId = sensorId, primId = frameId, appId = dataId, value = value})
     end,
 
     getRSSI = function()
@@ -38,7 +38,9 @@ rf2ethos = {
     end,
 
     startsWith = function(str, prefix)
-        if #prefix > #str then return false end
+        if #prefix > #str then
+            return false
+        end
         for i = 1, #prefix do
             if str:byte(i) ~= prefix:byte(i) then
                 return false
@@ -47,12 +49,11 @@ rf2ethos = {
         return true
     end,
 
-
     getWindowSize = function()
         return lcd.getWindowSize()
-        --return 784, 406
-        --return 472, 288
-        --return 472, 240
+        -- return 784, 406
+        -- return 472, 288
+        -- return 472, 240
     end,
 
     log = function(str)
@@ -63,8 +64,8 @@ rf2ethos = {
 
     print = function(str)
         print(tostring(str))
-        --rf2ethos.log(str)
+        -- rf2ethos.log(str)
     end,
 
-    clock = os.clock,
+    clock = os.clock
 }

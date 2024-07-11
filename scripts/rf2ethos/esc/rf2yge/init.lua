@@ -37,9 +37,9 @@ function getEscTypeLabel(values)
 end
 
 function getUInt(page, vals)
-	if page == nil then
-		return ""
-	end
+    if page == nil then
+        return ""
+    end
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
@@ -57,8 +57,6 @@ end
 function setPageValue(page, index, value)
     page.values[mspHeaderBytes + index] = value
 end
-
-
 
 apiVersion = 0
 mcuId = nil

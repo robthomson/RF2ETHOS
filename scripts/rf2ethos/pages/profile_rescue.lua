@@ -35,16 +35,16 @@ return {
     write = 147, -- msp_SET_RESCUE_PROFILE
     title = "Profile - Rescue",
     reboot = false,
-	refreshswitch = true,	
+    refreshswitch = true,
     eepromWrite = true,
-	simulatorResponse = { 1, 0, 200, 100, 5, 3, 10, 5, 182, 3, 188, 2, 194, 1, 244, 1, 20, 0, 20, 0, 10, 0, 232, 3, 44, 1, 184, 11 },	
+    simulatorResponse = {1, 0, 200, 100, 5, 3, 10, 5, 182, 3, 188, 2, 194, 1, 244, 1, 20, 0, 20, 0, 10, 0, 232, 3, 44, 1, 184, 11},
     minBytes = 28,
     labels = labels,
     fields = fields,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

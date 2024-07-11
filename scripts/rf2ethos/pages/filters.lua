@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -45,13 +44,13 @@ return {
     reboot = true,
     title = "Filters",
     minBytes = 25,
-	simulatorResponse = { 0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0 },
+    simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
     labels = labels,
     fields = fields,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end		
+        print("postLoad")
+    end
 }

@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -34,14 +33,14 @@ return {
     eepromWrite = true,
     reboot = false,
     title = "Mixer",
-	simulatorResponse = { 0, 0, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },	
+    simulatorResponse = {0, 0, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
     minBytes = 19,
     labels = labels,
     fields = fields,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

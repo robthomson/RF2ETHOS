@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -184,19 +183,19 @@ return {
     minBytes = 25,
     labels = labels,
     fields = fields,
-	refreshswitch = true,	
+    refreshswitch = true,
     rows = rows,
     cols = cols,
-	simulatorResponse = { 4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0 },	
+    simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
     rTableName = rTableName,
     flagRateChange = function(self)
         -- print("We need to reset the rates tables on save")
         resetRates = true
     end,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

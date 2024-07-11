@@ -26,16 +26,16 @@ return {
     write = 149, -- msp_SET_GOVERNOR_PROFILE
     title = "Profile - Governor",
     reboot = false,
-	refreshswitch = true,	
+    refreshswitch = true,
     eepromWrite = true,
-	simulatorResponse = { 208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100 },	
+    simulatorResponse = {208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100},
     minBytes = 13,
     labels = labels,
     fields = fields,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

@@ -1,4 +1,3 @@
-
 local utils = {}
 
 -- save a value to preferences
@@ -24,7 +23,7 @@ function utils.storePreference(preference, value)
 
     print("Write Preference: " .. file .. " [" .. value .. "]")
 
-    file =  preference .. ".cfg"
+    file = preference .. ".cfg"
 
     -- then write current data
     local f

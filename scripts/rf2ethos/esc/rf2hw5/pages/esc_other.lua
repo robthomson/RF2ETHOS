@@ -13,19 +13,19 @@ escinfo[#escinfo + 1] = {t = "---"}
 escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "Motor", label = "motor1", inline_size = 40.6}
-fields[#fields + 1] = {t = "Timing", inline = 1, label = "motor1", min = 0, max = 30, vals = {mspHeaderBytes+76}}
+fields[#fields + 1] = {t = "Timing", inline = 1, label = "motor1", min = 0, max = 30, vals = {mspHeaderBytes + 76}}
 
 labels[#labels + 1] = {t = "", label = "motor2", inline_size = 40.6}
-fields[#fields + 1] = {t = "Startup Power", inline = 1, label = "motor2", min = 0, max = #startupPower, vals = {mspHeaderBytes+79}, table = startupPower}
+fields[#fields + 1] = {t = "Startup Power", inline = 1, label = "motor2", min = 0, max = #startupPower, vals = {mspHeaderBytes + 79}, table = startupPower}
 
 labels[#labels + 1] = {t = "", label = "motor3", inline_size = 40.6}
-fields[#fields + 1] = {t = "Active Freewheel", inline = 1, label = "motor3", min = 0, max = #enabledDisabled, vals = {mspHeaderBytes+78}, table = enabledDisabled}
+fields[#fields + 1] = {t = "Active Freewheel", inline = 1, label = "motor3", min = 0, max = #enabledDisabled, vals = {mspHeaderBytes + 78}, table = enabledDisabled}
 
 labels[#labels + 1] = {t = "Brake", label = "brake1", inline_size = 40.6}
-fields[#fields + 1] = {t = "Brake Type", inline = 1, label = "brake1", min = 0, max = #brakeType, vals = {mspHeaderBytes+74}, table = brakeType}
+fields[#fields + 1] = {t = "Brake Type", inline = 1, label = "brake1", min = 0, max = #brakeType, vals = {mspHeaderBytes + 74}, table = brakeType}
 
 labels[#labels + 1] = {t = "", label = "brake2", inline_size = 40.6}
-fields[#fields + 1] = {t = "Brake Force %", inline = 1, label = "brake2", min = 0, max = 100, vals = {mspHeaderBytes+75}}
+fields[#fields + 1] = {t = "Brake Force %", inline = 1, label = "brake2", min = 0, max = 100, vals = {mspHeaderBytes + 75}}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -38,20 +38,20 @@ return {
     fields = fields,
     escinfo = escinfo,
     preSave = function(self)
-		self.values[2] = 0 -- save cmd	
-		
+        self.values[2] = 0 -- save cmd	
+
         return self.values
     end,
-	postRead = function(self)
-		print("postRead")
+    postRead = function(self)
+        print("postRead")
         if self.values[1] ~= mspSignature then
             print("Invalid ESC signature detected.")
             self.values = nil
-			self.escinfo[1].t = ""
-			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""
-		end
-	end,	
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+        end
+    end,
     postLoad = function(self)
         local model = getText(self, 49, 64)
         local version = getText(self, 17, 32)

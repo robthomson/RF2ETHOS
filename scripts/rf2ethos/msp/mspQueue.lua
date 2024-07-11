@@ -16,7 +16,6 @@ function MspQueueController:isProcessed()
     return not self.currentMessage and #self.messageQueue == 0
 end
 
-
 --[[
 function joinTableItems(table, delimiter)
     if table == nil or #table == 0 then return "" end
@@ -44,7 +43,7 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    --print("retryCount: "..self.retryCount)
+    -- print("retryCount: "..self.retryCount)
 
     if not rf2ethos.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 0.5 < os.clock() then
@@ -61,7 +60,7 @@ function MspQueueController:processQueue()
         cmd, buf, err = mspPollReply()
     else
         if not self.currentMessage.simulatorResponse then
-            print("No simulator response for command "..tostring(self.currentMessage.command))
+            print("No simulator response for command " .. tostring(self.currentMessage.command))
             self.currentMessage = nil
             return
         end
@@ -70,14 +69,14 @@ function MspQueueController:processQueue()
         err = nil
     end
 
-    if cmd then print("Received cmd: "..tostring(cmd)) end
-	
-	
-	if (cmd == self.currentMessage.command and not err) 
-		or (self.currentMessage.command == 68 and self.retryCount == 2)  -- 68 = MSP_REBOOT
-		or (self.currentMessage.command == 217 and self.retryCount == 2 and err)  -- ESC
-		then
-        --print("Received: {" .. joinTableItems(buf, ", ") .. "}")
+    if cmd then
+        print("Received cmd: " .. tostring(cmd))
+    end
+
+    if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
+    or (self.currentMessage.command == 217 and self.retryCount == 2 and err) -- ESC
+    then
+        -- print("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end
@@ -86,7 +85,6 @@ function MspQueueController:processQueue()
         self.currentMessage = nil
     end
 end
-
 
 local function deepCopy(original)
     local copy
@@ -103,15 +101,15 @@ local function deepCopy(original)
 end
 
 function MspQueueController:add(message)
-	if message ~= nil then
-		message = deepCopy(message)
-		print("Queueing command "..message.command.." at position "..#self.messageQueue + 1)
-		self.messageQueue[#self.messageQueue + 1] =  message
-		return self
-	else
-		print("Unable to queue - nil message.  Check function is callable")
-		-- this can go wrong if the function is declared below save function!!!
-	end	
+    if message ~= nil then
+        message = deepCopy(message)
+        print("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
+        self.messageQueue[#self.messageQueue + 1] = message
+        return self
+    else
+        print("Unable to queue - nil message.  Check function is callable")
+        -- this can go wrong if the function is declared below save function!!!
+    end
 end
 
 return MspQueueController.new()

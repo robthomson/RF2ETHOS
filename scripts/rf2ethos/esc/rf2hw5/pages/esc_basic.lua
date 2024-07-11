@@ -22,22 +22,22 @@ escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
 
 labels[#labels + 1] = {t = "ESC", label = "esc1", inline_size = 40.6}
-fields[#fields + 1] = {t = "Flight Mode", inline = 1, label = "esc1", min = 0, max = #flightMode, tableIdxInc = -1, vals = {mspHeaderBytes+64}, table = flightMode}
+fields[#fields + 1] = {t = "Flight Mode", inline = 1, label = "esc1", min = 0, max = #flightMode, tableIdxInc = -1, vals = {mspHeaderBytes + 64}, table = flightMode}
 
 labels[#labels + 1] = {t = "", label = "esc2", inline_size = 40.6}
-fields[#fields + 1] = {t = "Rotation", inline = 1, label = "esc2", min = 0, max = #rotation, vals = {mspHeaderBytes+77}, tableIdxInc = -1, table = rotation}
+fields[#fields + 1] = {t = "Rotation", inline = 1, label = "esc2", min = 0, max = #rotation, vals = {mspHeaderBytes + 77}, tableIdxInc = -1, table = rotation}
 
 labels[#labels + 1] = {t = "", label = "esc3", inline_size = 40.6}
-fields[#fields + 1] = {t = "BEC Voltage", inline = 1, label = "esc3", min = 0, max = #voltages, vals = {mspHeaderBytes+68}, tableIdxInc = -1, table = voltages}
+fields[#fields + 1] = {t = "BEC Voltage", inline = 1, label = "esc3", min = 0, max = #voltages, vals = {mspHeaderBytes + 68}, tableIdxInc = -1, table = voltages}
 
 labels[#labels + 1] = {t = "Protection and Limits", label = "limits1", inline_size = 40.6}
-fields[#fields + 1] = {t = "Lipo Cell Count", inline = 1, label = "limits1", min = 0, max = #lipoCellCount, vals = {mspHeaderBytes+65}, tableIdxInc = -1, table = lipoCellCount}
+fields[#fields + 1] = {t = "Lipo Cell Count", inline = 1, label = "limits1", min = 0, max = #lipoCellCount, vals = {mspHeaderBytes + 65}, tableIdxInc = -1, table = lipoCellCount}
 
 labels[#labels + 1] = {t = "", label = "limits2", inline_size = 40.6}
-fields[#fields + 1] = {t = "Volt Cutoff Type", inline = 1, label = "limits2", min = 0, max = #cutoffType, vals = {mspHeaderBytes+66}, tableIdxInc = -1, table = cutoffType}
+fields[#fields + 1] = {t = "Volt Cutoff Type", inline = 1, label = "limits2", min = 0, max = #cutoffType, vals = {mspHeaderBytes + 66}, tableIdxInc = -1, table = cutoffType}
 
 labels[#labels + 1] = {t = "", label = "limits3", inline_size = 40.6}
-fields[#fields + 1] = {t = "Cuttoff Voltage", inline = 1, label = "limits3", min = 0, max = #cutoffVoltage, vals = {mspHeaderBytes+67}, tableIdxInc = -1, table = cutoffVoltage}
+fields[#fields + 1] = {t = "Cuttoff Voltage", inline = 1, label = "limits3", min = 0, max = #cutoffVoltage, vals = {mspHeaderBytes + 67}, tableIdxInc = -1, table = cutoffVoltage}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -63,19 +63,19 @@ return {
         -- f.value = getPageValue(self, 68)
         -- print(f.value)
     end,
-	postRead = function(self)
-		print("postRead")
+    postRead = function(self)
+        print("postRead")
         if self.values[1] ~= mspSignature then
             print("Invalid ESC signature detected.")
             self.values = nil
-			self.escinfo[1].t = ""
-			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""
-		end
-	end,
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+        end
+    end,
     preSave = function(self)
-	
-		self.values[2] = 0 -- save cmd	
+
+        self.values[2] = 0 -- save cmd	
         -- BEC offset
         -- local f = self.fields[3]
         -- setPageValue(self, 68, f.value * 10 - 54)

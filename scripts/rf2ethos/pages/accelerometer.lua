@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -10,16 +9,16 @@ return {
     read = 240, -- msp_ACC_TRIM
     write = 239, -- msp_SET_ACC_TRIM
     eepromWrite = true,
-	simulatorResponse = { 0, 0, 0, 0 },
+    simulatorResponse = {0, 0, 0, 0},
     reboot = false,
     title = "Accelerometer",
     minBytes = 4,
     labels = labels,
     fields = fields,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

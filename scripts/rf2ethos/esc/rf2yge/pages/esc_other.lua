@@ -24,17 +24,17 @@ escinfo[#escinfo + 1] = {t = ""}
 
 labels[#labels + 1] = {t = "ESC"}
 
-fields[#fields + 1] = {t = "P-Gain", min = 1, max = 10, vals = {mspHeaderBytes+11, mspHeaderBytes+12}}
-fields[#fields + 1] = {t = "I-Gain", min = 1, max = 10, vals = {mspHeaderBytes+13, mspHeaderBytes+14}}
+fields[#fields + 1] = {t = "P-Gain", min = 1, max = 10, vals = {mspHeaderBytes + 11, mspHeaderBytes + 12}}
+fields[#fields + 1] = {t = "I-Gain", min = 1, max = 10, vals = {mspHeaderBytes + 13, mspHeaderBytes + 14}}
 
-fields[#fields + 1] = {t = "Motor Pole Pairs", min = 1, max = 100, vals = {mspHeaderBytes+41, mspHeaderBytes+42}, upd = updatePoles}
+fields[#fields + 1] = {t = "Motor Pole Pairs", min = 1, max = 100, vals = {mspHeaderBytes + 41, mspHeaderBytes + 42}, upd = updatePoles}
 labels[#labels + 1] = {t = "0"}
-fields[#fields + 1] = {t = "Main Teeth", min = 1, max = 1800, vals = {mspHeaderBytes+45, mspHeaderBytes+46}, upd = updateRatio}
+fields[#fields + 1] = {t = "Main Teeth", min = 1, max = 1800, vals = {mspHeaderBytes + 45, mspHeaderBytes + 46}, upd = updateRatio}
 labels[#labels + 1] = {t = ":"}
-fields[#fields + 1] = {t = "Pinion Teeth", min = 1, max = 255, vals = {mspHeaderBytes+43, mspHeaderBytes+44}}
+fields[#fields + 1] = {t = "Pinion Teeth", min = 1, max = 255, vals = {mspHeaderBytes + 43, mspHeaderBytes + 44}}
 
-fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {mspHeaderBytes+35, mspHeaderBytes+36}}
-fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes+37, mspHeaderBytes+38}}
+fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {mspHeaderBytes + 35, mspHeaderBytes + 36}}
+fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes + 37, mspHeaderBytes + 38}}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -52,7 +52,7 @@ return {
     preSave = function(self)
         -- direction
         -- apply bits to saved flags
-	end,	
+    end,
     postLoad = function(self)
         local model = getEscTypeLabel(self.values)
         local version = getUInt(self, {29, 30, 31, 32})

@@ -10,10 +10,10 @@ apiVersion = 0
 mcuId = nil
 
 function getText(page, st, en)
-	if page.values == nil then
-		return ""
-	end
-	
+    if page.values == nil then
+        return ""
+    end
+
     local tt = {}
     for i = st, en do
         local v = page.values[i + mspHeaderBytes]

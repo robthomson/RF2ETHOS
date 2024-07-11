@@ -1,4 +1,3 @@
-
 local fields = {}
 local rows = {}
 local cols = {}
@@ -43,16 +42,16 @@ return {
     title = "PIDs",
     reboot = false,
     eepromWrite = true,
-	refreshswitch = true,	
+    refreshswitch = true,
     minBytes = 34,
-	simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0 },	
+    simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0},
     fields = fields,
     rows = rows,
     cols = cols,
-	postRead = function(self)
-		print("postRead")
-	end,
+    postRead = function(self)
+        print("postRead")
+    end,
     postLoad = function(self)
-		print("postLoad")
-    end	
+        print("postLoad")
+    end
 }

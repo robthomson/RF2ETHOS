@@ -14,7 +14,9 @@ local mspHelper = {
     readS16 = function(buf)
         local offset = buf.offset or 1
         local value = buf[offset] + buf[offset + 1] * 256
-        if value >= 32768 then value = value - 65536 end
+        if value >= 32768 then
+            value = value - 65536
+        end
         buf.offset = offset + 2
         return value
     end,
@@ -36,7 +38,7 @@ local mspHelper = {
         buf[#buf + 1] = math.floor(value / 256) % 256
         buf[#buf + 1] = math.floor(value / 65536) % 256
         buf[#buf + 1] = math.floor(value / 16777216) % 256
-    end,
+    end
 }
 
 return mspHelper

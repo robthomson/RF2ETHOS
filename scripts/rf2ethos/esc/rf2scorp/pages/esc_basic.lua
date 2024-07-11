@@ -16,12 +16,12 @@ escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "Scorpion ESC"}
 
-fields[#fields + 1] = {t = "ESC Mode", min = 0, max = #escMode, vals = {mspHeaderBytes+33, mspHeaderBytes+34}, table = escMode}
-fields[#fields + 1] = {t = "Rotation", min = 0, max = #rotation, vals = {mspHeaderBytes+37, mspHeaderBytes+38}, table = rotation}
-fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {mspHeaderBytes+35, mspHeaderBytes+36}, table = becVoltage}
+fields[#fields + 1] = {t = "ESC Mode", min = 0, max = #escMode, vals = {mspHeaderBytes + 33, mspHeaderBytes + 34}, table = escMode}
+fields[#fields + 1] = {t = "Rotation", min = 0, max = #rotation, vals = {mspHeaderBytes + 37, mspHeaderBytes + 38}, table = rotation}
+fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {mspHeaderBytes + 35, mspHeaderBytes + 36}, table = becVoltage}
 
 -- not a good idea to allow this to be changed
---fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes+39, mspHeaderBytes+40}, table = teleProtocol}
+-- fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes+39, mspHeaderBytes+40}, table = teleProtocol}
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -35,16 +35,16 @@ return {
     escinfo = escinfo,
 
     svFlags = 0,
-	postRead = function(self)
-		print("postRead")
+    postRead = function(self)
+        print("postRead")
         if self.values[1] ~= mspSignature then
             print("Invalid ESC signature detected.")
             self.values = nil
-			self.escinfo[1].t = ""
-			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""
-		end
-	end,
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+        end
+    end,
     postLoad = function(self)
 
         local model = getEscType(self)

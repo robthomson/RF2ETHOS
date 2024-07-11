@@ -26,32 +26,31 @@ return {
     labels = labels,
     fields = fields,
     escinfo = escinfo,
-	postRead = function(self)
-        if self.values[1] ~= mspSignature then 
-            --self.values = nil
-			self.escinfo[1].t = ""		
-			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""			
-            return	
-		end
-	end,	
-    postLoad = function(self)
-		
-        if self.values[1] ~= mspSignature then 
-            --self.values = nil
-			self.escinfo[1].t = ""		
-			self.escinfo[2].t = ""
-			self.escinfo[2].t = ""			
+    postRead = function(self)
+        if self.values[1] ~= mspSignature then
+            -- self.values = nil
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
             return
-		else
-			local model = getEscTypeLabel(self.values)
-			local version = getUInt(self, {29, 30, 31, 32})
-			local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-			self.escinfo[1].t = model
-			self.escinfo[2].t = version
-			self.escinfo[3].t = firmware		
-        end	
+        end
+    end,
+    postLoad = function(self)
 
+        if self.values[1] ~= mspSignature then
+            -- self.values = nil
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+            return
+        else
+            local model = getEscTypeLabel(self.values)
+            local version = getUInt(self, {29, 30, 31, 32})
+            local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
+            self.escinfo[1].t = model
+            self.escinfo[2].t = version
+            self.escinfo[3].t = firmware
+        end
 
     end
 }

@@ -1,4 +1,3 @@
-
 local pages = {}
 
 pages[#pages + 1] = {title = "SCORPION", folder = "rf2scorp", image = "scorpion.png"}
