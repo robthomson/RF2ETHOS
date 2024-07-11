@@ -15,5 +15,11 @@ return {
     title = "Accelerometer",
     minBytes = 4,
     labels = labels,
-    fields = fields
+    fields = fields,
+	postRead = function(self)
+		print("postRead")
+	end,
+    postLoad = function(self)
+		print("postLoad")
+    end	
 }

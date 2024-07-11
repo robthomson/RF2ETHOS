@@ -2,6 +2,10 @@ local toolName = "YGE"
 moduleName = "RF2YGE"
 moduleTitle = "YGE ESC v0.42"
 
+mspSignature = 0xA5
+mspHeaderBytes = 2
+mspBytes = 60 -- 66
+
 escType = {
     [848] = "YGE 35 LVT BEC",
     [1616] = "YGE 65 LVT BEC",
@@ -33,6 +37,9 @@ function getEscTypeLabel(values)
 end
 
 function getUInt(page, vals)
+	if page == nil then
+		return ""
+	end
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
@@ -43,6 +50,7 @@ function getUInt(page, vals)
 end
 
 function getPageValue(page, index)
+
     return page.values[mspHeaderBytes + index]
 end
 
@@ -50,9 +58,7 @@ function setPageValue(page, index, value)
     page.values[mspHeaderBytes + index] = value
 end
 
-mspSignature = 0xA5
-mspHeaderBytes = 2
-mspBytes = 66
+
 
 apiVersion = 0
 mcuId = nil

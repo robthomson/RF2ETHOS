@@ -44,7 +44,16 @@ return {
         f = self.fields[3]
         f.value = f.value + 4
     end,
-
+	postRead = function(self)
+		print("postRead")
+        if self.values[1] ~= mspSignature then
+            print("Invalid ESC signature detected.")
+            self.values = nil
+			self.escinfo[1].t = ""
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""
+		end
+	end,
     preSave = function(self)
 	
 		self.values[2] = 0 -- save cmd

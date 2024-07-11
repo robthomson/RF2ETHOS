@@ -42,6 +42,16 @@ return {
 		
         return self.values
     end,
+	postRead = function(self)
+		print("postRead")
+        if self.values[1] ~= mspSignature then
+            print("Invalid ESC signature detected.")
+            self.values = nil
+			self.escinfo[1].t = ""
+			self.escinfo[2].t = ""
+			self.escinfo[2].t = ""
+		end
+	end,	
     postLoad = function(self)
         local model = getText(self, 49, 64)
         local version = getText(self, 17, 32)

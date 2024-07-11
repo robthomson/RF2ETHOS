@@ -192,5 +192,11 @@ return {
     flagRateChange = function(self)
         -- print("We need to reset the rates tables on save")
         resetRates = true
-    end
+    end,
+	postRead = function(self)
+		print("postRead")
+	end,
+    postLoad = function(self)
+		print("postLoad")
+    end	
 }

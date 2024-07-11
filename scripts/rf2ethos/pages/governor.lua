@@ -33,5 +33,11 @@ return {
     eepromWrite = true,
     minBytes = 24,
     labels = labels,
-    fields = fields
+    fields = fields,
+	postRead = function(self)
+		print("postRead")
+	end,
+    postLoad = function(self)
+		print("postLoad")
+    end	
 }

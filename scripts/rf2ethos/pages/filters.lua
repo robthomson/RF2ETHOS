@@ -47,5 +47,11 @@ return {
     minBytes = 25,
 	simulatorResponse = { 0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0 },
     labels = labels,
-    fields = fields
+    fields = fields,
+	postRead = function(self)
+		print("postRead")
+	end,
+    postLoad = function(self)
+		print("postLoad")
+    end		
 }

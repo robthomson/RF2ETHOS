@@ -4,7 +4,7 @@ moduleTitle = "Scorpion ESC v0.42"
 
 mspSignature = 0x53
 mspHeaderBytes = 2
-mspBytes = 84
+mspBytes = 1 -- 84
 
 apiVersion = 0
 mcuId = nil
