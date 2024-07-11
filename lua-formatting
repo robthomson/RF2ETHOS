@@ -1,6 +1,5 @@
 # this script uses lua-format
 # https://github.com/Koihik/LuaFormatter
-#!/bin/sh
 
 
 list=$(find ./ -name "*.lua")
