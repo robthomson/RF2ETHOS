@@ -108,6 +108,9 @@ function MspQueueController:add(message)
 		print("Queueing command "..message.command.." at position "..#self.messageQueue + 1)
 		self.messageQueue[#self.messageQueue + 1] =  message
 		return self
+	else
+		print("Unable to queue - nil message.  Check function is callable")
+		-- this can go wrong if the function is declared below save function!!!
 	end	
 end
 

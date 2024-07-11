@@ -136,6 +136,19 @@ local function name(widget)
     return translations[locale] or translations["en"]
 end
 
+local mspEepromWrite =
+{
+    command = 250, -- MSP_EEPROM_WRITE, fails when armed
+    processReply = function(self, buf)
+        if Page.reboot then
+            rebootFc()
+        end	
+		if rf2ethos.mspQueue:isProcessed()  then
+			invalidatePages()
+		end
+    end,
+    simulatorResponse = {}
+}
 
 rf2ethos.settingsSaved = function()
     -- check if this page requires writing to eeprom to save (most do)
@@ -147,7 +160,9 @@ rf2ethos.settingsSaved = function()
         end
     elseif pageState ~= pageStatus.eepromWrite then
         -- If we're not already trying to write to eeprom from a previous save, then we're done.
-        invalidatePages()
+		if rf2ethos.mspQueue:isProcessed()  then
+			invalidatePages()
+		end
     end
 end
 
@@ -177,6 +192,7 @@ local mspLoadSettings =
         end
 		print("mspDataLoaded")
 		mspDataLoaded = true
+
 
     end
 }
@@ -215,17 +231,7 @@ end
 
 
 
-local mspEepromWrite =
-{
-    command = 250, -- MSP_EEPROM_WRITE, fails when armed
-    processReply = function(self, buf)
-        if Page.reboot then
-            rebootFc()
-        end
-        invalidatePages()
-    end,
-    simulatorResponse = {}
-}
+
 
 local function rebootFc()
     print("Attempting to reboot the FC...")
@@ -570,7 +576,7 @@ function wakeup(widget)
 	-- ESC LOADER
 	if triggerESCLOADER == true then
 		if progressDialogDisplay ~= true then
-			-- we will prob never hit this loop in reality
+			
 			progressDialogDisplay = true
 			progressDialogWatchDog = os.clock()
 			progressDialog = form.openProgressDialog("Searching...", "Please power cycle the esc")
@@ -694,6 +700,7 @@ function wakeup(widget)
         -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG'
         -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
         -- INIT CONFIG MODE
+	
     else
         if environment.simulation ~= true or SIM_ENABLE_RSSI == true then
             if telemetryState ~= 1 then
@@ -821,10 +828,11 @@ function wakeup(widget)
             end
         elseif pageState == pageStatus.eepromWrite then
             if (saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-
 				saveDialog:value(100)
 				saveDialog:close()
-				invalidatePages()
+				if rf2ethos.mspQueue:isProcessed()  then
+					invalidatePages()
+				end	
 			else
 				saveDialogProgressCounter = saveDialogProgressCounter + 1
             end
@@ -856,7 +864,7 @@ function wakeup(widget)
         end
     end
 
-if createForm == true then
+	if createForm == true then
 
         if wasSaving == true or environment.simulation == true then
 
@@ -932,7 +940,7 @@ if createForm == true then
     end
 
     if uiState ~= uiStatus.mainMenu then
-        if environment.simulation == true or mspDataLoaded == true then
+        if environment.simulation == true or mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() then
             mspDataLoaded = false
             isLoading = false
             wasLoading = true
@@ -942,6 +950,7 @@ if createForm == true then
         end
     end
 
+	
     if isSaving then
         if pageState >= pageStatus.saving then
             if saveDialogDisplay == false then
@@ -1076,7 +1085,8 @@ if createForm == true then
         end
     end
 
-	    rf2ethos.mspQueue:processQueue()
+	--this needs to run on every wakeup event.
+	rf2ethos.mspQueue:processQueue()
 
 end
 
