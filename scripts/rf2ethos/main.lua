@@ -64,7 +64,7 @@ reloadRates = false
 defaultRateTable = 4 -- ACTUAL
 isLoading = false
 wasLoading = false
-reloadServos = false
+--reloadServos = false
 
 local exitAPP = false
 local noRFMsg = false
@@ -627,7 +627,7 @@ function wakeup(widget)
 								wasSaving = false
 								wasLoading = false
 								reloadRates = false
-								reloadServos = false
+								--reloadServos = false
 
 							else
 
@@ -640,7 +640,7 @@ function wakeup(widget)
 									wasSaving = false
 									wasLoading = false
 									reloadRates = false
-									reloadServos = false
+									--reloadServos = false
 								end
 								return true
 
@@ -668,7 +668,7 @@ function wakeup(widget)
 								wasSaving = false
 								wasLoading = false
 								reloadRates = false
-								reloadServos = false
+								--reloadServos = false
 							else
 								rateswitchLast = rateswitchParam:value()
 
@@ -677,7 +677,7 @@ function wakeup(widget)
 								if environment.simulation ~= true then
 									wasSaving = false
 									wasLoading = false
-									reloadServos = false
+									--reloadServos = false
 									wasReloading = false
 
 									createForm = true
@@ -862,9 +862,9 @@ function wakeup(widget)
         end
     end
 
-	if createForm == true then
+	if createForm == true and rf2ethos.mspQueue:isProcessed() then
 
-        if (wasSaving == true and rf2ethos.mspQueue:isProcessed()) or environment.simulation == true then
+        if wasSaving == true or environment.simulation == true then
 
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -876,14 +876,14 @@ function wakeup(widget)
                 saveDialog:close()
                 saveFailed = false
             end
-			rf2ethos.resetServos() -- this must run after save settings
-			rf2ethos.resetCopyProfiles() -- this must run after save settings
+			--rf2ethos.resetServos() -- this must run after save settings
+			--rf2ethos.resetCopyProfiles() -- this must run after save settings
 
 			-- switch back the Page var to avoid having a page refresh!
 			Page = PageTmp
 
 
-        elseif (wasLoading == true and rf2ethos.mspQueue:isProcessed() ) or environment.simulation == true then
+        elseif (wasLoading == true ) or environment.simulation == true then
             wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -919,13 +919,13 @@ function wakeup(widget)
             rf2ethos.rateSwitchCheck()
         elseif reloadRates == true or environment.simulation == true then
             rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-        elseif reloadServos == true then
-            if progressDialogDisplay == true then
-                progressDialogWatchDog = nil
-                progressDialogDisplay = false
-                progressDialog:close()
-            end
-            rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
+        --elseif reloadServos == true then
+        --    if progressDialogDisplay == true then
+        --        progressDialogWatchDog = nil
+        --        progressDialogDisplay = false
+        --        progressDialog:close()
+        --    end
+        --    rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
         else
             rf2ethos.openMainMenu()
         end
@@ -938,7 +938,7 @@ function wakeup(widget)
     end
 
     if uiState ~= uiStatus.mainMenu then
-        if environment.simulation == true or mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() then
+        if environment.simulation == true or (mspDataLoaded == true and rf2ethos.mspQueue:isProcessed()) then
             mspDataLoaded = false
             isLoading = false
             wasLoading = true
@@ -980,7 +980,7 @@ function wakeup(widget)
 					wasSaving = false
 					wasLoading = false
 					reloadRates = false
-					reloadServos = false
+					--reloadServos = false
 				end
             end
 
@@ -1056,7 +1056,7 @@ function wakeup(widget)
                         wasSaving = false
                         wasLoading = false
                         reloadRates = false
-                        reloadServos = false
+                        --reloadServos = false
                     end
                     return true
                 end
@@ -1255,13 +1255,16 @@ end
 
 -- when saving - we have to force a reload of data of servos due to way you
 -- write one servo - and essentially loose Pages
+--[[
 function rf2ethos.resetServos()
     if lastScript == "servos.lua" then
         rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
     end
 end
+]]--
 
 -- when saving - we have to force a reload of data of copy-profiles due to way you
+
 function rf2ethos.resetCopyProfiles()
     if lastScript == "copy_profiles.lua" then
 		--invalidatePages
@@ -1271,7 +1274,7 @@ function rf2ethos.resetCopyProfiles()
 		wasSaving = false
 		wasLoading = false
 		reloadRates = false
-		reloadServos = false
+		--reloadServos = false
     end
 end
 
@@ -1731,6 +1734,8 @@ end
 
 function rf2ethos.openPageSERVOSLoader(idx, title, script)
 
+	print("openPageSERVOSLoader")
+
     uiState = uiStatus.pages
     mspDataLoaded = false
 
@@ -1759,9 +1764,9 @@ end
 
 function rf2ethos.openPageSERVOS(idx, title, script)
 
+	print("openPageSERVOS")
 
-
-    reloadServos = false
+    --reloadServos = false
 
     uiState = uiStatus.pages
 

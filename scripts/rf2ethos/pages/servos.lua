@@ -28,8 +28,6 @@ return {
         self.servoCount = self.values[1]
         if rf2ethos.lastServoCount ~= self.servoCount then
             rf2ethos.lastServoCount = self.servoCount
-            -- createForm = true
-            -- reloadServos = true
         end
         -- self.fields[1].max = servoCount - 1
         self.servoConfiguration = {}
