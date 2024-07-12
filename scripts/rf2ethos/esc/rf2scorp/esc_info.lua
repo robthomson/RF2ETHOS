@@ -27,9 +27,9 @@ return {
     fields = fields,
     escinfo = escinfo,
     postRead = function(self)
-        print("postRead")
+        rf2ethos.utils.log("postRead")
         if self.values[1] ~= mspSignature then
-            print("Invalid ESC signature detected.")
+            rf2ethos.utils.log("Invalid ESC signature detected.")
             self.values = nil
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
@@ -37,7 +37,7 @@ return {
         end
     end,
     postLoad = function(self)
-        print("postLoad")
+        rf2ethos.utils.log("postLoad")
         if not self.values then
             return
         end

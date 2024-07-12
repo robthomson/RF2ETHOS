@@ -65,29 +65,9 @@ return {
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
 
-        -- motor timing
-        -- local f = self.fields[5]
-        -- self.svTiming = getPageValue(self, f.vals[2]) * 256 + getPageValue(self, f.vals[1])
-        -- f.value = motorTimingToUI[self.svTiming] or 0
-
-        -- F3C autorotation
-        -- f = self.fields[7]
-        -- self.svFlags = getPageValue(self, f.vals[1])
-        -- f.value = bitExtract(f.value, escFlags.f3cAuto)
     end,
 
     preSave = function(self)
-
-        -- motor timing
-        -- f = self.fields[5]
-        -- local value = motorTimingFromUI[f.value] or 0
-        -- setPageValue(self, f.vals[1], value % 256)
-        -- setPageValue(self, f.vals[2], math.floor(value / 256))
-
-        -- F3C autorotation
-        -- apply bits to saved flags
-        -- f = self.fields[7]
-        -- setPageValue(self, f.vals[1], bitReplace(self.svFlags, f.value, escFlags.f3cAuto))
 
         return self.values
     end

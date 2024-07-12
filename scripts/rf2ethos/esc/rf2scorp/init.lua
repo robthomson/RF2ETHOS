@@ -6,7 +6,7 @@ mspSignature = 0x53
 mspHeaderBytes = 2
 mspBytes = 1 -- 84
 
-apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 
@@ -31,7 +31,7 @@ function getUInt(page, vals)
         raw_val = raw_val << (idx - 1) * 8
         v = (v | raw_val) << 0
 
-        print(v)
+        rf2ethos.utils.log(v)
 
     end
     return v

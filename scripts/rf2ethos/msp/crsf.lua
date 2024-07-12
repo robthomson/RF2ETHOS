@@ -32,10 +32,10 @@ rf2ethos.protocol.mspPoll = function()
         local cmd, data = crsf.popFrame()
         if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] == CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] == CRSF_ADDRESS_BETAFLIGHT then
             --[[
-            print("cmd:0x"..string.format("%X", cmd))
-            print("  data length: "..string.format("%u", #data))
+            rf2ethos.utils.log("cmd:0x"..string.format("%X", cmd))
+            rf2ethos.utils.log("  data length: "..string.format("%u", #data))
             for i=1,#data do
-                print("  ["..string.format("%u", i).."]:  0x"..string.format("%X", data[i]))
+                rf2ethos.utils.log("  ["..string.format("%u", i).."]:  0x"..string.format("%X", data[i]))
             end
 --]]
             local mspData = {}

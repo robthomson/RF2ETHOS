@@ -21,7 +21,7 @@ function utils.storePreference(preference, value)
         value = value:name()
     end
 
-    print("Write Preference: " .. file .. " [" .. value .. "]")
+    rf2ethos.utils.log("Write Preference: " .. file .. " [" .. value .. "]")
 
     file = preference .. ".cfg"
 
@@ -38,7 +38,7 @@ function utils.loadPreference(preference)
     -- open preference file
     file = preference .. ".cfg"
 
-    print("Read Preference:  " .. file)
+    rf2ethos.utils.log("Read Preference:  " .. file)
 
     local f
     f = io.open(file, "rb")
@@ -173,8 +173,8 @@ function utils.defaultRates(x)
 end
 
 -- set positions of form elements
-function utils.getInlinePositions(f, Page)
-    local tmp_inline_size = utils.getInlineSize(f.label, Page)
+function utils.getInlinePositions(f, lPage)
+    local tmp_inline_size = utils.getInlineSize(f.label, lPage)
     local inline_multiplier = rf2ethos.radio.inlinesize_mult
 
     local inline_size = tmp_inline_size * inline_multiplier
@@ -234,8 +234,8 @@ function utils.getInlinePositions(f, Page)
 end
 
 -- find size of elements
-function utils.getInlineSize(id, Page)
-    for i, v in ipairs(Page.labels) do
+function utils.getInlineSize(id, lPage)
+    for i, v in ipairs(lPage.labels) do
         if id ~= nil then
             if v.label == id then
                 local size
@@ -259,6 +259,16 @@ function utils.writeText(x, y, str)
         lcd.color(lcd.RGB(90, 90, 90))
     end
     lcd.drawText(x, y, str)
+end
+
+function utils.log(msg,level)
+	if level == nil then
+		level = 0
+	end
+	
+	if level > rf2ethos.config.debugLevel then
+		print(msg)
+	end	
 end
 
 -- print a table out to debug console
@@ -337,7 +347,7 @@ function utils.print_r(node)
     table.insert(output, output_str)
     output_str = table.concat(output)
 
-    print(output_str)
+    rf2ethos.utils.log(output_str)
 end
 
 -- convert a string to a nunber

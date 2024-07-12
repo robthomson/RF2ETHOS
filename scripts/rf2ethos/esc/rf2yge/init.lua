@@ -58,7 +58,7 @@ function setPageValue(page, index, value)
     page.values[mspHeaderBytes + index] = value
 end
 
-apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 

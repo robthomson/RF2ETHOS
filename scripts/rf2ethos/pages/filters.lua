@@ -48,9 +48,9 @@ return {
     labels = labels,
     fields = fields,
     postRead = function(self)
-        print("postRead")
+        rf2ethos.utils.log("postRead")
     end,
     postLoad = function(self)
-        print("postLoad")
+        rf2ethos.utils.log("postLoad")
     end
 }

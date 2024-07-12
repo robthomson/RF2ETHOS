@@ -17,14 +17,14 @@ return {
     fields = fields,
     simulatorResponse = {252, 1, 127, 0, 35, 0, 0, 0, 0, 0, 0, 122, 1, 182, 0, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
     postRead = function(self)
-        print("postRead")
+        rf2ethos.utils.log("postRead")
         self.maxPidProfiles = self.values[25]
         self.currentPidProfile = self.values[24]
         self.values = {0, self.getDestinationPidProfile(self), self.currentPidProfile}
         self.minBytes = 3
     end,
     postLoad = function(self)
-        print("postLoad")
+        rf2ethos.utils.log("postLoad")
     end,
     getDestinationPidProfile = function(self)
         local destPidProfile

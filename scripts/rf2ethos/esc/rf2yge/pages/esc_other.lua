@@ -61,10 +61,5 @@ return {
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
 
-        -- update pole count
-        -- self.updatePoles(self)
-
-        -- update gear ratio
-        -- self.updateRatio(self)
     end
 }

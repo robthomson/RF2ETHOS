@@ -60,13 +60,13 @@ return {
 
         -- BEC offset
         -- local f = self.fields[3]
-        -- f.value = getPageValue(self, 68)
-        -- print(f.value)
+        -- f.value = getrf2ethos.PageValue(self, 68)
+        -- rf2ethos.utils.log(f.value)
     end,
     postRead = function(self)
-        print("postRead")
+        rf2ethos.utils.log("postRead")
         if self.values[1] ~= mspSignature then
-            print("Invalid ESC signature detected.")
+            rf2ethos.utils.log("Invalid ESC signature detected.")
             self.values = nil
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
@@ -78,7 +78,7 @@ return {
         self.values[2] = 0 -- save cmd	
         -- BEC offset
         -- local f = self.fields[3]
-        -- setPageValue(self, 68, f.value * 10 - 54)
+        -- setrf2ethos.PageValue(self, 68, f.value * 10 - 54)
         return self.values
     end
 }

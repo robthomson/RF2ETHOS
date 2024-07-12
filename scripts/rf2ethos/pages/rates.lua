@@ -2,7 +2,7 @@ local labels = {}
 local fields = {}
 
 if RateTable == nil then
-    RateTable = defaultRateTable
+    RateTable = rf2ethos.config.defaultRateTable
 end
 
 -- NONE
@@ -189,13 +189,13 @@ return {
     simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
     rTableName = rTableName,
     flagRateChange = function(self)
-        -- print("We need to reset the rates tables on save")
-        resetRates = true
+        -- rf2ethos.utils.log("We need to reset the rates tables on save")
+        rf2ethos.triggers.resetRates = true
     end,
     postRead = function(self)
-        print("postRead")
+        rf2ethos.utils.log("postRead")
     end,
     postLoad = function(self)
-        print("postLoad")
+        rf2ethos.utils.log("postLoad")
     end
 }

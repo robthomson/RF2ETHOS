@@ -43,7 +43,7 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    -- print("retryCount: "..self.retryCount)
+    -- rf2ethos.utils.log("retryCount: "..self.retryCount)
 
     if not rf2ethos.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 0.5 < os.clock() then
@@ -60,7 +60,7 @@ function MspQueueController:processQueue()
         cmd, buf, err = mspPollReply()
     else
         if not self.currentMessage.simulatorResponse then
-            print("No simulator response for command " .. tostring(self.currentMessage.command))
+            rf2ethos.utils.log("No simulator response for command " .. tostring(self.currentMessage.command))
             self.currentMessage = nil
             return
         end
@@ -70,13 +70,13 @@ function MspQueueController:processQueue()
     end
 
     if cmd then
-        print("Received cmd: " .. tostring(cmd))
+        rf2ethos.utils.log("Received cmd: " .. tostring(cmd))
     end
 
     if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
     or (self.currentMessage.command == 217 and self.retryCount == 2 and err) -- ESC
     then
-        -- print("Received: {" .. joinTableItems(buf, ", ") .. "}")
+        -- rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end
@@ -103,11 +103,11 @@ end
 function MspQueueController:add(message)
     if message ~= nil then
         message = deepCopy(message)
-        print("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
+        rf2ethos.utils.log("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
         self.messageQueue[#self.messageQueue + 1] = message
         return self
     else
-        print("Unable to queue - nil message.  Check function is callable")
+        rf2ethos.utils.log("Unable to queue - nil message.  Check function is callable")
         -- this can go wrong if the function is declared below save function!!!
     end
 end
@@ -120,7 +120,7 @@ local myMspMessage =
 {
     command = 111,
     processReply = function(self, buf)
-        print("Do something with the response buffer")
+        rf2ethos.utils.log("Do something with the response buffer")
     end,
     simulatorResponse = { 1, 2, 3, 4 }
 }
@@ -129,7 +129,7 @@ local anotherMspMessage =
 {
     command = 123,
     processReply = function(self, buf)
-        print("Received response for command "..tostring(self.command).." with length "..tostring(#buf))
+        rf2ethos.utils.log("Received response for command "..tostring(self.command).." with length "..tostring(#buf))
     end,
     simulatorResponse = { 254, 128 }
 }
