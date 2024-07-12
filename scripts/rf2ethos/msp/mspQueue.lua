@@ -16,7 +16,6 @@ function MspQueueController:isProcessed()
     return not self.currentMessage and #self.messageQueue == 0
 end
 
---[[
 function joinTableItems(table, delimiter)
     if table == nil or #table == 0 then return "" end
     delimiter = delimiter or ""
@@ -26,7 +25,6 @@ function joinTableItems(table, delimiter)
     end
     return result
 end
---]]
 
 local function popFirstElement(tbl)
     return table.remove(tbl, 1)
@@ -76,7 +74,7 @@ function MspQueueController:processQueue()
     if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
     or (self.currentMessage.command == 217 and self.retryCount == 2 and err) -- ESC
     then
-        -- rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
+        rf2ethos.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end

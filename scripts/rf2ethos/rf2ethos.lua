@@ -57,7 +57,7 @@ rf2ethos = {
     end,
 
     log = function(str)
-        local f = io.open("/LOGS/rf2ethos.log", 'a')
+        local f = io.open("/rf2ethos.log", 'a')
         io.write(f, tostring(str) .. "\n")
         io.close(f)
     end,

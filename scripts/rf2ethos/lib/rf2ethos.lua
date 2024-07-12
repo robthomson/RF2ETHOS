@@ -91,14 +91,14 @@ end
 
 
 function rf2ethos.log(str)
-        local f = io.open("/LOGS/rf2ethos.log", 'a')
+        local f = io.open("/rf2ethos.log", 'a')
         io.write(f, tostring(str) .. "\n")
         io.close(f)
     end
-	
+
 
 function rf2ethos.print(str)
         rf2ethos.utils.log(tostring(str))
 end
 
-return rf2ethos	
+return rf2ethos

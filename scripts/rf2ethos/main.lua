@@ -357,6 +357,13 @@ local function event(widget, category, value, x, y)
 
     rf2ethos.utils.log("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
+    if value == EVT_VIRTUAL_PREV_LONG then
+        print("Forcing exit")
+        invalidatePages()
+        system.exit()
+        return 0
+    end
+
     -- close esc main type selection menu
     if rf2ethos.escMenuState == 1 then
         if category == 5 or value == 35 then
@@ -713,7 +720,7 @@ function wakeup(widget)
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
     updateTelemetryState()
 
- 
+
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
         if rf2ethos.prevUiState ~= rf2ethos.uiState then
             rf2ethos.prevUiState = rf2ethos.uiState
@@ -2683,7 +2690,7 @@ local function create()
     -- rf2ethos.config.maxRetries = rf2ethos.protocol.rf2ethos.config.maxRetries
     -- rf2ethos.config.requestTimeout = rf2ethos.protocol.pageReqTimeout
     rf2ethos.uiState = rf2ethos.uiStatus.init
- 
+
     config.apiVersion = 0
 
 
