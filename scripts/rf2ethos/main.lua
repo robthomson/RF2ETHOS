@@ -61,7 +61,6 @@ reloadRates = false
 defaultRateTable = 4 -- ACTUAL
 isLoading = false
 wasLoading = false
--- reloadServos = false
 
 local exitAPP = false
 local noRFMsg = false
@@ -242,7 +241,9 @@ function rf2ethos.dataBindFields()
 
         if progressDialogDisplay == true then
             local percent = (i / #Page.fields) * 100
-            progressDialog:value(percent)
+            if triggerESCLOADER ~= true then
+                progressDialog:value(percent)
+            end
         end
 
         if Page.values and #Page.values >= Page.minBytes then
@@ -573,9 +574,10 @@ function wakeup(widget)
 
             escPowerCycleLoader = escPowerCycleLoader + 1
 
-            if escPowerCycleLoader == 100 then
+            if escPowerCycleLoader >= 100 then
                 escPowerCycleLoader = 0
                 progressDialog:close()
+                triggerESCLOADER = false
                 triggerESCMAINMENU = true
             end
 
@@ -606,7 +608,6 @@ function wakeup(widget)
                             wasSaving = false
                             wasLoading = false
                             reloadRates = false
-                            -- reloadServos = false
 
                         else
 
@@ -619,7 +620,7 @@ function wakeup(widget)
                                 wasSaving = false
                                 wasLoading = false
                                 reloadRates = false
-                                -- reloadServos = false
+
                             end
                             return true
 
@@ -647,7 +648,7 @@ function wakeup(widget)
                             wasSaving = false
                             wasLoading = false
                             reloadRates = false
-                            -- reloadServos = false
+
                         else
                             rateswitchLast = rateswitchParam:value()
 
@@ -656,7 +657,7 @@ function wakeup(widget)
                             if environment.simulation ~= true then
                                 wasSaving = false
                                 wasLoading = false
-                                -- reloadServos = false
+
                                 wasReloading = false
 
                                 createForm = true
@@ -720,6 +721,7 @@ function wakeup(widget)
         lastIdx = nil
         lastPage = nil
         lastSubPage = nil
+        invalidatePages()
 
         rf2ethos.openPageESC(lastIdx, lastTitle, lastScript)
 
@@ -895,13 +897,6 @@ function wakeup(widget)
             rf2ethos.rateSwitchCheck()
         elseif reloadRates == true or environment.simulation == true then
             rf2ethos.openPageRATESLoader(lastIdx, lastSubPage, lastTitle, lastScript)
-            -- elseif reloadServos == true then
-            --    if progressDialogDisplay == true then
-            --        progressDialogWatchDog = nil
-            --        progressDialogDisplay = false
-            --        progressDialog:close()
-            --    end
-            --    rf2ethos.openPageSERVOSLoader(lastIdx, lastTitle, lastScript)
         else
             rf2ethos.openMainMenu()
         end
@@ -953,7 +948,7 @@ function wakeup(widget)
                     wasSaving = false
                     wasLoading = false
                     reloadRates = false
-                    -- reloadServos = false
+
                 end
             end
 
@@ -1029,7 +1024,7 @@ function wakeup(widget)
                         wasSaving = false
                         wasLoading = false
                         reloadRates = false
-                        -- reloadServos = false
+
                     end
                     return true
                 end
@@ -1243,7 +1238,7 @@ function rf2ethos.resetCopyProfiles()
         wasSaving = false
         wasLoading = false
         reloadRates = false
-        -- reloadServos = false
+
     end
 end
 
@@ -1729,8 +1724,6 @@ function rf2ethos.openPageSERVOS(idx, title, script)
 
     print("openPageSERVOS")
 
-    -- reloadServos = false
-
     uiState = uiStatus.pages
 
     local numPerRow = 2
@@ -2138,9 +2131,6 @@ function rf2ethos.openPageESCTool(folder)
     print("rf2ethos.openPageESCTool")
 
     ESC_MENUSTATE = 2
-
-    -- ESC.init = assert(loadfile(TOOL_DIR .. "ESC/" .. folder .. "/init.lua"))()
-    -- escPowerCycle = ESC.init.powerCycle
 
     if escPowerCycle == true then
         uiState = uiStatus.pages
