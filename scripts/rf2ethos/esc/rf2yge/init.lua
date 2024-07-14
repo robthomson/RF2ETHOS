@@ -2,6 +2,10 @@ local toolName = "YGE"
 moduleName = "RF2YGE"
 moduleTitle = "YGE ESC v0.42"
 
+mspSignature = 0xA5
+mspHeaderBytes = 2
+mspBytes = 60 -- 66
+
 escType = {
     [848] = "YGE 35 LVT BEC",
     [1616] = "YGE 65 LVT BEC",
@@ -28,21 +32,25 @@ escType = {
 escFlags = {spinDirection = 0, f3cAuto = 1, keepMah = 2, bec12v = 3}
 
 function getEscTypeLabel(values)
-    local idx = bit32.bor(bit32.lshift(values[mspHeaderBytes + 24], 8), values[mspHeaderBytes + 23])
+    local idx = (values[mspHeaderBytes + 24] * 256) + values[mspHeaderBytes + 23]
     return escType[idx] or "YGE ESC (" .. idx .. ")"
 end
 
 function getUInt(page, vals)
+    if page == nil then
+        return ""
+    end
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
-        raw_val = bit32.lshift(raw_val, (idx - 1) * 8)
-        v = bit32.bor(v, raw_val)
+        raw_val = raw_val * (256 ^ (idx - 1))
+        v = v + raw_val
     end
     return v
 end
 
 function getPageValue(page, index)
+
     return page.values[mspHeaderBytes + index]
 end
 
@@ -50,11 +58,7 @@ function setPageValue(page, index, value)
     page.values[mspHeaderBytes + index] = value
 end
 
-mspSignature = 0xA5
-mspHeaderBytes = 2
-mspBytes = 66
-
-apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 

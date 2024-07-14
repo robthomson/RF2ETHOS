@@ -6,11 +6,14 @@ mspSignature = 0x53
 mspHeaderBytes = 2
 mspBytes = 84
 
-apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 
 function getEscType(page)
+	if page.values == nil then
+		return 0
+	end
     -- esc type
     local tt = {}
     for i = 1, 32 do
@@ -18,24 +21,22 @@ function getEscType(page)
         if v == 0 then
             break
         end
-        table.insert(tt, string.char(v))
+		if v ~= nil then
+			table.insert(tt, string.char(v))
+		end	
     end
     return table.concat(tt)
 end
 
 function getUInt(page, vals)
+	if page.values == nil then
+		return 0
+	end
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
-
-        -- raw_val = bit32.lshift(raw_val, (idx-1)*8)
-        -- v = bit32.bor(v, raw_val)
-
         raw_val = raw_val << (idx - 1) * 8
         v = (v | raw_val) << 0
-
-        print(v)
-
     end
     return v
 end

@@ -29,8 +29,15 @@ return {
     write = 143, -- msp_SET_GOVERNOR_CONFIG
     title = "Governor",
     reboot = true,
+    simulatorResponse = {3, 100, 0, 100, 0, 20, 0, 20, 0, 30, 0, 10, 0, 0, 0, 0, 0, 50, 0, 10, 5, 10, 0, 10},
     eepromWrite = true,
     minBytes = 24,
     labels = labels,
-    fields = fields
+    fields = fields,
+    postRead = function(self)
+        --rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        --rf2ethos.utils.log("postLoad")
+    end
 }

@@ -26,9 +26,16 @@ return {
     write = 149, -- msp_SET_GOVERNOR_PROFILE
     title = "Profile - Governor",
     reboot = false,
-	refreshswitch = true,	
+    refreshswitch = true,
     eepromWrite = true,
+    simulatorResponse = {208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100},
     minBytes = 13,
     labels = labels,
-    fields = fields
+    fields = fields,
+    postRead = function(self)
+        --rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        --rf2ethos.utils.log("postLoad")
+    end
 }

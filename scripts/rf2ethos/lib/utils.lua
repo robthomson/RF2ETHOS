@@ -1,4 +1,3 @@
-
 local utils = {}
 
 -- save a value to preferences
@@ -22,9 +21,9 @@ function utils.storePreference(preference, value)
         value = value:name()
     end
 
-    print("Write Preference: " .. file .. " [" .. value .. "]")
+    --rf2ethos.utils.log("Write Preference: " .. file .. " [" .. value .. "]")
 
-    file =  preference .. ".cfg"
+    file = preference .. ".cfg"
 
     -- then write current data
     local f
@@ -39,7 +38,7 @@ function utils.loadPreference(preference)
     -- open preference file
     file = preference .. ".cfg"
 
-    print("Read Preference:  " .. file)
+    --rf2ethos.utils.log("Read Preference:  " .. file)
 
     local f
     f = io.open(file, "rb")
@@ -174,9 +173,9 @@ function utils.defaultRates(x)
 end
 
 -- set positions of form elements
-function utils.getInlinePositions(f, Page)
-    local tmp_inline_size = utils.getInlineSize(f.label, Page)
-    local inline_multiplier = radio.inlinesize_mult
+function utils.getInlinePositions(f, lPage)
+    local tmp_inline_size = utils.getInlineSize(f.label, lPage)
+    local inline_multiplier = rf2ethos.radio.inlinesize_mult
 
     local inline_size = tmp_inline_size * inline_multiplier
 
@@ -191,8 +190,8 @@ function utils.getInlinePositions(f, Page)
 
     local eX
     local eW = fieldW - padding
-    local eH = radio.navbuttonHeight
-    local eY = radio.linePaddingTop
+    local eH = rf2ethos.radio.navbuttonHeight
+    local eY = rf2ethos.radio.linePaddingTop
     local posX
     lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)
@@ -235,8 +234,8 @@ function utils.getInlinePositions(f, Page)
 end
 
 -- find size of elements
-function utils.getInlineSize(id, Page)
-    for i, v in ipairs(Page.labels) do
+function utils.getInlineSize(id, lPage)
+    for i, v in ipairs(lPage.labels) do
         if id ~= nil then
             if v.label == id then
                 local size
@@ -260,6 +259,17 @@ function utils.writeText(x, y, str)
         lcd.color(lcd.RGB(90, 90, 90))
     end
     lcd.drawText(x, y, str)
+end
+
+function utils.log(msg)
+
+	
+	if rf2ethos.config.logEnable == true then
+		print(msg)
+        local f = io.open("/rf2ethos.log", 'a')
+        io.write(f, tostring(msg) .. "\n")
+        io.close(f)		
+	end	
 end
 
 -- print a table out to debug console

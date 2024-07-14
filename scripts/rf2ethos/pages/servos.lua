@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -22,12 +21,15 @@ return {
     minBytes = 33,
     labels = labels,
     fields = fields,
+    simulatorResponse = {
+        4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5,
+        212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+    },
     postRead = function(self)
+        --rf2ethos.utils.log("postRead")
         self.servoCount = self.values[1]
         if rf2ethos.lastServoCount ~= self.servoCount then
             rf2ethos.lastServoCount = self.servoCount
-            -- createForm = true
-            -- reloadServos = true
         end
         -- self.fields[1].max = servoCount - 1
         self.servoConfiguration = {}
@@ -43,7 +45,11 @@ return {
         self.setValues(self, rf2ethos.lastChangedServo)
         self.minBytes = 1 + 16
     end,
+    postLoad = function(self)
+        --rf2ethos.utils.log("postLoad")
+    end,
     setValues = function(self, servoIndex)
+        --rf2ethos.utils.log("setValues")
         self.values = {}
         self.values[1] = servoIndex - 1
         for i = 1, 16 do
@@ -51,6 +57,7 @@ return {
         end
     end,
     servoChanged = function(self, servoIndex)
+        --rf2ethos.utils.log("servoChanged")
         rf2ethos.lastChangedServo = servoIndex
         self.setValues(self, rf2ethos.lastChangedServo)
         rf2ethos.dataBindFields()

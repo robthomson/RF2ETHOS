@@ -6,20 +6,20 @@ local REPLY_FRAME_ID = 0x32
 
 local lastSensorId, lastFrameId, lastDataId, lastValue
 
-protocol.mspSend = function(payload)
+rf2ethos.protocol.mspSend = function(payload)
     local dataId = payload[1] + (payload[2] << 8)
     local value = 0
     for i = 3, #payload do
         value = value + (payload[i] << ((i - 3) * 8))
     end
-    return protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
+    return rf2ethos.protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
 end
 
-protocol.mspRead = function(cmd)
+rf2ethos.protocol.mspRead = function(cmd)
     return mspSendRequest(cmd, {})
 end
 
-protocol.mspWrite = function(cmd, payload)
+rf2ethos.protocol.mspWrite = function(cmd, payload)
     return mspSendRequest(cmd, payload)
 end
 
@@ -41,11 +41,11 @@ local function smartPortTelemetryPop()
     end
 end
 
-protocol.mspPoll = function()
+rf2ethos.protocol.mspPoll = function()
     while true do
         local sensorId, frameId, dataId, value = smartPortTelemetryPop()
         if (sensorId == SMARTPORT_REMOTE_SENSOR_ID or sensorId == FPORT_REMOTE_SENSOR_ID) and frameId == REPLY_FRAME_ID then
-            -- print("sensorId:0x"..string.format("%X", sensorId).." frameId:0x"..string.format("%X", frameId).." dataId:0x"..string.format("%X", dataId).." value:0x"..string.format("%X", value))
+            -- --rf2ethos.utils.log("sensorId:0x"..string.format("%X", sensorId).." frameId:0x"..string.format("%X", frameId).." dataId:0x"..string.format("%X", dataId).." value:0x"..string.format("%X", value))
             local payload = {}
             payload[1] = dataId & 0xFF
             dataId = dataId >> 8
@@ -58,7 +58,7 @@ protocol.mspPoll = function()
             value = value >> 8
             payload[6] = value & 0xFF
             -- for i=1,#payload do
-            --    print(  "["..string.format("%u", i).."]:  0x"..string.format("%X", payload[i]))
+            --    --rf2ethos.utils.log(  "["..string.format("%u", i).."]:  0x"..string.format("%X", payload[i]))
             -- end
             return payload
         elseif sensorId == nil then

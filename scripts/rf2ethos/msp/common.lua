@@ -1,9 +1,8 @@
-local environment = system.getVersion()
 -- Protocol version
-local msp_VERSION = 1 << 5
-local msp_STARTFLAG = 1 << 4
+local MSP_VERSION = (1 << 5)
+local MSP_STARTFLAG = (1 << 4)
 
--- Sequence number for next msp packet
+-- Sequence number for next MSP packet
 local mspSeq = 0
 local mspRemoteSeq = 0
 local mspRxBuf = {}
@@ -17,62 +16,73 @@ local mspTxBuf = {}
 local mspTxIdx = 1
 local mspTxCRC = 0
 
+local function deepCopy(original)
+    local copy
+    if type(original) == "table" then
+        copy = {}
+        for key, value in next, original, nil do
+            copy[deepCopy(key)] = deepCopy(value)
+        end
+        setmetatable(copy, deepCopy(getmetatable(original)))
+    else -- number, string, boolean, etc
+        copy = original
+    end
+    return copy
+end
+
 function mspProcessTxQ()
     if (#(mspTxBuf) == 0) then
         return false
     end
     -- if not sensor:idle() then  -- was protocol.push() -- maybe sensor:idle()  here??
-    -- print("Sensor not idle... waiting to send cmd: "..tostring(mspLastReq))
+    -- --rf2ethos.utils.log("Sensor not idle... waiting to send cmd: "..tostring(mspLastReq))
     -- return true
     -- end
-    if environment.simulation ~= true then
-        -- print("Sending mspTxBuf size "..tostring(#mspTxBuf).." at Idx "..tostring(mspTxIdx).." for cmd: "..tostring(mspLastReq))
-    end
+    --rf2ethos.utils.log("Sending mspTxBuf size " .. tostring(#mspTxBuf) .. " at Idx " .. tostring(mspTxIdx) .. " for cmd: " .. tostring(mspLastReq))
     local payload = {}
-    payload[1] = mspSeq + msp_VERSION
+    payload[1] = mspSeq + MSP_VERSION
     mspSeq = (mspSeq + 1) & 0x0F
     if mspTxIdx == 1 then
         -- start flag
-        payload[1] = payload[1] + msp_STARTFLAG
+        payload[1] = payload[1] + MSP_STARTFLAG
     end
     local i = 2
-    while (i <= protocol.maxTxBufferSize) and mspTxIdx <= #mspTxBuf do
+    while (i <= rf2ethos.protocol.maxTxBufferSize) and mspTxIdx <= #mspTxBuf do
         payload[i] = mspTxBuf[mspTxIdx]
         mspTxIdx = mspTxIdx + 1
         mspTxCRC = mspTxCRC ~ payload[i]
         i = i + 1
     end
-    if i <= protocol.maxTxBufferSize then
+    if i <= rf2ethos.protocol.maxTxBufferSize then
         payload[i] = mspTxCRC
         i = i + 1
         -- zero fill
-        while i <= protocol.maxTxBufferSize do
+        while i <= rf2ethos.protocol.maxTxBufferSize do
             payload[i] = 0
             i = i + 1
         end
-        protocol.mspSend(payload)
+		
+		--rf2ethos.utils.log("Sent: {" .. joinTableItems(payload, ", ") .. "}")
+		
+        rf2ethos.protocol.mspSend(payload)
         mspTxBuf = {}
         mspTxIdx = 1
         mspTxCRC = 0
         return false
     end
-    protocol.mspSend(payload)
+    rf2ethos.protocol.mspSend(payload)
     return true
 end
 
 function mspSendRequest(cmd, payload)
-    if environment.simulation ~= true then
-        -- print("Sending cmd "..cmd)
-    end
+    --rf2ethos.utils.log("Sending cmd "..cmd)
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
-        if environment.simulation ~= true then
-            print("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd))
-        end
+        --rf2ethos.utils.log("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd))
         return nil
     end
     mspTxBuf[1] = #(payload)
-    mspTxBuf[2] = cmd & 0xFF -- msp command
+    mspTxBuf[2] = cmd & 0xFF -- MSP command
     for i = 1, #(payload) do
         mspTxBuf[i + 2] = payload[i] & 0xFF
     end
@@ -80,14 +90,14 @@ function mspSendRequest(cmd, payload)
 end
 
 local function mspReceivedReply(payload)
-    -- print("Starting mspReceivedReply")
+    --rf2ethos.utils.log("Starting mspReceivedReply")
     local idx = 1
     local status = payload[idx]
     local version = (status & 0x60) >> 5
     local start = (status & 0x10) ~= 0
     local seq = status & 0x0F
     idx = idx + 1
-    -- print(" msp sequence #:  "..string.format("%u",seq))
+    -- --rf2ethos.utils.log(" msp sequence #:  "..string.format("%u",seq))
     if start then
         -- start flag set
         mspRxBuf = {}
@@ -96,7 +106,7 @@ local function mspReceivedReply(payload)
         mspRxReq = mspLastReq
         idx = idx + 1
         if version == 1 then
-            -- print("version == 1")
+            --rf2ethos.utils.log("version == 1")
             mspRxReq = payload[idx]
             idx = idx + 1
         end
@@ -105,20 +115,19 @@ local function mspReceivedReply(payload)
             mspStarted = true
         end
     elseif not mspStarted then
-        -- print("  mspReceivedReply: missing Start flag")
+        --rf2ethos.utils.log("  mspReceivedReply: missing Start flag")
         return nil
-    elseif (mspRemoteSeq + 1) & 0x0F ~= seq then
-        -- print("  mspReceivedReply: msp packet sequence # incorrect")
+    elseif ((mspRemoteSeq + 1) & 0x0F) ~= seq then
         mspStarted = false
         return nil
     end
-    while (idx <= protocol.maxRxBufferSize) and (#mspRxBuf < mspRxSize) do
+    while (idx <= rf2ethos.protocol.maxRxBufferSize) and (#mspRxBuf < mspRxSize) do
         mspRxBuf[#mspRxBuf + 1] = payload[idx]
         mspRxCRC = mspRxCRC ~ payload[idx]
         idx = idx + 1
     end
-    if idx > protocol.maxRxBufferSize then
-        -- print("  mspReceivedReply:  payload continues into next frame.")
+    if idx > rf2ethos.protocol.maxRxBufferSize then
+        --rf2ethos.utils.log("  mspReceivedReply:  payload continues into next frame.")
         -- Store the last sequence number so we can start there on the next continuation payload
         mspRemoteSeq = seq
         return false
@@ -126,24 +135,19 @@ local function mspReceivedReply(payload)
     mspStarted = false
     -- check CRC
     if mspRxCRC ~= payload[idx] and version == 0 then
-        -- print("  mspReceivedReply:  payload checksum incorrect, message failed!")
-        -- print("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
-        -- print("    CRC from payload:     0x"..string.format("%X", payload[idx]))
+        --rf2ethos.utils.log("  mspReceivedReply:  payload checksum incorrect, message failed!")
+        --rf2ethos.utils.log("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
+        --rf2ethos.utils.log("    CRC from payload:     0x"..string.format("%X", payload[idx]))
         return nil
     end
-    -- print("  Got reply for cmd "..mspRxReq)
+    --rf2ethos.utils.log("  Got reply for cmd "..mspRxReq)
     return true
 end
 
 function mspPollReply()
-
-    if environment.simulation == true then
-        return 1, "ababababababababababababababababsa", 1
-    end
-
-    local startTime = utils.getTime()
-    while (utils.getTime() - startTime < 5) do
-        local mspData = protocol.mspPoll()
+    local startTime = os.clock()
+    while (os.clock() - startTime < 0.05) do
+        local mspData = rf2ethos.protocol.mspPoll()
         if mspData ~= nil and mspReceivedReply(mspData) then
             mspLastReq = 0
             return mspRxReq, mspRxBuf, mspRxError

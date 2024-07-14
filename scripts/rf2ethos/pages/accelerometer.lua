@@ -1,4 +1,3 @@
-
 local labels = {}
 local fields = {}
 
@@ -10,9 +9,16 @@ return {
     read = 240, -- msp_ACC_TRIM
     write = 239, -- msp_SET_ACC_TRIM
     eepromWrite = true,
+    simulatorResponse = {0, 0, 0, 0},
     reboot = false,
     title = "Accelerometer",
     minBytes = 4,
     labels = labels,
-    fields = fields
+    fields = fields,
+    postRead = function(self)
+        --rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        --rf2ethos.utils.log("postLoad")
+    end
 }

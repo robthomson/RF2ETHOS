@@ -4,12 +4,16 @@ moduleTitle = "HobbyWing ESC v0.42"
 
 mspSignature = 0xFD
 mspHeaderBytes = 2
-mspBytes = 80
+mspBytes = 60 --
 
-apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 
 function getText(page, st, en)
+    if page.values == nil then
+        return ""
+    end
+
     local tt = {}
     for i = st, en do
         local v = page.values[i + mspHeaderBytes]
