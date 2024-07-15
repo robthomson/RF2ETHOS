@@ -316,7 +316,7 @@ function wakeup(widget)
     end
 
     -- capture profile switching and trigger a reload if needs be
-    if rf2ethos.Page ~= nil then
+    if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
         if rf2ethos.Page.refreshswitch == true then
 
             if rf2ethos.lastPage ~= "rates.lua" then
