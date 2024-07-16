@@ -3,7 +3,7 @@
 local config = {}
 config.toolName = "RF2ETHOS"
 config.toolDir = "/scripts/rf2ethos/"
-config.logEnable = false
+config.logEnable = true
 config.ethosVersion = 1510
 config.luaVersion = "2.0.0 - 240625"
 config.ethosVersionString = "ETHOS < V1.5.10"
@@ -27,6 +27,7 @@ triggers.triggerRELOAD = false
 triggers.triggerESCRELOAD = false
 triggers.triggerESCMAINMENU = false
 triggers.triggerESCLOADER = false
+triggers.triggerMAINMENU = false
 triggers.escPowerCycle = false
 triggers.escPowerCycleAnimation = nil
 triggers.escPowerCycleLoader = 0
@@ -43,6 +44,7 @@ triggers.linkUPTime = nil
 triggers.createForm = false
 triggers.profileswitchLast = nil
 triggers.rateswitchLast = nil
+triggers.closeSave = false
 
 
 rf2ethos = {}
@@ -110,6 +112,14 @@ rf2ethos.dialogs.badversion = false
 rf2ethos.dialogs.badversionDisplay = false
 
 
+local function invalidatePages()
+    rf2ethos.Page = nil
+    rf2ethos.pageState = rf2ethos.pageStatus.display
+    rf2ethos.saveTS = 0
+    collectgarbage()
+end
+
+
 local function rebootFc()
 
     --rf2ethos.utils.log("Attempting to reboot the FC...")
@@ -117,8 +127,9 @@ local function rebootFc()
     rf2ethos.mspQueue:add({
         command = 68, -- MSP_REBOOT
         processReply = function(self, buf)
-            -- invalidatePages()
-        end
+            invalidatePages()
+        end,
+		simulatorResponse = {}
     })
 end
 
@@ -127,15 +138,61 @@ local mspEepromWrite = {
     processReply = function(self, buf)
         if rf2ethos.Page.reboot then
             rebootFc()
-        end
-        if rf2ethos.mspQueue:isProcessed() then
-            invalidatePages()
-        end
+        else
+            invalidatePages()	
+		end
     end,
     simulatorResponse = {}
 }
 
 
+function rf2ethos.dataBindFields()
+    for i = 1, #rf2ethos.Page.fields do
+
+		-- display progress loader when retrieving data
+        if rf2ethos.dialogs.progressDisplay == true then
+            local percent = (i / #rf2ethos.Page.fields) * 100
+			-- we have to stop this happening on esc as we handle this
+			-- differently
+            if rf2ethos.triggers.triggerESCLOADER ~= true then
+                rf2ethos.dialogs.progress:value(percent)		
+            end
+        end
+
+        if rf2ethos.Page.values and #rf2ethos.Page.values >= rf2ethos.Page.minBytes then
+            local f = rf2ethos.Page.fields[i]
+            if f.vals then
+                f.value = 0
+                for idx = 1, #f.vals do
+                    --local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
+					-- inject header bytes if we have
+					local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
+                    raw_val = raw_val << ((idx - 1) * 8)
+                    f.value = f.value | raw_val
+                end
+                local bits = #f.vals * 8
+                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then
+                    f.value = f.value - (2 ^ bits)
+                end
+                f.value = f.value / (f.scale or 1)
+            end
+        end
+    end
+end
+
+rf2ethos.settingsSaved = function()
+    -- check if this page requires writing to eeprom to save (most do)
+    if rf2ethos.Page and rf2ethos.Page.eepromWrite then
+        -- don't write again if we're already responding to earlier page.write()s
+        if rf2ethos.pageState ~= rf2ethos.pageStatus.eepromWrite then
+            rf2ethos.pageState = rf2ethos.pageStatus.eepromWrite
+            rf2ethos.mspQueue:add(mspEepromWrite)
+        end
+    elseif rf2ethos.pageState ~= rf2ethos.pageStatus.eepromWrite then
+        -- If we're not already trying to write to eeprom from a previous save, then we're done.
+        invalidatePages()
+    end
+end
 
 local mspSaveSettings = {
     processReply = function(self, buf)
@@ -148,6 +205,7 @@ local mspLoadSettings = {
 
         --rf2ethos.utils.log("rf2ethos.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. rf2ethos.Page.minBytes)
 
+
         rf2ethos.Page.values = buf
         if rf2ethos.Page.postRead then
             rf2ethos.Page.postRead(rf2ethos.Page)
@@ -156,7 +214,7 @@ local mspLoadSettings = {
         if rf2ethos.Page.postLoad then
             rf2ethos.Page.postLoad(rf2ethos.Page)
         end
-        --rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
+        rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
         rf2ethos.triggers.mspDataLoaded = true
 
     end
@@ -178,34 +236,33 @@ local function saveSettings()
         rf2ethos.saveTS = os.clock()
 
         if rf2ethos.Page.values then
-            local payload = rf2ethos.Page.values	
+            local payload = rf2ethos.Page.values
+			
             if rf2ethos.Page.preSave then
                 payload = rf2ethos.Page.preSave(rf2ethos.Page)
             end
-			-- this has been added as its a bit odd using presave to pass a payload and then fudge
-			-- it back into shape.  much simpler to just move the payload around.
-			-- this is used within the skorp esc system
             if rf2ethos.Page.alterPayload then  
                 payload = rf2ethos.Page.alterPayload(payload)
-            end			
+            end				
+			
             mspSaveSettings.command = rf2ethos.Page.write
             mspSaveSettings.payload = payload
             mspSaveSettings.simulatorResponse = {}
             rf2ethos.mspQueue:add(mspSaveSettings)
+            rf2ethos.mspQueue.errorHandler = function()
+                displayMessage = {
+                    title = "Save error",
+                    text = "Make sure your heli is disarmed."
+                }
+				print("Save failed")
+				rf2ethos.triggers.saveFailed = true
+            end
         elseif type(rf2ethos.Page.write) == "function" then
             rf2ethos.Page.write(rf2ethos.Page)
         end
 
     end
 end
-
-local function invalidatePages()
-    rf2ethos.Page = nil
-    rf2ethos.pageState = rf2ethos.pageStatus.display
-    rf2ethos.saveTS = 0
-    collectgarbage()
-end
-
 
 local function requestPage()
     if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
@@ -234,6 +291,7 @@ end
 -- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
 function wakeup(widget)
 
+
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
     if rf2ethos.triggers.exitAPP == true then
@@ -242,6 +300,10 @@ function wakeup(widget)
         system.exit()
         return
     end
+
+	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then
+		invalidatePages()
+	end
 
     -- ethos version
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
@@ -276,6 +338,22 @@ function wakeup(widget)
 
         end
     end
+	
+	if rf2ethos.triggers.closeSave == true then
+	
+		if (rf2ethos.dialogs.saveProgressCounter <= 100 ) then
+			rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 30
+		end
+		rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)	
+				
+		if rf2ethos.dialogs.saveProgressCounter >= 100 then
+			rf2ethos.triggers.closeSave = false
+			rf2ethos.dialogs.saveProgressCounter = 0
+            rf2ethos.dialogs.saveDisplay = false
+            rf2ethos.dialogs.saveWatchDog = nil			
+			rf2ethos.dialogs.save:close()		
+		end	
+	end
 
     -- ESC LOADER
     if rf2ethos.triggers.triggerESCLOADER == true then
@@ -460,26 +538,33 @@ function wakeup(widget)
     -- some watchdogs to enable close buttons on save and progress if they time-out
     if rf2ethos.dialogs.saveDisplay == true then
         if rf2ethos.dialogs.saveWatchDog ~= nil then
-            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > 20 then
+			-- watchdog will always kick in 5s after protocol timeout settings
+            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (rf2ethos.protocol.saveTimeout + 5) then
                 rf2ethos.dialogs.save:closeAllowed(true)
             end
         end
     end
 
-    if rf2ethos.triggers.escPowerCycle == true then
-        -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG'
-        -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
-        -- INIT CONFIG MODE
-    else
-        if rf2ethos.dialogs.progressDisplay == true then
-            if rf2ethos.dialogs.progressWatchDog ~= nil then
-                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > 30 then
-                    rf2ethos.dialogs.progress:message("Error.. we timed out")
-                    rf2ethos.dialogs.progress:closeAllowed(true)
-                end
-            end
-        end
-    end
+
+	if rf2ethos.dialogs.progressDisplay == true then
+		if rf2ethos.dialogs.progressWatchDog ~= nil then
+		
+			if rf2ethos.triggers.escPowerCycle == true then
+				if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 30) then
+					rf2ethos.dialogs.progress:message("Error.. we timed out")
+					rf2ethos.dialogs.progress:closeAllowed(true)
+				end
+			else
+				if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 5) then
+						rf2ethos.dialogs.progress:message("Error.. we timed out")
+						rf2ethos.dialogs.progress:closeAllowed(true)	
+				end
+			end
+			
+		end
+	end
+
+
 
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
@@ -495,26 +580,8 @@ function wakeup(widget)
 
         if rf2ethos.pageState == rf2ethos.pageStatus.saving then
             if (rf2ethos.saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-                if rf2ethos.mspQueue.retryCount < rf2ethos.mspQueue.maxRetries then
-                    saveSettings()
-                    rf2ethos.mspQueue.retryCount = rf2ethos.mspQueue.retryCount + 1
-
-                else
-                    -- Saving failed for some reason
-                    rf2ethos.triggers.saveFailed = true
-                    rf2ethos.dialogs.save:message("Error - failed to write data")
-                    rf2ethos.dialogs.save:closeAllowed(true)
-                    invalidatePages()
-                end
-
-            end
-        elseif rf2ethos.pageState == rf2ethos.pageStatus.eepromWrite then
-            if (rf2ethos.saveTS + rf2ethos.protocol.saveTimeout) < os.clock() then
-                rf2ethos.dialogs.save:value(100)
-                rf2ethos.dialogs.save:close()
-                if rf2ethos.mspQueue:isProcessed() then
-                    invalidatePages()
-                end   
+				--invalidatePages()
+				rf2ethos.dataBindFields()
             end
         end
         if not rf2ethos.Page then
@@ -535,33 +602,41 @@ function wakeup(widget)
             collectgarbage()
         end
 		if rf2ethos.Page ~= nil then
-			if not (rf2ethos.Page.values or rf2ethos.Page.isReady) and rf2ethos.pageState == rf2ethos.pageStatus.display then
+			if not (rf2ethos.Page.values) and rf2ethos.pageState == rf2ethos.pageStatus.display then
 				requestPage()
 			end
 		end	
     end
 
-
+    if rf2ethos.uiState ~= rf2ethos.uiStatus.mainMenu then
+        if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+            rf2ethos.triggers.mspDataLoaded = false
+            rf2ethos.triggers.isLoading = false
+            rf2ethos.triggers.wasLoading = true
+            if config.environment.simulation ~= true then
+                rf2ethos.triggers.createForm = true
+            end
+        end
+    end
+	
     if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
 
-        if rf2ethos.triggers.wasSaving == true or config.environment.simulation == true then
+        if (rf2ethos.triggers.wasSaving == true) or config.environment.simulation == true then
 
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
+			
             rf2ethos.triggers.wasSaving = false
-            rf2ethos.dialogs.save:value(100)
+           
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
-            if rf2ethos.triggers.saveFailed == false then
-                rf2ethos.dialogs.save:close()
-                rf2ethos.triggers.saveFailed = false
+            
+			if rf2ethos.triggers.saveFailed == false then
+				-- mark save complete so we can speed up progress dialog for	
+				rf2ethos.triggers.closeSave = true
             end
-            -- rf2ethos.resetServos() -- this must run after save settings
-            -- rf2ethos.resetCopyProfiles() -- this must run after save settings
 
-            -- switch back the rf2ethos.Page var to avoid having a page refresh!
-            rf2ethos.Page = rf2ethos.PageTmp
-
+		
         elseif (rf2ethos.triggers.wasLoading == true) or config.environment.simulation == true then
             rf2ethos.triggers.wasLoading = false
             rf2ethos.profileSwitchCheck()
@@ -607,19 +682,10 @@ function wakeup(widget)
         rf2ethos.triggers.createForm = false
     end
 
-    if rf2ethos.uiState ~= rf2ethos.uiStatus.mainMenu then
-        if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed()) then
-            rf2ethos.triggers.mspDataLoaded = false
-            rf2ethos.triggers.isLoading = false
-            rf2ethos.triggers.wasLoading = true
-            if config.environment.simulation ~= true then
-                rf2ethos.triggers.createForm = true
-            end
-        end
-    end
 
     if rf2ethos.triggers.isSaving then
-        if rf2ethos.pageState >= rf2ethos.pageStatus.saving then
+
+		if rf2ethos.pageState >= rf2ethos.pageStatus.saving then
             if rf2ethos.dialogs.saveDisplay == false then
                 rf2ethos.triggers.saveFailed = false
                 rf2ethos.dialogs.saveProgressCounter = 0
@@ -632,16 +698,14 @@ function wakeup(widget)
             end
             local saveMsg = ""
             if rf2ethos.pageState == rf2ethos.pageStatus.saving then
-				rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter * 4)
+				rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
                 rf2ethos.dialogs.save:message("Saving...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.eepromWrite then
-                rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter * 4)
+                rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
                 rf2ethos.dialogs.save:message("Saving...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.rebooting then
                 saveMsg = rf2ethos.dialogs.save:message("Rebooting...")
-                rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter * 4)
-                rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 1
-
+                rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
                 if rf2ethos.dialogs.saveProgressCounter >= 100 then
                     rf2ethos.dialogs.save:close()
                     invalidatePages()
@@ -653,7 +717,8 @@ function wakeup(widget)
 
                 end
             end
-			rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 1
+			rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
+		
         else
             rf2ethos.triggers.isSaving = false
             rf2ethos.dialogs.saveDisplay = false
@@ -756,14 +821,6 @@ function wakeup(widget)
         rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 	
-    if rf2ethos.triggers.telemetryState ~= 1 or (rf2ethos.pageState >= rf2ethos.pageStatus.saving) then
-        -- we dont refresh as busy doing other stuff
-        -- --rf2ethos.utils.log("Form invalidation disabled....")
-    else
-        if (rf2ethos.triggers.isSaving == false and rf2ethos.triggers.wasSaving == false) or (rf2ethos.triggers.isLoading == false and rf2ethos.triggers.wasLoading == false) then
-            -- form.invalidate()
-        end
-    end
 
     -- this needs to run on every wakeup event.
     rf2ethos.mspQueue:processQueue()
@@ -934,6 +991,7 @@ end
 
 
 local function close()
+	invalidatePages()
     rf2ethos.resetState()
     system.exit()
     return true

@@ -31,7 +31,7 @@ return {
         --rf2ethos.utils.log("postRead")
         if self.values[1] ~= mspSignature then
             --rf2ethos.utils.log("Invalid ESC signature detected.")
-            self.values = nil
+            --self.values = nil
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
@@ -39,13 +39,20 @@ return {
         end
     end,
     postLoad = function(self)
-
-        local model = getText(self, 49, 64)
-        local version = getText(self, 17, 32)
-        local firmware = getText(self, 1, 16)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
+		if self.values[1] ~= mspSignature then
+            -- self.values = nil
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+            return		
+		else
+			local model = getText(self, 49, 64)
+			local version = getText(self, 17, 32)
+			local firmware = getText(self, 1, 16)
+			self.escinfo[1].t = model
+			self.escinfo[2].t = version
+			self.escinfo[3].t = firmware
+		end	
 
     end
 }

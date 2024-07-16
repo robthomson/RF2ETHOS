@@ -74,10 +74,9 @@ function MspQueueController:processQueue()
 
     if (cmd == self.currentMessage.command and not err) 
 	or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
-    or (self.currentMessage.command == 217 and self.retryCount == 2 and err and ESC.init.powerCycle == true ) -- ESC
+    or (self.currentMessage.command == 217 and err and self.retryCount == 2 ) -- ESC
     then
-		rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
-		
+		rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")	
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end

@@ -57,21 +57,7 @@ function rf2ethos.rateSwitchCheck()
 end
 
 
-rf2ethos.settingsSaved = function()
-    -- check if this page requires writing to eeprom to save (most do)
-    if rf2ethos.Page and rf2ethos.Page.eepromWrite then
-        -- don't write again if we're already responding to earlier page.write()s
-        if rf2ethos.pageState ~= rf2ethos.pageStatus.eepromWrite then
-            rf2ethos.pageState = rf2ethos.pageStatus.eepromWrite
-            rf2ethos.mspQueue:add(mspEepromWrite)
-        end
-    elseif rf2ethos.pageState ~= rf2ethos.pageStatus.eepromWrite then
-        -- If we're not already trying to write to eeprom from a previous save, then we're done.
-        if rf2ethos.mspQueue:isProcessed() then
-            invalidatePages()
-        end
-    end
-end
+
 
 function rf2ethos.getFieldValue(f)
 

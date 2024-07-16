@@ -39,14 +39,20 @@ return {
         end
     end,
     postLoad = function(self)
-
-        local model = getEscType(self)
-        local version = "v" .. getUInt(self, {59, 60})
-        local firmware = string.format("%08X", getUInt(self, {55, 56, 57, 58}))
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
-
+        if self.values[1] ~= mspSignature then
+            -- self.values = nil
+            self.escinfo[1].t = ""
+            self.escinfo[2].t = ""
+            self.escinfo[2].t = ""
+            return
+        else	
+				local model = getEscType(self)
+				local version = "v" .. getUInt(self, {59, 60})
+				local firmware = string.format("%08X", getUInt(self, {55, 56, 57, 58}))
+				self.escinfo[1].t = model
+				self.escinfo[2].t = version
+				self.escinfo[3].t = firmware
+		end	
     end,
     alterPayload = function(payload)
 		payload[2] = 0
