@@ -1,0 +1,41 @@
+#!/bin/sh
+
+#clean old compiled tree
+rm -rfv ../scripts/*
+
+if  ! [ -d "../scripts" ]; then
+	mkdir ../scripts
+fi
+
+#copy tree to scripts
+rsync -rvva ../src/* ../scripts/
+
+#adjust any included lua files
+find ../scripts/ -type f  -name '*.lua' -exec sed -i 's/.lua/.luac/g' {} \;
+
+#compile the scripts
+files=$(find ../scripts/ -type f  -name '*.lua')
+
+for x in $files ; do
+
+	filename=$(basename $x)
+	filename_compiled="${filename}c"
+	x_compiled="${x}c"
+
+	echo $filename
+
+	if [ -d "luac.out" ] ; then
+		rm luac.out
+	fi
+
+	echo $x_compiled 
+	luac5.4 $x 
+	if [ $? -ne 0 ]; then
+		exit 1
+	fi
+
+	# move to correct folder
+	rm -f $x
+	mv luac.out $x_compiled
+
+done

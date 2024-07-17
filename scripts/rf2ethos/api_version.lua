@@ -1,3 +1,4 @@
+--[[
 local msp_API_VERSION = 1
 local config.apiVersionReceived = false
 local lastRunTS = 0
@@ -36,3 +37,4 @@ local function getApiVersion()
 end
 
 return {f = getApiVersion, t = "Waiting for API version"}
+]]--
