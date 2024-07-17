@@ -3,7 +3,7 @@
 local config = {}
 config.toolName = "RF2ETHOS"
 config.toolDir = "/scripts/rf2ethos/"
-config.logEnable = true
+config.logEnable = false
 config.ethosVersion = 1510
 config.luaVersion = "2.0.0 - 240625"
 config.ethosVersionString = "ETHOS < V1.5.10"
@@ -634,6 +634,12 @@ function wakeup(widget)
 			if rf2ethos.triggers.saveFailed == false then
 				-- mark save complete so we can speed up progress dialog for	
 				rf2ethos.triggers.closeSave = true
+				
+				-- switch back in the PageTmp
+				rf2ethos.Page = rf2ethos.PageTmp
+				rf2ethos.PageTmp = {}
+				
+				
             end
 
 		
@@ -735,7 +741,9 @@ function wakeup(widget)
 
                     -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
                     -- to stop has having to do a 'reload' of the page.
+					rf2ethos.PageTmp = {}
                     rf2ethos.PageTmp = rf2ethos.Page
+
 
                     rf2ethos.triggers.isSaving = true
                     rf2ethos.triggers.wasSaving = true
