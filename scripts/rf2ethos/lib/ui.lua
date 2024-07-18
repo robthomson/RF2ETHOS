@@ -1,10 +1,9 @@
 local ui = {}
 
 
-
 function ui.openMainMenu()
 
-	local MainMenu = assert(loadfile(rf2ethos.config.toolDir .. "pages.lua"))()
+	local MainMenu = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages.lua"))()
 
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then
         return
@@ -142,7 +141,7 @@ function ui.openPageRATESLoader(idx, subpage, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
     rf2ethos.dialogs.progressDisplay = true
@@ -394,7 +393,7 @@ function ui.openPageESC(idx, title, script)
         numPerRow = rf2ethos.radio.buttonsPerRow
     end
 
-    local ESCMenu = assert(loadfile(rf2ethos.config.toolDir .. "pages/" .. script))()
+    local ESCMenu = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
 
     local lc = 0
     local bx = 0
@@ -464,10 +463,10 @@ function ui.openPageESCToolLoader(folder)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    ESC.init = assert(loadfile(rf2ethos.config.toolDir .. "esc/" .. folder .. "/init.lua"))()
+    ESC.init = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/init.lua"))()
     rf2ethos.triggers.escPowerCycle = ESC.init.powerCycle
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "esc/" .. folder .. "/esc_info.lua"))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/esc_info.lua"))()
 
     rf2ethos.triggers.isLoading = true
 
@@ -517,7 +516,7 @@ function ui.openPageESCTool(folder)
     })
     field:focus()
 
-    ESC.pages = assert(loadfile(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages.lua"))()
+    ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages.lua"))()
 
     if rf2ethos.Page.escinfo then
         local model = rf2ethos.Page.escinfo[1].t
@@ -663,7 +662,7 @@ function rf2ethos.openESCFormLoader(folder, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
     rf2ethos.dialogs.progressDisplay = true
@@ -755,7 +754,7 @@ function ui.openPagePIDLoader(idx, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
     rf2ethos.dialogs.progressDisplay = true
@@ -890,7 +889,7 @@ function ui.openPageSERVOSLoader(idx, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
     rf2ethos.dialogs.progressDisplay = true
@@ -1248,7 +1247,7 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
 
-    rf2ethos.Page = assert(loadfile(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
     rf2ethos.dialogs.progressDisplay = true
@@ -1491,7 +1490,7 @@ function ui.navigationButtons(x, y, w, h)
     local section
     local page
 
-    help = assert(loadfile(rf2ethos.config.toolDir .. "help/pages.lua"))()
+    help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
     section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
     page = rf2ethos.lastSubPage
     if page == nil then
