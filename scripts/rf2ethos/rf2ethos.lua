@@ -424,6 +424,7 @@ rf2ethos.readPage = function()
 end
 
 local function saveSettings()
+
     if rf2ethos.pageState ~= rf2ethos.pageStatus.saving then
         rf2ethos.pageState = rf2ethos.pageStatus.saving
         rf2ethos.saveTS = os.clock()
@@ -779,6 +780,7 @@ function rf2ethos.wakeup(widget)
 
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
+			
 
             if rf2ethos.triggers.saveFailed == false then
                 -- mark save complete so we can speed up progress dialog for	
@@ -887,16 +889,20 @@ function rf2ethos.wakeup(widget)
 
                     -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
                     -- to stop has having to do a 'reload' of the page.
-                    rf2ethos.PageTmp = {}
-                    rf2ethos.PageTmp = rf2ethos.Page
+					if rf2ethos.config.environment.simulation ~= true then
+						rf2ethos.PageTmp = {}
+						rf2ethos.PageTmp = rf2ethos.Page
 
-                    rf2ethos.triggers.isSaving = true
-                    rf2ethos.triggers.wasSaving = true
+						rf2ethos.triggers.isSaving = true
+						rf2ethos.triggers.wasSaving = true
 
-                    rf2ethos.triggers.triggerSAVE = false
-                    rf2ethos.resetRates()
-                    saveSettings()
-                    return true
+						rf2ethos.triggers.triggerSAVE = false
+						rf2ethos.resetRates()
+						saveSettings()
+						return true
+					else
+						return true
+					end
                 end
             }, {
                 label = "CANCEL",
@@ -927,7 +933,7 @@ function rf2ethos.wakeup(widget)
             options = TEXT_LEFT
         })
 
-        rf2ethos.triggers.triggerSAVE = false
+		rf2ethos.triggers.triggerSAVE = false
     end
 
     if rf2ethos.triggers.triggerRELOAD == true then
