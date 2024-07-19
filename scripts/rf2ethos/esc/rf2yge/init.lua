@@ -32,14 +32,13 @@ escType = {
 escFlags = {spinDirection = 0, f3cAuto = 1, keepMah = 2, bec12v = 3}
 
 function getEscTypeLabel(values)
-    local idx = (values[mspHeaderBytes + 24] * 256) + values[mspHeaderBytes + 23]
+    local idx = (values[mspHeaderBytes + 24] * 256) +
+                    values[mspHeaderBytes + 23]
     return escType[idx] or "YGE ESC (" .. idx .. ")"
 end
 
 function getUInt(page, vals)
-    if page == nil then
-        return ""
-    end
+    if page == nil then return "" end
     local v = 0
     for idx = 1, #vals do
         local raw_val = page.values[vals[idx] + mspHeaderBytes] or 0
@@ -49,10 +48,7 @@ function getUInt(page, vals)
     return v
 end
 
-function getPageValue(page, index)
-
-    return page.values[mspHeaderBytes + index]
-end
+function getPageValue(page, index) return page.values[mspHeaderBytes + index] end
 
 function setPageValue(page, index, value)
     page.values[mspHeaderBytes + index] = value
@@ -62,4 +58,9 @@ rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 
-return {toolName = toolName, mspSignature = mspSignature, mspHeaderBytes = mspHeaderBytes, mspBytes = mspBytes}
+return {
+    toolName = toolName,
+    mspSignature = mspSignature,
+    mspHeaderBytes = mspHeaderBytes,
+    mspBytes = mspBytes
+}

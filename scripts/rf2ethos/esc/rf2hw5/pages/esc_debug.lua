@@ -10,22 +10,134 @@ labels[#labels + 1] = {t = "type", x = x + indent, y = inc.y(lineSpacing)}
 
 labels[#labels + 1] = {t = "name", x = x + indent, y = inc.y(lineSpacing)}
 
-fields[#fields + 1] = {t = "flight mode", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {64}} --
-fields[#fields + 1] = {t = "lipo cells", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {65}} --
-fields[#fields + 1] = {t = "volt cutoff type", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {66}} --
-fields[#fields + 1] = {t = "cuttoff voltage", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {67}} --
-fields[#fields + 1] = {t = "bec voltage", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {68}} --
-fields[#fields + 1] = {t = "startup time", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {69}} -- #
-fields[#fields + 1] = {t = "gov P", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {70}} -- #
-fields[#fields + 1] = {t = "gov I", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {71}} -- #
-fields[#fields + 1] = {t = "auto restart", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {72}} -- #
-fields[#fields + 1] = {t = "restart acc time", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {73}} -- #
-fields[#fields + 1] = {t = "brake type", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {74}} -- !
-fields[#fields + 1] = {t = "brake force", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {75}} -- !
-fields[#fields + 1] = {t = "timing", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {76}} -- !
-fields[#fields + 1] = {t = "rotation", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {77}} --
-fields[#fields + 1] = {t = "active freewheel", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {78}} -- !
-fields[#fields + 1] = {t = "startup power", x = x + indent, y = inc.y(lineSpacing), sp = x + sp, ro = true, vals = {79}} -- !
+fields[#fields + 1] = {
+    t = "flight mode",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {64}
+} --
+fields[#fields + 1] = {
+    t = "lipo cells",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {65}
+} --
+fields[#fields + 1] = {
+    t = "volt cutoff type",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {66}
+} --
+fields[#fields + 1] = {
+    t = "cuttoff voltage",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {67}
+} --
+fields[#fields + 1] = {
+    t = "bec voltage",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {68}
+} --
+fields[#fields + 1] = {
+    t = "startup time",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {69}
+} -- #
+fields[#fields + 1] = {
+    t = "gov P",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {70}
+} -- #
+fields[#fields + 1] = {
+    t = "gov I",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {71}
+} -- #
+fields[#fields + 1] = {
+    t = "auto restart",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {72}
+} -- #
+fields[#fields + 1] = {
+    t = "restart acc time",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {73}
+} -- #
+fields[#fields + 1] = {
+    t = "brake type",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {74}
+} -- !
+fields[#fields + 1] = {
+    t = "brake force",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {75}
+} -- !
+fields[#fields + 1] = {
+    t = "timing",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {76}
+} -- !
+fields[#fields + 1] = {
+    t = "rotation",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {77}
+} --
+fields[#fields + 1] = {
+    t = "active freewheel",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {78}
+} -- !
+fields[#fields + 1] = {
+    t = "startup power",
+    x = x + indent,
+    y = inc.y(lineSpacing),
+    sp = x + sp,
+    ro = true,
+    vals = {79}
+} -- !
 
 return {
     read = 217, -- msp_ESC_PARAMETERS

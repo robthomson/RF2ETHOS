@@ -5,9 +5,7 @@ function utils.storePreference(preference, value)
     -- open preference file
     file = preference .. ".cfg"
 
-    if value == nil then
-        value = ""
-    end
+    if value == nil then value = "" end
 
     if type(value) == "boolean" then
         if value == true then
@@ -17,11 +15,9 @@ function utils.storePreference(preference, value)
         end
     end
 
-    if type(value) == "userdata" then
-        value = value:name()
-    end
+    if type(value) == "userdata" then value = value:name() end
 
-    --rf2ethos.utils.log("Write Preference: " .. file .. " [" .. value .. "]")
+    -- rf2ethos.utils.log("Write Preference: " .. file .. " [" .. value .. "]")
 
     file = preference .. ".cfg"
 
@@ -38,7 +34,7 @@ function utils.loadPreference(preference)
     -- open preference file
     file = preference .. ".cfg"
 
-    --rf2ethos.utils.log("Read Preference:  " .. file)
+    -- rf2ethos.utils.log("Read Preference:  " .. file)
 
     local f
     f = io.open(file, "rb")
@@ -57,19 +53,13 @@ end
 
 function utils.getSection(id, sections)
     for i, v in ipairs(sections) do
-        if id ~= nil then
-            if v.section == id then
-                return v
-            end
-        end
+        if id ~= nil then if v.section == id then return v end end
     end
 end
 
 -- explode a string
 function utils.explode(inputstr, sep)
-    if sep == nil then
-        sep = "%s"
-    end
+    if sep == nil then sep = "%s" end
     local t = {}
     for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do
         table.insert(t, str)
@@ -78,9 +68,7 @@ function utils.explode(inputstr, sep)
 end
 
 function utils.round(number, precision)
-    if precision == nil then
-        precision = 0
-    end
+    if precision == nil then precision = 0 end
     local fmtStr = string.format("%%0.%sf", precision)
     number = string.format(fmtStr, number)
     number = tonumber(number)
@@ -125,22 +113,21 @@ function utils.loadScript(script)
 end
 
 -- return the time
-function utils.getTime()
-    return os.clock() * 100
-end
+function utils.getTime() return os.clock() * 100 end
 
 function utils.scaleValue(value, f)
     local v
     v = value * utils.decimalInc(f.decimals)
-    if f.scale ~= nil then
-        v = v / f.scale
-    end
+    if f.scale ~= nil then v = v / f.scale end
     v = utils.round(v)
     return v
 end
 
 function utils.decimalInc(dec)
-    local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
+    local decTable = {
+        10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000,
+        10000000000, 100000000000
+    }
 
     if dec == nil then
         return 1
@@ -263,13 +250,12 @@ end
 
 function utils.log(msg)
 
-	
-	if rf2ethos.config.logEnable == true then
-		print(msg)
+    if rf2ethos.config.logEnable == true then
+        print(msg)
         local f = io.open("/rf2ethos.log", 'a')
         io.write(f, tostring(msg) .. "\n")
-        io.close(f)		
-	end	
+        io.close(f)
+    end
 end
 
 -- print a table out to debug console
@@ -280,9 +266,7 @@ function utils.print_r(node)
 
     while true do
         local size = 0
-        for k, v in pairs(node) do
-            size = size + 1
-        end
+        for k, v in pairs(node) do size = size + 1 end
 
         local cur_index = 1
         for k, v in pairs(node) do
@@ -305,26 +289,31 @@ function utils.print_r(node)
                 end
 
                 if (type(v) == "number" or type(v) == "boolean") then
-                    output_str = output_str .. string.rep("\t", depth) .. key .. " = " .. tostring(v)
+                    output_str = output_str .. string.rep("\t", depth) .. key ..
+                                     " = " .. tostring(v)
                 elseif (type(v) == "table") then
-                    output_str = output_str .. string.rep("\t", depth) .. key .. " = {\n"
+                    output_str = output_str .. string.rep("\t", depth) .. key ..
+                                     " = {\n"
                     table.insert(stack, node)
                     table.insert(stack, v)
                     cache[node] = cur_index + 1
                     break
                 else
-                    output_str = output_str .. string.rep("\t", depth) .. key .. " = '" .. tostring(v) .. "'"
+                    output_str = output_str .. string.rep("\t", depth) .. key ..
+                                     " = '" .. tostring(v) .. "'"
                 end
 
                 if (cur_index == size) then
-                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
+                    output_str = output_str .. "\n" ..
+                                     string.rep("\t", depth - 1) .. "}"
                 else
                     output_str = output_str .. ","
                 end
             else
                 -- close the table
                 if (cur_index == size) then
-                    output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
+                    output_str = output_str .. "\n" ..
+                                     string.rep("\t", depth - 1) .. "}"
                 end
             end
 
@@ -332,7 +321,8 @@ function utils.print_r(node)
         end
 
         if (size == 0) then
-            output_str = output_str .. "\n" .. string.rep("\t", depth - 1) .. "}"
+            output_str = output_str .. "\n" .. string.rep("\t", depth - 1) ..
+                             "}"
         end
 
         if (#stack > 0) then
@@ -353,15 +343,11 @@ end
 
 -- convert a string to a nunber
 function utils.makeNumber(x)
-    if x == nil or x == "" then
-        x = 0
-    end
+    if x == nil or x == "" then x = 0 end
 
     x = string.gsub(x, "%D+", "")
     x = tonumber(x)
-    if x == nil or x == "" then
-        x = 0
-    end
+    if x == nil or x == "" then x = 0 end
 
     return x
 end
@@ -371,9 +357,7 @@ end
 function utils.convertPageValueTable(tbl, inc)
     local thetable = {}
 
-    if inc == nil then
-        inc = 0
-    end
+    if inc == nil then inc = 0 end
 
     if tbl[0] ~= nil then
         thetable[0] = {}

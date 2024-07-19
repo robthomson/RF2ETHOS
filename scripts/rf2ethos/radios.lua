@@ -85,6 +85,7 @@ local supportedRadios = {
     }
 }
 
-local radio = assert(supportedRadios[resolution], resolution .. " not supported")
+local radio =
+    assert(supportedRadios[resolution], resolution .. " not supported")
 
 return radio

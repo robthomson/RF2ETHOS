@@ -20,20 +20,14 @@ function joinTableItems(table, delimiter)
     if table == nil or #table == 0 then return "" end
     delimiter = delimiter or ""
     local result = table[1]
-    for i = 2, #table do
-        result = result .. delimiter .. table[i]
-    end
+    for i = 2, #table do result = result .. delimiter .. table[i] end
     return result
 end
 
-local function popFirstElement(tbl)
-    return table.remove(tbl, 1)
-end
+local function popFirstElement(tbl) return table.remove(tbl, 1) end
 
 function MspQueueController:processQueue()
-    if self:isProcessed() then
-        return
-    end
+    if self:isProcessed() then return end
 
     if not self.currentMessage then
         self.currentMessage = popFirstElement(self.messageQueue)
@@ -41,12 +35,14 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    --rf2ethos.utils.log("retryCount: "..self.retryCount)
+    -- rf2ethos.utils.log("retryCount: "..self.retryCount)
 
     if not rf2ethos.runningInSimulator then
-        if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 1 < os.clock() then
+        if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + 1 <
+            os.clock() then
             if self.currentMessage.payload then
-                rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
+                rf2ethos.protocol.mspWrite(self.currentMessage.command,
+                                           self.currentMessage.payload)
             else
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, {})
             end
@@ -58,7 +54,7 @@ function MspQueueController:processQueue()
         cmd, buf, err = mspPollReply()
     else
         if not self.currentMessage.simulatorResponse then
-            --rf2ethos.utils.log("No simulator response for command " .. tostring(self.currentMessage.command))
+            -- rf2ethos.utils.log("No simulator response for command " .. tostring(self.currentMessage.command))
             self.currentMessage = nil
             return
         end
@@ -67,16 +63,13 @@ function MspQueueController:processQueue()
         err = nil
     end
 
-    if cmd then
-        rf2ethos.utils.log("Received cmd: " .. tostring(cmd))
-    end
+    if cmd then rf2ethos.utils.log("Received cmd: " .. tostring(cmd)) end
 
-
-    if (cmd == self.currentMessage.command and not err) 
-	or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
-    or (self.currentMessage.command == 217 and err and self.retryCount == 2 ) -- ESC
+    if (cmd == self.currentMessage.command and not err) or
+        (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
+    or (self.currentMessage.command == 217 and err and self.retryCount == 2) -- ESC
     then
-		rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")	
+        rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
         if self.currentMessage.processReply then
             self.currentMessage:processReply(buf)
         end
@@ -103,11 +96,11 @@ end
 function MspQueueController:add(message)
     if message ~= nil then
         message = deepCopy(message)
-        --rf2ethos.utils.log("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
+        -- rf2ethos.utils.log("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
         self.messageQueue[#self.messageQueue + 1] = message
         return self
     else
-        --rf2ethos.utils.log("Unable to queue - nil message.  Check function is callable")
+        -- rf2ethos.utils.log("Unable to queue - nil message.  Check function is callable")
         -- this can go wrong if the function is declared below save function!!!
     end
 end

@@ -6,49 +6,27 @@
 local function fold(init, op, ...)
     local result = init
     local args = table.pack(...)
-    for i = 1, args.n do
-        result = op(result, args[i])
-    end
+    for i = 1, args.n do result = op(result, args[i]) end
     return result
 end
 
-local function trim(n)
-    return n & 0xFFFFFFFF
-end
+local function trim(n) return n & 0xFFFFFFFF end
 
-local function mask(w)
-    return ~(0xFFFFFFFF << w)
-end
+local function mask(w) return ~(0xFFFFFFFF << w) end
 
-function bit32.arshift(x, disp)
-    return x // (2 ^ disp)
-end
+function bit32.arshift(x, disp) return x // (2 ^ disp) end
 
 function bit32.band(...)
-    return fold(0xFFFFFFFF, function(a, b)
-        return a & b
-    end, ...)
+    return fold(0xFFFFFFFF, function(a, b) return a & b end, ...)
 end
 
-function bit32.bnot(x)
-    return ~x
-end
+function bit32.bnot(x) return ~x end
 
-function bit32.bor(...)
-    return fold(0, function(a, b)
-        return a | b
-    end, ...)
-end
+function bit32.bor(...) return fold(0, function(a, b) return a | b end, ...) end
 
-function bit32.btest(...)
-    return bit32.band(...) ~= 0
-end
+function bit32.btest(...) return bit32.band(...) ~= 0 end
 
-function bit32.bxor(...)
-    return fold(0, function(a, b)
-        return a ~ b
-    end, ...)
-end
+function bit32.bxor(...) return fold(0, function(a, b) return a ~ b end, ...) end
 
 local function fieldargs(f, w)
     w = w or 1
@@ -81,9 +59,7 @@ function bit32.lrotate(x, disp)
     end
 end
 
-function bit32.lshift(x, disp)
-    return trim(x << disp)
-end
+function bit32.lshift(x, disp) return trim(x << disp) end
 
 function bit32.rrotate(x, disp)
     if disp == 0 then
@@ -97,9 +73,7 @@ function bit32.rrotate(x, disp)
     end
 end
 
-function bit32.rshift(x, disp)
-    return trim(x >> disp)
-end
+function bit32.rshift(x, disp) return trim(x >> disp) end
 
 -------------------------------------------------------------------------------
 

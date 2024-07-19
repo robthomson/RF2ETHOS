@@ -11,9 +11,7 @@ local crsfMspCmd = 0
 
 rf2ethos.protocol.mspSend = function(payload)
     local payloadOut = {CRSF_ADDRESS_BETAFLIGHT, CRSF_ADDRESS_RADIO_TRANSMITTER}
-    for i = 1, #(payload) do
-        payloadOut[i + 2] = payload[i]
-    end
+    for i = 1, #(payload) do payloadOut[i + 2] = payload[i] end
     return crsf.pushFrame(crsfMspCmd, payloadOut)
 end
 
@@ -30,7 +28,9 @@ end
 rf2ethos.protocol.mspPoll = function()
     while true do
         local cmd, data = crsf.popFrame()
-        if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] == CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] == CRSF_ADDRESS_BETAFLIGHT then
+        if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] ==
+            CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] ==
+            CRSF_ADDRESS_BETAFLIGHT then
             --[[
             --rf2ethos.utils.log("cmd:0x"..string.format("%X", cmd))
             --rf2ethos.utils.log("  data length: "..string.format("%u", #data))
@@ -39,9 +39,7 @@ rf2ethos.protocol.mspPoll = function()
             end
 --]]
             local mspData = {}
-            for i = 3, #data do
-                mspData[i - 2] = data[i]
-            end
+            for i = 3, #data do mspData[i - 2] = data[i] end
             return mspData
         elseif cmd == nil then
             return nil

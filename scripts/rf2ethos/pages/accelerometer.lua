@@ -2,8 +2,24 @@ local labels = {}
 local fields = {}
 
 -- labels[#labels + 1] = { t = "Accelerometer trim",     x = x,          y = inc.y(lineSpacing) }
-fields[#fields + 1] = {t = "Roll", help = "accelerometerTrim", min = -300, max = 300, default = 0, unit = "°", vals = {3, 4}}
-fields[#fields + 1] = {t = "Pitch", help = "accelerometerTrim", min = -300, max = 300, default = 0, unit = "°", vals = {1, 2}}
+fields[#fields + 1] = {
+    t = "Roll",
+    help = "accelerometerTrim",
+    min = -300,
+    max = 300,
+    default = 0,
+    unit = "°",
+    vals = {3, 4}
+}
+fields[#fields + 1] = {
+    t = "Pitch",
+    help = "accelerometerTrim",
+    min = -300,
+    max = 300,
+    default = 0,
+    unit = "°",
+    vals = {1, 2}
+}
 
 return {
     read = 240, -- msp_ACC_TRIM
@@ -16,9 +32,9 @@ return {
     labels = labels,
     fields = fields,
     postRead = function(self)
-        --rf2ethos.utils.log("postRead")
+        -- rf2ethos.utils.log("postRead")
     end,
     postLoad = function(self)
-        --rf2ethos.utils.log("postLoad")
+        -- rf2ethos.utils.log("postLoad")
     end
 }

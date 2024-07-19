@@ -70,9 +70,7 @@ return {
 
         -- hex(device)
         f = self.fields[6]
-        if f.vals then
-            f.value = string.format("x%02X", f.value)
-        end
+        if f.vals then f.value = string.format("x%02X", f.value) end
 
         -- hex(crc)
         f = self.fields[#self.fields]
