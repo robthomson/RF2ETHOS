@@ -1255,6 +1255,8 @@ function ui.openPagePreferences(idx, title, script)
         rf2ethos.config.watchdogParam = newValue
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
     end)
+	
+
 
 end
 
