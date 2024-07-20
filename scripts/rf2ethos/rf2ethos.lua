@@ -33,6 +33,8 @@ triggers.createForm = false
 triggers.profileswitchLast = nil
 triggers.rateswitchLast = nil
 triggers.closeSave = false
+triggers.badMspVersion = false
+triggers.badMspVersionDisplay = false
 
 rf2ethos = {}
 rf2ethos.compile = compile
@@ -80,6 +82,8 @@ rf2ethos.fieldHelpTxt = nil
 rf2ethos.protocol = {}
 rf2ethos.radio = {}
 rf2ethos.sensor = {}
+rf2ethos.init = nil
+
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -130,6 +134,8 @@ function rf2ethos.resetState()
     rf2ethos.dialogs.nolinkDisplay = false
     rf2ethos.dialogs.nolinkValue = 0
     rf2ethos.triggers.telemetryState = nil
+	rf2ethos.triggers.badMspVersionDisplay = false
+	rf2ethos.triggers.badMspVersion = false
 
 end
 
@@ -482,6 +488,37 @@ function rf2ethos.wakeup(widget)
         return
     end
 
+
+	if rf2ethos.triggers.badMspVersion == true then
+	
+		local buttons = {
+			{
+				label = "   OK   ",
+				action = function()
+					rf2ethos.triggers.exitAPP = true
+					return true
+				end
+			}
+		}
+		
+		if rf2ethos.triggers.badMspVersionDisplay == false then
+			rf2ethos.triggers.badMspVersionDisplay = true
+			form.openDialog({
+				width = nil,
+				title = "MSP Error",
+				message = rf2ethos.init.t,
+				buttons = buttons,
+				wakeup = function()
+				end,
+				paint = function()
+				end,
+				options = TEXT_LEFT
+			})		
+		end	
+
+		return
+	end
+
     if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then invalidatePages() end
 
     -- ethos version
@@ -660,6 +697,10 @@ function rf2ethos.wakeup(widget)
                     noLinkDialog:closeAllowed(false)
                     noLinkDialog:value(0)
                     rf2ethos.dialogs.nolinkValue = 0
+					
+					-- check msp version of fbl
+					rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
+					rf2ethos.init.f()
                 end
             end
 
@@ -671,10 +712,19 @@ function rf2ethos.wakeup(widget)
                     rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
                 end
                 if rf2ethos.dialogs.nolinkValue > 100 then
-                    noLinkDialog:close()
-                    rf2ethos.dialogs.nolinkValue = 0
-                    rf2ethos.dialogs.nolinkDisplay = false
-                    if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
+				
+					if rf2ethos.init.f() == false then
+						noLinkDialog:close()
+						rf2ethos.dialogs.nolinkValue = 0
+						rf2ethos.dialogs.nolinkDisplay = false
+						rf2ethos.triggers.badMspVersion = true
+					else 
+						noLinkDialog:close()
+						rf2ethos.dialogs.nolinkValue = 0
+						rf2ethos.dialogs.nolinkDisplay = false
+						rf2ethos.triggers.badMspVersion = false
+						if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
+					end
                 end
                 noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
             end
@@ -740,6 +790,7 @@ function rf2ethos.wakeup(widget)
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
     updateTelemetryState()
+
 
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
         if rf2ethos.prevUiState ~= rf2ethos.uiState then rf2ethos.prevUiState = rf2ethos.uiState end
