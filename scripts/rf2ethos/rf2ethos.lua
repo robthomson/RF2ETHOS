@@ -489,7 +489,9 @@ function rf2ethos.wakeup(widget)
     end
 
 
-	if rf2ethos.triggers.badMspVersion == true then
+	if rf2ethos.triggers.badMspVersion == true  then
+	
+
 	
 		local buttons = {
 			{
@@ -500,6 +502,8 @@ function rf2ethos.wakeup(widget)
 				end
 			}
 		}
+		
+		
 		
 		if rf2ethos.triggers.badMspVersionDisplay == false then
 			rf2ethos.triggers.badMspVersionDisplay = true
@@ -713,7 +717,7 @@ function rf2ethos.wakeup(widget)
                 end
                 if rf2ethos.dialogs.nolinkValue > 100 then
 				
-					if rf2ethos.init.f() == false then
+					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0 then
 						noLinkDialog:close()
 						rf2ethos.dialogs.nolinkValue = 0
 						rf2ethos.dialogs.nolinkDisplay = false
