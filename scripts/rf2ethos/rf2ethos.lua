@@ -1040,7 +1040,7 @@ end
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 function rf2ethos.event(widget, category, value, x, y)
 
-    print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+    --print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if value == EVT_VIRTUAL_PREV_LONG then
         print("Forcing exit")
