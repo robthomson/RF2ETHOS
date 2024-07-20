@@ -488,39 +488,38 @@ function rf2ethos.wakeup(widget)
         return
     end
 
-
-	if rf2ethos.triggers.badMspVersion == true  then
-	
-
-	
-		local buttons = {
-			{
-				label = "   OK   ",
-				action = function()
-					rf2ethos.triggers.exitAPP = true
-					return true
-				end
+	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then
+		if rf2ethos.triggers.badMspVersion == true  then
+		
+			local buttons = {
+				{
+					label = "   OK   ",
+					action = function()
+						rf2ethos.triggers.exitAPP = true
+						return true
+					end
+				}
 			}
-		}
-		
-		
-		
-		if rf2ethos.triggers.badMspVersionDisplay == false then
-			rf2ethos.triggers.badMspVersionDisplay = true
-			form.openDialog({
-				width = nil,
-				title = "MSP Error",
-				message = rf2ethos.init.t,
-				buttons = buttons,
-				wakeup = function()
-				end,
-				paint = function()
-				end,
-				options = TEXT_LEFT
-			})		
-		end	
+			
+			
+			
+			if rf2ethos.triggers.badMspVersionDisplay == false then
+				rf2ethos.triggers.badMspVersionDisplay = true
+				form.openDialog({
+					width = nil,
+					title = "MSP Error",
+					message = rf2ethos.init.t,
+					buttons = buttons,
+					wakeup = function()
+					end,
+					paint = function()
+					end,
+					options = TEXT_LEFT
+				})		
+			end	
 
-		return
+			return
+		end
 	end
 
     if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then invalidatePages() end
@@ -717,7 +716,7 @@ function rf2ethos.wakeup(widget)
                 end
                 if rf2ethos.dialogs.nolinkValue > 100 then
 				
-					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0 then
+					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
 						noLinkDialog:close()
 						rf2ethos.dialogs.nolinkValue = 0
 						rf2ethos.dialogs.nolinkDisplay = false
