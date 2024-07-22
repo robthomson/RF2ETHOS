@@ -714,7 +714,7 @@ function rf2ethos.wakeup(widget)
                 else
                     rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
                 end
-                if rf2ethos.dialogs.nolinkValue > 100 then
+                if rf2ethos.dialogs.nolinkValue >= 100 then
 				
 					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
 						noLinkDialog:close()
