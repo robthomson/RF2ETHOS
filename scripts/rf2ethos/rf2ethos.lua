@@ -702,8 +702,8 @@ function rf2ethos.wakeup(widget)
                     rf2ethos.dialogs.nolinkValue = 0
 					
 					-- check msp version of fbl
-					rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
-					rf2ethos.init.f()
+					--rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
+					--rf2ethos.init.f()
                 end
             end
 
@@ -716,18 +716,18 @@ function rf2ethos.wakeup(widget)
                 end
                 if rf2ethos.dialogs.nolinkValue >= 100 then
 				
-					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
-						noLinkDialog:close()
-						rf2ethos.dialogs.nolinkValue = 0
-						rf2ethos.dialogs.nolinkDisplay = false
-						rf2ethos.triggers.badMspVersion = true
-					else 
+					--if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
+					--	noLinkDialog:close()
+					--	rf2ethos.dialogs.nolinkValue = 0
+					--	rf2ethos.dialogs.nolinkDisplay = false
+					--	rf2ethos.triggers.badMspVersion = true
+					--else 
 						noLinkDialog:close()
 						rf2ethos.dialogs.nolinkValue = 0
 						rf2ethos.dialogs.nolinkDisplay = false
 						rf2ethos.triggers.badMspVersion = false
 						if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
-					end
+					--end
                 end
                 noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
             end
