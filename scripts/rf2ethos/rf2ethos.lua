@@ -536,7 +536,7 @@ function rf2ethos.wakeup(widget)
 
     if rf2ethos.triggers.closeSave == true then
 
-        if (rf2ethos.dialogs.saveProgressCounter <= 100) then rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 30 end
+        if (rf2ethos.dialogs.saveProgressCounter < 100) then rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 10 end
         rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 then
@@ -876,7 +876,7 @@ function rf2ethos.wakeup(widget)
     end
 
     if rf2ethos.triggers.isSaving then
-
+		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
         if rf2ethos.pageState >= rf2ethos.pageStatus.saving then
             if rf2ethos.dialogs.saveDisplay == false then
                 rf2ethos.triggers.saveFailed = false
@@ -898,7 +898,7 @@ function rf2ethos.wakeup(widget)
             elseif rf2ethos.pageState == rf2ethos.pageStatus.rebooting then
                 saveMsg = rf2ethos.dialogs.save:message("Rebooting...")
                 rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
-                if rf2ethos.dialogs.saveProgressCounter >= 100 then
+                if rf2ethos.dialogs.saveProgressCounter > 100 then
                     rf2ethos.dialogs.save:close()
                     invalidatePages()
                     rf2ethos.triggers.wasReloading = true
@@ -909,13 +909,14 @@ function rf2ethos.wakeup(widget)
 
                 end
             end
-            rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
-
+            
         else
             rf2ethos.triggers.isSaving = false
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
         end
+	elseif rf2ethos.triggers.wasSaving == true then
+		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
     end
 
     -- trigger save
