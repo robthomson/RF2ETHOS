@@ -150,11 +150,14 @@ function ui.openPageRATES(idx, subpage, title, script)
 
     if rf2ethos.Page.fields then
         local v = rf2ethos.Page.fields[13].value
-        if v ~= nil then rf2ethos.RateTable = math.floor(v) end
+        if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
 
-        if rf2ethos.RateTable ~= nil then
-            if rf2ethos.RateTable ~= rf2ethos.RateTable then
-                rf2ethos.RateTable = rf2ethos.RateTable
+
+        if rf2ethos.activeRateTable ~= nil then
+            if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
+                rf2ethos.RateTable = rf2ethos.activeRateTable 
+				
+				
                 if rf2ethos.dialogs.progressDisplay == true then
                     rf2ethos.dialogs.progressWatchDog = nil
                     rf2ethos.dialogs.progressDisplay = false
@@ -211,7 +214,7 @@ function ui.openPageRATES(idx, subpage, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethosmsp_RATEROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethos_RATEROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #rf2ethos.Page.fields do
         local f = rf2ethos.Page.fields[i]
@@ -235,7 +238,7 @@ function ui.openPageRATES(idx, subpage, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            field = form.addNumberField(_G["rf2ethosmsp_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
+            field = form.addNumberField(_G["rf2ethos_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
                 local value = rf2ethos.getFieldValue(f)
                 return value
             end, function(value)
@@ -750,7 +753,7 @@ function ui.openPagePID(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethosmsp_PIDROWS_" .. ri] = form.addLine(rv) end
+    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethos_PIDROWS_" .. ri] = form.addLine(rv) end
 
     for i = 1, #rf2ethos.Page.fields do
         local f = rf2ethos.Page.fields[i]
@@ -769,7 +772,7 @@ function ui.openPagePID(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        field = form.addNumberField(_G["rf2ethosmsp_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
+        field = form.addNumberField(_G["rf2ethos_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
             local value = rf2ethos.getFieldValue(f)
             return value
         end, function(value)

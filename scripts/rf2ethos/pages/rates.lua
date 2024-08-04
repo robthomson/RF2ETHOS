@@ -1,10 +1,10 @@
 local labels = {}
 local fields = {}
 
-if RateTable == nil then RateTable = rf2ethos.config.defaultRateTable end
+if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
 
 -- NONE
-if RateTable == 0 then
+if rf2ethos.RateTable == 0 then
 
     rTableName = "NONE"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
@@ -25,7 +25,7 @@ if RateTable == 0 then
     fields[#fields + 1] = {row = 3, col = 3, subpage = 1, min = 0, max = 0, vals = {15}, default = 0}
     fields[#fields + 1] = {row = 4, col = 3, subpage = 1, min = 0, max = 0, vals = {21}, default = 0}
     -- BETAFL
-elseif RateTable == 1 then
+elseif rf2ethos.RateTable == 1 then
 
     rTableName = "BETAFLIGHT"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
@@ -47,7 +47,7 @@ elseif RateTable == 1 then
     fields[#fields + 1] = {row = 3, col = 3, subpage = 1, min = 0, max = 100, vals = {15}, decimals = 2, scale = 100, default = 0, decimals = 2}
     fields[#fields + 1] = {row = 4, col = 3, subpage = 1, min = 0, max = 100, vals = {21}, decimals = 2, scale = 100, default = 0, decimals = 2}
     -- RACEFL
-elseif RateTable == 2 then
+elseif rf2ethos.RateTable == 2 then
 
     rTableName = "RACEFLIGHT"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
@@ -70,7 +70,7 @@ elseif RateTable == 2 then
     fields[#fields + 1] = {row = 4, col = 3, subpage = 1, min = 0, max = 100, vals = {21}, default = 0}
 
     -- KISS
-elseif RateTable == 3 then
+elseif rf2ethos.RateTable == 3 then
 
     rTableName = "KISS"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
@@ -92,7 +92,7 @@ elseif RateTable == 3 then
     fields[#fields + 1] = {row = 3, col = 3, subpage = 1, min = 0, max = 100, vals = {15}, decimals = 2, scale = 100, default = 0, decimals = 2}
     fields[#fields + 1] = {row = 4, col = 3, subpage = 1, min = 0, max = 100, vals = {21}, decimals = 2, scale = 100, default = 0, decimals = 2}
     -- ACTUAL
-elseif RateTable == 4 then
+elseif rf2ethos.RateTable == 4 then
 
     rTableName = "ACTUAL"
     rows = {"Roll", "Pitch", "Yaw", "Col"}
@@ -120,7 +120,7 @@ elseif RateTable == 4 then
     fields[#fields + 1] = {row = 4, col = 3, subpage = 1, min = 0, max = 100, vals = {21}, decimals = 2, scale = 100, default = 0}
 
     -- QUICK
-elseif RateTable == 5 then
+elseif rf2ethos.RateTable == 5 then
 
     rTableName = "QUICK"
     rows = {"Roll", "Pitch", "Yaw", "Col"}

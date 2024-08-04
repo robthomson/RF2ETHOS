@@ -192,36 +192,6 @@ function rf2ethos.saveValue(currentField)
     if f.upd and rf2ethos.Page.values then f.upd(rf2ethos.Page) end
 end
 
-function rf2ethos.dataBindFields()
-    for i = 1, #rf2ethos.Page.fields do
-
-        -- display progress loader when retrieving data
-        if rf2ethos.dialogs.progressDisplay == true then
-            local percent = (i / #rf2ethos.Page.fields) * 100
-            -- we have to stop this happening on esc as we handle this
-            -- differently
-            if rf2ethos.triggers.triggerESCLOADER ~= true then rf2ethos.dialogs.progress:value(percent) end
-        end
-
-        if rf2ethos.Page.values and #rf2ethos.Page.values >= rf2ethos.Page.minBytes then
-            local f = rf2ethos.Page.fields[i]
-            if f.vals then
-                f.value = 0
-                for idx = 1, #f.vals do
-                    -- local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
-                    -- inject header bytes if we have
-                    local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
-                    raw_val = raw_val << ((idx - 1) * 8)
-                    f.value = f.value | raw_val
-                end
-                local bits = #f.vals * 8
-                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
-                f.value = f.value / (f.scale or 1)
-            end
-        end
-    end
-end
-
 function rf2ethos.sportTelemetryPop()
     -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
     local frame = rf2ethos.sensor:popFrame()
@@ -315,7 +285,8 @@ function rf2ethos.resetRates()
 
             for k, v in pairs(newTable) do
                 local f = rf2ethos.Page.fields[k]
-                for idx = 1, #f.vals do rf2ethos.Page.values[f.vals[idx]] = v >> ((idx - 1) * 8) end
+				v = math.floor(v)
+				for idx = 1, #f.vals do rf2ethos.Page.values[f.vals[idx]] = v >> ((idx - 1) * 8) end
             end
             rf2ethos.triggers.resetRates = false
         end
@@ -355,33 +326,37 @@ local mspEepromWrite = {
 }
 
 function rf2ethos.dataBindFields()
-    for i = 1, #rf2ethos.Page.fields do
+	if rf2ethos.Page.fields then
+		for i = 1, #rf2ethos.Page.fields do
 
-        -- display progress loader when retrieving data
-        if rf2ethos.dialogs.progressDisplay == true then
-            local percent = (i / #rf2ethos.Page.fields) * 100
-            -- we have to stop this happening on esc as we handle this
-            -- differently
-            if rf2ethos.triggers.triggerESCLOADER ~= true then rf2ethos.dialogs.progress:value(percent) end
-        end
+			-- display progress loader when retrieving data
+			if rf2ethos.dialogs.progressDisplay == true then
+				local percent = (i / #rf2ethos.Page.fields) * 100
+				-- we have to stop this happening on esc as we handle this
+				-- differently
+				if rf2ethos.triggers.triggerESCLOADER ~= true then rf2ethos.dialogs.progress:value(percent) end
+			end
 
-        if rf2ethos.Page.values and #rf2ethos.Page.values >= rf2ethos.Page.minBytes then
-            local f = rf2ethos.Page.fields[i]
-            if f.vals then
-                f.value = 0
-                for idx = 1, #f.vals do
-                    -- local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
-                    -- inject header bytes if we have
-                    local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
-                    raw_val = raw_val << ((idx - 1) * 8)
-                    f.value = f.value | raw_val
-                end
-                local bits = #f.vals * 8
-                if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
-                f.value = f.value / (f.scale or 1)
-            end
-        end
-    end
+			if rf2ethos.Page.values and #rf2ethos.Page.values >= rf2ethos.Page.minBytes then
+				local f = rf2ethos.Page.fields[i]
+				if f.vals then
+					f.value = 0
+					for idx = 1, #f.vals do
+						-- local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
+						-- inject header bytes if we have
+						local raw_val = rf2ethos.Page.values[f.vals[idx]] or 0
+						raw_val = raw_val << ((idx - 1) * 8)
+						f.value = f.value | raw_val
+					end
+					local bits = #f.vals * 8
+					if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
+					f.value = f.value / (f.scale or 1)
+				end
+			end
+		end
+	else
+		rf2ethos.utils.log("Unable to bind fields as rf2ethos.Page.fields does not exist")
+	end	
 end
 
 rf2ethos.settingsSaved = function()
@@ -591,7 +566,7 @@ function rf2ethos.wakeup(widget)
             end
             rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
 
-            rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 0.5
+            rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 1
 
             if rf2ethos.mspQueue:isProcessed() then requestPage() end
 
@@ -600,6 +575,7 @@ function rf2ethos.wakeup(widget)
                 rf2ethos.dialogs.progress:close()
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
+				rf2ethos.triggers.badMspVersion = false
             end
 
         end
@@ -702,8 +678,8 @@ function rf2ethos.wakeup(widget)
                     rf2ethos.dialogs.nolinkValue = 0
 					
 					-- check msp version of fbl
-					--rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
-					--rf2ethos.init.f()
+					rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
+					rf2ethos.init.f()
                 end
             end
 
@@ -716,18 +692,18 @@ function rf2ethos.wakeup(widget)
                 end
                 if rf2ethos.dialogs.nolinkValue >= 100 then
 				
-					--if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
-					--	noLinkDialog:close()
-					--	rf2ethos.dialogs.nolinkValue = 0
-					--	rf2ethos.dialogs.nolinkDisplay = false
-					--	rf2ethos.triggers.badMspVersion = true
-					--else 
+					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
+						noLinkDialog:close()
+						rf2ethos.dialogs.nolinkValue = 0
+						rf2ethos.dialogs.nolinkDisplay = false
+						rf2ethos.triggers.badMspVersion = true
+					else 
 						noLinkDialog:close()
 						rf2ethos.dialogs.nolinkValue = 0
 						rf2ethos.dialogs.nolinkDisplay = false
 						rf2ethos.triggers.badMspVersion = false
 						if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
-					--end
+					end
                 end
                 noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
             end
