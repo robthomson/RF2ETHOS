@@ -25,6 +25,7 @@ local function init()
             returnTable.t = "This version of the Lua scripts ("..SUPPORTED_API_VERSION..")\ncan't be used with the selected model ("..tostring(apiVersion)..")."
         else
             -- received correct API version, proceed
+			rf2ethos.config.apiVersion = apiVersion
             return true
         end
     end
