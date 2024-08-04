@@ -389,7 +389,9 @@ local mspLoadSettings = {
         rf2ethos.dataBindFields()
         if rf2ethos.Page.postLoad then rf2ethos.Page.postLoad(rf2ethos.Page) end
         rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
-        rf2ethos.triggers.mspDataLoaded = true
+        -- removing from here as we should only trigger this
+		-- from the pages/*.lua script using 'postLoad'
+		--rf2ethos.triggers.mspDataLoaded = true
 
     end
 }
@@ -463,9 +465,8 @@ function rf2ethos.wakeup(widget)
         return
     end
 
-	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then
+	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false then
 		if rf2ethos.triggers.badMspVersion == true  then
-		
 			local buttons = {
 				{
 					label = "   OK   ",
@@ -575,7 +576,6 @@ function rf2ethos.wakeup(widget)
                 rf2ethos.dialogs.progress:close()
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
-				rf2ethos.triggers.badMspVersion = false
             end
 
         end

@@ -62,10 +62,7 @@ return {
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
 
-        -- BEC offset
-        -- local f = self.fields[3]
-        -- f.value = getrf2ethos.PageValue(self, 68)
-        -- --rf2ethos.utils.log(f.value)
+		rf2ethos.triggers.mspDataLoaded = true
 
     end,
     postRead = function(self)
