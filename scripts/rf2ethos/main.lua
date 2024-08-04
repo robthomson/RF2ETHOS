@@ -16,7 +16,7 @@ config.requestTimeout = nil
 config.lcdWidth = nil
 config.lcdHeight = nil
 config.iconsizeParam = nil
-config.supportedMspApiVersion = "12.06"
+config.supportedMspApiVersion = { "12.06", "12.07" }
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
 
