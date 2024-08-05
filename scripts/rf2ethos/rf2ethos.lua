@@ -465,6 +465,12 @@ function rf2ethos.wakeup(widget)
         system.exit()
         return
     end
+	
+	if rf2ethos.dialogs.progressDisplay == true  or  rf2ethos.dialogs.saveDisplay == true then
+		ELRS_PAUSE_TELEMETRY = true
+	else
+		ELRS_PAUSE_TELEMETRY = false
+	end
 
 	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false then
 		if rf2ethos.triggers.badMspVersion == true  then
