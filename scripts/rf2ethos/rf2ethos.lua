@@ -466,7 +466,7 @@ function rf2ethos.wakeup(widget)
         return
     end
 	
-	if rf2ethos.dialogs.progressDisplay == true  or  rf2ethos.dialogs.saveDisplay == true then
+	if rf2ethos.dialogs.progressDisplay == true  or  rf2ethos.dialogs.saveDisplay == true or rf2ethos.dialogs.nolinkDisplay == true then
 		ELRS_PAUSE_TELEMETRY = true
 	else
 		ELRS_PAUSE_TELEMETRY = false
@@ -693,11 +693,18 @@ function rf2ethos.wakeup(widget)
             if rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1 then
 
                 if rf2ethos.triggers.telemetryState == 1 then
-                    rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 20
+                    rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 5
                 else
                     rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
                 end
-                if rf2ethos.dialogs.nolinkValue >= 100 then
+				
+				if rf2ethos.dialogs.nolinkValue >= 50 then
+					if rf2ethos.init.t ~= nil then
+						 noLinkDialog:message(rf2ethos.init.t)
+					end
+				end
+				
+                if rf2ethos.dialogs.nolinkValue >= 100 and rf2ethos.mspQueue:isProcessed() then
 				
 					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
 						noLinkDialog:close()

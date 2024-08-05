@@ -23,7 +23,7 @@ local function init()
     end
 
     if not apiVersion and (not lastRunTS or lastRunTS + 2 < os.clock()) then
-        returnTable.t = "Waiting for API version"
+        returnTable.t = "Checking API version"
         mspApiVersion.getApiVersion(function(_, version) apiVersion = version end)
         lastRunTS = os.clock()
     end
