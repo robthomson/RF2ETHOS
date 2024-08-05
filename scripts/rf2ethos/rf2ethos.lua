@@ -1027,8 +1027,6 @@ end
 
 function rf2ethos.create()
 
-	ELRS_PAUSE_TELEMETRY = true
-
     rf2ethos.sensor = sport.getSensor({primId = 0x32})
     rf2ethos.rssiSensor = system.getSource("RSSI")
     if not rf2ethos.rssiSensor then

@@ -35,6 +35,7 @@ function mspProcessTxQ()
     -- return true
     -- end
     -- rf2ethos.utils.log("Sending mspTxBuf size " .. tostring(#mspTxBuf) .. " at Idx " .. tostring(mspTxIdx) .. " for cmd: " .. tostring(mspLastReq))
+	
     local payload = {}
     payload[1] = mspSeq + MSP_VERSION
     mspSeq = (mspSeq + 1) & 0x0F
@@ -71,6 +72,7 @@ function mspProcessTxQ()
 end
 
 function mspSendRequest(cmd, payload)
+	ELRS_PAUSE_TELEMETRY = true
     -- rf2ethos.utils.log("Sending cmd "..cmd)
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
@@ -133,6 +135,7 @@ local function mspReceivedReply(payload)
         return nil
     end
     -- rf2ethos.utils.log("  Got reply for cmd "..mspRxReq)
+	ELRS_PAUSE_TELEMETRY = false
     return true
 end
 
