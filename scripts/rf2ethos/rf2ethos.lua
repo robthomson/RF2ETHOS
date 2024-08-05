@@ -136,6 +136,7 @@ function rf2ethos.resetState()
     rf2ethos.triggers.telemetryState = nil
 	rf2ethos.triggers.badMspVersionDisplay = false
 	rf2ethos.triggers.badMspVersion = false
+	ELRS_PAUSE_TELEMETRY = false
 
 end
 
@@ -1025,6 +1026,8 @@ function rf2ethos.wakeup(widget)
 end
 
 function rf2ethos.create()
+
+	ELRS_PAUSE_TELEMETRY = true
 
     rf2ethos.sensor = sport.getSensor({primId = 0x32})
     rf2ethos.rssiSensor = system.getSource("RSSI")
