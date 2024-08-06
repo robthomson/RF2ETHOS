@@ -32,7 +32,9 @@ function compile.loadScript(script)
 		config.useCompiler = false
 	end
 
-
+    if compile.file_exists("/scripts/nocompile" ) == true then
+		config.useCompiler = false
+	end
 
     if config.useCompiler == true then
         if compile.file_exists(cachefile) ~= true then
