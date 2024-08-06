@@ -706,25 +706,6 @@ function rf2ethos.wakeup(widget)
 				rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
 			end
 
-			if rf2ethos.dialogs.nolinkValue >= 10 and  rf2ethos.dialogs.nolinkValue <= 20 then
-				if rf2ethos.init.t ~= nil then
-					 noLinkDialog:message("Connecting [ checking for telemetry ]")
-				end
-			end
-			
-			if rf2ethos.dialogs.nolinkValue >= 20 and rf2ethos.dialogs.nolinkValue <= 40 then
-				if rf2ethos.init.t ~= nil then
-						noLinkDialog:message(rf2ethos.init.t)
-				end
-			end
-			
-			if rf2ethos.dialogs.nolinkValue >= 40 and rf2ethos.dialogs.nolinkValue <= 60 and rf2ethos.config.apiVersion ~= nil then
-				noLinkDialog:message(rf2ethos.init.t .. " [" .. rf2ethos.config.apiVersion .. "]")
-			end
-
-			if rf2ethos.dialogs.nolinkValue >= 60 and rf2ethos.config.apiVersion ~= nil then
-				noLinkDialog:message(rf2ethos.init.t .. " [" .. rf2ethos.config.apiVersion .. "] [OK]")
-			end
 			
 			if rf2ethos.dialogs.nolinkValue >= 100 and rf2ethos.mspQueue:isProcessed() then
 			
