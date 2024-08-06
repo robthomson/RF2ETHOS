@@ -14,11 +14,25 @@ function compile.file_exists(name)
     end
 end
 
+function compile.baseName()
+	local baseName
+	baseName = config.toolDir:gsub("/scripts/","")
+	baseName = baseName:gsub("/","")
+	return baseName
+end
+
 function compile.loadScript(script)
 
 
 	local cachefile
 	cachefile = toolDir .. "compiled/" .. script:gsub("/", "_") .. "c"
+
+
+    if compile.file_exists("/scripts/" .. compile.baseName() .. ".nocompile" ) == true then
+		config.useCompiler = false
+	end
+
+
 
     if config.useCompiler == true then
         if compile.file_exists(cachefile) ~= true then

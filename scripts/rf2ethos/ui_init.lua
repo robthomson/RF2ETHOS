@@ -18,12 +18,12 @@ end
 
 local function init()
     if rf2ethos.getRSSI() == 0 and not rf2ethos.runningInSimulator then
-        returnTable.t = "Waiting for connection"
+        returnTable.t = "Connecting [ checking for telemetry ]"
         return false
     end
 
     if not apiVersion and (not lastRunTS or lastRunTS + 2 < os.clock()) then
-        returnTable.t = "Checking API version"
+        returnTable.t = "Connecting [ checking msp versions ]"
         mspApiVersion.getApiVersion(function(_, version) apiVersion = version end)
         lastRunTS = os.clock()
     end

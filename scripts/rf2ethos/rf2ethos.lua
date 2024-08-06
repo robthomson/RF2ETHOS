@@ -444,13 +444,18 @@ end
 
 local function updateTelemetryState()
 
-    if not rf2ethos.rssiSensor then
-        rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noSensor
-    elseif rf2ethos.getRSSI() == 0 then
-        rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noTelemetry
-    else
-        rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.ok
-    end
+
+	if config.environment.simulation ~= true then
+		if not rf2ethos.rssiSensor then
+			rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noSensor
+		elseif rf2ethos.getRSSI() == 0 then
+			rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noTelemetry
+		else
+			rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.ok
+		end
+	else
+		rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.ok
+	end
 
 end
 
@@ -675,53 +680,71 @@ function rf2ethos.wakeup(widget)
         -- INIT CONFIG MODE
 
     else
-        if config.environment.simulation ~= true then
-            if rf2ethos.triggers.telemetryState ~= 1 then
-                if rf2ethos.dialogs.nolinkDisplay == false then
-                    rf2ethos.dialogs.nolinkDisplay = true
-                    noLinkDialog = form.openProgressDialog("Connecting", "Waiting for a link to the flight controller")
-                    noLinkDialog:closeAllowed(false)
-                    noLinkDialog:value(0)
-                    rf2ethos.dialogs.nolinkValue = 0
-					
-					-- check msp version of fbl
-					rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
-					rf2ethos.init.f()
-                end
-            end
-
-            if rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1 then
-
-                if rf2ethos.triggers.telemetryState == 1 then
-                    rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 5
-                else
-                    rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
-                end
+		if rf2ethos.triggers.telemetryState ~= 1 then
+			if rf2ethos.dialogs.nolinkDisplay == false then
+				rf2ethos.dialogs.nolinkDisplay = true
+				noLinkDialog = form.openProgressDialog("Connecting", "Connecting")
+				noLinkDialog:closeAllowed(false)
+				noLinkDialog:value(0)
+				rf2ethos.dialogs.nolinkValue = 0
 				
-				if rf2ethos.dialogs.nolinkValue >= 50 then
-					if rf2ethos.init.t ~= nil then
-						 noLinkDialog:message(rf2ethos.init.t)
-					end
+				-- check msp version of fbl
+				rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
+				rf2ethos.init.f()
+			end
+		end
+
+		if rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1 then
+
+			if rf2ethos.triggers.telemetryState == 1 then
+				if rf2ethos.config.apiVersion ~= nil then
+					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 4
+				else
+					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 2
 				end
-				
-                if rf2ethos.dialogs.nolinkValue >= 100 and rf2ethos.mspQueue:isProcessed() then
-				
-					if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
-						noLinkDialog:close()
-						rf2ethos.dialogs.nolinkValue = 0
-						rf2ethos.dialogs.nolinkDisplay = false
-						rf2ethos.triggers.badMspVersion = true
-					else 
-						noLinkDialog:close()
-						rf2ethos.dialogs.nolinkValue = 0
-						rf2ethos.dialogs.nolinkDisplay = false
-						rf2ethos.triggers.badMspVersion = false
+			else
+				rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
+			end
+
+			if rf2ethos.dialogs.nolinkValue >= 10 and  rf2ethos.dialogs.nolinkValue <= 20 then
+				if rf2ethos.init.t ~= nil then
+					 noLinkDialog:message("Connecting [ checking for telemetry ]")
+				end
+			end
+			
+			if rf2ethos.dialogs.nolinkValue >= 20 and rf2ethos.dialogs.nolinkValue <= 40 then
+				if rf2ethos.init.t ~= nil then
+						noLinkDialog:message(rf2ethos.init.t)
+				end
+			end
+			
+			if rf2ethos.dialogs.nolinkValue >= 40 and rf2ethos.dialogs.nolinkValue <= 60 and rf2ethos.config.apiVersion ~= nil then
+				noLinkDialog:message(rf2ethos.init.t .. " [" .. rf2ethos.config.apiVersion .. "]")
+			end
+
+			if rf2ethos.dialogs.nolinkValue >= 60 and rf2ethos.config.apiVersion ~= nil then
+				noLinkDialog:message(rf2ethos.init.t .. " [" .. rf2ethos.config.apiVersion .. "] [OK]")
+			end
+			
+			if rf2ethos.dialogs.nolinkValue >= 100 and rf2ethos.mspQueue:isProcessed() then
+			
+				if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
+					noLinkDialog:close()
+					rf2ethos.dialogs.nolinkValue = 0
+					rf2ethos.dialogs.nolinkDisplay = false
+					rf2ethos.triggers.badMspVersion = true
+				else 
+					noLinkDialog:close()
+					rf2ethos.dialogs.nolinkValue = 0
+					rf2ethos.dialogs.nolinkDisplay = false
+					rf2ethos.triggers.badMspVersion = false
+					if config.environment.simulation ~= true then
 						if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
-					end
-                end
-                noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
-            end
-        end
+					end	
+				end
+			end
+			noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
+		end
     end
 
     if rf2ethos.triggers.triggerESCMAINMENU == true then
