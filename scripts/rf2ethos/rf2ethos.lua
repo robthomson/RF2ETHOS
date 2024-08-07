@@ -322,6 +322,7 @@ local mspEepromWrite = {
         else
             invalidatePages()
         end
+		rf2ethos.triggers.closeSave = true
     end,
     simulatorResponse = {}
 }
@@ -371,6 +372,8 @@ rf2ethos.settingsSaved = function()
     elseif rf2ethos.pageState ~= rf2ethos.pageStatus.eepromWrite then
         -- If we're not already trying to write to eeprom from a previous save, then we're done.
         invalidatePages()
+		rf2ethos.triggers.closeSave = true
+
     end
 end
 
@@ -384,15 +387,15 @@ local mspLoadSettings = {
     processReply = function(self, buf)
 
         -- rf2ethos.utils.log("rf2ethos.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. rf2ethos.Page.minBytes)
-
-        rf2ethos.Page.values = buf
-        if rf2ethos.Page.postRead then rf2ethos.Page.postRead(rf2ethos.Page) end
-        rf2ethos.dataBindFields()
-        if rf2ethos.Page.postLoad then rf2ethos.Page.postLoad(rf2ethos.Page) end
-        rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
-        -- removing from here as we should only trigger this
-		-- from the pages/*.lua script using 'postLoad'
-		--rf2ethos.triggers.mspDataLoaded = true
+		if rf2ethos.Page ~= nil then
+			rf2ethos.Page.values = buf
+			if rf2ethos.Page.postRead then rf2ethos.Page.postRead(rf2ethos.Page) end
+			rf2ethos.dataBindFields()
+			if rf2ethos.Page.postLoad then rf2ethos.Page.postLoad(rf2ethos.Page) end
+			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
+		else
+			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded rf2ethos.Page is nil?")
+		end
 
     end
 }
@@ -424,7 +427,7 @@ local function saveSettings()
             mspSaveSettings.simulatorResponse = {}
             rf2ethos.mspQueue:add(mspSaveSettings)
             rf2ethos.mspQueue.errorHandler = function()
-                displayMessage = {title = "Save error", text = "Make sure your heli is disarmed."}
+               displayMessage = {title = "Save error", text = "Make sure your heli is disarmed."}
                 print("Save failed")
                 rf2ethos.triggers.saveFailed = true
             end
@@ -547,11 +550,19 @@ function rf2ethos.wakeup(widget)
     end
 
     if rf2ethos.triggers.closeSave == true then
+		rf2ethos.triggers.isSaving = false
 
-        if (rf2ethos.dialogs.saveProgressCounter < 100) then rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 10 end
+		if rf2ethos.mspQueue:isProcessed() then
+			if (rf2ethos.dialogs.saveProgressCounter > 40 and rf2ethos.dialogs.saveProgressCounter <= 80) then 
+				rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 10
+			else
+				rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5 		
+			end
+		end	
+		
         rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
 
-        if rf2ethos.dialogs.saveProgressCounter >= 100 then
+        if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
             rf2ethos.triggers.closeSave = false
             rf2ethos.dialogs.saveProgressCounter = 0
             rf2ethos.dialogs.saveDisplay = false
@@ -698,9 +709,9 @@ function rf2ethos.wakeup(widget)
 
 			if rf2ethos.triggers.telemetryState == 1 then
 				if rf2ethos.config.apiVersion ~= nil then
-					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 4
+					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 15
 				else
-					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 2
+					rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 5
 				end
 			else
 				rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
@@ -825,7 +836,7 @@ function rf2ethos.wakeup(widget)
         end
     end
 
-    if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
+	if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
 
         if (rf2ethos.triggers.wasSaving == true) or config.environment.simulation == true then
 
@@ -839,6 +850,7 @@ function rf2ethos.wakeup(widget)
 			
 
             if rf2ethos.triggers.saveFailed == false then
+				--rf2ethos.dialogs.save:message("Saving... [done]")
                 -- mark save complete so we can speed up progress dialog for	
                 rf2ethos.triggers.closeSave = true
 
@@ -909,23 +921,14 @@ function rf2ethos.wakeup(widget)
             local saveMsg = ""
             if rf2ethos.pageState == rf2ethos.pageStatus.saving then
                 rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
-                rf2ethos.dialogs.save:message("Saving...")
+                rf2ethos.dialogs.save:message("Saving data...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.eepromWrite then
                 rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
-                rf2ethos.dialogs.save:message("Saving...")
+                --rf2ethos.dialogs.save:message("Writing to eeprom...")
+				rf2ethos.dialogs.save:message("Saving data...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.rebooting then
                 saveMsg = rf2ethos.dialogs.save:message("Rebooting...")
                 rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
-                if rf2ethos.dialogs.saveProgressCounter > 100 then
-                    rf2ethos.dialogs.save:close()
-                    invalidatePages()
-                    rf2ethos.triggers.wasReloading = true
-                    rf2ethos.triggers.createForm = true
-                    rf2ethos.triggers.wasSaving = false
-                    rf2ethos.triggers.wasLoading = false
-                    rf2ethos.triggers.reloadRates = false
-
-                end
             end
             
         else
@@ -935,6 +938,7 @@ function rf2ethos.wakeup(widget)
         end
 	elseif rf2ethos.triggers.wasSaving == true then
 		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
+		rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
     end
 
     -- trigger save
