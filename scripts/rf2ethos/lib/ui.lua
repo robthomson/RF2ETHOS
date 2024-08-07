@@ -141,7 +141,7 @@ function ui.openPageRATESLoader(idx, subpage, title, script)
 
     rf2ethos.triggers.isLoading = true
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageRATES(idx, subpage, title, script) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageRATES(idx, subpage, title, script) end
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRATESLoader")
 end
@@ -425,7 +425,7 @@ function ui.openPageESCToolLoader(folder)
 
     rf2ethos.triggers.isLoading = true
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageESCTool(folder) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageESCTool(folder) end
 
 end
 
@@ -612,7 +612,7 @@ function rf2ethos.openESCFormLoader(folder, script)
 
     rf2ethos.triggers.isLoading = true
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.openESCForm(folder, script) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.openESCForm(folder, script) end
 
 end
 
@@ -704,7 +704,7 @@ function ui.openPagePIDLoader(idx, title, script)
 
     rf2ethos.triggers.isLoading = true
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPagePID(idx, title, script) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPagePID(idx, title, script) end
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPagePID")
 end
@@ -827,7 +827,7 @@ function ui.openPageSERVOSLoader(idx, title, script)
 
     rf2ethos.triggers.isLoading = true
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageSERVOS(idx, title, script) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageSERVOS(idx, title, script) end
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageSERVOS")
 end
@@ -1115,7 +1115,7 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageDefaultLoader")
 
-    if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageDefault(idx, subpage, title, script) end
+    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageDefault(idx, subpage, title, script) end
 
 end
 
@@ -1309,7 +1309,8 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     label = "        OK        ",
                     action = function()
                         -- trigger RELOAD
-                        if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerESCRELOAD = true end
+                        --if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerESCRELOAD = true end
+						rf2ethos.triggers.triggerESCRELOAD = true
                         return true
                     end
                 }, {
