@@ -183,8 +183,6 @@ function rf2ethos.getFieldValue(f)
 end
 
 function rf2ethos.saveValue(currentField)
-    --if rf2ethos.config.environment.simulation == true then return end
-
     local f = rf2ethos.Page.fields[currentField]
     local scale = f.scale or 1
     local step = f.step or 1
@@ -843,7 +841,6 @@ function rf2ethos.wakeup(widget)
 
 	if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
 
-        --if (rf2ethos.triggers.wasSaving == true) or config.environment.simulation == true then
 		if (rf2ethos.triggers.wasSaving == true)  then
 		
             rf2ethos.profileSwitchCheck()
@@ -867,7 +864,6 @@ function rf2ethos.wakeup(widget)
             end
 
 		elseif (rf2ethos.triggers.wasLoading == true) then
-        --elseif (rf2ethos.triggers.wasLoading == true) or config.environment.simulation == true then
             rf2ethos.triggers.wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -885,7 +881,6 @@ function rf2ethos.wakeup(widget)
                 rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
             end
 		elseif rf2ethos.triggers.wasReloading == true then	
-        --elseif rf2ethos.triggers.wasReloading == true or config.environment.simulation == true then
             rf2ethos.triggers.wasReloading = false
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePIDLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
@@ -902,7 +897,6 @@ function rf2ethos.wakeup(widget)
             end
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
-        --elseif rf2ethos.triggers.reloadRates == true or config.environment.simulation == true then
 		elseif rf2ethos.triggers.reloadRates == true then	
 			rf2ethos.ui.openPageRATESLoader(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
         else
@@ -959,20 +953,17 @@ function rf2ethos.wakeup(widget)
 
                     -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
                     -- to stop has having to do a 'reload' of the page.
-					--if rf2ethos.config.environment.simulation ~= true then
-						rf2ethos.PageTmp = {}
-						rf2ethos.PageTmp = rf2ethos.Page
+					rf2ethos.PageTmp = {}
+					rf2ethos.PageTmp = rf2ethos.Page
 
-						rf2ethos.triggers.isSaving = true
-						rf2ethos.triggers.wasSaving = true
+					rf2ethos.triggers.isSaving = true
+					rf2ethos.triggers.wasSaving = true
 
-						rf2ethos.triggers.triggerSAVE = false
-						rf2ethos.resetRates()
-						saveSettings()
-						return true
-					--else
-					--	return true
-					--end
+					rf2ethos.triggers.triggerSAVE = false
+					rf2ethos.resetRates()
+					saveSettings()
+					return true
+
                 end
             }, {
                 label = "CANCEL",
@@ -1012,15 +1003,14 @@ function rf2ethos.wakeup(widget)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-                    --if config.environment.simulation ~= true then
-                        rf2ethos.triggers.wasReloading = true
-                        rf2ethos.triggers.createForm = true
 
-                        rf2ethos.triggers.wasSaving = false
-                        rf2ethos.triggers.wasLoading = false
-                        rf2ethos.triggers.reloadRates = false
+					rf2ethos.triggers.wasReloading = true
+					rf2ethos.triggers.createForm = true
 
-                    --end
+					rf2ethos.triggers.wasSaving = false
+					rf2ethos.triggers.wasLoading = false
+					rf2ethos.triggers.reloadRates = false
+
                     return true
                 end
             }, {
