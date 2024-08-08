@@ -34,8 +34,8 @@ function mspProcessTxQ()
     -- --rf2ethos.utils.log("Sensor not idle... waiting to send cmd: "..tostring(mspLastReq))
     -- return true
     -- end
-     rf2ethos.utils.log("Sending mspTxBuf size " .. tostring(#mspTxBuf) .. " at Idx " .. tostring(mspTxIdx) .. " for cmd: " .. tostring(mspLastReq))
-	
+    rf2ethos.utils.log("Sending mspTxBuf size " .. tostring(#mspTxBuf) .. " at Idx " .. tostring(mspTxIdx) .. " for cmd: " .. tostring(mspLastReq))
+
     local payload = {}
     payload[1] = mspSeq + MSP_VERSION
     mspSeq = (mspSeq + 1) & 0x0F
@@ -75,7 +75,7 @@ function mspSendRequest(cmd, payload)
     -- rf2ethos.utils.log("Sending cmd "..cmd)
     -- busy
     if #(mspTxBuf) ~= 0 or not cmd then
-         rf2ethos.utils.log("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd))
+        rf2ethos.utils.log("Existing mspTxBuf is still being sent, failed send of cmd: " .. tostring(cmd))
         return nil
     end
     mspTxBuf[1] = #(payload)
@@ -92,7 +92,7 @@ local function mspReceivedReply(payload)
     local start = (status & 0x10) ~= 0
     local seq = status & 0x0F
     idx = idx + 1
-    rf2ethos.utils.log(" msp sequence #:  "..string.format("%u",seq))
+    rf2ethos.utils.log(" msp sequence #:  " .. string.format("%u", seq))
     if start then
         -- start flag set
         mspRxBuf = {}
@@ -133,7 +133,7 @@ local function mspReceivedReply(payload)
         -- rf2ethos.utils.log("    CRC from payload:     0x"..string.format("%X", payload[idx]))
         return nil
     end
-     rf2ethos.utils.log("  Got reply for cmd "..mspRxReq)
+    rf2ethos.utils.log("  Got reply for cmd " .. mspRxReq)
     return true
 end
 

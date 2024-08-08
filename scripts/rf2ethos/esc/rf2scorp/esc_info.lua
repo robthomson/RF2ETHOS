@@ -56,6 +56,6 @@ return {
             self.escinfo[2].t = version
             self.escinfo[3].t = firmware
         end
-		rf2ethos.triggers.mspDataLoaded = true
+        rf2ethos.triggers.mspDataLoaded = true
     end
 }

@@ -83,8 +83,8 @@ return {
         -- set BEC voltage max (8.4 or 12.3)
         f = self.fields[3]
         f.max = (self.svFlags & (1 << escFlags.bec12v)) == 0 and 84 or 123
-		
-		rf2ethos.triggers.mspDataLoaded = true
+
+        rf2ethos.triggers.mspDataLoaded = true
     end,
     postRead = function(self)
         if self.values[1] ~= mspSignature then

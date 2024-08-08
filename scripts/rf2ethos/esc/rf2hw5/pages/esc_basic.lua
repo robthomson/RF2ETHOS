@@ -62,7 +62,7 @@ return {
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
 
-		rf2ethos.triggers.mspDataLoaded = true
+        rf2ethos.triggers.mspDataLoaded = true
 
     end,
     postRead = function(self)

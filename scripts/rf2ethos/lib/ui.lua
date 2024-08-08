@@ -1,5 +1,14 @@
 local ui = {}
 
+function ui.showProgressDialog()
+    -- show progress dialog
+    rf2ethos.dialogs.progressDisplay = true
+    rf2ethos.dialogs.progressWatchDog = os.clock()
+    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller. ")
+    rf2ethos.dialogs.progress:value(0)
+    rf2ethos.dialogs.progress:closeAllowed(false)
+end
+
 function ui.openMainMenu()
 
     local MainMenu = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages.lua"))()
@@ -95,16 +104,20 @@ function ui.openMainMenu()
                     end,
                     press = function()
                         if pvalue.script == "pids.lua" then
+                            ui.showProgressDialog()
                             rf2ethos.ui.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "servos.lua" then
+                            ui.showProgressDialog()
                             rf2ethos.ui.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
+                            ui.showProgressDialog()
                             rf2ethos.ui.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                         elseif pvalue.script == "esc.lua" then
                             rf2ethos.ui.openPageESC(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "preferences.lua" then
                             rf2ethos.ui.openPagePreferences(pidx, pvalue.title, pvalue.script)
                         else
+                            ui.showProgressDialog()
                             rf2ethos.ui.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
                         end
                     end
@@ -127,11 +140,11 @@ function ui.openPageRATESLoader(idx, subpage, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastSubPage = subpage
@@ -147,14 +160,12 @@ function ui.openPageRATES(idx, subpage, title, script)
 
     if rf2ethos.Page.fields then
         local v = rf2ethos.Page.fields[13].value
-        if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
-
+        if v ~= nil then rf2ethos.activeRateTable = math.floor(v) end
 
         if rf2ethos.activeRateTable ~= nil then
             if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
-                rf2ethos.RateTable = rf2ethos.activeRateTable 
-				
-				
+                rf2ethos.RateTable = rf2ethos.activeRateTable
+
                 if rf2ethos.dialogs.progressDisplay == true then
                     rf2ethos.dialogs.progressWatchDog = nil
                     rf2ethos.dialogs.progressDisplay = false
@@ -262,11 +273,9 @@ function ui.openPageRATES(idx, subpage, title, script)
         end
     end
 
-    if rf2ethos.dialogs.progressDisplay == true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -386,6 +395,7 @@ function ui.openPageESC(idx, title, script)
             paint = function()
             end,
             press = function()
+                ui.showProgressDialog()
                 rf2ethos.ui.openPageESCToolLoader(pvalue.folder)
             end
         })
@@ -402,11 +412,11 @@ end
 -- a then pass on to the actual form display function
 function ui.openPageESCToolLoader(folder)
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from ESC")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from ESC")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.escManufacturer = folder
     rf2ethos.escScript = nil
@@ -421,7 +431,6 @@ function ui.openPageESCToolLoader(folder)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/esc_info.lua"))()
 
     rf2ethos.triggers.isLoading = true
-
 
 end
 
@@ -576,11 +585,9 @@ function ui.openPageESCTool(folder)
 
     end
 
-    if rf2ethos.dialogs.progressDisplay == true and rf2ethos.triggers.triggerESCLOADER ~= true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true and rf2ethos.triggers.triggerESCLOADER ~= true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -600,11 +607,11 @@ function rf2ethos.openESCFormLoader(folder, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.triggers.isLoading = true
 
@@ -668,11 +675,9 @@ function rf2ethos.openESCForm(folder, script)
         end
     end
 
-    if rf2ethos.dialogs.progressDisplay == true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -684,11 +689,11 @@ function ui.openPagePIDLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastSubPage = subpage
@@ -788,11 +793,9 @@ function ui.openPagePID(idx, title, script)
         end
     end
 
-    if rf2ethos.dialogs.progressDisplay == true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -806,11 +809,11 @@ function ui.openPageSERVOSLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastSubPage = subpage
@@ -907,11 +910,9 @@ function ui.openPageSERVOS(idx, title, script)
         end
     end
 
-    if rf2ethos.dialogs.progressDisplay == true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -1090,11 +1091,11 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.dialogs.progressDisplay = true
-    rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(0)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+    -- rf2ethos.dialogs.progressDisplay = true
+    -- rf2ethos.dialogs.progressWatchDog = os.clock()
+    -- rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    -- rf2ethos.dialogs.progress:value(0)
+    -- rf2ethos.dialogs.progress:closeAllowed(false)
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastSubPage = subpage
@@ -1104,7 +1105,6 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
     rf2ethos.triggers.isLoading = true
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageDefaultLoader")
-
 
 end
 
@@ -1140,11 +1140,9 @@ function ui.openPageDefault(idx, subpage, title, script)
         end
     end
 
-    if rf2ethos.dialogs.progressDisplay == true then
-        rf2ethos.dialogs.progressWatchDog = nil
-        rf2ethos.dialogs.progressDisplay = false
-        rf2ethos.dialogs.progress:close()
-    end
+    -- if rf2ethos.dialogs.progressDisplay == true then
+    --	rf2ethos.triggers.closeProgress = true
+    -- end
 
 end
 
@@ -1247,8 +1245,6 @@ function ui.openPagePreferences(idx, title, script)
         rf2ethos.config.watchdogParam = newValue
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
     end)
-	
-
 
 end
 
@@ -1298,7 +1294,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     label = "        OK        ",
                     action = function()
                         -- trigger RELOAD
-						rf2ethos.triggers.triggerESCRELOAD = true
+                        rf2ethos.triggers.triggerESCRELOAD = true
                         return true
                     end
                 }, {
