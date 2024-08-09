@@ -86,6 +86,9 @@ rf2ethos.protocol.retry = 0
 rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
+rf2ethos.checkedVersion = false
+rf2ethos.dialogRateLimit = os.clock()
+rf2ethos.dialogRateLimitInterval = 0.2
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -144,20 +147,24 @@ function rf2ethos.resetState()
 end
 
 function rf2ethos.profileSwitchCheck()
-    profileswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
-    if profileswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(profileswitchParam, ",")
-        profileswitchParam = system.getSource({category = s[1], member = s[2]})
-        rf2ethos.triggers.profileswitchLast = profileswitchParam:value()
+	if rf2ethos.config.profileswitchParamPreference == nil then
+		rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
+        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
+        rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
+	end
+    if rf2ethos.config.profileswitchParam ~= nil then
+        rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
     end
 end
 
 function rf2ethos.rateSwitchCheck()
-    rateswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rateswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rateswitchParam, ",")
-        rateswitchParam = system.getSource({category = s[1], member = s[2]})
-        rf2ethos.triggers.rateswitchLast = rateswitchParam:value()
+	if rf2ethos.config.rateswitchParamPreference == nil then
+		rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
+        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
+        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})		
+	end
+    if rf2ethos.config.rateswitchParam ~= nil then
+        rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
     end
 end
 
@@ -433,10 +440,12 @@ local function saveSettings()
 end
 
 local function requestPage()
-    if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
-        rf2ethos.Page.reqTS = os.clock()
-        if rf2ethos.Page.read then rf2ethos.readPage() end
-    end
+	if rf2ethos.Page ~= nil then
+		if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
+			rf2ethos.Page.reqTS = os.clock()
+			if rf2ethos.Page.read then rf2ethos.readPage() end
+		end
+	end	
 end
 
 local function updateTelemetryState()
@@ -507,38 +516,41 @@ function rf2ethos.wakeup(widget)
     if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then invalidatePages() end
 
     -- ethos version
-    if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
-        if rf2ethos.dialogs.badversionDisplay == false then
-            rf2ethos.dialogs.badversionDisplay = true
+	if rf2ethos.checkedVersion == false then
+		rf2ethos.checkedVersion = true
+		if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
+			if rf2ethos.dialogs.badversionDisplay == false then
+				rf2ethos.dialogs.badversionDisplay = true
 
-            local buttons = {
-                {
-                    label = "EXIT",
-                    action = function()
-                        rf2ethos.triggers.exitAPP = true
-                        return true
-                    end
-                }
-            }
+				local buttons = {
+					{
+						label = "EXIT",
+						action = function()
+							rf2ethos.triggers.exitAPP = true
+							return true
+						end
+					}
+				}
 
-            if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
-                form.openDialog("Warning", config.ethosVersionString, buttons, 1)
-            else
-                form.openDialog({
-                    width = rf2ethos.config.lcdWidth,
-                    title = "Warning",
-                    message = config.ethosVersionString,
-                    buttons = buttons,
-                    wakeup = function()
-                    end,
-                    paint = function()
-                    end,
-                    options = TEXT_LEFT
-                })
-            end
+				if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
+					form.openDialog("Warning", config.ethosVersionString, buttons, 1)
+				else
+					form.openDialog({
+						width = rf2ethos.config.lcdWidth,
+						title = "Warning",
+						message = config.ethosVersionString,
+						buttons = buttons,
+						wakeup = function()
+						end,
+						paint = function()
+						end,
+						options = TEXT_LEFT
+					})
+				end
 
-        end
-    end
+			end
+		end
+	end
 
     if rf2ethos.triggers.closeSave == true then
         rf2ethos.triggers.isSaving = false
@@ -550,8 +562,11 @@ function rf2ethos.wakeup(widget)
                 rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
             end
         end
-
-        rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+ 
+		if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+			rf2ethos.dialogRateLimit = os.clock()
+			rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
             rf2ethos.triggers.closeSave = false
@@ -573,13 +588,17 @@ function rf2ethos.wakeup(widget)
             rf2ethos.dialogs.progress:closeAllowed(false)
         else
             -- this is where we should hit
-
+			rf2ethos.triggers.closeProgress = false
+			
             if rf2ethos.triggers.escPowerCycleLoader <= 95 then
                 rf2ethos.dialogs.progress:message("Please power cycle the esc")
             else
                 rf2ethos.dialogs.progress:message("Aborting...")
             end
-            rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
+			if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+				rf2ethos.dialogRateLimit = os.clock()
+				rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
+			end
 
             rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 1
 
@@ -590,6 +609,7 @@ function rf2ethos.wakeup(widget)
                 rf2ethos.dialogs.progress:close()
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
+				rf2ethos.triggers.closeProgress = true
             end
 
         end
@@ -600,15 +620,16 @@ function rf2ethos.wakeup(widget)
         if rf2ethos.Page.refreshswitch == true then
 
             if rf2ethos.lastPage ~= "rates.lua" then
-                if profileswitchParam ~= nil then
+                if rf2ethos.config.profileswitchParam ~= nil then
 
-                    if profileswitchParam:value() ~= rf2ethos.triggers.profileswitchLast then
+                    if rf2ethos.config.profileswitchParam:value() ~= rf2ethos.triggers.profileswitchLast then
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
                             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
                             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-                            form.clear()
+                            rf2ethos.ui.showProgressDialog()
+							form.clear()
                             rf2ethos.triggers.wasReloading = true
                             rf2ethos.triggers.createForm = true
                             rf2ethos.triggers.wasSaving = false
@@ -617,17 +638,15 @@ function rf2ethos.wakeup(widget)
 
                         else
 
-                            rf2ethos.triggers.profileswitchLast = profileswitchParam:value()
+                            rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
                             -- trigger RELOAD
                             -- rf2ethos.utils.log("Profile switch reload")
-                            if config.environment.simulation ~= true then
-                                rf2ethos.triggers.wasReloading = true
-                                rf2ethos.triggers.createForm = true
-                                rf2ethos.triggers.wasSaving = false
-                                rf2ethos.triggers.wasLoading = false
-                                rf2ethos.triggers.reloadRates = false
-
-                            end
+							rf2ethos.ui.showProgressDialog()
+							rf2ethos.triggers.wasReloading = true
+							rf2ethos.triggers.createForm = true
+							rf2ethos.triggers.wasSaving = false
+							rf2ethos.triggers.wasLoading = false
+							rf2ethos.triggers.reloadRates = false
                             return true
 
                         end
@@ -637,14 +656,14 @@ function rf2ethos.wakeup(widget)
 
             -- capture profile switching and trigger a reload if needs be
             if rf2ethos.lastPage == "rates.lua" then
-                if rateswitchParam ~= nil then
-                    if rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
+                if rf2ethos.config.rateswitchParam ~= nil then
+                    if rf2ethos.config.rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
                             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
                             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-                            form.clear()
+                            rf2ethos.ui.showProgressDialog()
                             rf2ethos.triggers.wasReloading = true
                             rf2ethos.triggers.createForm = true
                             rf2ethos.triggers.wasSaving = false
@@ -652,19 +671,18 @@ function rf2ethos.wakeup(widget)
                             rf2ethos.triggers.reloadRates = false
 
                         else
-                            rf2ethos.triggers.rateswitchLast = rateswitchParam:value()
+                            rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
 
                             -- trigger RELOAD
                             -- rf2ethos.utils.log("Rate switch reload")
-                            if config.environment.simulation ~= true then
-                                rf2ethos.triggers.wasSaving = false
-                                rf2ethos.triggers.wasLoading = false
+							rf2ethos.ui.showProgressDialog()
+							rf2ethos.triggers.wasSaving = false
+							rf2ethos.triggers.wasLoading = false
 
-                                rf2ethos.triggers.wasReloading = false
+							rf2ethos.triggers.wasReloading = false
 
-                                rf2ethos.triggers.createForm = true
-                                rf2ethos.triggers.reloadRates = true
-                            end
+							rf2ethos.triggers.createForm = true
+							rf2ethos.triggers.reloadRates = true
                             return true
                         end
 
@@ -723,7 +741,11 @@ function rf2ethos.wakeup(widget)
                     if config.environment.simulation ~= true then if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end end
                 end
             end
-            noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
+			if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+			    rf2ethos.dialogRateLimit = os.clock()
+				noLinkDialog:value(rf2ethos.dialogs.nolinkValue)
+			end			
+            
         end
     end
 
@@ -757,20 +779,34 @@ function rf2ethos.wakeup(widget)
 
         if rf2ethos.triggers.isLoading == true then
             rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 2
-            rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+			
+			if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+			    rf2ethos.dialogRateLimit = os.clock()
+				rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+			end
+			
         end
-
-        if rf2ethos.triggers.closeProgress == true then
+		
+		if rf2ethos.triggers.closeProgress == true then
 
             if rf2ethos.dialogs.progressCounter < 50 then
-                rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 30
-                rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+                rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 50
+				if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+					rf2ethos.dialogRateLimit = os.clock()
+					rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+				end
             elseif rf2ethos.dialogs.progressCounter > 50 and rf2ethos.dialogs.progressCounter <= 90 then
-                rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 20
-                rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+                rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 40
+				if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+					rf2ethos.dialogRateLimit = os.clock()
+					rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+				end
             else
                 rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
-                rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+				if (os.clock() - rf2ethos.dialogRateLimit) >= rf2ethos.dialogRateLimitInterval then	
+					rf2ethos.dialogRateLimit = os.clock()
+					rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+				end
             end
 
             -- close once we reach 100%
@@ -812,8 +848,6 @@ function rf2ethos.wakeup(widget)
             end
 
         end
-    else
-        rf2ethos.dialogs.progressCounter = 0
     end
 
     -- Process outgoing TX packets and check for incoming frames
@@ -851,8 +885,8 @@ function rf2ethos.wakeup(widget)
     end
 
     if rf2ethos.uiState ~= rf2ethos.uiStatus.mainMenu then
-        -- if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
-        if (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+        if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+        --if (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
             rf2ethos.triggers.mspDataLoaded = false
             rf2ethos.triggers.isLoading = false
             rf2ethos.triggers.wasLoading = true
@@ -1061,9 +1095,9 @@ function rf2ethos.wakeup(widget)
         rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 
-    -- this needs to run on every wakeup event.
-    rf2ethos.mspQueue:processQueue()
 
+	-- this needs to run on every wakeup event.
+    rf2ethos.mspQueue:processQueue()
 end
 
 function rf2ethos.create()

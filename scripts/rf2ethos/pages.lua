@@ -4,10 +4,10 @@ local sections = {}
 
 sections[#sections + 1] = {title = "Flight Tuning", section = 1}
 pages[#pages + 1] = {title = "PIDs", section = 1, script = "pids.lua", image = "pids.png"}
-pages[#pages + 1] = {title = "Rates", section = 1, subpage = 1, script = "rates.lua", image = "rates.png"}
-pages[#pages + 1] = {title = "Main Rotor", section = 1, subpage = 4, script = "profile.lua", image = "mainrotor.png"}
-pages[#pages + 1] = {title = "Tail Rotor", section = 1, subpage = 2, script = "profile.lua", image = "tailrotor.png"}
-pages[#pages + 1] = {title = "Governor", section = 1, script = "profile_governor.lua", image = "governor.png"}
+pages[#pages + 1] = {title = "Rates",section = 1, subpage = 1, script = "rates.lua", image = "rates.png"}
+pages[#pages + 1] = {title = "Main Rotor",section = 1, subpage = 4, script = "profile.lua", image = "mainrotor.png"}
+pages[#pages + 1] = {title = "Tail Rotor",section = 1, subpage = 2, script = "profile.lua", image = "tailrotor.png"}
+pages[#pages + 1] = {title = "Governor",section = 1, script = "profile_governor.lua", image = "governor.png"}
 
 sections[#sections + 1] = {title = "Advanced", section = 2}
 pages[#pages + 1] = {title = "PID Controller", section = 2, subpage = 1, script = "profile.lua", image = "pids-controller.png"}
