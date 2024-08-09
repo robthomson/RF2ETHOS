@@ -41,7 +41,7 @@ return {
     end,
     postLoad = function(self)
         -- rf2ethos.utils.log("postLoad")
-        rf2ethos.triggers.mspDataLoaded = true
+		rf2ethos.triggers.mspDataLoaded = true
     end,
     setValues = function(self, servoIndex)
         -- rf2ethos.utils.log("setValues")

@@ -13,12 +13,10 @@ config.maxRetries = nil
 config.apiVersion = 0
 config.defaultRateTable = 4 -- ACTUAL
 config.requestTimeout = nil
-config.watchDogTimeout = 10
 config.lcdWidth = nil
 config.lcdHeight = nil
-config.progressDialogStyle = 1 -- 0 = disable, 1 = ethos progress dialogs
 config.iconsizeParam = nil
-config.supportedMspApiVersion = {"12.06", "12.07"}
+config.supportedMspApiVersion = { "12.06", "12.07" }
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
 
@@ -42,12 +40,8 @@ local function close()
     return rf2ethos.close()
 end
 
-local function paint()
-    return rf2ethos.paint()
-end
-
 local function init()
-    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, close = close, paint = paint})
+    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, close = close})
 end
 
 return {init = init}
