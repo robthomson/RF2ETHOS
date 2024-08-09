@@ -13,7 +13,7 @@ config.maxRetries = nil
 config.apiVersion = 0
 config.defaultRateTable = 4 -- ACTUAL
 config.requestTimeout = nil
-config.watchDogTimeout = 30
+config.watchDogTimeout = 10
 config.lcdWidth = nil
 config.lcdHeight = nil
 config.progressDialogStyle = 1 -- 0 = disable, 1 = ethos progress dialogs
