@@ -667,13 +667,18 @@ function rf2ethos.wakeupMediumPriority(widget)
 			rf2ethos.triggers.closeProgress = false
 			
             if rf2ethos.triggers.escPowerCycleLoader <= 95 then
+				if config.progressDialogStyle == 1 then
                 rf2ethos.dialogs.progress:message("Please power cycle the esc")
+				end
             else
-                rf2ethos.dialogs.progress:message("Aborting...")
+				if config.progressDialogStyle == 1 then
+					rf2ethos.dialogs.progress:message("Aborting...")
+				end
             end
 
-			rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
-
+			if config.progressDialogStyle == 1 then
+				rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
+			end
 
             rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 1
 
@@ -681,7 +686,9 @@ function rf2ethos.wakeupMediumPriority(widget)
 
             if rf2ethos.triggers.escPowerCycleLoader >= 100 then
                 rf2ethos.triggers.escPowerCycleLoader = 0
-                rf2ethos.dialogs.progress:close()
+				if config.progressDialogStyle == 1 then
+					rf2ethos.dialogs.progress:close()
+				end
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
 				rf2ethos.triggers.closeProgress = true
