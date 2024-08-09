@@ -42,8 +42,12 @@ local function close()
     return rf2ethos.close()
 end
 
+local function paint()
+    return rf2ethos.paint()
+end
+
 local function init()
-    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, close = close})
+    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, close = close, paint = paint})
 end
 
 return {init = init}

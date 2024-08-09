@@ -47,6 +47,7 @@ function MspQueueController:processQueue()
 		lastTimeCommandSentInterval = 0.5
 	end
 
+
     if not rf2ethos.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + lastTimeCommandSentInterval < os.clock() then
             if self.currentMessage.payload then

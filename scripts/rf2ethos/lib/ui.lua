@@ -8,8 +8,13 @@ function ui.showProgressDialog()
 		rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller. ")
 		rf2ethos.dialogs.progress:value(0)
 		rf2ethos.dialogs.progress:closeAllowed(false)
+	else
+		rf2ethos.dialogs.progressDisplay = true
 	end
 end
+
+
+
 
 function ui.openMainMenu()
 
@@ -871,7 +876,9 @@ function ui.openPageSERVOS(idx, title, script)
                     rf2ethos.triggers.wasReloading = true
                     rf2ethos.triggers.createForm = true
                 else
-                    rf2ethos.Page.fields[1].value = value
+					if rf2ethos.Page.fields ~= nil then
+						rf2ethos.Page.fields[1].value = value
+					end
                 end
                 return value
             end, function(value)
