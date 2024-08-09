@@ -16,7 +16,7 @@ config.requestTimeout = nil
 config.watchDogTimeout = 30
 config.lcdWidth = nil
 config.lcdHeight = nil
-config.progressDialogStyle = 0 -- 0 = disable, 1 = ethos progress dialogs
+config.progressDialogStyle = 1 -- 0 = disable, 1 = ethos progress dialogs
 config.iconsizeParam = nil
 config.supportedMspApiVersion = {"12.06", "12.07"}
 

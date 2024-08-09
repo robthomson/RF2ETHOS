@@ -41,8 +41,7 @@ triggers.badMspVersionDisplay = false
 rf2ethos = {}
 rf2ethos.compile = compile
 
-rf2ethos.wakeupSchedulerLow = os.clock()
-rf2ethos.wakeupSchedulerMedium = os.clock()
+rf2ethos.wakeupSchedulerUI = os.clock()
 
 rf2ethos.config = {}
 rf2ethos.config = config
@@ -477,37 +476,27 @@ function rf2ethos.wakeup(widget)
 	local now = os.clock()
 
 	-- low priority tasks
-	rf2ethos.wakeupHighPriority()
+	-- runs every 0.01 (or there about)
+	rf2ethos.wakeupMSP()
 
-	-- medium priority tasks
-	if (now - rf2ethos.wakeupSchedulerMedium) >= 0.3 then	
-		rf2ethos.wakeupSchedulerMedium = now
-		rf2ethos.wakeupMediumPriority()
+	-- runs every 0.1 (or there about)
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
+		rf2ethos.wakeupSchedulerUI = now
+		rf2ethos.wakeupUI()
 	end		
 
-	-- low priority tasks
-	if (now - rf2ethos.wakeupSchedulerLow) >= 0.5 then	
-		rf2ethos.wakeupSchedulerLow = now
-		rf2ethos.wakeupLowPriority()
-	end	
 
 end
 
-function rf2ethos.wakeupHighPriority(widget)
+function rf2ethos.wakeupMSP(widget)
 
 	-- this needs to run on every wakeup event.
     rf2ethos.mspQueue:processQueue()
 	
-	-- elrs telem pausing
-    if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true or rf2ethos.dialogs.nolinkDisplay == true then
-        ELRS_PAUSE_TELEMETRY = true
-    else
-        ELRS_PAUSE_TELEMETRY = false
-    end
-	
+
 end
 
-function rf2ethos.wakeupMediumPriority(widget)
+function rf2ethos.wakeupUI(widget)
 
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
@@ -517,6 +506,208 @@ function rf2ethos.wakeupMediumPriority(widget)
         system.exit()
         return
     end
+
+	-- elrs telem pausing
+    if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true or rf2ethos.dialogs.nolinkDisplay == true then
+        ELRS_PAUSE_TELEMETRY = true
+    else
+        ELRS_PAUSE_TELEMETRY = false
+    end
+
+
+    -- check ethos version
+	if rf2ethos.checkedVersion == false then
+		rf2ethos.checkedVersion = true
+		if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
+			if rf2ethos.dialogs.badversionDisplay == false then
+				rf2ethos.dialogs.badversionDisplay = true
+
+				local buttons = {
+					{
+						label = "EXIT",
+						action = function()
+							rf2ethos.triggers.exitAPP = true
+							return true
+						end
+					}
+				}
+
+				if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
+					form.openDialog("Warning", config.ethosVersionString, buttons, 1)
+				else
+					form.openDialog({
+						width = rf2ethos.config.lcdWidth,
+						title = "Warning",
+						message = config.ethosVersionString,
+						buttons = buttons,
+						wakeup = function()
+						end,
+						paint = function()
+						end,
+						options = TEXT_LEFT
+					})
+				end
+
+			end
+		end
+	end	
+	
+
+    -- save dialog watchdog
+    if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.saveTimeout = rf2ethos.config.watchdogParam end
+    if rf2ethos.dialogs.saveDisplay == true then
+        if rf2ethos.dialogs.saveWatchDog ~= nil then
+            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (rf2ethos.protocol.saveTimeout + rf2ethos.config.watchDogTimeout) then 
+				rf2ethos.dialogs.save:closeAllowed(true) 
+				rf2ethos.dialogs.progress:message("Error.. we timed out")
+				-- switch back to original page values
+				rf2ethos.Page = rf2ethos.PageTmp
+				rf2ethos.PageTmp = {}
+				rf2ethos.triggers.isLoading = false
+				rf2ethos.triggers.wasLoading = false
+				rf2ethos.dialogs.progressCounter = 0	
+				rf2ethos.triggers.isSaving = false
+				rf2ethos.pageState = rf2ethos.pageStatus.display
+			end
+        end
+    end
+
+	--progress dialog watchdog
+    if rf2ethos.dialogs.progressDisplay == true then
+		if rf2ethos.dialogs.progressWatchDog ~= nil then
+
+            if rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam end
+
+            if rf2ethos.triggers.escPowerCycle == true then
+                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + (rf2ethos.config.watchDogTimeout * 3)) then
+					if rf2ethos.config.progressDialogStyle == 1 then
+						rf2ethos.dialogs.progress:message("Error.. we timed out")
+						rf2ethos.dialogs.progress:closeAllowed(true)
+					end
+                    -- switch back to original page values
+                    rf2ethos.Page = rf2ethos.PageTmp
+                    rf2ethos.PageTmp = {}
+                    rf2ethos.triggers.isLoading = false
+                    rf2ethos.triggers.wasLoading = false
+                    rf2ethos.dialogs.progressCounter = 0
+                end
+            else
+                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + rf2ethos.config.watchDogTimeout) then
+					if rf2ethos.config.progressDialogStyle == 1 then
+						rf2ethos.dialogs.progress:message("Error.. we timed out")
+						rf2ethos.dialogs.progress:closeAllowed(true)
+					end
+                    -- switch back to original page values
+                    rf2ethos.Page = rf2ethos.PageTmp
+                    rf2ethos.PageTmp = {}
+                    rf2ethos.triggers.isLoading = false
+                    rf2ethos.triggers.wasLoading = false
+                    rf2ethos.dialogs.progressCounter = 0
+                end
+            end
+
+        end
+	end	
+
+   -- trigger save
+    if rf2ethos.triggers.triggerSAVE == true then
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+
+                    -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
+                    -- to stop has having to do a 'reload' of the page.
+                    rf2ethos.PageTmp = {}
+                    rf2ethos.PageTmp = rf2ethos.Page
+
+                    rf2ethos.triggers.isSaving = true
+                    rf2ethos.triggers.wasSaving = true
+
+                    rf2ethos.triggers.triggerSAVE = false
+                    rf2ethos.resetRates()
+                    saveSettings()
+                    return true
+
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    rf2ethos.triggers.triggerSAVE = false
+                    return true
+                end
+            }
+        }
+        local theTitle
+        local theMsg
+        if rf2ethos.escMode == true then
+            theTitle = "SAVE SETTINGS TO ESC"
+            theMsg = "Save current page to the speed controller"
+        else
+            theTitle = "SAVE SETTINGS TO FBL"
+            theMsg = "Save current page to flight controller"
+        end
+        form.openDialog({
+            width = nil,
+            title = theTitle,
+            message = theMsg,
+            buttons = buttons,
+            wakeup = function()
+            end,
+            paint = function()
+            end,
+            options = TEXT_LEFT
+        })
+
+        rf2ethos.triggers.triggerSAVE = false
+    end
+
+    if rf2ethos.triggers.triggerRELOAD == true then
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+                    -- trigger RELOAD
+                    rf2ethos.triggers.wasReloading = true
+                    rf2ethos.triggers.createForm = true
+
+                    rf2ethos.triggers.wasSaving = false
+                    rf2ethos.triggers.wasLoading = false
+                    rf2ethos.triggers.reloadRates = false
+
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+        form.openDialog({
+            width = nil,
+            title = "RELOAD",
+            message = "Reload data from flight controller",
+            buttons = buttons,
+            wakeup = function()
+            end,
+            paint = function()
+            end,
+            options = TEXT_LEFT
+        })
+
+        rf2ethos.triggers.triggerRELOAD = false
+    end
+
+    if rf2ethos.triggers.triggerESCRELOAD == true then
+        rf2ethos.triggers.triggerESCRELOAD = false
+        rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
+    end
+	
+
+
+
+
 
    -- check telemetry state and overlay dialog if not linked
     if rf2ethos.triggers.escPowerCycle == true then
@@ -667,18 +858,13 @@ function rf2ethos.wakeupMediumPriority(widget)
 			rf2ethos.triggers.closeProgress = false
 			
             if rf2ethos.triggers.escPowerCycleLoader <= 95 then
-				if config.progressDialogStyle == 1 then
                 rf2ethos.dialogs.progress:message("Please power cycle the esc")
-				end
             else
-				if config.progressDialogStyle == 1 then
-					rf2ethos.dialogs.progress:message("Aborting...")
-				end
+                rf2ethos.dialogs.progress:message("Aborting...")
             end
 
-			if config.progressDialogStyle == 1 then
-				rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
-			end
+			rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
+
 
             rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 1
 
@@ -686,9 +872,7 @@ function rf2ethos.wakeupMediumPriority(widget)
 
             if rf2ethos.triggers.escPowerCycleLoader >= 100 then
                 rf2ethos.triggers.escPowerCycleLoader = 0
-				if config.progressDialogStyle == 1 then
-					rf2ethos.dialogs.progress:close()
-				end
+                rf2ethos.dialogs.progress:close()
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
 				rf2ethos.triggers.closeProgress = true
@@ -794,12 +978,14 @@ function rf2ethos.wakeupMediumPriority(widget)
 
     if rf2ethos.dialogs.progressDisplay == true then
 
+		--[[
         if rf2ethos.triggers.isLoading == true then
-            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
+            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
 			if rf2ethos.config.progressDialogStyle == 1 then
 				rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
 			end	
         end
+		]]--
 
 		
 		if rf2ethos.triggers.closeProgress == true then
@@ -815,7 +1001,7 @@ function rf2ethos.wakeupMediumPriority(widget)
 					rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
 				end
             else
-				rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
+				rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
 				if rf2ethos.config.progressDialogStyle == 1 then
 					rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
 				end
@@ -999,208 +1185,13 @@ function rf2ethos.wakeupMediumPriority(widget)
 		end	
     end
 
- 
+    -- Process outgoing TX packets and check for incoming frames
+    updateTelemetryState()
 
 		
 end
 
-function rf2ethos.wakeupLowPriority(widget)
 
-	
-    -- check ethos version
-	if rf2ethos.checkedVersion == false then
-		rf2ethos.checkedVersion = true
-		if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
-			if rf2ethos.dialogs.badversionDisplay == false then
-				rf2ethos.dialogs.badversionDisplay = true
-
-				local buttons = {
-					{
-						label = "EXIT",
-						action = function()
-							rf2ethos.triggers.exitAPP = true
-							return true
-						end
-					}
-				}
-
-				if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
-					form.openDialog("Warning", config.ethosVersionString, buttons, 1)
-				else
-					form.openDialog({
-						width = rf2ethos.config.lcdWidth,
-						title = "Warning",
-						message = config.ethosVersionString,
-						buttons = buttons,
-						wakeup = function()
-						end,
-						paint = function()
-						end,
-						options = TEXT_LEFT
-					})
-				end
-
-			end
-		end
-	end	
-
-    -- save dialog watchdog
-    if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.saveTimeout = rf2ethos.config.watchdogParam end
-    if rf2ethos.dialogs.saveDisplay == true then
-        if rf2ethos.dialogs.saveWatchDog ~= nil then
-            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (rf2ethos.protocol.saveTimeout + rf2ethos.config.watchDogTimeout) then 
-				rf2ethos.dialogs.save:closeAllowed(true) 
-				rf2ethos.dialogs.progress:message("Error.. we timed out")
-				-- switch back to original page values
-				rf2ethos.Page = rf2ethos.PageTmp
-				rf2ethos.PageTmp = {}
-				rf2ethos.triggers.isLoading = false
-				rf2ethos.triggers.wasLoading = false
-				rf2ethos.dialogs.progressCounter = 0	
-				rf2ethos.triggers.isSaving = false
-				rf2ethos.pageState = rf2ethos.pageStatus.display
-			end
-        end
-    end
-
-	--progress dialog watchdog
-    if rf2ethos.dialogs.progressDisplay == true then
-		if rf2ethos.dialogs.progressWatchDog ~= nil then
-
-            if rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam end
-
-            if rf2ethos.triggers.escPowerCycle == true then
-                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + (rf2ethos.config.watchDogTimeout * 3)) then
-					if rf2ethos.config.progressDialogStyle == 1 then
-						rf2ethos.dialogs.progress:message("Error.. we timed out")
-						rf2ethos.dialogs.progress:closeAllowed(true)
-					end
-                    -- switch back to original page values
-                    rf2ethos.Page = rf2ethos.PageTmp
-                    rf2ethos.PageTmp = {}
-                    rf2ethos.triggers.isLoading = false
-                    rf2ethos.triggers.wasLoading = false
-                    rf2ethos.dialogs.progressCounter = 0
-                end
-            else
-                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + rf2ethos.config.watchDogTimeout) then
-					if rf2ethos.config.progressDialogStyle == 1 then
-						rf2ethos.dialogs.progress:message("Error.. we timed out")
-						rf2ethos.dialogs.progress:closeAllowed(true)
-					end
-                    -- switch back to original page values
-                    rf2ethos.Page = rf2ethos.PageTmp
-                    rf2ethos.PageTmp = {}
-                    rf2ethos.triggers.isLoading = false
-                    rf2ethos.triggers.wasLoading = false
-                    rf2ethos.dialogs.progressCounter = 0
-                end
-            end
-
-        end
-	end	
-
-   -- trigger save
-    if rf2ethos.triggers.triggerSAVE == true then
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-
-                    -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
-                    -- to stop has having to do a 'reload' of the page.
-                    rf2ethos.PageTmp = {}
-                    rf2ethos.PageTmp = rf2ethos.Page
-
-                    rf2ethos.triggers.isSaving = true
-                    rf2ethos.triggers.wasSaving = true
-
-                    rf2ethos.triggers.triggerSAVE = false
-                    rf2ethos.resetRates()
-                    saveSettings()
-                    return true
-
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    rf2ethos.triggers.triggerSAVE = false
-                    return true
-                end
-            }
-        }
-        local theTitle
-        local theMsg
-        if rf2ethos.escMode == true then
-            theTitle = "SAVE SETTINGS TO ESC"
-            theMsg = "Save current page to the speed controller"
-        else
-            theTitle = "SAVE SETTINGS TO FBL"
-            theMsg = "Save current page to flight controller"
-        end
-        form.openDialog({
-            width = nil,
-            title = theTitle,
-            message = theMsg,
-            buttons = buttons,
-            wakeup = function()
-            end,
-            paint = function()
-            end,
-            options = TEXT_LEFT
-        })
-
-        rf2ethos.triggers.triggerSAVE = false
-    end
-
-    if rf2ethos.triggers.triggerRELOAD == true then
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    -- trigger RELOAD
-                    rf2ethos.triggers.wasReloading = true
-                    rf2ethos.triggers.createForm = true
-
-                    rf2ethos.triggers.wasSaving = false
-                    rf2ethos.triggers.wasLoading = false
-                    rf2ethos.triggers.reloadRates = false
-
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-        form.openDialog({
-            width = nil,
-            title = "RELOAD",
-            message = "Reload data from flight controller",
-            buttons = buttons,
-            wakeup = function()
-            end,
-            paint = function()
-            end,
-            options = TEXT_LEFT
-        })
-
-        rf2ethos.triggers.triggerRELOAD = false
-    end
-
-    if rf2ethos.triggers.triggerESCRELOAD == true then
-        rf2ethos.triggers.triggerESCRELOAD = false
-        rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
-    end
-	
-
-
-   -- Process outgoing TX packets and check for incoming frames
-    -- Process outgoing TX packets and check for incoming frames
-    updateTelemetryState()
-end
 
 function rf2ethos.paint()
 
