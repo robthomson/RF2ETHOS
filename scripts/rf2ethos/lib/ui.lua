@@ -4,8 +4,10 @@ function ui.progessDisplay()
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
-    rf2ethos.dialogs.progress:value(20)
-    rf2ethos.dialogs.progress:closeAllowed(false)
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.progress:value(20)
+		rf2ethos.dialogs.progress:closeAllowed(false)
+	end
 end
 
 function ui.openMainMenu()
@@ -1344,6 +1346,7 @@ function ui.navigationButtons(x, y, w, h)
         end,
         press = function()
             rf2ethos.triggers.triggerRELOAD = true
+			return true
         end
     })
 

@@ -504,49 +504,19 @@ function rf2ethos.wakeupUI()
 	
 		if rf2ethos.dialogs.progressCounter <= 100 then
 			rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 20
-			rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+			if rf2ethos.dialogs.progress ~= nil then
+				rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)
+			end
 		end
 	
 		if rf2ethos.dialogs.progressCounter >= 120 then
 			rf2ethos.dialogs.progressWatchDog = nil
 			rf2ethos.dialogs.progressDisplay = false
-			rf2ethos.dialogs.progress:close()	
+			if rf2ethos.dialogs.progress ~= nil then
+				rf2ethos.dialogs.progress:close()	
+			end
 			rf2ethos.dialogs.progressCounter = 0
 			rf2ethos.triggers.closeProgressLoader = false
-		end
-	end
-
-
-	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false then
-		if rf2ethos.triggers.badMspVersion == true  then
-			local buttons = {
-				{
-					label = "   OK   ",
-					action = function()
-						rf2ethos.triggers.exitAPP = true
-						return true
-					end
-				}
-			}
-			
-			
-			
-			if rf2ethos.triggers.badMspVersionDisplay == false then
-				rf2ethos.triggers.badMspVersionDisplay = true
-				form.openDialog({
-					width = nil,
-					title = "MSP Error",
-					message = rf2ethos.init.t,
-					buttons = buttons,
-					wakeup = function()
-					end,
-					paint = function()
-					end,
-					options = TEXT_LEFT
-				})		
-			end	
-
-			return
 		end
 	end
 
@@ -597,14 +567,18 @@ function rf2ethos.wakeupUI()
 			end
 		end	
 		
+		if rf2ethos.dialogs.save ~= nil then
         rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
             rf2ethos.triggers.closeSave = false
             rf2ethos.dialogs.saveProgressCounter = 0
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
-            rf2ethos.dialogs.save:close()
+			if rf2ethos.dialogs.save ~= nil then
+				rf2ethos.dialogs.save:close()
+			end
         end
     end
 
@@ -615,8 +589,10 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.progressDisplay = true
             rf2ethos.dialogs.progressWatchDog = os.clock()
             rf2ethos.dialogs.progress = form.openProgressDialog("Searching...", "Please power cycle the esc")
-            rf2ethos.dialogs.progress:value(20)
-            rf2ethos.dialogs.progress:closeAllowed(false)
+			if rf2ethos.dialogs.progress ~= nil then
+				rf2ethos.dialogs.progress:value(20)
+				rf2ethos.dialogs.progress:closeAllowed(false)
+			end
         else
             -- this is where we should hit
 
@@ -633,7 +609,9 @@ function rf2ethos.wakeupUI()
 
             if rf2ethos.triggers.escPowerCycleLoader >= 100 then
                 rf2ethos.triggers.escPowerCycleLoader = 0
-                rf2ethos.dialogs.progress:close()
+				if rf2ethos.dialogs.progress ~= nil then
+					rf2ethos.dialogs.progress:close()
+				end	
                 rf2ethos.triggers.triggerESCLOADER = false
                 rf2ethos.triggers.triggerESCMAINMENU = true
             end
@@ -653,8 +631,8 @@ function rf2ethos.wakeupUI()
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
-                            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-                            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+                            if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:close() end
+                            if rf2ethos.dialogs.saveDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.save:close() end
                             form.clear()
                             rf2ethos.triggers.wasReloading = true
                             rf2ethos.triggers.createForm = true
@@ -665,7 +643,6 @@ function rf2ethos.wakeupUI()
                         else
 							-- trigger RELOAD
 							-- rf2ethos.utils.log("Profile switch reload")
-							rf2ethos.ui.progessDisplay()
                             rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
 							rf2ethos.triggers.wasReloading = true
 							rf2ethos.triggers.createForm = true
@@ -686,8 +663,8 @@ function rf2ethos.wakeupUI()
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
-                            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-                            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+                            if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.progress:close() end
+                            if rf2ethos.dialogs.saveDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.save:close() end
                             form.clear()
                             rf2ethos.triggers.wasReloading = true
                             rf2ethos.triggers.createForm = true
@@ -698,7 +675,6 @@ function rf2ethos.wakeupUI()
                         else
                             -- trigger RELOAD
                             -- rf2ethos.utils.log("Rate switch reload")
-							rf2ethos.ui.progessDisplay()
                             rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()							
 							rf2ethos.triggers.wasSaving = false
 							rf2ethos.triggers.wasLoading = false
@@ -723,6 +699,14 @@ function rf2ethos.wakeupUI()
 
     else
 		if rf2ethos.triggers.telemetryState ~= 1 then
+		
+			if rf2ethos.dialogs.progress then
+				rf2ethos.dialogs.progress:close()
+			end
+			if rf2ethos.dialogs.save then
+				rf2ethos.dialogs.save:close()
+			end
+		
 			if rf2ethos.dialogs.nolinkDisplay == false then
 				rf2ethos.dialogs.nolinkDisplay = true
 				noLinkDialog = form.openProgressDialog("Connecting", "Connecting")
@@ -805,16 +789,20 @@ function rf2ethos.wakeupUI()
 	
             if rf2ethos.triggers.escPowerCycle == true then
                 if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 30) then
-                    rf2ethos.dialogs.progress:message("Error.. we timed out")
-                    rf2ethos.dialogs.progress:closeAllowed(true)
+					if rf2ethos.dialogs.progress ~= nil then
+						rf2ethos.dialogs.progress:message("Error.. we timed out")
+						rf2ethos.dialogs.progress:closeAllowed(true)
+					end
 					--switch back to original page values
 					rf2ethos.Page = rf2ethos.PageTmp
 					rf2ethos.PageTmp = {}
                 end
             else
                 if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 15) then
-                    rf2ethos.dialogs.progress:message("Error.. we timed out")
-                    rf2ethos.dialogs.progress:closeAllowed(true)
+					if rf2ethos.dialogs.progress ~= nil then
+						rf2ethos.dialogs.progress:message("Error.. we timed out")
+						rf2ethos.dialogs.progress:closeAllowed(true)
+					end
 					--switch back to original page values
 					rf2ethos.Page = rf2ethos.PageTmp
 					rf2ethos.PageTmp = {}					
@@ -896,7 +884,6 @@ function rf2ethos.wakeupUI()
             end
 
 		elseif (rf2ethos.triggers.wasLoading == true) then
-        --elseif (rf2ethos.triggers.wasLoading == true) or config.environment.simulation == true then
             rf2ethos.triggers.wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
@@ -915,7 +902,8 @@ function rf2ethos.wakeupUI()
             end
 			rf2ethos.triggers.closeProgressLoader = true
 		elseif rf2ethos.triggers.wasReloading == true then	
-			triggers.closeProgressLoader = true
+			rf2ethos.ui.progessDisplay()
+			
         --elseif rf2ethos.triggers.wasReloading == true or config.environment.simulation == true then
             rf2ethos.triggers.wasReloading = false
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
@@ -1044,7 +1032,6 @@ function rf2ethos.wakeupUI()
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-					rf2ethos.ui.progessDisplay()
 					rf2ethos.triggers.wasReloading = true
 					rf2ethos.triggers.createForm = true
 
@@ -1079,6 +1066,41 @@ function rf2ethos.wakeupUI()
         rf2ethos.triggers.triggerESCRELOAD = false
         rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
+
+	-- show version error if necessary
+	if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false then
+		if rf2ethos.triggers.badMspVersion == true  then
+			local buttons = {
+				{
+					label = "   OK   ",
+					action = function()
+						rf2ethos.triggers.exitAPP = true
+						return true
+					end
+				}
+			}
+				
+			if rf2ethos.triggers.badMspVersionDisplay == false  then
+
+				rf2ethos.triggers.badMspVersionDisplay = true
+				form.openDialog({
+					width = nil,
+					title = "MSP Error",
+					message = rf2ethos.init.t,
+					buttons = buttons,
+					wakeup = function()
+					end,
+					paint = function()
+					end,
+					options = TEXT_LEFT
+				})		
+			end	
+
+			return
+		end
+	end
+
+
 
 end
 
@@ -1218,6 +1240,15 @@ function rf2ethos.event(widget, category, value, x, y)
 end
 
 function rf2ethos.close()
+	if rf2ethos.dialogs.progress then
+		rf2ethos.dialogs.progress:close()
+	end
+	if rf2ethos.dialogs.save then
+		rf2ethos.dialogs.save:close()
+	end
+	if noLinkDialog then
+		noLinkDialog:close()
+	end
     invalidatePages()
     rf2ethos.resetState()
     system.exit()
