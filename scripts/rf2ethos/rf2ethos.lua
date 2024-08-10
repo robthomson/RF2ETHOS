@@ -678,7 +678,7 @@ function rf2ethos.wakeupUI()
                             rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()							
 							rf2ethos.triggers.wasSaving = false
 							rf2ethos.triggers.wasLoading = false
-							rf2ethos.triggers.wasReloading = false
+							rf2ethos.triggers.wasReloading = true
 							rf2ethos.triggers.createForm = true
 							rf2ethos.triggers.reloadRates = true
                             return true
