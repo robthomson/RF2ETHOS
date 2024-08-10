@@ -1081,12 +1081,18 @@ function rf2ethos.wakeupUI()
 			}
 				
 			if rf2ethos.triggers.badMspVersionDisplay == false  then
+				local message
+				if rf2ethos.config.apiVersion ~= 0 then
+					message = rf2ethos.init.t
+				else
+					message = "Unable to determine msp version in use."
+				end
 
 				rf2ethos.triggers.badMspVersionDisplay = true
 				form.openDialog({
 					width = nil,
 					title = "MSP Error",
-					message = rf2ethos.init.t,
+					message = message,
 					buttons = buttons,
 					wakeup = function()
 					end,
