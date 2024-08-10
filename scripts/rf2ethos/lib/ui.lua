@@ -1173,9 +1173,9 @@ function ui.openPagePreferences(idx, title, script)
     end)
 
     -- PROFILE
-    rf2ethos.config.profileswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
-    if rf2ethos.config.profileswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParam, ",")
+    rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
+    if rf2ethos.config.profileswitchParamPreference ~= nil then
+        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
         rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -1189,9 +1189,9 @@ function ui.openPagePreferences(idx, title, script)
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/profileswitch", category .. "," .. member)
     end)
 
-    rf2ethos.config.rateswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rf2ethos.config.rateswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParam, ",")
+    rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
+    if rf2ethos.config.rateswitchParamPreference ~= nil then
+        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
         rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -1214,8 +1214,6 @@ function ui.openPagePreferences(idx, title, script)
         rf2ethos.config.watchdogParam = newValue
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
     end)
-	
-
 
 end
 

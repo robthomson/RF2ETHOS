@@ -40,6 +40,7 @@ triggers.closeProgressLoader = false
 rf2ethos = {}
 rf2ethos.compile = compile
 
+
 rf2ethos.config = {}
 rf2ethos.config = config
 
@@ -84,7 +85,7 @@ rf2ethos.protocol = {}
 rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
-
+rf2ethos.wakeupSchedulerUI = os.clock()
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -142,21 +143,26 @@ function rf2ethos.resetState()
 
 end
 
+
 function rf2ethos.profileSwitchCheck()
-    profileswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
-    if profileswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(profileswitchParam, ",")
-        profileswitchParam = system.getSource({category = s[1], member = s[2]})
-        rf2ethos.triggers.profileswitchLast = profileswitchParam:value()
+	if rf2ethos.config.profileswitchParamPreference == nil then
+		rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
+		local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
+		rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
+	end	
+    if rf2ethos.config.profileswitchParam ~= nil then
+        rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
     end
 end
 
 function rf2ethos.rateSwitchCheck()
-    rateswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rateswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rateswitchParam, ",")
-        rateswitchParam = system.getSource({category = s[1], member = s[2]})
-        rf2ethos.triggers.rateswitchLast = rateswitchParam:value()
+	if rf2ethos.config.rateswitchParamPreference == nil then
+		rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
+        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
+        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})		
+	end
+    if rf2ethos.config.rateswitchParam ~= nil then
+        rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
     end
 end
 
@@ -461,6 +467,19 @@ end
 -- WAKEUP:  Called every ~30-50ms by the main Ethos software loop
 function rf2ethos.wakeup(widget)
 
+    -- every 0.01 to ensure msp timings work
+    rf2ethos.mspQueue:processQueue()
+
+	--keep cpu load down by running UI at reduced interval
+	local now = os.clock()
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
+		rf2ethos.wakeupSchedulerUI = now
+		rf2ethos.wakeupUI()
+	end	
+end
+
+function rf2ethos.wakeupUI()
+
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
     if rf2ethos.triggers.exitAPP == true then
@@ -627,9 +646,10 @@ function rf2ethos.wakeup(widget)
         if rf2ethos.Page.refreshswitch == true then
 
             if rf2ethos.lastPage ~= "rates.lua" then
-                if profileswitchParam ~= nil then
+                if rf2ethos.config.profileswitchParam ~= nil then
 
-                    if profileswitchParam:value() ~= rf2ethos.triggers.profileswitchLast then
+                    if rf2ethos.config.profileswitchParam:value() ~= rf2ethos.triggers.profileswitchLast then
+	
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
@@ -643,18 +663,15 @@ function rf2ethos.wakeup(widget)
                             rf2ethos.triggers.reloadRates = false
 
                         else
-
-                            rf2ethos.triggers.profileswitchLast = profileswitchParam:value()
-                            -- trigger RELOAD
-                            -- rf2ethos.utils.log("Profile switch reload")
-                            if config.environment.simulation ~= true then
-                                rf2ethos.triggers.wasReloading = true
-                                rf2ethos.triggers.createForm = true
-                                rf2ethos.triggers.wasSaving = false
-                                rf2ethos.triggers.wasLoading = false
-                                rf2ethos.triggers.reloadRates = false
-
-                            end
+							-- trigger RELOAD
+							-- rf2ethos.utils.log("Profile switch reload")
+							rf2ethos.ui.progessDisplay()
+                            rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
+							rf2ethos.triggers.wasReloading = true
+							rf2ethos.triggers.createForm = true
+							rf2ethos.triggers.wasSaving = false
+							rf2ethos.triggers.wasLoading = false
+							rf2ethos.triggers.reloadRates = false
                             return true
 
                         end
@@ -664,8 +681,8 @@ function rf2ethos.wakeup(widget)
 
             -- capture profile switching and trigger a reload if needs be
             if rf2ethos.lastPage == "rates.lua" then
-                if rateswitchParam ~= nil then
-                    if rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
+                if rf2ethos.config.rateswitchParam ~= nil then
+                    if rf2ethos.config.rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
 
                         if rf2ethos.dialogs.progressDisplay == true or rf2ethos.dialogs.saveDisplay == true then
                             -- switch has been toggled mid flow - this is bad.. clean upd
@@ -679,19 +696,15 @@ function rf2ethos.wakeup(widget)
                             rf2ethos.triggers.reloadRates = false
 
                         else
-                            rf2ethos.triggers.rateswitchLast = rateswitchParam:value()
-
                             -- trigger RELOAD
                             -- rf2ethos.utils.log("Rate switch reload")
-                            if config.environment.simulation ~= true then
-                                rf2ethos.triggers.wasSaving = false
-                                rf2ethos.triggers.wasLoading = false
-
-                                rf2ethos.triggers.wasReloading = false
-
-                                rf2ethos.triggers.createForm = true
-                                rf2ethos.triggers.reloadRates = true
-                            end
+							rf2ethos.ui.progessDisplay()
+                            rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()							
+							rf2ethos.triggers.wasSaving = false
+							rf2ethos.triggers.wasLoading = false
+							rf2ethos.triggers.wasReloading = false
+							rf2ethos.triggers.createForm = true
+							rf2ethos.triggers.reloadRates = true
                             return true
                         end
 
@@ -1031,15 +1044,13 @@ function rf2ethos.wakeup(widget)
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-                    --if config.environment.simulation ~= true then
-                        rf2ethos.triggers.wasReloading = true
-                        rf2ethos.triggers.createForm = true
+					rf2ethos.ui.progessDisplay()
+					rf2ethos.triggers.wasReloading = true
+					rf2ethos.triggers.createForm = true
 
-                        rf2ethos.triggers.wasSaving = false
-                        rf2ethos.triggers.wasLoading = false
-                        rf2ethos.triggers.reloadRates = false
-
-                    --end
+					rf2ethos.triggers.wasSaving = false
+					rf2ethos.triggers.wasLoading = false
+					rf2ethos.triggers.reloadRates = false
                     return true
                 end
             }, {
@@ -1068,9 +1079,6 @@ function rf2ethos.wakeup(widget)
         rf2ethos.triggers.triggerESCRELOAD = false
         rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
-
-    -- this needs to run on every wakeup event.
-    rf2ethos.mspQueue:processQueue()
 
 end
 
