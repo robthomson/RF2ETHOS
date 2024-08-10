@@ -798,7 +798,7 @@ function rf2ethos.wakeupUI()
     if rf2ethos.dialogs.progressDisplay == true then
         if rf2ethos.dialogs.progressWatchDog ~= nil then
 
-			if rf2ethos.config.watchdogParam ~= 1 then 
+			if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then 
 				rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
 			end
 

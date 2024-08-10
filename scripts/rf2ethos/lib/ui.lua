@@ -1208,7 +1208,7 @@ function ui.openPagePreferences(idx, title, script)
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
     if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
     line = form.addLine("Timeout")
-    form.addChoiceField(line, nil, {{"Default", 1}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
+    form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
         return rf2ethos.config.watchdogParam
     end, function(newValue)
         rf2ethos.config.watchdogParam = newValue
