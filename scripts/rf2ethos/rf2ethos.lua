@@ -480,7 +480,7 @@ function rf2ethos.wakeup(widget)
 
 	--keep cpu load down by running UI at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 then	
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
 		rf2ethos.wakeupSchedulerUI = now
 		rf2ethos.wakeupUI()
 	end	
