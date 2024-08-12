@@ -1,0 +1,1 @@
+rsync -rva  %DEV_RF2ETHOS_GIT_SRC%/scripts  %DEV_SIM_SRC%
