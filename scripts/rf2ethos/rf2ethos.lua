@@ -568,8 +568,8 @@ function rf2ethos.wakeupUI()
 			end
 		end	
 		
-		if rf2ethos.dialogs.save == true then
-			rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+		if rf2ethos.dialogs.save ~= nil then
+        rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
 		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
@@ -577,7 +577,7 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveProgressCounter = 0
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
-			f rf2ethos.dialogs.save == true then
+			if rf2ethos.dialogs.save ~= nil then
 				rf2ethos.dialogs.save:close()
 			end
         end
