@@ -497,11 +497,6 @@ function rf2ethos.wakeupUI()
         return
     end
 	
-	if rf2ethos.dialogs.progressDisplay == true  or  rf2ethos.dialogs.saveDisplay == true or rf2ethos.dialogs.nolinkDisplay == true then
-		ELRS_PAUSE_TELEMETRY = true
-	else
-		ELRS_PAUSE_TELEMETRY = false
-	end
 
 	if rf2ethos.triggers.closeProgressLoader == true then
 

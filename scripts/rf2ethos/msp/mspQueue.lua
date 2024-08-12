@@ -29,7 +29,11 @@ local function popFirstElement(tbl)
 end
 
 function MspQueueController:processQueue()
-    if self:isProcessed() then return end
+    if self:isProcessed() then
+        ELRS_PAUSE_TELEMETRY = false
+        return
+    end
+    ELRS_PAUSE_TELEMETRY = true
 
     if not self.currentMessage then
         self.currentMessage = popFirstElement(self.messageQueue)
