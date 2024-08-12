@@ -105,6 +105,14 @@ rf2ethos.dialogs.nolinkValue = 0
 rf2ethos.dialogs.badversion = false
 rf2ethos.dialogs.badversionDisplay = false
 
+
+rf2ethos.config.saveTimeout = nil
+rf2ethos.config.requestTimeout = nil
+rf2ethos.config.maxRetries = nil
+rf2ethos.config.lcdWidth = nil
+rf2ethos.config.lcdHeight = nil
+rf2ethos.config.iconsizeParam = nil
+
 rf2ethos.runningInSimulator = system:getVersion().simulation
 
 -- Ethos: when the RF1 and RF2 system tools are both installed, RF1 tries to call getRSSI in RF2 and gets stuck.

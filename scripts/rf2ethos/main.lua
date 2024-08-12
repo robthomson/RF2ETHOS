@@ -8,14 +8,8 @@ config.ethosVersion = 1510
 config.luaVersion = "2.0.0 - 240625"
 config.ethosVersionString = "ETHOS < V1.5.10"
 config.environment = system.getVersion()
-config.saveTimeout = nil
-config.maxRetries = nil
 config.apiVersion = 0
 config.defaultRateTable = 4 -- ACTUAL
-config.requestTimeout = nil
-config.lcdWidth = nil
-config.lcdHeight = nil
-config.iconsizeParam = nil
 config.supportedMspApiVersion = { "12.06", "12.07" }
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
