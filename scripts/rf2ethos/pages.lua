@@ -4,17 +4,17 @@ local sections = {}
 
 sections[#sections + 1] = {title = "Flight Tuning", section = 1}
 pages[#pages + 1] = {title = "PIDs", section = 1, script = "pids.lua", image = "pids.png"}
-pages[#pages + 1] = {title = "Rates", section = 1, subpage = 1, script = "rates.lua", image = "rates.png"}
-pages[#pages + 1] = {title = "Main Rotor", section = 1, subpage = 4, script = "profile.lua", image = "mainrotor.png"}
-pages[#pages + 1] = {title = "Tail Rotor", section = 1, subpage = 2, script = "profile.lua", image = "tailrotor.png"}
+pages[#pages + 1] = {title = "Rates", section = 1, script = "rates.lua", image = "rates.png"}
+pages[#pages + 1] = {title = "Main Rotor", section = 1,  script = "profile_mainrotor.lua", image = "mainrotor.png"}
+pages[#pages + 1] = {title = "Tail Rotor", section = 1, script = "profile_tailrotor.lua", image = "tailrotor.png"}
 pages[#pages + 1] = {title = "Governor", section = 1, script = "profile_governor.lua", image = "governor.png"}
 
 sections[#sections + 1] = {title = "Advanced", section = 2}
-pages[#pages + 1] = {title = "PID Controller", section = 2, subpage = 1, script = "profile.lua", image = "pids-controller.png"}
-pages[#pages + 1] = {title = "PID Bandwidth", section = 2, subpage = 3, script = "profile.lua", image = "pids-bandwidth.png"}
-pages[#pages + 1] = {title = "Auto Level", section = 2, subpage = 5, script = "profile.lua", image = "autolevel.png"}
+pages[#pages + 1] = {title = "PID Controller", section = 2, script = "profile_pidcontroller.lua", image = "pids-controller.png"}
+pages[#pages + 1] = {title = "PID Bandwidth", section = 2, script = "profile_pidbandwidth.lua", image = "pids-bandwidth.png"}
+pages[#pages + 1] = {title = "Auto Level", section = 2, script = "profile_autolevel.lua", image = "autolevel.png"}
 pages[#pages + 1] = {title = "Rescue", section = 2, script = "profile_rescue.lua", image = "rescue.png"}
-pages[#pages + 1] = {title = "Rates", section = 2, subpage = 2, script = "rates.lua", image = "rates.png"}
+pages[#pages + 1] = {title = "Rates", section = 2, script = "rates_advanced.lua", image = "rates.png"}
 
 sections[#sections + 1] = {title = "Hardware", section = 4}
 pages[#pages + 1] = {title = "Servos", section = 4, script = "servos.lua", image = "servos.png"}

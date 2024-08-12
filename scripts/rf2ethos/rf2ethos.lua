@@ -59,7 +59,6 @@ rf2ethos.saveTS = 0
 rf2ethos.lastPage = nil
 rf2ethos.lastSection = nil
 rf2ethos.lastIdx = nil
-rf2ethos.lastSubPage = nil
 rf2ethos.lastTitle = nil
 rf2ethos.lastScript = nil
 rf2ethos.gfx_buttons = {}
@@ -268,8 +267,7 @@ end
 function rf2ethos.resetCopyProfiles()
     if rf2ethos.lastScript == "copy_profiles.lua" then
         -- invalidatePages
-        -- rf2ethos.ui.openPageDefaultLoader(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
-        rf2ethos.triggers.wasReloading = true
+		rf2ethos.triggers.wasReloading = true
         rf2ethos.triggers.createForm = true
         rf2ethos.triggers.wasSaving = false
         rf2ethos.triggers.wasLoading = false
@@ -294,7 +292,7 @@ function rf2ethos.saveFieldValue(f, value)
 end
 
 function rf2ethos.resetRates()
-    if rf2ethos.lastScript == "rates.lua" and rf2ethos.lastSubPage == 2 then
+    if rf2ethos.lastScript == "rates_advanced.lua" then
         if rf2ethos.triggers.resetRates == true then
             rf2ethos.NewRateTable = rf2ethos.Page.fields[13].value
 
@@ -766,7 +764,6 @@ function rf2ethos.wakeupUI()
         rf2ethos.escUnknown = false
         rf2ethos.lastIdx = nil
         rf2ethos.lastPage = nil
-        rf2ethos.lastSubPage = nil
         invalidatePages()
 
         rf2ethos.ui.openPageESC(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
@@ -904,8 +901,8 @@ function rf2ethos.wakeupUI()
             rf2ethos.rateSwitchCheck()
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePID(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "rates.lua" and rf2ethos.lastSubPage == 1 then
-                rf2ethos.ui.openPageRATES(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
+            elseif rf2ethos.lastScript == "rates.lua" then
+                rf2ethos.ui.openPageRATES(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.lastScript == "servos.lua" then
                 rf2ethos.ui.openPageSERVOS(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
@@ -913,7 +910,7 @@ function rf2ethos.wakeupUI()
             elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
                 rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
             else
-                rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
+                rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             end
 			rf2ethos.triggers.closeProgressLoader = true
 		elseif rf2ethos.triggers.wasReloading == true then	
@@ -923,8 +920,8 @@ function rf2ethos.wakeupUI()
             rf2ethos.triggers.wasReloading = false
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePIDLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "rates.lua" and rf2ethos.lastSubPage == 1 then
-                rf2ethos.ui.openPageRATESLoader(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
+            elseif rf2ethos.lastScript == "rates.lua" then
+                rf2ethos.ui.openPageRATESLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.lastScript == "servos.lua" then
                 rf2ethos.ui.openPageSERVOSLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
@@ -932,14 +929,14 @@ function rf2ethos.wakeupUI()
             elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
                 rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
             else
-                rf2ethos.ui.openPageDefaultLoader(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
+                rf2ethos.ui.openPageDefaultLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             end
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
 			
         --elseif rf2ethos.triggers.reloadRates == true or config.environment.simulation == true then
 		elseif rf2ethos.triggers.reloadRates == true then	
-			rf2ethos.ui.openPageRATESLoader(rf2ethos.lastIdx, rf2ethos.lastSubPage, rf2ethos.lastTitle, rf2ethos.lastScript)
+			rf2ethos.ui.openPageRATESLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
         else
             rf2ethos.ui.openMainMenu()
         end
