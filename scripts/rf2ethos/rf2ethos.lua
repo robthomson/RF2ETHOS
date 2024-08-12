@@ -480,7 +480,7 @@ function rf2ethos.wakeup(widget)
 
 	--keep cpu load down by running UI at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 then	
 		rf2ethos.wakeupSchedulerUI = now
 		rf2ethos.wakeupUI()
 	end	
@@ -794,8 +794,13 @@ function rf2ethos.wakeupUI()
 				rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
 			end
 			
-			rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
-			rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)			
+			if rf2ethos.dialogs.progressCounter <= 40 then
+				rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
+				rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)	
+			else
+				rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
+				rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)	
+			end
 
             if rf2ethos.triggers.escPowerCycle == true then
                 if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout) + 30) then
