@@ -30,12 +30,12 @@ fields[#fields + 1] = {subpage = 1, t = "", help = "profilesItermRelaxType", inl
 labels[#labels + 1] = {subpage = 1, t = "    Cut-off point", label = 15, inline_size = 8.15}
 fields[#fields + 1] = {subpage = 1, t = "R", help = "profilesItermRelax", inline = 3, label = 15, min = 1, max = 100, default = 10, vals = {18}}
 fields[#fields + 1] = {subpage = 1, t = "P", help = "profilesItermRelax", inline = 2, label = 15, min = 1, max = 100, default = 10, vals = {19}}
-fields[#fields + 1] = {subpage = 1, t = "Y", help = "profilesItermRelax", inline = 1, label = 15, min = 1, max = 100, default = 15, vals = {20}}
+fields[#fields + 1] = {subpage = 1, t = "Y", help = "profilesItermRelax", inline = 1, label = 15, min = 1, max = 100, default = 10, vals = {20}}
 
 -- tail rotor settings
 labels[#labels + 1] = {subpage = 2, t = "Yaw stop gain", label = "ysgain", inline_size = 13.6}
-fields[#fields + 1] = {subpage = 2, t = "CW", help = "profilesYawStopGainCW", inline = 2, label = "ysgain", min = 25, max = 250, default = 100, vals = {21}}
-fields[#fields + 1] = {subpage = 2, t = "CCW", help = "profilesYawStopGainCCW", inline = 1, label = "ysgain", min = 25, max = 250, default = 100, vals = {22}}
+fields[#fields + 1] = {subpage = 2, t = "CW", help = "profilesYawStopGainCW", inline = 2, label = "ysgain", min = 25, max = 250, default = 80, vals = {21}}
+fields[#fields + 1] = {subpage = 2, t = "CCW", help = "profilesYawStopGainCCW", inline = 1, label = "ysgain", min = 25, max = 250, default = 120, vals = {22}}
 
 fields[#fields + 1] = {subpage = 2, t = "Precomp Cutoff", help = "profilesYawPrecompCutoff", min = 0, max = 250, default = 5, unit = "Hz", vals = {23}}
 fields[#fields + 1] = {subpage = 2, t = "Cyclic FF gain", help = "profilesYawFFCyclicGain", min = 0, max = 250, default = 30, vals = {24}}

@@ -12,7 +12,7 @@ fields[#fields + 1] = {t = "F", help = "govFGain", inline = 1, label = 1, min = 
 
 labels[#labels + 1] = {subpage = 1, t = "Precomp", label = 2, inline_size = 8.15}
 fields[#fields + 1] = {t = "Yaw", help = "govYawPrecomp", inline = 3, label = 2, min = 0, max = 250, default = 0, vals = {10}}
-fields[#fields + 1] = {t = "Cyc", help = "govCyclicPrecomp", inline = 2, label = 2, min = 0, max = 250, default = 40, vals = {11}}
+fields[#fields + 1] = {t = "Cyc", help = "govCyclicPrecomp", inline = 2, label = 2, min = 0, max = 250, default = 10, vals = {11}}
 fields[#fields + 1] = {t = "Col", help = "govCollectivePrecomp", inline = 1, label = 2, min = 0, max = 250, default = 100, vals = {12}}
 
 labels[#labels + 1] = {subpage = 1, t = "Tail Torque Assist", label = 3}
