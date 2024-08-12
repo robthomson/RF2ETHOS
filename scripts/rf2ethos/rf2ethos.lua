@@ -506,9 +506,9 @@ function rf2ethos.wakeupUI()
 	if rf2ethos.triggers.closeProgressLoader == true then
 
 	
-		if rf2ethos.dialogs.progressCounter == 0 then
-			rf2ethos.dialogs.progressCounter = 20
-		end
+		--if rf2ethos.dialogs.progressCounter == 0 then
+		--	rf2ethos.dialogs.progressCounter = 20
+		--end
 	
 		if rf2ethos.dialogs.progressCounter <= 100 then
 			rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 20

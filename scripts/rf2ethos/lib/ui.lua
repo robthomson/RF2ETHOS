@@ -5,7 +5,7 @@ function ui.progessDisplay()
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
 	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.progress:value(20)
+		rf2ethos.dialogs.progress:value(0)
 		rf2ethos.dialogs.progress:closeAllowed(false)
 	end
 end
