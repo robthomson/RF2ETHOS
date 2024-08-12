@@ -12,6 +12,7 @@ config.apiVersion = 0
 config.defaultRateTable = 4 -- ACTUAL
 config.supportedMspApiVersion = { "12.06", "12.07" }
 
+
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
 
 compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)

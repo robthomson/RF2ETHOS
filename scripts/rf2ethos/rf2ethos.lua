@@ -782,11 +782,11 @@ function rf2ethos.wakeupUI()
     if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.saveTimeout = rf2ethos.config.watchdogParam end
     if rf2ethos.dialogs.saveDisplay == true then
         if rf2ethos.dialogs.saveWatchDog ~= nil then
-            -- watchdog will always kick in 5s after protocol timeout settings
-            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (rf2ethos.protocol.saveTimeout + 5) then rf2ethos.dialogs.save:closeAllowed(true) end
+            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (tonumber(rf2ethos.protocol.saveTimeout)) then rf2ethos.dialogs.save:closeAllowed(true) end
         end
     end
 
+	
     if rf2ethos.dialogs.progressDisplay == true then
         if rf2ethos.dialogs.progressWatchDog ~= nil then
 
