@@ -794,9 +794,8 @@ function rf2ethos.wakeupUI()
 				rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
 			end
 
-	
             if rf2ethos.triggers.escPowerCycle == true then
-                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 30) then
+                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout) + 30) then
 					if rf2ethos.dialogs.progress ~= nil then
 						rf2ethos.dialogs.progress:message("Error.. we timed out")
 						rf2ethos.dialogs.progress:closeAllowed(true)
@@ -806,7 +805,7 @@ function rf2ethos.wakeupUI()
 					rf2ethos.PageTmp = {}
                 end
             else
-                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (rf2ethos.protocol.pageReqTimeout + 15) then
+                if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
 					if rf2ethos.dialogs.progress ~= nil then
 						rf2ethos.dialogs.progress:message("Error.. we timed out")
 						rf2ethos.dialogs.progress:closeAllowed(true)
