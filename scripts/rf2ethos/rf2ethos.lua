@@ -401,7 +401,7 @@ local mspLoadSettings = {
 			rf2ethos.dataBindFields()
 			if rf2ethos.Page.postLoad then 
 				rf2ethos.Page.postLoad(rf2ethos.Page) 
-			end
+			end					
 			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
 		else
 			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded rf2ethos.Page is nil?")
@@ -793,6 +793,9 @@ function rf2ethos.wakeupUI()
 			if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then 
 				rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
 			end
+			
+			rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
+			rf2ethos.dialogs.progress:value(rf2ethos.dialogs.progressCounter)			
 
             if rf2ethos.triggers.escPowerCycle == true then
                 if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout) + 30) then
@@ -803,6 +806,8 @@ function rf2ethos.wakeupUI()
 					--switch back to original page values
 					rf2ethos.Page = rf2ethos.PageTmp
 					rf2ethos.PageTmp = {}
+					rf2ethos.dialogs.progressCounter = 0 
+					rf2ethos.dialogs.progressDisplay = false
                 end
             else
                 if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
@@ -812,7 +817,9 @@ function rf2ethos.wakeupUI()
 					end
 					--switch back to original page values
 					rf2ethos.Page = rf2ethos.PageTmp
-					rf2ethos.PageTmp = {}					
+					rf2ethos.PageTmp = {}		
+					rf2ethos.dialogs.progressCounter = 0 
+					rf2ethos.dialogs.progressDisplay = false
                 end
             end
 
@@ -864,6 +871,7 @@ function rf2ethos.wakeupUI()
 			--end
         end
     end
+
 
 	if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
 
