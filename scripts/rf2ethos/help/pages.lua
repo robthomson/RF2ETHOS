@@ -40,7 +40,7 @@ data["rates"]["table"][3] = {
 
 -- RATE TABLE ACTUAL
 data["rates"]["table"][4] = {
-    "Center Sensitivity: Use to reduce sensitivity around center stick. Center Sensitivity set to the same as Max Rate is linear. A lower number than Max Rate will reduce sensitivity around center stick. Note that higher than Max Rate will increase the Max Rate - not recommended as it causes issues in the Blackbox log.",
+    "Center Sensitivity: Use to reduce sensitivity around center stick. Set Center Sensitivity set to the same as Max Rate for a linear response. A lower number than Max Rate will reduce sensitivity around center stick. Note that higher than Max Rate will increase the Max Rate - not recommended as it causes issues in the Blackbox log.",
     "Max Rate: Maximum rotation rate at full stick deflection in degrees per second.", "Expo: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
