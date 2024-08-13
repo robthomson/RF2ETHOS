@@ -62,7 +62,7 @@ return {
         end
 		rf2ethos.triggers.mspDataLoaded = true
     end,
-    alterPayload = function(payload)
+    preSavePayload = function(payload)
         payload[2] = 0
         return payload
     end
