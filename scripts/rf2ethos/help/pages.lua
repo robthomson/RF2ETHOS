@@ -4,60 +4,64 @@ data = {}
 data["pids"] = {}
 data["pids"]["qrCODE"] = "gfx/qr/pids.png"
 data["pids"]["TEXT"] = {
-    "Increase D, P, I in order until each wobbles, then back off.", "Set F for a good response in full stick flips and rolls.", "If necessary, tweak P:D ratio to set response damping to your liking.",
-    "Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", "Increase B if you want sharper response."
+    "Increase D, P, I in order until each wobbles, then back off.", 
+	"Set F for a good response in full stick flips and rolls.", 
+	"If necessary, tweak P:D ratio to set response damping to your liking.",
+    "Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", 
+	"Increase B if you want sharper response."
 }
 
 -- FLIGHT TUNING RATES
-data["rates_1"] = {}
-data["rates_1"]["table"] = {}
-data["rates_1"]["qrCODE"] = "gfx/qr/rates.png"
-data["rates_1"]["TEXT"] = {"Default: We keep this to make button appear for rates.", "We will use the sub keys below."}
+data["rates"] = {}
+data["rates"]["table"] = {}
+data["rates"]["qrCODE"] = "gfx/qr/rates.png"
+data["rates"]["TEXT"] = {"Default: We keep this to make button appear for rates.", "We will use the sub keys below."}
+
 -- RATE TABLE NONE
-data["rates_1"]["table"][0] = {"All values are set to zero because no RATE TABLE is in use."}
+data["rates"]["table"][0] = {"All values are set to zero because no RATE TABLE is in use."}
 
 -- RATE TABLE BETAFLIGHT
-data["rates_1"]["table"][1] = {
+data["rates"]["table"][1] = {
     "RC Rate: Maximum rotation rate at full stick deflection.", "SuperRate: Increases maximum rotation rate while reducing sensitivity around half stick.",
     "Expo: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
 -- RATE TABLE RACEFLIGHT
-data["rates_1"]["table"][2] = {
+data["rates"]["table"][2] = {
     "Rate: Maximum rotation rate at full stick deflection in degrees per second.", "Acro+: Increases the maximum rotation rate while reducing sensitivity around half stick.",
     "Expo: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
 -- RATE TABLE KISS
-data["rates_1"]["table"][3] = {
+data["rates"]["table"][3] = {
     "RC Rate: Maximum rotation rate at full stick deflection.", "Rate: Increases maximum rotation rate while reducing sensitivity around half stick.",
     "RC Curve: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
 -- RATE TABLE ACTUAL
-data["rates_1"]["table"][4] = {
+data["rates"]["table"][4] = {
     "Center Sensitivity: Use to reduce sensitivity around center stick. Center Sensitivity set to the same as Max Rate is linear. A lower number than Max Rate will reduce sensitivity around center stick. Note that higher than Max Rate will increase the Max Rate - not recommended as it causes issues in the Blackbox log.",
     "Max Rate: Maximum rotation rate at full stick deflection in degrees per second.", "Expo: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
 -- RATE TABLE QUICK
-data["rates_1"]["table"][5] = {
+data["rates"]["table"][5] = {
     "RC Rate: Use to reduce sensitivity around center stick. RC Rate set to one half of the Max Rate is linear. A lower number will reduce sensitivity around center stick. Higher than one half of the Max Rate will also increase the Max Rate.",
     "Max Rate: Maximum rotation rate at full stick deflection in degrees per second.", "Expo: Reduces sensitivity near the stick's center where fine controls are needed."
 }
 
 -- FLIGHT TUNING - MAIN ROTOR
-data["profile_4"] = {}
-data["profile_4"]["qrCODE"] = "gfx/qr/mainrotor.png"
-data["profile_4"]["TEXT"] = {
+data["profile_mainrotor"] = {}
+data["profile_mainrotor"]["qrCODE"] = "gfx/qr/mainrotor.png"
+data["profile_mainrotor"]["TEXT"] = {
     "Collective Pitch Compensation: Increasing will compensate for the pitching motion caused by tail drag when climbing.", "Cross Coupling Gain: Removes roll coupling when only elevator is applied.",
     "Cross Coupling Ratio: Amount of compensation (pitch vs roll) to apply.", "Cross Coupling Feq. Limit: Frequency limit for the compensation, higher value will make the compensation action faster."
 }
 
 -- FLIGHT TUNING - TAIL ROTOR
-data["profile_2"] = {}
-data["profile_2"]["qrCODE"] = "gfx/qr/tailrotor.png"
-data["profile_2"]["TEXT"] = {
+data["profile_tailrotor"] = {}
+data["profile_tailrotor"]["qrCODE"] = "gfx/qr/tailrotor.png"
+data["profile_tailrotor"]["TEXT"] = {
     "Yaw Stop Gain: Higher stop gain will make the tail stop more aggressively but may cause oscillations if too high. Adjust CW or CCW to make the yaw stops even.",
     "Precomp Cutoff: Frequency limit for all yaw precompensation actions.", "Cyclic FF Gain: Tail precompensation for cyclic inputs.",
     "Collective FF Gain: Tail precompensation for collective inputs.",
@@ -74,23 +78,23 @@ data["profile_governor"]["TEXT"] = {
 }
 
 -- ADVANCED TUNING - PID CONTROLLER
-data["profile_1"] = {}
-data["profile_1"]["qrCODE"] = "gfx/qr/pidcontroller.png"
-data["profile_1"]["TEXT"] = {
+data["profile_pidcontroller"] = {}
+data["profile_pidcontroller"]["qrCODE"] = "gfx/qr/pidcontroller.png"
+data["profile_pidcontroller"]["TEXT"] = {
     "Error decay ground: PID decay to help prevent heli from tipping over when on the ground.", "Error limit: Angle limit for I-term.", "Offset limit: Angle limit for High Speed Integral (O-term).",
     "Error rotation: Allow errors to be shared between all axes.",
     "I-term relax: Limit accumulation of I-term during fast movements - helps reduce bounce back after fast stick movements. Generally needs to be lower for large helis and can be higher for small helis. Best to only reduce as much as is needed for your flying style."
 }
 
 -- ADVANCED TUNING - PID BANDWIDTH
-data["profile_3"] = {}
-data["profile_3"]["qrCODE"] = "gfx/qr/pidbandwidth.png"
-data["profile_3"]["TEXT"] = {"PID Bandwidth: Overall bandwidth in HZ used by the PID loop.", "D-term cutoff: D-term cutoff frequency in HZ.", "B-term cutoff: B-term cutoff frequency in HZ."}
+data["profile_pidbandwidth"] = {}
+data["profile_pidbandwidth"]["qrCODE"] = "gfx/qr/pidbandwidth.png"
+data["profile_pidbandwidth"]["TEXT"] = {"PID Bandwidth: Overall bandwidth in HZ used by the PID loop.", "D-term cutoff: D-term cutoff frequency in HZ.", "B-term cutoff: B-term cutoff frequency in HZ."}
 
 -- ADVANCED TUNING - AUTO LEVEL
-data["profile_5"] = {}
-data["profile_5"]["qrCODE"] = "gfx/qr/autolevel.png"
-data["profile_5"]["TEXT"] = {
+data["profile_autolevel"] = {}
+data["profile_autolevel"]["qrCODE"] = "gfx/qr/autolevel.png"
+data["profile_autolevel"]["TEXT"] = {
     "Acro Trainer: How aggressively the heli tilts back to level when flying in Acro Trainer Mode.", "Angle Mode: How aggressively the heli tilts back to level when flying in Angle Mode.",
     "Horizon Mode: How aggressively the heli tilts back to level when flying in Horizon Mode."
 }
@@ -106,9 +110,9 @@ data["profile_rescue"]["TEXT"] = {
 }
 
 -- ADVANCED TUNING - RATES
-data["rates_2"] = {}
-data["rates_2"]["qrCODE"] = "gfx/qr/rates.png"
-data["rates_2"]["TEXT"] = {
+data["rates_advanced"] = {}
+data["rates_advanced"]["qrCODE"] = "gfx/qr/rates.png"
+data["rates_advanced"]["TEXT"] = {
     "Rates type: Choose the rate type you prefer flying with. Raceflight and Actual are the most straightforward.",
     "Dynamics: Applied regardless of rates type. Typically left on defaults but can be adjusted to smooth heli movements, like with scale helis."
 }
