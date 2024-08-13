@@ -18,7 +18,6 @@ function ui.openMainMenu()
 
     -- clear all nav vars
     rf2ethos.lastIdx = nil
-    rf2ethos.lastSubPage = nil
     rf2ethos.lastTitle = nil
     rf2ethos.lastScript = nil
     rf2ethos.lastPage = nil
@@ -109,8 +108,8 @@ function ui.openMainMenu()
                             rf2ethos.ui.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "servos.lua" then
                             rf2ethos.ui.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "rates.lua" and pvalue.subpage == 1 then
-                            rf2ethos.ui.openPageRATESLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                        elseif pvalue.script == "rates.lua"  then
+                            rf2ethos.ui.openPageRATESLoader(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "esc.lua" then
                             rf2ethos.ui.openPageESC(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
@@ -118,7 +117,7 @@ function ui.openMainMenu()
                             rf2ethos.ui.openPagePreferences(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
                         else
-                            rf2ethos.ui.openPageDefaultLoader(pidx, pvalue.subpage, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageDefaultLoader(pidx, pvalue.title, pvalue.script)
                         end
                     end
                 })
@@ -132,7 +131,7 @@ function ui.openMainMenu()
     end
 end
 
-function ui.openPageRATESLoader(idx, subpage, title, script)
+function ui.openPageRATESLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
@@ -142,19 +141,17 @@ function ui.openPageRATESLoader(idx, subpage, title, script)
 
 
     rf2ethos.lastIdx = idx
-    rf2ethos.lastSubPage = subpage
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
 
     rf2ethos.triggers.isLoading = true
 
-    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageRATES(idx, subpage, title, script) end
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRATESLoader")
 end
 
-function ui.openPageRATES(idx, subpage, title, script)
+function ui.openPageRATES(idx, title, script)
 
     if rf2ethos.Page.fields then
         local v = rf2ethos.Page.fields[13].value
@@ -171,7 +168,7 @@ function ui.openPageRATES(idx, subpage, title, script)
                     rf2ethos.dialogs.progressDisplay = false
                     rf2ethos.dialogs.progress:close()
                 end
-                rf2ethos.ui.openPageRATESLoader(idx, subpage, title, script)
+                rf2ethos.ui.openPageRATESLoader(idx, title, script)
 
             end
         end
@@ -230,7 +227,7 @@ function ui.openPageRATES(idx, subpage, title, script)
         local pageIdx = i
         local currentField = i
 
-        if f.subpage == 1 then
+        if f.hidden == nil or f.hidden == false then
             posX = positions[f.col]
 
             pos = {x = posX + padding, y = posY, w = w - padding, h = h}
@@ -327,7 +324,6 @@ function ui.openPageESC(idx, title, script)
         press = function()
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
-            rf2ethos.lastSubPage = nil
             rf2ethos.escMode = false
             rf2ethos.ui.openMainMenu()
         end
@@ -680,7 +676,6 @@ function ui.openPagePIDLoader(idx, title, script)
 
 
     rf2ethos.lastIdx = idx
-    rf2ethos.lastSubPage = subpage
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
@@ -795,7 +790,6 @@ function ui.openPageSERVOSLoader(idx, title, script)
 
 
     rf2ethos.lastIdx = idx
-    rf2ethos.lastSubPage = subpage
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
 
@@ -898,7 +892,7 @@ function ui.getLabel(id, page)
 end
 
 function ui.fieldChoice(f, i)
-    if rf2ethos.lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= rf2ethos.lastSubPage then return end end
+
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
 
@@ -934,7 +928,7 @@ function ui.fieldChoice(f, i)
 end
 
 function ui.fieldNumber(f, i)
-    if rf2ethos.lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= rf2ethos.lastSubPage then return end end
+
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
         if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
@@ -1006,7 +1000,7 @@ function ui.fieldNumber(f, i)
 end
 
 function ui.fieldLabel(f, i, l)
-    if rf2ethos.lastSubPage ~= nil and f.subpage ~= nil then if f.subpage ~= rf2ethos.lastSubPage then return end end
+
 
     if f.t ~= nil then
         if f.t2 ~= nil then f.t = f.t2 end
@@ -1060,7 +1054,7 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPageDefaultLoader(idx, subpage, title, script)
+function ui.openPageDefaultLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.mspDataLoaded = false
@@ -1071,7 +1065,6 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
 
 
     rf2ethos.lastIdx = idx
-    rf2ethos.lastSubPage = subpage
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
 
@@ -1079,11 +1072,10 @@ function ui.openPageDefaultLoader(idx, subpage, title, script)
 
     -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageDefaultLoader")
 
-    --if rf2ethos.config.environment.simulation == true then rf2ethos.ui.openPageDefault(idx, subpage, title, script) end
 
 end
 
-function ui.openPageDefault(idx, subpage, title, script)
+function ui.openPageDefault(idx, title, script)
 
     local fieldAR = {}
 
@@ -1122,7 +1114,6 @@ function ui.openPagePreferences(idx, title, script)
     rf2ethos.triggers.mspDataLoaded = false
 
     rf2ethos.lastIdx = idx
-    rf2ethos.lastSubPage = nil
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.triggers.isLoading = false
@@ -1157,7 +1148,6 @@ function ui.openPagePreferences(idx, title, script)
         press = function()
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
-            rf2ethos.lastSubPage = nil
             rf2ethos.escMode = false
             rf2ethos.ui.openMainMenu()
         end
@@ -1231,7 +1221,6 @@ function ui.navigationButtonsEscForm(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.resetRates = false
             rf2ethos.escMode = true
             rf2ethos.escNotReadyCount = 0
             collectgarbage()
@@ -1301,12 +1290,7 @@ function ui.navigationButtons(x, y, w, h)
 
     help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
     section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-    page = rf2ethos.lastSubPage
-    if page == nil then
-        section = section
-    else
-        section = section .. '_' .. page
-    end
+
 
     if help.data[section] then
         helpWidth = w - (w * 20) / 100
@@ -1321,7 +1305,6 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.resetRates = false
             rf2ethos.ui.openMainMenu()
         end
     })
@@ -1370,7 +1353,7 @@ end
 function ui.openPagehelp(helpdata, section)
     local txtData
 
-    if section == "rates_1" then
+    if section == "rates" then
         txtData = helpdata[section]["table"][rf2ethos.RateTable]
     else
         txtData = helpdata[section]["TEXT"]
@@ -1401,7 +1384,7 @@ function ui.openPagehelp(helpdata, section)
         wakeup = function()
         end,
         paint = function()
-            local w = rf2ethos.config.lcdWidth
+            local w = rf2ethos.config.lcdWidth 
             local h = rf2ethos.config.lcdHeight
             local left = w * 0.75
 
