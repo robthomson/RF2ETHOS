@@ -96,7 +96,7 @@ function ui.openMainMenu()
                     rf2ethos.gfx_buttons[pidx] = nil
                 end
 
-                form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
+                 rf2ethos.formFields[pidx] = form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
                     text = pvalue.title,
                     icon = rf2ethos.gfx_buttons[pidx],
                     options = FONT_S,
@@ -243,7 +243,7 @@ function ui.openPageRATES(idx, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            field = form.addNumberField(_G["rf2ethos_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
+            rf2ethos.formFields[i] = form.addNumberField(_G["rf2ethos_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
                 local value
 				if rf2ethos.activeRateTable == 0 then
 					value = 0
@@ -259,9 +259,9 @@ function ui.openPageRATES(idx, title, script)
                 local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                 if f.mult ~= nil then default = math.floor(default * f.mult) end
                 if f.scale ~= nil then default = math.floor(default / f.scale) end
-                field:default(default)
+                rf2ethos.formFields[i]:default(default)
             else
-                field:default(0)
+                rf2ethos.formFields[i]:default(0)
             end
             if f.decimals ~= nil then field:decimals(f.decimals) end
             if f.unit ~= nil then field:suffix(f.unit) end
@@ -269,11 +269,11 @@ function ui.openPageRATES(idx, title, script)
             if f.help ~= nil then
                 if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                     local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                    field:help(helpTxt)
+                    rf2ethos.formFields[i]:help(helpTxt)
                 end
             end
 			if f.disable == true then
-				field:enable(false)
+				rf2ethos.formFields[i]:enable(false)
 			end
         end
     end
@@ -323,7 +323,7 @@ function ui.openPageESC(idx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW
 
-    field = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['menu']  = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -336,7 +336,7 @@ function ui.openPageESC(idx, title, script)
             rf2ethos.ui.openMainMenu()
         end
     })
-    field:focus()
+    rf2ethos.formNavigationFields['menu']:focus()
 
     local buttonW
     local buttonH
@@ -389,7 +389,7 @@ function ui.openPageESC(idx, title, script)
             rf2ethos.esc_buttons[pidx] = nil
         end
 
-        form.addButton(line, {x = bx, y = y, w = buttonW, h = buttonH}, {
+        rf2ethos.formFields[pidx] = form.addButton(line, {x = bx, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = rf2ethos.esc_buttons[pidx],
             options = FONT_S,
@@ -461,7 +461,7 @@ function ui.openPageESCTool(folder)
     buttonW = 100
     local x = windowWidth - buttonW
 
-    field = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+     rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -471,7 +471,7 @@ function ui.openPageESCTool(folder)
             rf2ethos.triggers.triggerESCMAINMENU = true
         end
     })
-    field:focus()
+    rf2ethos.formNavigationFields['menu']:focus()
 
     ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages.lua"))()
 
@@ -565,7 +565,7 @@ function ui.openPageESCTool(folder)
         end
 
         -- rf2ethos.utils.log("x = " .. bx .. ", y = " .. y .. ", w = " .. buttonW .. ", h = " .. buttonH)
-        field = form.addButton(nil, {x = bx, y = y, w = buttonW, h = buttonH}, {
+        rf2ethos.formFields[pidx] = form.addButton(nil, {x = bx, y = y, w = buttonW, h = buttonH}, {
             text = pvalue.title,
             icon = rf2ethos.esctool_buttons[pvalue.image],
             options = FONT_S,
@@ -578,7 +578,7 @@ function ui.openPageESCTool(folder)
             end
         })
 
-        if rf2ethos.escUnknown == true then field:enable(false) end
+        if rf2ethos.escUnknown == true then  rf2ethos.formFields[pidx]:enable(false) end
 
         lc = lc + 1
 
@@ -758,7 +758,7 @@ function ui.openPagePID(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        field = form.addNumberField(_G["rf2ethos_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
+        rf2ethos.formFields[i] = form.addNumberField(_G["rf2ethos_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
             local value = rf2ethos.getFieldValue(f)
             return value
         end, function(value)
@@ -768,16 +768,16 @@ function ui.openPagePID(idx, title, script)
         if f.default ~= nil then
             local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
             if f.mult ~= nil then default = default * f.mult end
-            field:default(default)
+            rf2ethos.formFields[i]:default(default)
         else
-            field:default(0)
+            rf2ethos.formFields[i]:default(0)
         end
-        if f.decimals ~= nil then field:decimals(f.decimals) end
-        if f.unit ~= nil then field:suffix(f.unit) end
+        if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+        if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
         if f.help ~= nil then
             if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                 local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                field:help(helpTxt)
+                rf2ethos.formFields[i]:help(helpTxt)
             end
         end
     end
@@ -851,7 +851,7 @@ function ui.openPageSERVOS(idx, title, script)
 
         if i == 1 then
             line = form.addLine("Servo")
-            field = form.addChoiceField(line, nil, rf2ethos.utils.convertPageValueTable(servoTable), function()
+            rf2ethos.formFields[i] = form.addChoiceField(line, nil, rf2ethos.utils.convertPageValueTable(servoTable), function()
                 value = rf2ethos.lastChangedServo
                 if rf2ethos.Page == nil then
                     rf2ethos.triggers.wasReloading = true
@@ -867,7 +867,7 @@ function ui.openPageSERVOS(idx, title, script)
         else
             if f.hideme == nil or f.hideme == false then
                 line = form.addLine(f.t)
-                field = form.addNumberField(line, nil, f.min, f.max, function()
+                rf2ethos.formFields[i] = form.addNumberField(line, nil, f.min, f.max, function()
                     local value = rf2ethos.getFieldValue(f)
                     return value
                 end, function(value)
@@ -877,16 +877,16 @@ function ui.openPageSERVOS(idx, title, script)
                 if f.default ~= nil then
                     local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                     if f.mult ~= nil then default = default * f.mult end
-                    field:default(default)
+                    rf2ethos.formFields[i]:default(default)
                 else
-                    field:default(0)
+                    rf2ethos.formFields[i]:default(0)
                 end
-                if f.decimals ~= nil then field:decimals(f.decimals) end
-                if f.unit ~= nil then field:suffix(f.unit) end
+                if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+                if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
                 if f.help ~= nil then
                     if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                         local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                        field:help(helpTxt)
+                        rf2ethos.formFields[i]:help(helpTxt)
                     end
                 end
             end
@@ -923,7 +923,7 @@ function ui.fieldChoice(f, i)
         postText = nil
     end
 
-    field = form.addChoiceField(line, posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
+    rf2ethos.formFields[i] = form.addChoiceField(line, posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
         local value = rf2ethos.getFieldValue(f)
 
         return value
@@ -975,7 +975,7 @@ function ui.fieldNumber(f, i)
         -- posField = {x = 2000, y = 0, w = 20, h = 20}
     end
 
-    field = form.addNumberField(line, posField, minValue, maxValue, function()
+    rf2ethos.formFields[i] = form.addNumberField(line, posField, minValue, maxValue, function()
         local value = rf2ethos.getFieldValue(f)
 
         return value
@@ -989,19 +989,19 @@ function ui.fieldNumber(f, i)
     if f.default ~= nil then
         local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
         if f.mult ~= nil then default = default * f.mult end
-        field:default(default)
+        rf2ethos.formFields[i]:default(default)
     else
-        field:default(0)
+        rf2ethos.formFields[i]:default(0)
     end
 
-    if f.decimals ~= nil then field:decimals(f.decimals) end
-    if f.unit ~= nil then field:suffix(f.unit) end
-    if f.step ~= nil then field:step(f.step) end
+    if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+    if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+    if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
 
     if f.help ~= nil then
         if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
             local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-            field:help(helpTxt)
+            rf2ethos.formFields[i]:help(helpTxt)
         end
     end
 
@@ -1148,7 +1148,7 @@ function ui.openPagePreferences(idx, title, script)
 
     line = form.addLine("Preferences")
 
-    field = form.addButton(line, {x = x - (buttonW + padding) * 1, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = buttonH}, {
+    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - (buttonW + padding) * 1, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = buttonH}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1161,12 +1161,12 @@ function ui.openPagePreferences(idx, title, script)
             rf2ethos.ui.openMainMenu()
         end
     })
-    field:focus()
+    rf2ethos.formNavigationFields['menu']:focus()
 
     rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
     if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then rf2ethos.config.iconsizeParam = 1 end
     line = form.addLine("Button style")
-    form.addChoiceField(line, nil, {{"Text", 0}, {"Small image", 1}, {"Large images", 2}}, function()
+    rf2ethos.formFields[1] = form.addChoiceField(line, nil, {{"Text", 0}, {"Small image", 1}, {"Large images", 2}}, function()
         return rf2ethos.config.iconsizeParam
     end, function(newValue)
         rf2ethos.config.iconsizeParam = newValue
@@ -1181,7 +1181,7 @@ function ui.openPagePreferences(idx, title, script)
     end
 
     line = form.addLine("Switch profile")
-    form.addSourceField(line, nil, function()
+    rf2ethos.formFields[2] = form.addSourceField(line, nil, function()
         return rf2ethos.config.profileswitchParam
     end, function(newValue)
         rf2ethos.config.profileswitchParam = newValue
@@ -1197,7 +1197,7 @@ function ui.openPagePreferences(idx, title, script)
     end
 
     line = form.addLine("Switch rates")
-    form.addSourceField(line, nil, function()
+    rf2ethos.formFields[3] = form.addSourceField(line, nil, function()
         return rf2ethos.config.rateswitchParam
     end, function(newValue)
         rf2ethos.config.rateswitchParam = newValue
@@ -1209,7 +1209,7 @@ function ui.openPagePreferences(idx, title, script)
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
     if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
     line = form.addLine("Timeout")
-    form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
+    rf2ethos.formFields[4] = form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
         return rf2ethos.config.watchdogParam
     end, function(newValue)
         rf2ethos.config.watchdogParam = newValue
@@ -1223,7 +1223,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
     local padding = 5
     local helpWidth = 0
 
-    field = form.addButton(line, {x = x - w - padding - w - padding - w - padding, y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - w - padding - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1236,9 +1236,9 @@ function ui.navigationButtonsEscForm(x, y, w, h)
             ui.openPageESCTool(rf2ethos.escManufacturer)
         end
     })
-    field:focus()
+    rf2ethos.formNavigationFields['menu']:focus()
 
-    form.addButton(line, {x = x - w - padding - w - padding, y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['save'] = form.addButton(line, {x = x - w - padding - w - padding, y = y, w = w, h = h}, {
         text = "SAVE",
         icon = nil,
         options = FONT_S,
@@ -1250,7 +1250,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
         end
     })
 
-    form.addButton(line, {x = x - w - padding, y = y, w = w, h = h}, {
+     rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = x - w - padding, y = y, w = w, h = h}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -1307,7 +1307,7 @@ function ui.navigationButtons(x, y, w, h)
         helpWidth = 0
     end
 
-    field = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['menu']  = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -1317,9 +1317,9 @@ function ui.navigationButtons(x, y, w, h)
             rf2ethos.ui.openMainMenu()
         end
     })
-    field:focus()
+    rf2ethos.formNavigationFields['menu']:focus()
 
-    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['save']  = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
         text = "SAVE",
         icon = nil,
         options = FONT_S,
@@ -1330,7 +1330,7 @@ function ui.navigationButtons(x, y, w, h)
         end
     })
 
-    form.addButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = w, h = h}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -1345,7 +1345,7 @@ function ui.navigationButtons(x, y, w, h)
     if helpWidth > 0 then
 
 
-        form.addButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, {
+        rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, {
             text = "?",
             icon = nil,
             options = FONT_S,

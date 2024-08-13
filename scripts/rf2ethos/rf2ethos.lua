@@ -52,6 +52,8 @@ rf2ethos.utils = assert(compile.loadScript(config.toolDir .. "lib/utils.lua"))()
 rf2ethos.ui = {}
 rf2ethos.ui = assert(compile.loadScript(config.toolDir .. "lib/ui.lua"))()
 
+rf2ethos.formFields = {}
+rf2ethos.formNavigationFields = {}
 rf2ethos.PageTmp = {}
 rf2ethos.Page = {}
 rf2ethos.saveTS = 0
@@ -896,6 +898,8 @@ function rf2ethos.wakeupUI()
             rf2ethos.triggers.wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
+			rf2ethos.formFields = {}
+			rf2ethos.formNavigationFields = {}
 						
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePID(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
