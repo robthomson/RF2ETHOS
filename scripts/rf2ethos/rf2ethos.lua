@@ -568,7 +568,7 @@ function rf2ethos.wakeupUI()
 			end
 		end	
 		
-		if rf2ethos.dialogs.save == true then
+		if rf2ethos.dialogs.save ~= nil then
         rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
 		end
 
@@ -577,7 +577,7 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveProgressCounter = 0
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
-			if rf2ethos.dialogs.save == true then
+			if rf2ethos.dialogs.save ~= nil then
 				rf2ethos.dialogs.save:close()
 			end
         end
@@ -979,9 +979,7 @@ function rf2ethos.wakeupUI()
         end
 	elseif rf2ethos.triggers.wasSaving == true then
 		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
-		if rf2ethos.dialogs.save == true then
-			rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
-		end
+		rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
     end
 
     -- trigger save
