@@ -54,7 +54,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            rf2ethos.triggers.mspDataLoaded = true
+            rf2ethos.triggers.isReady = true
         end
     end,
     postLoad = function(self)
@@ -64,6 +64,6 @@ return {
         self.escinfo[1].t = model
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
-		rf2ethos.triggers.mspDataLoaded = true		
+		rf2ethos.triggers.isReady = true		
     end
 }

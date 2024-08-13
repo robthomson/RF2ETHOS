@@ -47,7 +47,7 @@ return {
         f = self.fields[3]
         f.value = f.value + 4
 		
-		rf2ethos.triggers.mspDataLoaded = true		
+		rf2ethos.triggers.isReady = true		
     end,
     postRead = function(self)
         -- rf2ethos.utils.log("postRead")
@@ -57,7 +57,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            rf2ethos.triggers.mspDataLoaded = true
+            rf2ethos.triggers.isReady = true
         end
     end,
     preSave = function(self)

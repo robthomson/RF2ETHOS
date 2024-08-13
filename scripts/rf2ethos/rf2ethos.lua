@@ -19,7 +19,7 @@ triggers.triggerMAINMENU = false
 triggers.escPowerCycle = false
 triggers.escPowerCycleAnimation = nil
 triggers.escPowerCycleLoader = 0
-triggers.mspDataLoaded = false
+triggers.isReady = false
 triggers.isSaving = false
 triggers.wasSaving = false
 triggers.wasReloading = false
@@ -381,9 +381,9 @@ local mspLoadSettings = {
 			if rf2ethos.Page.postLoad then 
 				rf2ethos.Page.postLoad(rf2ethos.Page) 
 			end					
-			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded")
+			rf2ethos.utils.log("rf2ethos.triggers.isReady")
 		else
-			rf2ethos.utils.log("rf2ethos.triggers.mspDataLoaded rf2ethos.Page is nil?")
+			rf2ethos.utils.log("rf2ethos.triggers.isReady rf2ethos.Page is nil?")
 		end
 
     end
@@ -837,9 +837,9 @@ function rf2ethos.wakeupUI()
     end
 
     if rf2ethos.uiState ~= rf2ethos.uiStatus.mainMenu then
-        --if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
-		if (rf2ethos.triggers.mspDataLoaded == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
-            rf2ethos.triggers.mspDataLoaded = false
+        --if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+		if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+            rf2ethos.triggers.isReady = false
             rf2ethos.triggers.isLoading = false
             rf2ethos.triggers.wasLoading = true
             --if config.environment.simulation ~= true then 

@@ -84,7 +84,7 @@ return {
         f = self.fields[3]
         f.max = (self.svFlags & (1 << escFlags.bec12v)) == 0 and 84 or 123
 		
-		rf2ethos.triggers.mspDataLoaded = true
+		rf2ethos.triggers.isReady = true
     end,
     postRead = function(self)
         if self.values[1] ~= mspSignature then
@@ -92,7 +92,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            rf2ethos.triggers.mspDataLoaded = true
+            rf2ethos.triggers.isReady = true
             return
         end
     end,

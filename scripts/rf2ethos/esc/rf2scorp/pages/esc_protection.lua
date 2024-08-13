@@ -37,7 +37,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            rf2ethos.triggers.mspDataLoaded = true
+            rf2ethos.triggers.isReady = true
             return
         end
     end,
@@ -56,7 +56,7 @@ return {
             self.escinfo[2].t = version
             self.escinfo[3].t = firmware
         end
-		rf2ethos.triggers.mspDataLoaded = true
+		rf2ethos.triggers.isReady = true
     end,
     preSavePayload = function(payload)
         payload[2] = 0

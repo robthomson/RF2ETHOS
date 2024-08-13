@@ -25,7 +25,7 @@ function ui.openMainMenu()
     -- reset page to nil as should be nil on this page
     -- rf2ethos.Page = nil
 
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
     rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
     rf2ethos.triggers.escPowerCycle = false
     rf2ethos.escMenuState = 0
@@ -134,7 +134,7 @@ end
 function ui.openPageRATESLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -289,7 +289,7 @@ function ui.openPageESC(idx, title, script)
 
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then return end
 
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
     rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
     rf2ethos.triggers.escPowerCycle = false
 
@@ -420,7 +420,7 @@ function ui.openPageESCToolLoader(folder)
     rf2ethos.escMode = true
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     ESC.init = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/init.lua"))()
     rf2ethos.triggers.escPowerCycle = ESC.init.powerCycle
@@ -600,7 +600,7 @@ function rf2ethos.openESCFormLoader(folder, script)
     rf2ethos.escMode = true
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages/" .. script))()
     collectgarbage()
@@ -676,7 +676,7 @@ end
 function ui.openPagePIDLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -790,7 +790,7 @@ function ui.openPageSERVOSLoader(idx, title, script)
     -- rf2ethos.utils.log("openrf2ethos.ui.openPageSERVOSLoader")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -1065,7 +1065,7 @@ end
 function ui.openPageDefaultLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -1119,7 +1119,7 @@ end
 
 function ui.openPagePreferences(idx, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.mspDataLoaded = false
+    rf2ethos.triggers.isReady = false
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
