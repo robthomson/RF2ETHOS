@@ -219,7 +219,8 @@ function ui.openPageRATES(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethos_RATEROWS_" .. ri] = form.addLine(rv) end
+	local rateRows = {}
+	for ri, rv in ipairs(rf2ethos.Page.rows) do rateRows[ri] = form.addLine(rv) end
 
     for i = 1, #rf2ethos.Page.fields do
         local f = rf2ethos.Page.fields[i]
@@ -243,7 +244,7 @@ function ui.openPageRATES(idx, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            rf2ethos.formFields[i] = form.addNumberField(_G["rf2ethos_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
+            rf2ethos.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
                 local value
 				if rf2ethos.activeRateTable == 0 then
 					value = 0
@@ -263,9 +264,9 @@ function ui.openPageRATES(idx, title, script)
             else
                 rf2ethos.formFields[i]:default(0)
             end
-            if f.decimals ~= nil then field:decimals(f.decimals) end
-            if f.unit ~= nil then field:suffix(f.unit) end
-            if f.step ~= nil then field:step(f.step) end
+            if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+            if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+            if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
             if f.help ~= nil then
                 if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                     local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
@@ -739,7 +740,8 @@ function ui.openPagePID(idx, title, script)
     end
 
     -- display each row
-    for ri, rv in ipairs(rf2ethos.Page.rows) do _G["rf2ethos_PIDROWS_" .. ri] = form.addLine(rv) end
+	local pidRows = {}
+    for ri, rv in ipairs(rf2ethos.Page.rows) do pidRows[ri] = form.addLine(rv) end
 
     for i = 1, #rf2ethos.Page.fields do
         local f = rf2ethos.Page.fields[i]
@@ -758,7 +760,7 @@ function ui.openPagePID(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        rf2ethos.formFields[i] = form.addNumberField(_G["rf2ethos_PIDROWS_" .. f.row], pos, minValue, maxValue, function()
+        rf2ethos.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
             local value = rf2ethos.getFieldValue(f)
             return value
         end, function(value)
