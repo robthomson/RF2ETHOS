@@ -409,14 +409,13 @@ local function saveSettings()
             local payload = rf2ethos.Page.values
 
             if rf2ethos.Page.preSave then payload = rf2ethos.Page.preSave(rf2ethos.Page) end
-            if rf2ethos.Page.alterPayload then payload = rf2ethos.Page.alterPayload(payload) end
+            if rf2ethos.Page.preSavePayload then payload = rf2ethos.Page.preSavePayload(payload) end
 
             mspSaveSettings.command = rf2ethos.Page.write
             mspSaveSettings.payload = payload
             mspSaveSettings.simulatorResponse = {}
             rf2ethos.mspQueue:add(mspSaveSettings)
-            rf2ethos.mspQueue.errorHandler = function()
-               displayMessage = {title = "Save error", text = "Make sure your heli is disarmed."}
+            rf2ethos.mspQueue.errorHandler = function()	
                 print("Save failed")
                 rf2ethos.triggers.saveFailed = true
             end

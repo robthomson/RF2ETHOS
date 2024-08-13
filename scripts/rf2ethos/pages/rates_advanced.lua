@@ -72,12 +72,12 @@ return {
         -- rf2ethos.utils.log("postLoad")
 		rf2ethos.triggers.mspDataLoaded = true
     end,
-	alterPayload = function(payload)
+	preSavePayload = function(payload)
 		if rf2ethos.triggers.resetRates == true then
 			rf2ethos.triggers.resetRates = false
 			
 			rf2ethos.NewRateTable = rf2ethos.Page.values[1]
-			
+
 			payload =  defaultRates(rf2ethos.NewRateTable)			
 			
 			return payload 
