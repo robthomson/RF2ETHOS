@@ -958,6 +958,11 @@ function rf2ethos.wakeupUI()
                 rf2ethos.dialogs.save:value(0)
                 rf2ethos.dialogs.save:closeAllowed(false)
                 rf2ethos.mspQueue.retryCount = 0
+				-- we have to fake save when running in similator
+				if rf2ethos.config.environment.simulation == true then				
+					rf2ethos.triggers.closeSave = true
+					rf2ethos.pageState = rf2ethos.pageStatus.display
+				end
             end
             local saveMsg = ""
             if rf2ethos.pageState == rf2ethos.pageStatus.saving then
@@ -991,20 +996,23 @@ function rf2ethos.wakeupUI()
 
                     -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
                     -- to stop has having to do a 'reload' of the page.
-					--if rf2ethos.config.environment.simulation ~= true then
-						rf2ethos.PageTmp = {}
-						rf2ethos.PageTmp = rf2ethos.Page
+					
+					rf2ethos.PageTmp = {}
+					rf2ethos.PageTmp = rf2ethos.Page
 
-						rf2ethos.triggers.isSaving = true
-						rf2ethos.triggers.wasSaving = true
+					rf2ethos.triggers.isSaving = true
+					rf2ethos.triggers.wasSaving = true
 
-						rf2ethos.triggers.triggerSAVE = false
-						rf2ethos.resetRates()
+					rf2ethos.triggers.triggerSAVE = false
+					rf2ethos.resetRates()
+					if rf2ethos.config.environment.simulation ~= true then
 						saveSettings()
-						return true
-					--else
-					--	return true
-					--end
+					else
+						 -- when in sime we fake a save as not possible to really do
+						 -- this involves tricking the progress dialog into thinking
+						 rf2ethos.pageState = rf2ethos.pageStatus.saving
+					end
+					return true
                 end
             }, {
                 label = "CANCEL",
