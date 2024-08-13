@@ -1115,6 +1115,7 @@ function ui.openPageDefault(idx, title, script)
         end
     end
 
+
 end
 
 function ui.openPagePreferences(idx, title, script)

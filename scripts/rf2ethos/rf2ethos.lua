@@ -84,6 +84,7 @@ rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
+rf2ethos.wakeupSchedulerForm = os.clock()
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -462,6 +463,24 @@ function rf2ethos.wakeup(widget)
 		rf2ethos.wakeupSchedulerUI = now
 		rf2ethos.wakeupUI()
 	end	
+
+	--keep cpu load down by running Form at reduced interval
+	local now = os.clock()
+	if (now - rf2ethos.wakeupSchedulerForm) >= 0.2 then	
+		rf2ethos.wakeupSchedulerForm = now
+		rf2ethos.wakeupForm()
+	end	
+
+
+end
+
+function rf2ethos.wakeupForm()
+    if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
+		if rf2ethos.Page.wakeup then
+			-- run the pages wakeup function if it exists
+			rf2ethos.Page.wakeup()
+		end
+	end
 end
 
 function rf2ethos.wakeupUI()
@@ -851,7 +870,6 @@ function rf2ethos.wakeupUI()
 
 	if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
 
-        --if (rf2ethos.triggers.wasSaving == true) or config.environment.simulation == true then
 		if (rf2ethos.triggers.wasSaving == true)  then
 		
             rf2ethos.profileSwitchCheck()
@@ -878,6 +896,7 @@ function rf2ethos.wakeupUI()
             rf2ethos.triggers.wasLoading = false
             rf2ethos.profileSwitchCheck()
             rf2ethos.rateSwitchCheck()
+						
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePID(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.lastScript == "rates.lua" then
@@ -891,6 +910,7 @@ function rf2ethos.wakeupUI()
             else
                 rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             end
+
 			rf2ethos.triggers.closeProgressLoader = true
 		elseif rf2ethos.triggers.wasReloading == true then	
 			rf2ethos.ui.progessDisplay()
