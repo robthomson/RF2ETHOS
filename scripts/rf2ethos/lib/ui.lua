@@ -1221,7 +1221,6 @@ function ui.navigationButtonsEscForm(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.resetRates = false
             rf2ethos.escMode = true
             rf2ethos.escNotReadyCount = 0
             collectgarbage()
@@ -1306,7 +1305,6 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.resetRates = false
             rf2ethos.ui.openMainMenu()
         end
     })

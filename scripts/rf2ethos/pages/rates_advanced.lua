@@ -31,6 +31,22 @@ labels[#labels + 1] = {t = "Collective dynamics", label = "coldynamics", inline_
 fields[#fields + 1] = {t = "Time", help = "profilesRatesDynamicsTime", inline = 2, label = "coldynamics", min = 0, max = 250, vals = {23}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", help = "profilesRatesDynamicsAcc", inline = 1, label = "coldynamics", min = 0, max = 50000, vals = {24, 25}, unit = "°/^s", mult = 10, step = 10}
 
+
+
+-- rate table defaults
+local function defaultRates(x)
+    local defaults = {}
+    defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} 				-- NONE
+    defaults[1] = {1, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 203, 0, 1, 0, 0, 0} 		-- BF
+    defaults[2] = {2, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0} 			-- RACEFL
+    defaults[3] = {3, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0} 		-- KISS
+    defaults[4] = {4, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 48, 0, 48, 0, 0, 0} 		-- ACTUAL
+    defaults[5] = {5, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 250, 0, 104, 0, 0, 0} 	-- QUICK
+
+    return defaults[x]
+end
+
+
 return {
     read = 111, -- msp_RC_TUNING
     write = 204, -- msp_SET_RC_TUNING
@@ -55,5 +71,16 @@ return {
     postLoad = function(self)
         -- rf2ethos.utils.log("postLoad")
 		rf2ethos.triggers.mspDataLoaded = true
-    end
+    end,
+	alterPayload = function(payload)
+		if rf2ethos.triggers.resetRates == true then
+			rf2ethos.triggers.resetRates = false
+			
+			rf2ethos.NewRateTable = rf2ethos.Page.values[1]
+			
+			payload =  defaultRates(rf2ethos.NewRateTable)			
+			
+			return payload 
+		end
+    end	
 }

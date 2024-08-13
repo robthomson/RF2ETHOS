@@ -27,7 +27,6 @@ triggers.closinghelp = false
 triggers.saveFailed = false
 triggers.telemetryState = nil
 triggers.reloadRates = false
-triggers.resetRates = nil
 triggers.linkUPTime = nil
 triggers.createForm = false
 triggers.profileswitchLast = nil
@@ -133,7 +132,6 @@ function rf2ethos.resetState()
     rf2ethos.escMode = false
     rf2ethos.triggers.escPowerCycle = false
     rf2ethos.escManufacturer = nil
-    rf2ethos.triggers.resetRates = false
     rf2ethos.escScript = nil
     pageLoaded = 100
     pageTitle = nil
@@ -289,23 +287,6 @@ function rf2ethos.saveFieldValue(f, value)
     if f.mult ~= nil then f.value = f.value / f.mult end
 
     return f.value
-end
-
-function rf2ethos.resetRates()
-    if rf2ethos.lastScript == "rates_advanced.lua" then
-        if rf2ethos.triggers.resetRates == true then
-            rf2ethos.NewRateTable = rf2ethos.Page.fields[13].value
-
-            local newTable = rf2ethos.utils.defaultRates(rf2ethos.NewRateTable)
-
-            for k, v in pairs(newTable) do
-                local f = rf2ethos.Page.fields[k]
-				v = math.floor(v)
-				for idx = 1, #f.vals do rf2ethos.Page.values[f.vals[idx]] = v >> ((idx - 1) * 8) end
-            end
-            rf2ethos.triggers.resetRates = false
-        end
-    end
 end
 
 local function invalidatePages()
@@ -759,7 +740,6 @@ function rf2ethos.wakeupUI()
         rf2ethos.triggers.triggerESCMAINMENU = false
         rf2ethos.escMode = false
         rf2ethos.triggers.escPowerCycle = false
-        rf2ethos.triggers.resetRates = false
         rf2ethos.escNotReadyCount = 0
         rf2ethos.escUnknown = false
         rf2ethos.lastIdx = nil
@@ -1004,7 +984,6 @@ function rf2ethos.wakeupUI()
 					rf2ethos.triggers.wasSaving = true
 
 					rf2ethos.triggers.triggerSAVE = false
-					rf2ethos.resetRates()
 					if rf2ethos.config.environment.simulation ~= true then
 						saveSettings()
 					else
@@ -1191,7 +1170,6 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.resetRates = false
             rf2ethos.escMode = false
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
@@ -1204,7 +1182,6 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.resetRates = false
             rf2ethos.escMode = true
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
@@ -1217,7 +1194,6 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.resetRates = false
             rf2ethos.escMode = true
             rf2ethos.escScript = nil
             rf2ethos.escNotReadyCount = 0
@@ -1232,14 +1208,12 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.resetRates = false
             rf2ethos.ui.openMainMenu()
             return true
         end
         if value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.resetRates = false
             rf2ethos.ui.openMainMenu()
             return true
         end
