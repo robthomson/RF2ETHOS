@@ -244,7 +244,12 @@ function ui.openPageRATES(idx, title, script)
             end
 
             field = form.addNumberField(_G["rf2ethos_RATEROWS_" .. f.row], pos, minValue, maxValue, function()
-                local value = rf2ethos.getFieldValue(f)
+                local value
+				if rf2ethos.activeRateTable == 0 then
+					value = 0
+				else
+					value = rf2ethos.getFieldValue(f)
+				end	
                 return value
             end, function(value)
                 f.value = rf2ethos.saveFieldValue(f, value)
@@ -267,6 +272,9 @@ function ui.openPageRATES(idx, title, script)
                     field:help(helpTxt)
                 end
             end
+			if f.disable == true then
+				field:enable(false)
+			end
         end
     end
 
