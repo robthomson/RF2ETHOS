@@ -1343,6 +1343,7 @@ function ui.navigationButtons(x, y, w, h)
 
     if helpWidth > 0 then
 
+
         form.addButton(line, {x = x - (helpWidth + padding), y = y, w = helpWidth, h = h}, {
             text = "?",
             icon = nil,
@@ -1353,6 +1354,9 @@ function ui.navigationButtons(x, y, w, h)
                 rf2ethos.ui.openPagehelp(help.data, section)
             end
         })
+
+
+		
 
     end
 
@@ -1371,7 +1375,7 @@ function ui.openPagehelp(helpdata, section)
     local message = ""
 
     -- wrap text because of image on right
-    for k, v in ipairs(txtData) do message = message .. v .. "\n\n" end
+    for k, v in ipairs(txtData) do message = message .. v .. "\r\n\r\n" end
 
     local buttons = {
         {
@@ -1379,7 +1383,7 @@ function ui.openPagehelp(helpdata, section)
             action = function()
                 return true
             end
-        }
+        }	
     }
 
     local bitmap = lcd.loadBitmap(qr)
@@ -1392,6 +1396,7 @@ function ui.openPagehelp(helpdata, section)
         wakeup = function()
         end,
         paint = function()
+	
             local w = rf2ethos.config.lcdWidth 
             local h = rf2ethos.config.lcdHeight
             local left = w * 0.75
@@ -1399,9 +1404,13 @@ function ui.openPagehelp(helpdata, section)
             local qw = rf2ethos.radio.helpQrCodeSize
             local qh = rf2ethos.radio.helpQrCodeSize
 
+			
+
             local qy = rf2ethos.radio.buttonPadding
             local qx = rf2ethos.config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2
             lcd.drawBitmap(qx, qy, bitmap, qw, qh)
+
+
 
         end,
         options = TEXT_LEFT
