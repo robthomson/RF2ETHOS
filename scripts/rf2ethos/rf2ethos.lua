@@ -891,11 +891,11 @@ function rf2ethos.wakeupUI()
             end
             collectgarbage()
         end
-		--
-		if not (rf2ethos.Page.values or rf2ethos.triggers.isReady) and rf2ethos.pageState == rf2ethos.pageStatus.display then 
-			requestPage() 
-		end 
-		
+		if rf2ethos.Page ~= nil then
+			if not (rf2ethos.Page.values or rf2ethos.triggers.isReady) and rf2ethos.pageState == rf2ethos.pageStatus.display then 
+				requestPage() 
+			end 
+		end
 		
     end
 
