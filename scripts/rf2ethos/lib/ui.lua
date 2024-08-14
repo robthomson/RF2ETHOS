@@ -282,6 +282,27 @@ function ui.openPageRATES(idx, title, script)
 
 end
 
+function ui.progressDisplay() 
+
+	if rf2ethos.dialogs.progressDisplay == true then
+		return true
+	end
+	if rf2ethos.dialogs.saveDisplay == true  then
+		return true	
+	end
+	if rf2ethos.dialogs.progressDisplayESC == true  then
+		return true	
+	end
+	if rf2ethos.dialogs.nolinkDisplay == true  then
+		return true	
+	end
+	if rf2ethos.dialogs.badversionDisplay == true then
+		return true
+	end
+	
+	return false
+end
+
 function ui.openPageESC(idx, title, script)
 
     -- rf2ethos.utils.log("openrf2ethos.PageESC")
