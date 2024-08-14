@@ -20,6 +20,7 @@ triggers.escPowerCycle = false
 triggers.escPowerCycleAnimation = nil
 triggers.isReady = false
 triggers.isSaving = false
+triggers.isSavingFake = false
 triggers.wasSaving = false
 triggers.wasReloading = false
 triggers.closinghelp = false
@@ -31,6 +32,7 @@ triggers.createForm = false
 triggers.profileswitchLast = nil
 triggers.rateswitchLast = nil
 triggers.closeSave = false
+triggers.closeSaveFake = false
 triggers.badMspVersion = false
 triggers.badMspVersionDisplay = false
 triggers.closeProgressLoader = false
@@ -358,6 +360,7 @@ function rf2ethos.dataBindFields()
 end
 
 rf2ethos.settingsSaved = function()
+
     -- check if this page requires writing to eeprom to save (most do)
     if rf2ethos.Page and rf2ethos.Page.eepromWrite then
         -- don't write again if we're already responding to earlier page.write()s
@@ -574,7 +577,7 @@ function rf2ethos.wakeupUI()
 		end	
 		
 		if rf2ethos.dialogs.save ~= nil then
-        rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+			rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
 		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
@@ -583,10 +586,29 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
 			if rf2ethos.dialogs.save ~= nil then
-				rf2ethos.dialogs.save:close()
-			end
+				rf2ethos.dialogs.save:close()				
+			end			
         end
     end
+
+    if rf2ethos.triggers.closeSaveFake == true then
+		rf2ethos.triggers.isSaving = false
+
+		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 10		
+
+		if rf2ethos.dialogs.save ~= nil then
+			rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
+		end
+
+        if rf2ethos.dialogs.saveProgressCounter >= 100 then
+            rf2ethos.triggers.closeSaveFake = false
+            rf2ethos.dialogs.saveProgressCounter = 0
+            rf2ethos.dialogs.saveDisplay = false
+            rf2ethos.dialogs.saveWatchDog = nil
+			rf2ethos.dialogs.save:close()						
+        end
+    end
+
 
     -- capture profile switching and trigger a reload if needs be
     if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
@@ -978,11 +1000,6 @@ function rf2ethos.wakeupUI()
                 rf2ethos.dialogs.save:value(0)
                 rf2ethos.dialogs.save:closeAllowed(false)
                 rf2ethos.mspQueue.retryCount = 0
-				-- we have to fake save when running in similator
-				if rf2ethos.config.environment.simulation == true then				
-					rf2ethos.triggers.closeSave = true
-					rf2ethos.pageState = rf2ethos.pageStatus.display
-				end
             end
             local saveMsg = ""
             if rf2ethos.pageState == rf2ethos.pageStatus.saving then
@@ -1002,6 +1019,21 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
         end
+	elseif rf2ethos.triggers.isSavingFake == true then	
+	
+			if rf2ethos.dialogs.saveDisplay == false then
+                rf2ethos.triggers.saveFailed = false
+                rf2ethos.dialogs.saveProgressCounter = 0
+                rf2ethos.dialogs.saveDisplay = true
+                rf2ethos.dialogs.saveWatchDog = os.clock()
+                rf2ethos.dialogs.save = form.openProgressDialog("Saving...", "Saving data...")
+                rf2ethos.dialogs.save:value(0)
+                rf2ethos.dialogs.save:closeAllowed(false)
+                rf2ethos.mspQueue.retryCount = 0
+				rf2ethos.triggers.closeSaveFake = true
+				rf2ethos.triggers.isSavingFake = false
+            end	
+	
 	elseif rf2ethos.triggers.wasSaving == true then
 		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
 		rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
@@ -1013,23 +1045,21 @@ function rf2ethos.wakeupUI()
             {
                 label = "        OK        ",
                 action = function()
-
-                    -- store current rf2ethos.Page in rf2ethos.PageTmp for later use
-                    -- to stop has having to do a 'reload' of the page.
-					
-					rf2ethos.PageTmp = {}
-					rf2ethos.PageTmp = rf2ethos.Page
-
-					rf2ethos.triggers.isSaving = true
-					rf2ethos.triggers.wasSaving = true
-
-					rf2ethos.triggers.triggerSAVE = false
+		
+					-- we have to fake a save dialog in sim as its not actually possible 
+					-- to save in sim!
 					if rf2ethos.config.environment.simulation ~= true then
+						rf2ethos.PageTmp = {}
+						rf2ethos.PageTmp = rf2ethos.Page
+						rf2ethos.triggers.isSaving = true
+						rf2ethos.triggers.wasSaving = true
+						rf2ethos.triggers.triggerSAVE = false
 						saveSettings()
 					else
 						 -- when in sime we fake a save as not possible to really do
 						 -- this involves tricking the progress dialog into thinking
-						 rf2ethos.pageState = rf2ethos.pageStatus.saving
+						 rf2ethos.triggers.isSavingFake = true
+						 rf2ethos.triggers.triggerSAVE = false
 					end
 					return true
                 end
