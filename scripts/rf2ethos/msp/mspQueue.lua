@@ -45,7 +45,7 @@ function MspQueueController:processQueue()
 
 	local lastTimeInterval
 	if rf2ethos.escMode == true then
-		lastTimeInterval = 1
+		lastTimeInterval = 0.5
 	else
 		lastTimeInterval = 0.5
 	end
@@ -83,7 +83,7 @@ function MspQueueController:processQueue()
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
     elseif self.retryCount > self.maxRetries then
-        rf2ethos.utils.print("Max retries reached, aborting queue")
+        --rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
         if self.currentMessage.errorHandler then
             self.currentMessage:errorHandler()

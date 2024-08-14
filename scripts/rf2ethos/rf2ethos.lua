@@ -18,7 +18,6 @@ triggers.triggerESCLOADER = false
 triggers.triggerMAINMENU = false
 triggers.escPowerCycle = false
 triggers.escPowerCycleAnimation = nil
-triggers.escPowerCycleLoader = 0
 triggers.isReady = false
 triggers.isSaving = false
 triggers.wasSaving = false
@@ -94,6 +93,12 @@ rf2ethos.dialogs.progressDisplay = false
 rf2ethos.dialogs.progressWatchDog = nil
 rf2ethos.dialogs.progressCounter = 0
 
+rf2ethos.dialogs.progressESC = false
+rf2ethos.dialogs.progressDisplayESC = false
+rf2ethos.dialogs.progressWatchDogESC = nil
+rf2ethos.dialogs.progressCounterESC = 0
+rf2ethos.progressWatchDogESCRateLimit = os.clock()
+
 rf2ethos.dialogs.save = false
 rf2ethos.dialogs.saveDisplay = false
 rf2ethos.dialogs.saveWatchDog = nil
@@ -147,6 +152,7 @@ function rf2ethos.resetState()
     rf2ethos.triggers.telemetryState = nil
 	rf2ethos.triggers.badMspVersionDisplay = false
 	rf2ethos.triggers.badMspVersion = false
+	rf2ethos.dialogs.progressDisplayESC = false	
 	ELRS_PAUSE_TELEMETRY = false
 
 end
@@ -498,12 +504,6 @@ function rf2ethos.wakeupUI()
 	
 
 	if rf2ethos.triggers.closeProgressLoader == true then
-
-	
-		--if rf2ethos.dialogs.progressCounter == 0 then
-		--	rf2ethos.dialogs.progressCounter = 20
-		--end
-	
 		if rf2ethos.dialogs.progressCounter <= 100 then
 			rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 20
 			if rf2ethos.dialogs.progress ~= nil then
@@ -521,6 +521,10 @@ function rf2ethos.wakeupUI()
 			rf2ethos.triggers.closeProgressLoader = false
 		end
 	end
+	
+	if rf2ethos.triggers.closeProgressLoaderESC == true then
+			rf2ethos.dialogs.progressESC:close()
+	end	
 
     if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu then invalidatePages() end
 
@@ -581,43 +585,6 @@ function rf2ethos.wakeupUI()
 			if rf2ethos.dialogs.save ~= nil then
 				rf2ethos.dialogs.save:close()
 			end
-        end
-    end
-
-    -- ESC LOADER
-    if rf2ethos.triggers.triggerESCLOADER == true then
-        if rf2ethos.dialogs.progressDisplay ~= true then
-
-            rf2ethos.dialogs.progressDisplay = true
-            rf2ethos.dialogs.progressWatchDog = os.clock()
-            rf2ethos.dialogs.progress = form.openProgressDialog("Searching...", "Please power cycle the esc")
-			if rf2ethos.dialogs.progress ~= nil then
-				rf2ethos.dialogs.progress:value(20)
-				rf2ethos.dialogs.progress:closeAllowed(false)
-			end
-        else
-            -- this is where we should hit
-
-            if rf2ethos.triggers.escPowerCycleLoader <= 95 then
-                rf2ethos.dialogs.progress:message("Please power cycle the esc")
-            else
-                rf2ethos.dialogs.progress:message("Aborting...")
-            end
-            rf2ethos.dialogs.progress:value(rf2ethos.triggers.escPowerCycleLoader)
-
-            rf2ethos.triggers.escPowerCycleLoader = rf2ethos.triggers.escPowerCycleLoader + 1
-
-            if rf2ethos.mspQueue:isProcessed() then requestPage() end
-
-            if rf2ethos.triggers.escPowerCycleLoader >= 100 then
-                rf2ethos.triggers.escPowerCycleLoader = 0
-				if rf2ethos.dialogs.progress ~= nil then
-					rf2ethos.dialogs.progress:close()
-				end	
-                rf2ethos.triggers.triggerESCLOADER = false
-                rf2ethos.triggers.triggerESCMAINMENU = true
-            end
-
         end
     end
 
@@ -694,12 +661,7 @@ function rf2ethos.wakeupUI()
     end
 
     -- check telemetry state and overlay dialog if not linked
-    if rf2ethos.triggers.escPowerCycle == true then
-        -- ESC MODE - WE NEVER TIME OUT AS DO A 'RETRY DIALOG'
-        -- AS SOME ESC NEED TO BE CONNECTING AS YOU POWER UP to
-        -- INIT CONFIG MODE
-
-    else
+    if rf2ethos.dialogs.progressDisplayESC ~= true then
 		if rf2ethos.triggers.telemetryState ~= 1 then
 		
 			if rf2ethos.dialogs.progress then
@@ -822,6 +784,59 @@ function rf2ethos.wakeupUI()
 
         end
     end
+	
+	if rf2ethos.triggers.escPowerCycle == true and rf2ethos.escUnknown == true then
+
+			if rf2ethos.dialogs.progressDisplayESC ~= true then
+
+				rf2ethos.dialogs.progressDisplayESC = true
+				rf2ethos.dialogs.progressWatchDogESC = os.clock()
+				rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
+				if rf2ethos.dialogs.progressESC ~= nil then
+					rf2ethos.dialogs.progressESC:value(0)
+					rf2ethos.dialogs.progressESC:closeAllowed(false)
+				end
+			else
+	
+				
+				if rf2ethos.mspQueue:isProcessed() then 
+					requestPage() 
+				end
+	
+				-- we rate limit the progress to keep things low cpu	
+				if (os.clock() - rf2ethos.progressWatchDogESCRateLimit) >= 1.5 then
+
+					rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/"..rf2ethos.escManufacturer.."/esc_info.lua"))()
+					collectgarbage()				
+				
+					rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 2				
+					rf2ethos.progressWatchDogESCRateLimit = os.clock()					
+					rf2ethos.dialogs.progressESC:value(rf2ethos.dialogs.progressCounterESC)
+				end
+
+				if rf2ethos.Page.escinfo then
+					local model = rf2ethos.Page.escinfo[1].t	
+					if model ~= "" then
+						rf2ethos.triggers.closeProgressLoaderESC = true
+					end
+				end
+
+
+				if rf2ethos.dialogs.progressCounterESC >= 100 then
+					rf2ethos.dialogs.progressCounterESC = 0
+					if rf2ethos.dialogs.progressESC ~= nil then
+						rf2ethos.dialogs.progressESC:close()
+						rf2ethos.dialogs.progressDisplayESC = false			
+						rf2ethos.triggers.escPowerCycle	= false					
+					end	
+					rf2ethos.triggers.triggerESCLOADER = false
+
+				end
+
+			end
+
+	end
+
 
     -- Process outgoing TX packets and check for incoming frames
     -- Should run every wakeup() cycle with a few exceptions where returns happen earlier
@@ -854,18 +869,20 @@ function rf2ethos.wakeupUI()
             end
             collectgarbage()
         end
-        if rf2ethos.Page ~= nil then if not (rf2ethos.Page.values) and rf2ethos.pageState == rf2ethos.pageStatus.display then requestPage() end end
+		--
+		if not (rf2ethos.Page.values or rf2ethos.triggers.isReady) and rf2ethos.pageState == rf2ethos.pageStatus.display then 
+			requestPage() 
+		end 
+		
+		
     end
 
     if rf2ethos.uiState ~= rf2ethos.uiStatus.mainMenu then
-        --if rf2ethos.config.environment.simulation == true or (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
 		if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
             rf2ethos.triggers.isReady = false
             rf2ethos.triggers.isLoading = false
             rf2ethos.triggers.wasLoading = true
-            --if config.environment.simulation ~= true then 
-				rf2ethos.triggers.createForm = true 
-			--end
+			rf2ethos.triggers.createForm = true 
         end
     end
 
@@ -1268,6 +1285,9 @@ function rf2ethos.close()
 	end
 	if rf2ethos.dialogs.save then
 		rf2ethos.dialogs.save:close()
+	end
+	if rf2ethos.dialogs.progressESC then
+		rf2ethos.dialogs.progressESC:close()
 	end
 	if noLinkDialog then
 		noLinkDialog:close()

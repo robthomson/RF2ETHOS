@@ -415,7 +415,6 @@ end
 function ui.openPageESCToolLoader(folder)
 
 
-
     rf2ethos.escManufacturer = folder
     rf2ethos.escScript = nil
     rf2ethos.escMode = true
@@ -438,17 +437,11 @@ end
 -- basically we load libraries then read
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
 function ui.openPageESCTool(folder)
+	rf2ethos.triggers.wasLoading = false
 	rf2ethos.triggers.closeProgressLoader = true
     -- rf2ethos.utils.log("ui.openPageESCTool")
 
     rf2ethos.escMenuState = 2
-
-    if rf2ethos.triggers.escPowerCycle == true then
-        rf2ethos.uiState = rf2ethos.uiStatus.pages
-        rf2ethos.triggers.triggerESCLOADER = true
-    else
-        rf2ethos.uiState = rf2ethos.uiStatus.MainMenu
-    end
 
     local windowWidth = rf2ethos.config.lcdWidth
     local windowHeight = rf2ethos.config.lcdHeight
@@ -483,30 +476,16 @@ function ui.openPageESCTool(folder)
 
         if model == "" then
             model = "UNKNOWN ESC"
-            rf2ethos.escUnknown = true
+            rf2ethos.escUnknown = true	
         else
             rf2ethos.escUnknown = false
-        end
+		end
 
-        if rf2ethos.triggers.escPowerCycle == true and model == "UNKNOWN ESC" then
-
-            if rf2ethos.triggers.escPowerCycleAnimation == nil or rf2ethos.triggers.escPowerCycleAnimation == "-" or rf2ethos.triggers.escPowerCycleAnimation == "" then
-                rf2ethos.triggers.escPowerCycleAnimation = "+"
-            else
-                rf2ethos.triggers.escPowerCycleAnimation = "-"
-            end
-
-            line = form.addLine("")
-            form.addStaticText(line, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.buttonHeight},
-                               "Please power cycle the speed controller " .. rf2ethos.triggers.escPowerCycleAnimation)
-
-        else
-            rf2ethos.triggers.triggerESCLOADER = false
-            line = form.addLine("")
-            form.addStaticText(line, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.buttonHeight}, model .. " " .. version .. " " .. fw)
-
-        end
+		line = form.addLine("")
+		form.addStaticText(line, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.buttonHeight}, model .. " " .. version .. " " .. fw)
+		
     end
+
 
     local buttonW
     local buttonH
