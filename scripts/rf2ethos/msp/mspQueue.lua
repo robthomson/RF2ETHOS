@@ -45,7 +45,7 @@ function MspQueueController:processQueue()
 
 	local lastTimeInterval
 	if rf2ethos.escMode == true then
-		lastTimeInterval = 0.5
+		lastTimeInterval = 1  -- this is particually needed for HW esc.  
 	else
 		lastTimeInterval = 0.5
 	end
