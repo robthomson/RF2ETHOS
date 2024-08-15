@@ -4,20 +4,13 @@ config.toolName = "RF2ETHOS"							-- name of the tool
 config.toolDir = "/scripts/rf2ethos/"					-- base path the script is installed into
 config.logEnable = false								-- will log to: /scripts/rf2ethos/rf2ethos.log
 config.logEnableScreen = false							-- if config.logEnable is true then also print to screen
-config.mspTxRxDebug = true								-- simple print of full msp payload that is sent and received
+config.mspTxRxDebug = false								-- simple print of full msp payload that is sent and received
 config.reloadOnSave = false								-- trigger a reload on save
 config.useCompiler = true								-- compile the scripts (can be bypassed by /scripts/nocompile or /scripts/rf2ethos.nocompile)
 config.ethosVersion = 1510								-- min version of ethos supported by this script
 config.ethosVersionString = "ETHOS < V1.5.10"			-- string to print if ethos version error occurs
 config.defaultRateTable = 4 -- ACTUAL					-- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
 config.supportedMspApiVersion = { "12.06", "12.07" }	-- supported msp versions
-
-
--- check these config vars below as
-config.luaVersion = "2.0.0 - 240625"
-config.environment = system.getVersion()
-config.apiVersion = 0
-
 
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")

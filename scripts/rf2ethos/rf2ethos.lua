@@ -233,7 +233,6 @@ end
 -- SAVE FIELD VALUE FOR ETHOS FROM ETHOS FORMS INTO THE ACTUAL FORMAT THAT 
 -- WILL BE TRANSMITTED OVER MSP
 function rf2ethos.saveValue(currentField)
-    --if rf2ethos.config.environment.simulation == true then return end
 
     local f = rf2ethos.Page.fields[currentField]
     local scale = f.scale or 1
@@ -1220,6 +1219,7 @@ function rf2ethos.create()
     rf2ethos.uiState = rf2ethos.uiStatus.init
 
     config.apiVersion = 0
+	config.environment = system.getVersion()
 
     rf2ethos.ui.openMainMenu()
 
