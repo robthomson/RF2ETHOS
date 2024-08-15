@@ -103,21 +103,21 @@ function ui.openMainMenu()
                     paint = function()
                     end,
                     press = function()
-						ui.progessDisplay()
+						rf2ethos.ui.progessDisplay()
                         if pvalue.script == "pids.lua" then
-                            rf2ethos.ui.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPagePid(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "servos.lua" then
-                            rf2ethos.ui.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageServos(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "rates.lua"  then
-                            rf2ethos.ui.openPageRATESLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageRates(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "esc.lua" then
-                            rf2ethos.ui.openPageESC(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageEsc(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
                         elseif pvalue.script == "preferences.lua" then
                             rf2ethos.ui.openPagePreferences(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
                         else
-                            rf2ethos.ui.openPageDefaultLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageDefault(pidx, pvalue.title, pvalue.script)
                         end
                     end
                 })
@@ -131,7 +131,7 @@ function ui.openMainMenu()
     end
 end
 
-function ui.openPageRATESLoader(idx, title, script)
+function ui.openPageRatesLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -148,10 +148,10 @@ function ui.openPageRATESLoader(idx, title, script)
     rf2ethos.triggers.isLoading = true
 
 
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRATESLoader")
+    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRatesLoader")
 end
 
-function ui.openPageRATES(idx, title, script)
+function ui.openPageRates(idx, title, script)
 
     if rf2ethos.Page.fields then
         local v = rf2ethos.Page.fields[13].value
@@ -168,7 +168,7 @@ function ui.openPageRATES(idx, title, script)
                     rf2ethos.dialogs.progressDisplay = false
                     rf2ethos.dialogs.progress:close()
                 end
-                rf2ethos.ui.openPageRATESLoader(idx, title, script)
+                rf2ethos.ui.openPageRatesLoader(idx, title, script)
 
             end
         end
@@ -290,7 +290,7 @@ function ui.progressDisplay()
 	if rf2ethos.dialogs.saveDisplay == true  then
 		return true	
 	end
-	if rf2ethos.dialogs.progressDisplayESC == true  then
+	if rf2ethos.dialogs.progressDisplayEsc == true  then
 		return true	
 	end
 	if rf2ethos.dialogs.nolinkDisplay == true  then
@@ -303,9 +303,7 @@ function ui.progressDisplay()
 	return false
 end
 
-function ui.openPageESC(idx, title, script)
-
-    -- rf2ethos.utils.log("openrf2ethos.PageESC")
+function ui.openPageEsc(idx, title, script)
 
     rf2ethos.escMenuState = 1
 
@@ -419,7 +417,7 @@ function ui.openPageESC(idx, title, script)
             end,
             press = function()
 				ui.progessDisplay()
-                rf2ethos.ui.openPageESCToolLoader(pvalue.folder)
+                rf2ethos.ui.openPageEscToolLoader(pvalue.folder)
             end
         })
 
@@ -433,7 +431,7 @@ end
 
 -- preload the page for the specic module of esc and display
 -- a then pass on to the actual form display function
-function ui.openPageESCToolLoader(folder)
+function ui.openPageEscToolLoader(folder)
 
 
     rf2ethos.escManufacturer = folder
@@ -456,10 +454,10 @@ end
 -- initialise menu for specific type of esc
 -- basically we load libraries then read
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
-function ui.openPageESCTool(folder)
+function ui.openPageEscTool(folder)
 	rf2ethos.triggers.wasLoading = false
 	rf2ethos.triggers.closeProgressLoader = true
-    -- rf2ethos.utils.log("ui.openPageESCTool")
+    -- rf2ethos.utils.log("ui.openPageEscTool")
 
     rf2ethos.escMenuState = 2
 
@@ -672,7 +670,7 @@ function rf2ethos.openESCForm(folder, script)
 
 end
 
-function ui.openPagePIDLoader(idx, title, script)
+function ui.openPagePidLoader(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -689,10 +687,10 @@ function ui.openPagePIDLoader(idx, title, script)
 
     rf2ethos.triggers.isLoading = true
 
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPagePID")
+    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPagePid")
 end
 
-function ui.openPagePID(idx, title, script)
+function ui.openPagePid(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -783,9 +781,9 @@ function ui.openPagePID(idx, title, script)
 
 end
 
-function ui.openPageSERVOSLoader(idx, title, script)
+function ui.openPageServosLoader(idx, title, script)
 
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageSERVOSLoader")
+    -- rf2ethos.utils.log("openrf2ethos.ui.openPageServosLoader")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -802,12 +800,12 @@ function ui.openPageSERVOSLoader(idx, title, script)
     rf2ethos.triggers.isLoading = true
 
 
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageSERVOS")
+    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageServos")
 end
 
-function ui.openPageSERVOS(idx, title, script)
+function ui.openPageServos(idx, title, script)
 
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageSERVOS")
+    -- rf2ethos.utils.log("openrf2ethos.ui.openPageServos")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -1234,7 +1232,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.escMode = true
             rf2ethos.escNotReadyCount = 0
             collectgarbage()
-            ui.openPageESCTool(rf2ethos.escManufacturer)
+            ui.openPageEscTool(rf2ethos.escManufacturer)
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()
