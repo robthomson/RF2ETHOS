@@ -1,6 +1,11 @@
 local ui = {}
 
 function ui.progessDisplay()
+
+	if rf2ethos.dialogs.progressDisplay == true then
+		return
+	end
+
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
@@ -131,54 +136,17 @@ function ui.openMainMenu()
     end
 end
 
-function ui.openPageRatesLoader(idx, title, script)
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
-    collectgarbage()
+function ui.openPageRates(idx, title, script)
 
 
+
+	rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+	collectgarbage()
+	
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
-
-    rf2ethos.triggers.isLoading = true
-
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRatesLoader")
-end
-
-function ui.openPageRates(idx, title, script)
-
-    if rf2ethos.Page.fields then
-        local v = rf2ethos.Page.fields[13].value
-        if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
-
-
-        if rf2ethos.activeRateTable ~= nil then
-            if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
-                rf2ethos.RateTable = rf2ethos.activeRateTable 
-				
-				
-                if rf2ethos.dialogs.progressDisplay == true then
-                    rf2ethos.dialogs.progressWatchDog = nil
-                    rf2ethos.dialogs.progressDisplay = false
-                    rf2ethos.dialogs.progress:close()
-                end
-                rf2ethos.ui.openPageRatesLoader(idx, title, script)
-
-            end
-        end
-    end
-
-    rf2ethos.config.rateswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rf2ethos.config.rateswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParam, ",")
-        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -189,12 +157,15 @@ function ui.openPageRates(idx, title, script)
     rf2ethos.ui.fieldHeader(title)
 
     local numCols = #rf2ethos.Page.cols
-    local screenWidth = rf2ethos.config.lcdWidth - 10
+
+	-- we dont use the global due to scrollers
+	local screenWidth,screenHeight = rf2ethos.getWindowSize()
+
     local padding = 10
     local paddingTop = rf2ethos.radio.linePaddingTop
     local h = rf2ethos.radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
-    local paddingRight = 20
+    local paddingRight = 10
     local positions = {}
     local positions_r = {}
     local pos
@@ -208,12 +179,26 @@ function ui.openPageRates(idx, title, script)
     local c = 1
     while loc > 0 do
         local colLabel = rf2ethos.Page.cols[loc]
-        tsizeW, tsizeH = lcd.getTextSize(colLabel)
-        pos = {x = posX - tsizeW + paddingRight, y = posY, w = w, h = h}
+	
+        positions[loc] = posX - w 
+        positions_r[c] = posX - w 
+	
+		lcd.font(FONT_STD)
+        local tsizeW, tsizeH = lcd.getTextSize(colLabel)
+		
+		
+		local posTxt = (positions_r[c] + w) - tsizeW 
+
+		
+        pos = {	x = posTxt, 
+				y = posY, 
+				w = w, 
+				h = h
+			   }
         form.addStaticText(line, pos, colLabel)
-        positions[loc] = posX - w + paddingRight
-        positions_r[c] = posX - w + paddingRight
+				
         posX = math.floor(posX - w)
+		
         loc = loc - 1
         c = c + 1
     end
@@ -610,7 +595,6 @@ function rf2ethos.openESCFormLoader(folder, script)
    
 end
 
---
 function rf2ethos.openESCForm(folder, script)
 	rf2ethos.triggers.closeProgressLoader = true
     -- rf2ethos.utils.log("rf2ethos.openESCForm")
@@ -670,7 +654,8 @@ function rf2ethos.openESCForm(folder, script)
 
 end
 
-function ui.openPagePidLoader(idx, title, script)
+function ui.openPagePid(idx, title, script)
+
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -678,19 +663,10 @@ function ui.openPagePidLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-
-
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
-
-    rf2ethos.triggers.isLoading = true
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPagePid")
-end
-
-function ui.openPagePid(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -781,31 +757,19 @@ function ui.openPagePid(idx, title, script)
 
 end
 
-function ui.openPageServosLoader(idx, title, script)
+function ui.openPageServos(idx, title, script)
 
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageServosLoader")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
-
-
-
+	
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
 
-    rf2ethos.triggers.isLoading = true
-
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageServos")
-end
-
-function ui.openPageServos(idx, title, script)
-
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageServos")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -1057,7 +1021,7 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPageDefaultLoader(idx, title, script)
+function ui.openPageDefault(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -1065,24 +1029,18 @@ function ui.openPageDefaultLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-
-
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-
     rf2ethos.triggers.isLoading = true
 
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageDefaultLoader")
-
-
-end
-
-function ui.openPageDefault(idx, title, script)
 
     local fieldAR = {}
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.triggers.isReady = false
+
+
 
     longPage = false
 
