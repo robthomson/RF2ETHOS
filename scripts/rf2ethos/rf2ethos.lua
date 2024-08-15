@@ -940,7 +940,7 @@ function rf2ethos.wakeupUI()
 	-- and esc reload was triggered
     if rf2ethos.triggers.triggerEscReload == true then
         rf2ethos.triggers.triggerEscReload = false
-        rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
+        rf2ethos.openESCFormInit(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 
 	-- show an error if msp version is bad
@@ -1126,6 +1126,7 @@ function rf2ethos.wakeupUI()
 	-- check if rate or profile switches have been toggled
 	rf2ethos.profileSwitchCheck()
 	rf2ethos.rateSwitchCheck()	
+
 
 	-- start displaying an actual page of data
 	--[[

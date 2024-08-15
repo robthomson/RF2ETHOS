@@ -17,6 +17,8 @@ escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
 escinfo[#escinfo + 1] = {t = ""}
 
+local foundEsc = false
+local foundEscDone = false 
 return {
     read = 217, -- msp_ESC_PARAMETERS
     eepromWrite = false,
@@ -47,6 +49,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
+			foundEsc = false
             return
         else
             local model = getEscTypeLabel(self.values)
@@ -55,7 +58,17 @@ return {
             self.escinfo[1].t = model
             self.escinfo[2].t = version
             self.escinfo[3].t = firmware
+			foundEsc = true
         end
-		rf2ethos.triggers.isReady = true
-    end
+		--rf2ethos.triggers.isReady = true
+    end,
+    wakeup = function(self)
+	
+		if foundEsc == true and foundEscDone == false then
+			foundEscDone = true
+			rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
+		end
+				
+    end	
 }
+
