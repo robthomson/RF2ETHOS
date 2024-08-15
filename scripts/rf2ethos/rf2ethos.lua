@@ -12,6 +12,7 @@ triggers.exitAPP = false
 triggers.noRFMsg = false
 triggers.triggerSAVE = false
 triggers.triggerRELOAD = false
+triggers.triggerRELOADNoPrompt = false
 triggers.triggerESCRELOAD = false
 triggers.triggerESCMAINMENU = false
 triggers.triggerESCLOADER = false
@@ -390,6 +391,7 @@ function rf2ethos.readPage()
     end
 end
 
+
 -- SAVE ALL SETTINGS 
 local function saveSettings()
 
@@ -400,9 +402,27 @@ local function saveSettings()
         if rf2ethos.Page.values then
             local payload = rf2ethos.Page.values
 
-            if rf2ethos.Page.preSave then payload = rf2ethos.Page.preSave(rf2ethos.Page) end
-            if rf2ethos.Page.preSavePayload then payload = rf2ethos.Page.preSavePayload(payload) end
+            if rf2ethos.Page.preSave then 
+				payload = rf2ethos.Page.preSave(rf2ethos.Page) 
+			end
+            if rf2ethos.Page.preSavePayload then 
+				payload = rf2ethos.Page.preSavePayload(payload) 
+			end
+			
+			
+			if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
 
+				local logData = "Saving:        {" .. rf2ethos.utils.joinTableItems(payload, ", ") .. "}"
+
+				rf2ethos.utils.log(logData)
+				
+				if rf2ethos.config.mspTxRxDebug == true then
+						print(logData)
+				end
+				
+			end	
+			
+			
             mspSaveSettings.command = rf2ethos.Page.write
             mspSaveSettings.payload = payload
             mspSaveSettings.simulatorResponse = {}
@@ -833,7 +853,7 @@ function rf2ethos.wakeupUI()
 						rf2ethos.triggers.triggerSAVE = false
 						saveSettings()
 					else
-						 -- when in sime we fake a save as not possible to really do
+						 -- when in sim we fake a save as not possible to really do
 						 -- this involves tricking the progress dialog into thinking
 						 rf2ethos.triggers.isSavingFake = true
 						 rf2ethos.triggers.triggerSAVE = false
@@ -872,6 +892,15 @@ function rf2ethos.wakeupUI()
 		rf2ethos.triggers.triggerSAVE = false
     end
 
+	-- a reload that is pretty much instant with no prompt to ask them
+	if rf2ethos.triggers.triggerRELOADNoPrompt == true then
+		rf2ethos.triggers.triggerRELOADNoPrompt = false
+		rf2ethos.triggers.wasReloading = true
+		rf2ethos.triggers.createForm = true
+		rf2ethos.triggers.wasSaving = false
+		rf2ethos.triggers.wasLoading = false
+		rf2ethos.triggers.reloadRates = false	
+	end
 
 	-- a reload was triggered - popup a box asking for the reload to be done
     if rf2ethos.triggers.triggerRELOAD == true then
@@ -882,7 +911,6 @@ function rf2ethos.wakeupUI()
                     -- trigger RELOAD
 					rf2ethos.triggers.wasReloading = true
 					rf2ethos.triggers.createForm = true
-
 					rf2ethos.triggers.wasSaving = false
 					rf2ethos.triggers.wasLoading = false
 					rf2ethos.triggers.reloadRates = false
@@ -1087,6 +1115,9 @@ function rf2ethos.wakeupUI()
                 rf2ethos.triggers.closeSave = true
                 rf2ethos.Page = rf2ethos.PageTmp
                 rf2ethos.PageTmp = {}
+				if rf2ethos.config.reloadOnSave == true then
+					rf2ethos.triggers.triggerRELOADNoPrompt = true	
+				end
             end
 
 		-- we where busy loading some data and finished the job

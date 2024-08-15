@@ -16,14 +16,6 @@ function MspQueueController:isProcessed()
     return not self.currentMessage and #self.messageQueue == 0
 end
 
-function joinTableItems(table, delimiter)
-    if table == nil or #table == 0 then return "" end
-    delimiter = delimiter or ""
-    local result = table[1]
-    for i = 2, #table do result = result .. delimiter .. table[i] end
-    return result
-end
-
 local function popFirstElement(tbl)
     return table.remove(tbl, 1)
 end
@@ -74,12 +66,37 @@ function MspQueueController:processQueue()
         err = nil
     end
 
-    if cmd then rf2ethos.utils.log("Received cmd: " .. tostring(cmd)) end
+    if cmd then 
+		
+		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then	
+			local logData = "Requesting:  {" .. tostring(cmd) .."}"
+
+			rf2ethos.utils.log(logData) 
+			
+			if rf2ethos.config.mspTxRxDebug == true then
+						print(logData)
+			end			
+			
+		end	
+			
+	end
 
     if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
     or (self.currentMessage.command == 217 and err and self.retryCount == 2) -- ESC
     then
-        rf2ethos.utils.log("Received: {" .. joinTableItems(buf, ", ") .. "}")
+
+		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+			local logData = "Received:      {" .. rf2ethos.utils.joinTableItems(buf, ", ") .. "}"
+			rf2ethos.utils.log(logData)
+			
+			if rf2ethos.config.mspTxRxDebug == true then
+					if #buf > 0 then
+						print(logData)
+					end	
+			end
+			
+		end			
+			
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
     elseif self.retryCount > self.maxRetries then

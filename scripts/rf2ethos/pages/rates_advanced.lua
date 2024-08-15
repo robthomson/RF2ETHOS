@@ -1,6 +1,7 @@
 local labels = {}
 local fields = {}
 
+
 if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
 
 fields[#fields + 1] = {
@@ -72,15 +73,13 @@ return {
         -- rf2ethos.utils.log("postLoad")
 		rf2ethos.triggers.isReady = true
     end,
-	preSavePayload = function(payload)
+	preSavePayload = function(payload)	
 		if rf2ethos.triggers.resetRates == true then
 			rf2ethos.triggers.resetRates = false
-			
 			rf2ethos.NewRateTable = rf2ethos.Page.values[1]
-
 			payload =  defaultRates(rf2ethos.NewRateTable)			
-			
-			return payload 
 		end
+		
+		return payload 
     end	
 }

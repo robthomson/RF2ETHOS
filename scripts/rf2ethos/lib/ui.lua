@@ -1109,12 +1109,16 @@ function ui.openPageDefault(idx, title, script)
         local currentField = i
 
         rf2ethos.ui.fieldLabel(f, i, l)
+		
+		if f.hidden ~= true then
 
-        if f.table or f.type == 1 then
-            rf2ethos.ui.fieldChoice(f, i)
-        else
-            rf2ethos.ui.fieldNumber(f, i)
-        end
+			if f.table or f.type == 1 then
+				rf2ethos.ui.fieldChoice(f, i)
+			else
+				rf2ethos.ui.fieldNumber(f, i)
+			end
+			
+		end	
     end
 
 

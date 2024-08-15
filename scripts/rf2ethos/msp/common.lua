@@ -59,7 +59,7 @@ function mspProcessTxQ()
             i = i + 1
         end
 
-        -- rf2ethos.utils.log("Sent: {" .. joinTableItems(payload, ", ") .. "}")
+
 
         rf2ethos.protocol.mspSend(payload)
         mspTxBuf = {}

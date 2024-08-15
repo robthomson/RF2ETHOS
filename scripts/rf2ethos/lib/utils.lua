@@ -113,6 +113,14 @@ function utils.getTime()
     return os.clock() * 100
 end
 
+function utils.joinTableItems(table, delimiter)
+    if table == nil or #table == 0 then return "" end
+    delimiter = delimiter or ""
+    local result = table[1]
+    for i = 2, #table do result = result .. delimiter .. table[i] end
+    return result
+end
+
 function utils.scaleValue(value, f)
     local v
     v = value * utils.decimalInc(f.decimals)
@@ -222,12 +230,19 @@ end
 
 function utils.log(msg)
 
-    if rf2ethos.config.logEnable == true then
-        print(msg)
-        local f = io.open("/rf2ethos.log", 'a')
-        io.write(f, tostring(msg) .. "\n")
-        io.close(f)
-    end
+
+
+	if rf2ethos.config.logEnable == true then
+	
+		if rf2ethos.config.logEnableScreen == true then
+				print(msg)
+		end	
+	
+		local f = io.open(rf2ethos.config.toolDir .. "/rf2ethos.log", 'a')
+		io.write(f, tostring(msg) .. "\n")
+		io.close(f)
+		
+	end
 end
 
 -- print a table out to debug console
