@@ -1,6 +1,11 @@
 local ui = {}
 
 function ui.progessDisplay()
+
+	if rf2ethos.dialogs.progressDisplay == true then
+		return
+	end
+
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
@@ -103,21 +108,21 @@ function ui.openMainMenu()
                     paint = function()
                     end,
                     press = function()
-						ui.progessDisplay()
+						rf2ethos.ui.progessDisplay()
                         if pvalue.script == "pids.lua" then
-                            rf2ethos.ui.openPagePIDLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPagePid(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "servos.lua" then
-                            rf2ethos.ui.openPageSERVOSLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageServos(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "rates.lua"  then
-                            rf2ethos.ui.openPageRATESLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageRates(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "esc.lua" then
-                            rf2ethos.ui.openPageESC(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageEsc(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
                         elseif pvalue.script == "preferences.lua" then
                             rf2ethos.ui.openPagePreferences(pidx, pvalue.title, pvalue.script)
 							rf2ethos.triggers.closeProgressLoader = true
                         else
-                            rf2ethos.ui.openPageDefaultLoader(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPageDefault(pidx, pvalue.title, pvalue.script)
                         end
                     end
                 })
@@ -131,54 +136,17 @@ function ui.openMainMenu()
     end
 end
 
-function ui.openPageRATESLoader(idx, title, script)
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
-    collectgarbage()
+function ui.openPageRates(idx, title, script)
 
 
+
+	rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+	collectgarbage()
+	
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
-
-    rf2ethos.triggers.isLoading = true
-
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageRATESLoader")
-end
-
-function ui.openPageRATES(idx, title, script)
-
-    if rf2ethos.Page.fields then
-        local v = rf2ethos.Page.fields[13].value
-        if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
-
-
-        if rf2ethos.activeRateTable ~= nil then
-            if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
-                rf2ethos.RateTable = rf2ethos.activeRateTable 
-				
-				
-                if rf2ethos.dialogs.progressDisplay == true then
-                    rf2ethos.dialogs.progressWatchDog = nil
-                    rf2ethos.dialogs.progressDisplay = false
-                    rf2ethos.dialogs.progress:close()
-                end
-                rf2ethos.ui.openPageRATESLoader(idx, title, script)
-
-            end
-        end
-    end
-
-    rf2ethos.config.rateswitchParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rf2ethos.config.rateswitchParam ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParam, ",")
-        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -189,12 +157,15 @@ function ui.openPageRATES(idx, title, script)
     rf2ethos.ui.fieldHeader(title)
 
     local numCols = #rf2ethos.Page.cols
-    local screenWidth = rf2ethos.config.lcdWidth - 10
+
+	-- we dont use the global due to scrollers
+	local screenWidth,screenHeight = rf2ethos.getWindowSize()
+
     local padding = 10
     local paddingTop = rf2ethos.radio.linePaddingTop
     local h = rf2ethos.radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
-    local paddingRight = 20
+    local paddingRight = 10
     local positions = {}
     local positions_r = {}
     local pos
@@ -208,12 +179,26 @@ function ui.openPageRATES(idx, title, script)
     local c = 1
     while loc > 0 do
         local colLabel = rf2ethos.Page.cols[loc]
-        tsizeW, tsizeH = lcd.getTextSize(colLabel)
-        pos = {x = posX - tsizeW + paddingRight, y = posY, w = w, h = h}
+	
+        positions[loc] = posX - w 
+        positions_r[c] = posX - w 
+	
+		lcd.font(FONT_STD)
+        local tsizeW, tsizeH = lcd.getTextSize(colLabel)
+		
+		
+		local posTxt = (positions_r[c] + w) - tsizeW 
+
+		
+        pos = {	x = posTxt, 
+				y = posY, 
+				w = w, 
+				h = h
+			   }
         form.addStaticText(line, pos, colLabel)
-        positions[loc] = posX - w + paddingRight
-        positions_r[c] = posX - w + paddingRight
+				
         posX = math.floor(posX - w)
+		
         loc = loc - 1
         c = c + 1
     end
@@ -290,7 +275,7 @@ function ui.progressDisplay()
 	if rf2ethos.dialogs.saveDisplay == true  then
 		return true	
 	end
-	if rf2ethos.dialogs.progressDisplayESC == true  then
+	if rf2ethos.dialogs.progressDisplayEsc == true  then
 		return true	
 	end
 	if rf2ethos.dialogs.nolinkDisplay == true  then
@@ -303,9 +288,7 @@ function ui.progressDisplay()
 	return false
 end
 
-function ui.openPageESC(idx, title, script)
-
-    -- rf2ethos.utils.log("openrf2ethos.PageESC")
+function ui.openPageEsc(idx, title, script)
 
     rf2ethos.escMenuState = 1
 
@@ -419,7 +402,7 @@ function ui.openPageESC(idx, title, script)
             end,
             press = function()
 				ui.progessDisplay()
-                rf2ethos.ui.openPageESCToolLoader(pvalue.folder)
+                rf2ethos.ui.openPageEscToolLoader(pvalue.folder)
             end
         })
 
@@ -433,7 +416,7 @@ end
 
 -- preload the page for the specic module of esc and display
 -- a then pass on to the actual form display function
-function ui.openPageESCToolLoader(folder)
+function ui.openPageEscToolLoader(folder)
 
 
     rf2ethos.escManufacturer = folder
@@ -456,10 +439,10 @@ end
 -- initialise menu for specific type of esc
 -- basically we load libraries then read
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
-function ui.openPageESCTool(folder)
+function ui.openPageEscTool(folder)
 	rf2ethos.triggers.wasLoading = false
 	rf2ethos.triggers.closeProgressLoader = true
-    -- rf2ethos.utils.log("ui.openPageESCTool")
+    -- rf2ethos.utils.log("ui.openPageEscTool")
 
     rf2ethos.escMenuState = 2
 
@@ -612,7 +595,6 @@ function rf2ethos.openESCFormLoader(folder, script)
    
 end
 
---
 function rf2ethos.openESCForm(folder, script)
 	rf2ethos.triggers.closeProgressLoader = true
     -- rf2ethos.utils.log("rf2ethos.openESCForm")
@@ -672,7 +654,8 @@ function rf2ethos.openESCForm(folder, script)
 
 end
 
-function ui.openPagePIDLoader(idx, title, script)
+function ui.openPagePid(idx, title, script)
+
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -680,19 +663,10 @@ function ui.openPagePIDLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-
-
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
-
-    rf2ethos.triggers.isLoading = true
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPagePID")
-end
-
-function ui.openPagePID(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -783,31 +757,19 @@ function ui.openPagePID(idx, title, script)
 
 end
 
-function ui.openPageSERVOSLoader(idx, title, script)
+function ui.openPageServos(idx, title, script)
 
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageSERVOSLoader")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
-
-
-
+	
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
 
-    rf2ethos.triggers.isLoading = true
-
-
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageSERVOS")
-end
-
-function ui.openPageSERVOS(idx, title, script)
-
-    -- rf2ethos.utils.log("openrf2ethos.ui.openPageSERVOS")
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
 
@@ -1059,7 +1021,7 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPageDefaultLoader(idx, title, script)
+function ui.openPageDefault(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -1067,24 +1029,18 @@ function ui.openPageDefaultLoader(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-
-
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-
     rf2ethos.triggers.isLoading = true
 
-    -- rf2ethos.utils.log("Finished: rf2ethos.ui.openPageDefaultLoader")
-
-
-end
-
-function ui.openPageDefault(idx, title, script)
 
     local fieldAR = {}
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.triggers.isReady = false
+
+
 
     longPage = false
 
@@ -1234,7 +1190,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.escMode = true
             rf2ethos.escNotReadyCount = 0
             collectgarbage()
-            ui.openPageESCTool(rf2ethos.escManufacturer)
+            ui.openPageEscTool(rf2ethos.escManufacturer)
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()

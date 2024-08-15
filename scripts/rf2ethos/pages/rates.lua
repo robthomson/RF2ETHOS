@@ -39,10 +39,24 @@ return {
         rf2ethos.triggers.resetRates = true
     end,
     postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
+
     end,
     postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
+ 
+		-- if the activeRateTable is not what we are displaying
+		-- then we need to trigger a reload of the page
+		local v = rf2ethos.Page.values[1]
+		if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
+
+		if rf2ethos.activeRateTable ~= nil then
+			if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
+				rf2ethos.RateTable = rf2ethos.activeRateTable 
+				rf2ethos.triggers.wasReloading = true
+				return
+			end
+		end
+
 		rf2ethos.triggers.isReady = true
-    end
+    end,
+
 }
