@@ -441,7 +441,7 @@ end
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
 function ui.openPageEscTool(folder)
 	rf2ethos.triggers.wasLoading = false
-	rf2ethos.triggers.closeProgressLoader = true
+
     -- rf2ethos.utils.log("ui.openPageEscTool")
 
     rf2ethos.escMenuState = 2
@@ -569,7 +569,7 @@ function ui.openPageEscTool(folder)
 
     end
 
-
+	rf2ethos.triggers.closeProgressLoader = true
 end
 
 -- preload the page for the specic module of esc and display
