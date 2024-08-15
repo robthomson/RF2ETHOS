@@ -596,6 +596,7 @@ function rf2ethos.openESCFormInit(folder, script)
 end
 
 function rf2ethos.openESCForm(folder, script)
+
 	rf2ethos.triggers.closeProgressLoader = true
     -- rf2ethos.utils.log("rf2ethos.openESCForm")
 
@@ -1220,7 +1221,6 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     label = "        OK        ",
                     action = function()
                         -- trigger RELOAD
-                        --if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerEscReload = true end
 						rf2ethos.triggers.triggerEscReload = true
                         return true
                     end

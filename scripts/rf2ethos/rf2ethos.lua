@@ -848,7 +848,7 @@ function rf2ethos.wakeupUI()
 						rf2ethos.PageTmp = {}
 						rf2ethos.PageTmp = rf2ethos.Page
 						rf2ethos.triggers.isSaving = true
-						rf2ethos.triggers.wasSaving = true
+						--rf2ethos.triggers.wasSaving = true
 						rf2ethos.triggers.triggerSave = false
 						saveSettings()
 					else
@@ -940,6 +940,7 @@ function rf2ethos.wakeupUI()
 	-- and esc reload was triggered
     if rf2ethos.triggers.triggerEscReload == true then
         rf2ethos.triggers.triggerEscReload = false
+		rf2ethos.ui.progessDisplay()
         rf2ethos.openESCFormInit(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 
@@ -1103,7 +1104,6 @@ function rf2ethos.wakeupUI()
 	-- all the menu case checks - we should just be able to do as a task
 	-- when viewing the page
 	if rf2ethos.triggers.wasReloading == true then
-		
 			rf2ethos.ui.progessDisplay()
             rf2ethos.triggers.wasReloading = false
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
@@ -1128,92 +1128,6 @@ function rf2ethos.wakeupUI()
 	rf2ethos.rateSwitchCheck()	
 
 
-	-- start displaying an actual page of data
-	--[[
-	if rf2ethos.triggers.createForm == true and rf2ethos.mspQueue:isProcessed() then
-
-		-- we where just saving some data and completed the job
-		if (rf2ethos.triggers.wasSaving == true)  then
-		
-            rf2ethos.profileSwitchCheck()
-            rf2ethos.rateSwitchCheck()
-
-            rf2ethos.triggers.wasSaving = false
-
-            rf2ethos.dialogs.saveDisplay = false
-            rf2ethos.dialogs.saveWatchDog = nil
-			
-			-- we saved successfully - trigger a close of dialog and ready
-			-- for next task
-            if rf2ethos.triggers.saveFailed == false then
-                rf2ethos.triggers.closeSave = true
-                rf2ethos.Page = rf2ethos.PageTmp
-                rf2ethos.PageTmp = {}
-				if rf2ethos.config.reloadOnSave == true then
-					rf2ethos.triggers.triggerReloadNoPrompt = true	
-				end
-            end
-
-		-- we where busy loading some data and finished the job
-		
-		elseif (rf2ethos.triggers.wasLoading == true) then
-            rf2ethos.triggers.wasLoading = false
-            rf2ethos.profileSwitchCheck()
-            rf2ethos.rateSwitchCheck()
-			rf2ethos.formFields = {}
-			rf2ethos.formNavigationFields = {}
-			
-			-- launch the page that renders the actual page
-            if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
-                rf2ethos.ui.openPagePid(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "rates.lua" then
-                rf2ethos.ui.openPageRates(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "servos.lua" then
-                rf2ethos.ui.openPageServos(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
-                rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
-            elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
-                rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-            else
-                rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            end
-
-			rf2ethos.triggers.closeProgressLoader = true
-		-- preload msp data and dialog box progess 	
-		elseif rf2ethos.triggers.wasReloading == true then
-		
-			rf2ethos.ui.progessDisplay()
-            rf2ethos.triggers.wasReloading = false
-            if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
-                rf2ethos.ui.openPagePidLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "rates.lua" then
-                rf2ethos.ui.openPageRatesLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.lastScript == "servos.lua" then
-                rf2ethos.ui.openPageServosLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
-                rf2ethos.ui.openPageEscToolLoader(rf2ethos.escManufacturer)
-            elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
-                rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
-            else
-                rf2ethos.ui.openPageDefaultLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            end
-            rf2ethos.profileSwitchCheck()
-            rf2ethos.rateSwitchCheck()
-		
-		-- reload the rates page - this is captured because you may need to reload if the rate table in use has changed
-		elseif rf2ethos.triggers.reloadRates == true then	
-			rf2ethos.ui.openPageRatesLoader(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-			
-		-- all else fails - show home page
-        else
-            rf2ethos.ui.openMainMenu()
-        end
-
-        rf2ethos.triggers.createForm = false
-    else
-        rf2ethos.triggers.createForm = false
-    end
-	]]--
 
 end
 
