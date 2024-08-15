@@ -483,7 +483,7 @@ function ui.openPageESCTool(folder)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.triggerESCMAINMENU = true
+            rf2ethos.triggers.triggerEscMainMenu = true
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()
@@ -1252,7 +1252,7 @@ function ui.navigationButtonsEscForm(x, y, w, h)
         end,
         press = function()
             rf2ethos.escNotReadyCount = 0
-            rf2ethos.triggers.triggerSAVE = true
+            rf2ethos.triggers.triggerSave = true
         end
     })
 
@@ -1269,8 +1269,8 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     label = "        OK        ",
                     action = function()
                         -- trigger RELOAD
-                        --if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerESCRELOAD = true end
-						rf2ethos.triggers.triggerESCRELOAD = true
+                        --if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerEscReload = true end
+						rf2ethos.triggers.triggerEscReload = true
                         return true
                     end
                 }, {
@@ -1332,7 +1332,7 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.triggerSAVE = true
+            rf2ethos.triggers.triggerSave = true
         end
     })
 
@@ -1343,7 +1343,7 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-            rf2ethos.triggers.triggerRELOAD = true
+            rf2ethos.triggers.triggerReload = true
 			return true
         end
     })

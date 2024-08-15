@@ -10,13 +10,13 @@ triggers.isLoading = false
 triggers.wasLoading = false
 triggers.exitAPP = false
 triggers.noRFMsg = false
-triggers.triggerSAVE = false
-triggers.triggerRELOAD = false
-triggers.triggerRELOADNoPrompt = false
-triggers.triggerESCRELOAD = false
-triggers.triggerESCMAINMENU = false
-triggers.triggerESCLOADER = false
-triggers.triggerMAINMENU = false
+triggers.triggerSave = false
+triggers.triggerReload = false
+triggers.triggerReloadNoPrompt = false
+triggers.triggerEscReload = false
+triggers.triggerEscMainMenu = false
+triggers.triggerEscLoader = false
+triggers.triggerMainMenu = false
 triggers.escPowerCycle = false
 triggers.escPowerCycleAnimation = nil
 triggers.isReady = false
@@ -542,8 +542,8 @@ function rf2ethos.wakeupUI()
 
 	-- make the ui go to the main page of the esc in the event that theMsg
 	-- trigger is received.
-    if rf2ethos.triggers.triggerESCMAINMENU == true then
-        rf2ethos.triggers.triggerESCMAINMENU = false
+    if rf2ethos.triggers.triggerEscMainMenu == true then
+        rf2ethos.triggers.triggerEscMainMenu = false
         rf2ethos.escMode = false
         rf2ethos.triggers.escPowerCycle = false
         rf2ethos.escNotReadyCount = 0
@@ -828,7 +828,7 @@ function rf2ethos.wakeupUI()
 						rf2ethos.dialogs.progressDisplayESC = false			
 						rf2ethos.triggers.escPowerCycle	= false					
 					end	
-					rf2ethos.triggers.triggerESCLOADER = false
+					rf2ethos.triggers.triggerEscLoader = false
 
 				end
 
@@ -837,7 +837,7 @@ function rf2ethos.wakeupUI()
 	end
 
     -- a save was triggered - popup a box asking to save the data
-    if rf2ethos.triggers.triggerSAVE == true then
+    if rf2ethos.triggers.triggerSave == true then
         local buttons = {
             {
                 label = "        OK        ",
@@ -850,20 +850,20 @@ function rf2ethos.wakeupUI()
 						rf2ethos.PageTmp = rf2ethos.Page
 						rf2ethos.triggers.isSaving = true
 						rf2ethos.triggers.wasSaving = true
-						rf2ethos.triggers.triggerSAVE = false
+						rf2ethos.triggers.triggerSave = false
 						saveSettings()
 					else
 						 -- when in sim we fake a save as not possible to really do
 						 -- this involves tricking the progress dialog into thinking
 						 rf2ethos.triggers.isSavingFake = true
-						 rf2ethos.triggers.triggerSAVE = false
+						 rf2ethos.triggers.triggerSave = false
 					end
 					return true
                 end
             }, {
                 label = "CANCEL",
                 action = function()
-                    rf2ethos.triggers.triggerSAVE = false
+                    rf2ethos.triggers.triggerSave = false
                     return true
                 end
             }
@@ -889,12 +889,12 @@ function rf2ethos.wakeupUI()
             options = TEXT_LEFT
         })
 
-		rf2ethos.triggers.triggerSAVE = false
+		rf2ethos.triggers.triggerSave = false
     end
 
 	-- a reload that is pretty much instant with no prompt to ask them
-	if rf2ethos.triggers.triggerRELOADNoPrompt == true then
-		rf2ethos.triggers.triggerRELOADNoPrompt = false
+	if rf2ethos.triggers.triggerReloadNoPrompt == true then
+		rf2ethos.triggers.triggerReloadNoPrompt = false
 		rf2ethos.triggers.wasReloading = true
 		rf2ethos.triggers.createForm = true
 		rf2ethos.triggers.wasSaving = false
@@ -903,7 +903,7 @@ function rf2ethos.wakeupUI()
 	end
 
 	-- a reload was triggered - popup a box asking for the reload to be done
-    if rf2ethos.triggers.triggerRELOAD == true then
+    if rf2ethos.triggers.triggerReload == true then
         local buttons = {
             {
                 label = "        OK        ",
@@ -935,12 +935,12 @@ function rf2ethos.wakeupUI()
             options = TEXT_LEFT
         })
 
-        rf2ethos.triggers.triggerRELOAD = false
+        rf2ethos.triggers.triggerReload = false
     end
 
 	-- and esc reload was triggered
-    if rf2ethos.triggers.triggerESCRELOAD == true then
-        rf2ethos.triggers.triggerESCRELOAD = false
+    if rf2ethos.triggers.triggerEscReload == true then
+        rf2ethos.triggers.triggerEscReload = false
         rf2ethos.openESCFormLoader(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 
@@ -1116,7 +1116,7 @@ function rf2ethos.wakeupUI()
                 rf2ethos.Page = rf2ethos.PageTmp
                 rf2ethos.PageTmp = {}
 				if rf2ethos.config.reloadOnSave == true then
-					rf2ethos.triggers.triggerRELOADNoPrompt = true	
+					rf2ethos.triggers.triggerReloadNoPrompt = true	
 				end
             end
 
@@ -1327,7 +1327,7 @@ function rf2ethos.event(widget, category, value, x, y)
         if value == KEY_ENTER_LONG then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.triggers.triggerSAVE = true
+            rf2ethos.triggers.triggerSave = true
             system.killEvents(KEY_ENTER_BREAK)
             return true
         end
