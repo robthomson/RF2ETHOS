@@ -402,7 +402,7 @@ function ui.openPageEsc(idx, title, script)
             end,
             press = function()
 				ui.progessDisplay()
-                rf2ethos.ui.openPageEscToolLoader(pvalue.folder)
+                rf2ethos.ui.openPageEscInfo(pvalue.folder)
             end
         })
 
@@ -414,9 +414,10 @@ function ui.openPageEsc(idx, title, script)
 
 end
 
--- preload the page for the specic module of esc and display
--- a then pass on to the actual form display function
-function ui.openPageEscToolLoader(folder)
+-- we init the tool because we need to know the make and model of the esc in use for 
+-- the first menu to bother to display
+-- the page is expected to return a wakeup function that then triggers ui.openPageEscTool(folder)
+function ui.openPageEscInfo(folder)
 
 
     rf2ethos.escManufacturer = folder
@@ -431,7 +432,6 @@ function ui.openPageEscToolLoader(folder)
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/esc_info.lua"))()
 
-    rf2ethos.triggers.isLoading = true
 
 
 end
@@ -441,7 +441,7 @@ end
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
 function ui.openPageEscTool(folder)
 	rf2ethos.triggers.wasLoading = false
-	rf2ethos.triggers.closeProgressLoader = true
+
     -- rf2ethos.utils.log("ui.openPageEscTool")
 
     rf2ethos.escMenuState = 2
@@ -556,7 +556,7 @@ function ui.openPageEscTool(folder)
             end,
             press = function()
 				ui.progessDisplay()
-                rf2ethos.openESCFormLoader(folder, pvalue.script)
+                rf2ethos.openESCFormInit(folder, pvalue.script)
 				
             end
         })
@@ -569,12 +569,12 @@ function ui.openPageEscTool(folder)
 
     end
 
-
+	rf2ethos.triggers.closeProgressLoader = true
 end
 
 -- preload the page for the specic module of esc and display
 -- a then pass on to the actual form display function
-function rf2ethos.openESCFormLoader(folder, script)
+function rf2ethos.openESCFormInit(folder, script)
 
     -- rf2ethos.utils.log("rf2ethos.openESCFormLoader")
 
@@ -590,12 +590,13 @@ function rf2ethos.openESCFormLoader(folder, script)
 
 
 
-    rf2ethos.triggers.isLoading = true
+    --rf2ethos.triggers.isLoading = true
 
    
 end
 
 function rf2ethos.openESCForm(folder, script)
+
 	rf2ethos.triggers.closeProgressLoader = true
     -- rf2ethos.utils.log("rf2ethos.openESCForm")
 
@@ -1220,7 +1221,6 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     label = "        OK        ",
                     action = function()
                         -- trigger RELOAD
-                        --if rf2ethos.config.environment.simulation ~= true then rf2ethos.triggers.triggerEscReload = true end
 						rf2ethos.triggers.triggerEscReload = true
                         return true
                     end
