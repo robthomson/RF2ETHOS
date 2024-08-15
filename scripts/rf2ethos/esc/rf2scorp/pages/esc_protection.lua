@@ -22,7 +22,7 @@ local foundEscDone = false
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
-    eepromWrite = true,
+    eepromWrite = false,
     reboot = false,
     title = "Limits",
     minBytes = mspBytes,

@@ -493,7 +493,7 @@ function rf2ethos.wakeupForm()
     if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
 		if rf2ethos.Page.wakeup then
 			-- run the pages wakeup function if it exists
-			rf2ethos.Page.wakeup()
+			rf2ethos.Page.wakeup(rf2ethos.Page)
 		end
 	end
 end
@@ -870,10 +870,10 @@ function rf2ethos.wakeupUI()
         local theTitle
         local theMsg
         if rf2ethos.escMode == true then
-            theTitle = "SAVE SETTINGS TO ESC"
+            theTitle = "Save settings"
             theMsg = "Save current page to the speed controller"
         else
-            theTitle = "SAVE SETTINGS TO FBL"
+            theTitle = "Save settings"
             theMsg = "Save current page to flight controller"
         end
         form.openDialog({
@@ -924,7 +924,7 @@ function rf2ethos.wakeupUI()
         }
         form.openDialog({
             width = nil,
-            title = "RELOAD",
+            title = "Reload",
             message = "Reload data from flight controller",
             buttons = buttons,
             wakeup = function()
@@ -1044,7 +1044,6 @@ function rf2ethos.wakeupUI()
 	else 
 		-- detect page data loaded and ready to move onto rendering the page
 		if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
-			
             rf2ethos.triggers.isReady = false
             rf2ethos.triggers.isLoading = false
             rf2ethos.triggers.wasLoading = true
@@ -1072,23 +1071,13 @@ function rf2ethos.wakeupUI()
         end
 		
 		
-		-- intercept and load esc pages. this is in an odd place AND
-		-- should probably be relocated at some point.
-        if not rf2ethos.Page then
-            if rf2ethos.escMode == true then
-                if rf2ethos.escScript ~= nil then
-                    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. rf2ethos.escManufacturer .. "/pages/" .. rf2ethos.escScript))()
-                else
-                    rf2ethos.utils.log("rf2ethos.escScript is not present so cannot load as expected")
-                end
-            else
-                if rf2ethos.lastPage ~= nil then rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. rf2ethos.lastPage))() end
-                rf2ethos.escManufacturer = nil
-                rf2ethos.escScript = nil
-                rf2ethos.escMode = false
-            end
-            collectgarbage()
-        end
+		-- intercept and populate rf2ethos.Page if its empty
+		-- this simply catches scenarious where we save the page AND
+		-- other parts of the script fail for the few ms where the rf2ethos.Page
+		-- var is not populated
+		if not rf2ethos.Page and rf2ethos.PageTmp then
+			rf2ethos.Page = rf2ethos.PageTmp
+		end
 		
 		-- we have a page waiting to be retrieved - trigger a request page
 		if rf2ethos.Page ~= nil then
