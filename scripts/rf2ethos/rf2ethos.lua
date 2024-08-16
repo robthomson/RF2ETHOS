@@ -609,34 +609,25 @@ function rf2ethos.wakeupUI()
         end
     end
 
-
+	
     -- profile switching - trigger a reload if needs be when the switch is toggled
+	
     if rf2ethos.Page ~= nil and rf2ethos.Page.refreshswitch == true and rf2ethos.uiState == rf2ethos.uiStatus.pages then
 	
 		-- capture profile switching and of rates pages
-		if rf2ethos.lastPage == "rates.lua" or rf2ethos.lastPage ~= "rates_advanced.lua" then
+		if rf2ethos.lastPage == "rates.lua" or rf2ethos.lastPage == "rates_advanced.lua" then
 			if rf2ethos.config.rateswitchParam ~= nil then
 				if rf2ethos.config.rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
 
 					if rf2ethos.ui.progressDisplay() then
 						-- switch has been toggled mid flow - this is bad.. clean upd
-						if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.progress:close() end
-						if rf2ethos.dialogs.saveDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.save:close() end
 						form.clear()
-						rf2ethos.triggers.wasReloading = true
-						rf2ethos.triggers.createForm = true
-						rf2ethos.triggers.wasSaving = false
-						rf2ethos.triggers.wasLoading = false
-						rf2ethos.triggers.reloadRates = false
+						rf2ethos.triggers.triggerReloadNoPrompt = true
 
 					else
 						-- trigger RELOAD
 						rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()							
-						rf2ethos.triggers.wasSaving = false
-						rf2ethos.triggers.wasLoading = false
-						rf2ethos.triggers.wasReloading = true
-						rf2ethos.triggers.createForm = true
-						rf2ethos.triggers.reloadRates = true
+						rf2ethos.triggers.triggerReloadNoPrompt = true
 						return true
 					end
 
@@ -648,29 +639,19 @@ function rf2ethos.wakeupUI()
 
 				if rf2ethos.config.profileswitchParam:value() ~= rf2ethos.triggers.profileswitchLast then
 
-
+					
 					if rf2ethos.ui.progressDisplay() then
 						-- switch has been toggled mid flow - this is bad.. clean upd
-						if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:close() end
-						if rf2ethos.dialogs.saveDisplay == true and rf2ethos.dialogs.progress ~= nil  then rf2ethos.dialogs.save:close() end
 						form.clear()
-						rf2ethos.triggers.wasReloading = true
-						rf2ethos.triggers.createForm = true
-						rf2ethos.triggers.wasSaving = false
-						rf2ethos.triggers.wasLoading = false
-						rf2ethos.triggers.reloadRates = false
-
-					else
+						rf2ethos.triggers.triggerReloadNoPrompt = true
+					else				
 						-- trigger RELOAD
 						rf2ethos.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
-						rf2ethos.triggers.wasReloading = true
-						rf2ethos.triggers.createForm = true
-						rf2ethos.triggers.wasSaving = false
-						rf2ethos.triggers.wasLoading = false
-						rf2ethos.triggers.reloadRates = false
+						rf2ethos.triggers.triggerReloadNoPrompt = true
 						return true
 
 					end
+					
 				end
 			end
 		end			
