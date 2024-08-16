@@ -1208,7 +1208,7 @@ end
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 function rf2ethos.event(widget, category, value, x, y)
 
-    --print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+    print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if value == EVT_VIRTUAL_PREV_LONG then
         print("Forcing exit")
@@ -1216,6 +1216,8 @@ function rf2ethos.event(widget, category, value, x, y)
         system.exit()
         return 0
     end
+
+	
 
     -- close esc main type selection menu
     if rf2ethos.escMenuState == 1 then
@@ -1232,13 +1234,18 @@ function rf2ethos.event(widget, category, value, x, y)
     -- close esc pages menu
     if rf2ethos.escMenuState == 2 then
         if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-            rf2ethos.escMode = true
-            rf2ethos.escManufacturer = nil
-            rf2ethos.escScript = nil
-            rf2ethos.ui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-            return true
+            if rf2ethos.triggers.escPowerCycle == true then 
+				rf2ethos.dialogs.progressCounterESC = 100
+				return true
+			else
+				if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+				if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
+				rf2ethos.escMode = true
+				rf2ethos.escManufacturer = nil
+				rf2ethos.escScript = nil
+				rf2ethos.ui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+				return true
+			end
         end
     end
     -- close esc tool menu
