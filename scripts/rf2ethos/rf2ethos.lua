@@ -579,7 +579,12 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
 			if rf2ethos.dialogs.save ~= nil then
-				rf2ethos.dialogs.save:close()				
+				rf2ethos.dialogs.save:close()		
+
+				if rf2ethos.config.reloadOnSave == true then
+					rf2ethos.triggers.triggerReloadNoPrompt = true
+				end	
+				
 			end			
         end
     end
