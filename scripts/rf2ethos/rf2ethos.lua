@@ -66,7 +66,6 @@ rf2ethos.escMenuState = 0
 rf2ethos.escManufacturer = nil
 rf2ethos.escScript = nil
 rf2ethos.escUnknown = false
-rf2ethos.escNotReadyCount = 0
 rf2ethos.uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 rf2ethos.pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
 rf2ethos.telemetryStatus = {ok = 1, noSensor = 2, noTelemetry = 3}
@@ -1214,7 +1213,6 @@ function rf2ethos.event(widget, category, value, x, y)
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
             rf2ethos.escMode = true
             rf2ethos.escScript = nil
-            rf2ethos.escNotReadyCount = 0
             collectgarbage()
             rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
             return true
