@@ -23,7 +23,6 @@ triggers.isSavingFake = false
 triggers.wasReloading = false
 triggers.saveFailed = false
 triggers.telemetryState = nil
-triggers.linkUPTime = nil
 triggers.profileswitchLast = nil
 triggers.rateswitchLast = nil
 triggers.closeSave = false
@@ -107,7 +106,6 @@ rf2ethos.dialogs.nolinkValue = 0
 rf2ethos.dialogs.badversion = false
 rf2ethos.dialogs.badversionDisplay = false
 
-
 rf2ethos.config.saveTimeout = nil
 rf2ethos.config.requestTimeout = nil
 rf2ethos.config.maxRetries = nil
@@ -139,7 +137,6 @@ function rf2ethos.resetState()
     pageFile = nil
     rf2ethos.triggers.exitAPP = false
     rf2ethos.triggers.noRFMsg = false
-    rf2ethos.triggers.linkUPTime = nil
     rf2ethos.dialogs.nolinkDisplay = false
     rf2ethos.dialogs.nolinkValue = 0
     rf2ethos.triggers.telemetryState = nil
