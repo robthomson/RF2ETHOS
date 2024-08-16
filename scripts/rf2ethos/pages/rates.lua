@@ -57,6 +57,6 @@ return {
 		end
 
 		rf2ethos.triggers.isReady = true
-    end,
+    end	
 
 }

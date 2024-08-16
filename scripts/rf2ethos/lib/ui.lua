@@ -427,10 +427,10 @@ function ui.openPageEscInfo(folder)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
 
-    ESC.init = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/init.lua"))()
+    ESC.init = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
     rf2ethos.triggers.escPowerCycle = ESC.init.powerCycle
 
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/esc_info.lua"))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/esc_info.lua"))()
 
 
 
@@ -438,7 +438,7 @@ end
 
 -- initialise menu for specific type of esc
 -- basically we load libraries then read
--- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
+-- /scripts/rf2ethosmsp/pages/esc/<TYPE>/pages.lua
 function ui.openPageEscTool(folder)
 
 
@@ -470,7 +470,7 @@ function ui.openPageEscTool(folder)
     })
     rf2ethos.formNavigationFields['menu']:focus()
 
-    ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages.lua"))()
+    ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/pages.lua"))()
 
     if rf2ethos.Page.escinfo then
         local model = rf2ethos.Page.escinfo[1].t
@@ -585,7 +585,7 @@ function rf2ethos.openESCFormInit(folder, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
 
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/" .. folder .. "/pages/" .. script))()
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/pages/" .. script))()
     collectgarbage()
 
 

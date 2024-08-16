@@ -79,6 +79,7 @@ rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
 
+
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
 rf2ethos.dialogs.progressDisplay = false
@@ -455,6 +456,19 @@ function rf2ethos.updateTelemetryState()
 
 end
 
+-- PAINT.  HOOK INTO PAINT FUNCTION TO ALLOW lcd FUNCTIONS TO BE USED
+-- NOTE. this function will only be called if lcd.refesh is triggered. it is not a wakeup function
+function rf2ethos.paint()
+
+	-- run the modules paint function if it exists
+	if rf2ethos.Page ~= nil then
+		if rf2ethos.Page.paint then
+			rf2ethos.Page.paint(rf2ethos.Page)
+		end
+	end
+end
+
+
 -- MAIN WAKEUP FUNCTION. THIS SIMPLY FARMS OUT AT DIFFERING SCHEDULES TO SUB FUNCTIONS
 function rf2ethos.wakeup(widget)
 
@@ -782,7 +796,7 @@ function rf2ethos.wakeupUI()
 				-- we rate limit the progress to keep things low cpu	
 				if (os.clock() - rf2ethos.progressWatchDogESCRateLimit) >= 1.5 then
 
-					rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "esc/"..rf2ethos.escManufacturer.."/esc_info.lua"))()
+					rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/"..rf2ethos.escManufacturer.."/esc_info.lua"))()
 					collectgarbage()				
 				
 					rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 2				

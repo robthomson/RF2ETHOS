@@ -23,6 +23,10 @@ local function wakeup()
     rf2ethos.wakeup()
 end
 
+local function paint()
+    rf2ethos.paint()
+end
+
 local function event(widget, category, value, x, y)
     return rf2ethos.event(widget, category, value, x, y)
 end
@@ -36,7 +40,7 @@ local function close()
 end
 
 local function init()
-    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, close = close})
+    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, paint=paint, close = close})
 end
 
 return {init = init}
