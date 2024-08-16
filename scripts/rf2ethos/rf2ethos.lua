@@ -67,7 +67,6 @@ rf2ethos.uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 rf2ethos.pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
 rf2ethos.telemetryStatus = {ok = 1, noSensor = 2, noTelemetry = 3}
 rf2ethos.uiState = rf2ethos.uiStatus.init
-rf2ethos.prevUiState = nil
 rf2ethos.pageState = rf2ethos.pageStatus.display
 rf2ethos.lastLabel = nil
 rf2ethos.NewRateTable = nil
@@ -1016,10 +1015,6 @@ function rf2ethos.wakeupUI()
 	-- by the msp processing
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
 	
-		-- reset ui state.
-        if rf2ethos.prevUiState ~= rf2ethos.uiState then 
-			rf2ethos.prevUiState = rf2ethos.uiState 
-		end
 
 		-- rebind fields if needed
         if rf2ethos.pageState == rf2ethos.pageStatus.saving then
