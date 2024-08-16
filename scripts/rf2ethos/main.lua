@@ -11,7 +11,7 @@ config.ethosVersion = 1510								-- min version of ethos supported by this scri
 config.ethosVersionString = "ETHOS < V1.5.10"			-- string to print if ethos version error occurs
 config.defaultRateTable = 4 -- ACTUAL					-- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
 config.supportedMspApiVersion = { "12.06", "12.07" }	-- supported msp versions
-config.simulateOnTransmitter = false						-- make the transmitter run as if its running in the SIM (no fbl required)
+config.simulateOnTransmitter = false					-- make the transmitter run as if its running in the SIM (no fbl required)
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
 
