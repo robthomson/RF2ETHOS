@@ -1,0 +1,103 @@
+==
+Creating new pages
+==
+
+- The page will need a menu item called from /pages.lua
+- should be added in /pages/<pagename.lua 
+- icon should be in /gfx/menu/pagename.png
+
+==
+Page return info
+==
+
+A page is expected to return certain key details.
+
+An example as follows
+return {
+    read = 123, 			-- MSP CODE TO RECEIVE DATA (if using msp)
+    write = 456, 			-- MSP CODE TO SEND DATA (if using msp)
+    title = "Page Title",  		-- TITLE
+    reboot = false,			-- RUN REBOOT AFTER SENDING MSP
+    eepromWrite = true,			-- WRITE EPPROM AFTER SENDING MSP
+    minBytes = 25,			-- MINIMUM EXPECTED BYTES FOR A VALID MSP EXCHANGE
+    labels = labels,			-- LABELS USED BY ETHOS FORMS TO RENDER PAGE LABELS (see more below)
+    fields = fields,			-- FIELDS USED BY ETHOS FORMS TO RENDER FIELDS FOR DATA CAPTURE (see more below)
+    refreshswitch = false,		-- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
+    simulatorResponse = {4,10},		-- A VALID BYTE STRING USED WITHIN THE SIMULATOR
+    postRead = function(self) 		-- A FUNCTON RUN WHEN MSP READ COMPLETES
+	return self
+    end,
+    postLoad = function(self)   	-- A FUNCTION RUN WHEN MSP LOAD HAS COMPLETED
+	return self
+    end,
+    preSave = function(self)		-- A FUNCTION RUN ON THE PAGES DATA JUST PRIOR TO DOING AN MSP WRITE
+		return self 
+    end,
+    preSavePayload = function(payload)	-- A FUNCTION RUN ON THE PAYLOAD JUST PRIOR TO DOING AN MSP WRITE
+		return payload 
+    end,
+    wakeup = function(self)		-- A WAKEUP FUNCTION THAT RUNS EVERY 0.2ms. USE FOR ANYTHING THAT HAS TO HAPPEN ASYNC
+		return self 
+    end,
+    paint = function(self)		-- A HOOK INTO A FUNCTION CALLED WHENEVER THE LCD IS REDRAWN TO SCREEN
+		return self 
+    end	
+}
+
+== 
+LABELS AND PAGES VARS
+==
+
+Example
+
+labels[#labels + 1] = {t = "Swashplate", label = "line1", inline_size = 40.15}
+fields[#fields + 1] = {t = "Geo correction", help = "mixerCollectiveGeoCorrection", label = "line1", inline = 1, min = -125, max = 125, vals = {19}, decimals = 1, scale = 5, step = 2}
+
+labels[#labels + 1] = {t = "", label = "line2", inline_size = 40.15}
+fields[#fields + 1] = {t = "Total pitch limit", help = "mixerTotalPitchLimit", label = "line2", inline = 1, min = 0, max = 3000, vals = {10, 11}, decimals = 1, scale = 83.33333333333333, step = 1}
+
+fields[#fields + 1] = {t = "Total pitch limit", help = "mixerTotalPitchLimit", min = 0, max = 3000, vals = {10, 11}, decimals = 1, scale = 83.33333333333333, step = 1}
+
+fields[#fields + 1] = {t = "Mode", min = 0, max = 4, vals = {1}, table = {[0] = "OFF", "PASSTHROUGH", "STANDARD", "MODE1", "MODE2"}}
+fields[#fields + 1] = {t = "Accel", help = "profilesRatesDynamicsAcc", inline = 1, label = "pitchdynamics", min = 0, max = 50000, vals = {12, 13}, unit = "°/s", mult = 10, step = 10}
+
+
+The system will iterate over these variables to determine the layout to render using ethos forms.
+
+The following provides an example summary of the parameters you can use.
+
+#LABELS
+- t 		=> Field Text
+- t2 		=> Field Text (small screens)
+- label 	=> A 'tag' that is used to make a field entry be inserted into a label line element
+- inline_size 	=> The size of the fields that are inserted (when associated with the label field)
+
+#FIELDS
+- t 		=> Field Text
+- t2 		=> Field Text (small screens)
+- help		=> A tag used to determine which text to display from /help/fields.lua
+- min		=> Minimum value achievable in form input box
+- max		=> Maximum value  achievable in form input box
+- decimals	=> A number value to indicate the number of decimal points used on the form field
+- scale		=> A scaling value used when rendering the value to screen
+- mult		=> a multiplier used to multiply the value when saving / storing it
+- unit		=> a unit field added to the end of each text field
+- step		=> the field can only increment by a certain step value
+- vals		=> MSP payload location values used for saving and retrieving the data
+- table		=> If set a drop down select is displayed with the table values shown in the select
+- tableIdxInc	=> Shift all elements from table up/down by the value set. So you can shit +/- <value> 
+- postedit	=> a function called whenever the field is changed
+- onFocus	=> a function called whenever the field is in focus (not yet available)
+- postFocus	=> a function called whenever the field looses focus (not yet available)
+
+
+
+
+
+
+
+
+
+
+
+
