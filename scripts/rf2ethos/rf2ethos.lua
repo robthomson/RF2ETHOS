@@ -20,7 +20,6 @@ triggers.escPowerCycleAnimation = nil
 triggers.isReady = false
 triggers.isSaving = false
 triggers.isSavingFake = false
-triggers.wasReloading = false
 triggers.saveFailed = false
 triggers.telemetryState = nil
 triggers.profileswitchLast = nil
