@@ -51,7 +51,7 @@ return {
 		if rf2ethos.activeRateTable ~= nil then
 			if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
 				rf2ethos.RateTable = rf2ethos.activeRateTable 
-				rf2ethos.triggers.wasReloading = true
+				rf2ethos.triggers.reload = true
 				return
 			end
 		end

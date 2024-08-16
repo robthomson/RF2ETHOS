@@ -6,8 +6,6 @@ local config = arg[1]
 local compile = arg[2]
 
 local triggers = {}
-triggers.isLoading = false
-triggers.wasLoading = false
 triggers.exitAPP = false
 triggers.noRFMsg = false
 triggers.triggerSave = false
@@ -22,14 +20,10 @@ triggers.escPowerCycleAnimation = nil
 triggers.isReady = false
 triggers.isSaving = false
 triggers.isSavingFake = false
-triggers.wasSaving = false
 triggers.wasReloading = false
-triggers.closinghelp = false
 triggers.saveFailed = false
 triggers.telemetryState = nil
-triggers.reloadRates = false
 triggers.linkUPTime = nil
-triggers.createForm = false
 triggers.profileswitchLast = nil
 triggers.rateswitchLast = nil
 triggers.closeSave = false
@@ -834,7 +828,6 @@ function rf2ethos.wakeupUI()
 						rf2ethos.PageTmp = {}
 						rf2ethos.PageTmp = rf2ethos.Page
 						rf2ethos.triggers.isSaving = true
-						--rf2ethos.triggers.wasSaving = true
 						rf2ethos.triggers.triggerSave = false
 						saveSettings()
 					else
@@ -880,11 +873,7 @@ function rf2ethos.wakeupUI()
 	-- a reload that is pretty much instant with no prompt to ask them
 	if rf2ethos.triggers.triggerReloadNoPrompt == true then
 		rf2ethos.triggers.triggerReloadNoPrompt = false
-		rf2ethos.triggers.wasReloading = true
-		rf2ethos.triggers.createForm = true
-		rf2ethos.triggers.wasSaving = false
-		rf2ethos.triggers.wasLoading = false
-		rf2ethos.triggers.reloadRates = false	
+		rf2ethos.triggers.reload = true
 	end
 
 	-- a reload was triggered - popup a box asking for the reload to be done
@@ -894,11 +883,7 @@ function rf2ethos.wakeupUI()
                 label = "        OK        ",
                 action = function()
                     -- trigger RELOAD
-					rf2ethos.triggers.wasReloading = true
-					rf2ethos.triggers.createForm = true
-					rf2ethos.triggers.wasSaving = false
-					rf2ethos.triggers.wasLoading = false
-					rf2ethos.triggers.reloadRates = false
+					rf2ethos.triggers.reload = true
                     return true
                 end
             }, {
@@ -1015,10 +1000,6 @@ function rf2ethos.wakeupUI()
 				rf2ethos.triggers.closeSaveFake = true
 				rf2ethos.triggers.isSavingFake = false
             end	
-	
-	elseif rf2ethos.triggers.wasSaving == true then
-		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 5
-		rf2ethos.dialogs.save:value(rf2ethos.dialogs.saveProgressCounter)
     end
 
 	-- check we have telemetry
@@ -1031,10 +1012,7 @@ function rf2ethos.wakeupUI()
 		-- detect page data loaded and ready to move onto rendering the page
 		if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
             rf2ethos.triggers.isReady = false
-            rf2ethos.triggers.isLoading = false
-            rf2ethos.triggers.wasLoading = true
-			rf2ethos.triggers.createForm = true 
-			
+
 			rf2ethos.triggers.closeProgressLoader = true
 			
         end
@@ -1078,9 +1056,9 @@ function rf2ethos.wakeupUI()
 	-- this needs to be done a little better as there is no need FOR
 	-- all the menu case checks - we should just be able to do as a task
 	-- when viewing the page
-	if rf2ethos.triggers.wasReloading == true then
+	if rf2ethos.triggers.reload == true then
 			rf2ethos.ui.progessDisplay()
-            rf2ethos.triggers.wasReloading = false
+            rf2ethos.triggers.reload = false
             if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
                 rf2ethos.ui.openPagePid(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
             elseif rf2ethos.lastScript == "rates.lua" then

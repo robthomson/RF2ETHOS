@@ -440,7 +440,7 @@ end
 -- basically we load libraries then read
 -- /scripts/rf2ethosmsp/esc/<TYPE>/pages.lua
 function ui.openPageEscTool(folder)
-	rf2ethos.triggers.wasLoading = false
+
 
     -- rf2ethos.utils.log("ui.openPageEscTool")
 
@@ -590,7 +590,6 @@ function rf2ethos.openESCFormInit(folder, script)
 
 
 
-    --rf2ethos.triggers.isLoading = true
 
    
 end
@@ -814,8 +813,7 @@ function ui.openPageServos(idx, title, script)
             rf2ethos.formFields[i] = form.addChoiceField(line, nil, rf2ethos.utils.convertPageValueTable(servoTable), function()
                 value = rf2ethos.lastChangedServo
                 if rf2ethos.Page == nil then
-                    rf2ethos.triggers.wasReloading = true
-                    rf2ethos.triggers.createForm = true
+                    rf2ethos.triggers.reload = true
                 else
                     rf2ethos.Page.fields[1].value = value
                 end
@@ -1033,7 +1031,7 @@ function ui.openPageDefault(idx, title, script)
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-    rf2ethos.triggers.isLoading = true
+
 
 
     local fieldAR = {}
@@ -1083,7 +1081,6 @@ function ui.openPagePreferences(idx, title, script)
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-    rf2ethos.triggers.isLoading = false
     rf2ethos.Page = nil
 
     form.clear()
