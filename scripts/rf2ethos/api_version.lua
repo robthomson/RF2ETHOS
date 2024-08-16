@@ -6,7 +6,7 @@ local INTERVAL = 50
 local environment = system.getVersion()
 
 local function processMspReply(cmd, rx_buf, err)
-    if rf2ethos.config.environment.simulation == true then
+    if rf2ethos.runningInSimulator == true then
         config.apiVersionReceived = true
         return
     else
@@ -19,7 +19,7 @@ end
 
 local function getApiVersion()
 
-    if rf2ethos.config.environment.simulation == true then
+    if rf2ethos.runningInSimulator == true then
         config.apiVersionReceived = true
         lastRunTS = rf2ethos.utils.getTime()
         return "12.06"

@@ -110,11 +110,16 @@ rf2ethos.config.lcdWidth = nil
 rf2ethos.config.lcdHeight = nil
 rf2ethos.config.iconsizeParam = nil
 
-rf2ethos.runningInSimulator = system:getVersion().simulation
+-- make the tx run with no fbl connected
+if config.simulateOnTransmitter == true then
+	rf2ethos.runningInSimulator = true
+else
+	rf2ethos.runningInSimulator = system:getVersion().simulation
+end
 
 -- RETURN THE CURRENT RSSI SENSOR VALUE 
 function rf2ethos.getRSSI()
-    if rf2ethos.config.environment.simulation == true then return 100 end
+    if rf2ethos.runningInSimulator == true then return 100 end
 
     if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() then
         return rf2ethos.rssiSensor:value()
@@ -436,7 +441,7 @@ end
 function rf2ethos.updateTelemetryState()
 
 
-	if rf2ethos.config.environment.simulation ~= true then
+	if rf2ethos.runningInSimulator ~= true then
 		if not rf2ethos.rssiSensor then
 			rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noSensor
 		elseif rf2ethos.getRSSI() == 0 then
@@ -697,7 +702,7 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.nolinkValue = 0
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = false
-				if config.environment.simulation ~= true then
+				if rf2ethos.runningInSimulator ~= true then
 					if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
 				end	
 			end
@@ -817,7 +822,7 @@ function rf2ethos.wakeupUI()
 		
 					-- we have to fake a save dialog in sim as its not actually possible 
 					-- to save in sim!
-					if rf2ethos.config.environment.simulation ~= true then
+					if rf2ethos.runningInSimulator ~= true then
 						rf2ethos.PageTmp = {}
 						rf2ethos.PageTmp = rf2ethos.Page
 						rf2ethos.triggers.isSaving = true
