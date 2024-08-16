@@ -16,7 +16,6 @@ triggers.triggerEscMainMenu = false
 triggers.triggerEscLoader = false
 triggers.triggerMainMenu = false
 triggers.escPowerCycle = false
-triggers.escPowerCycleAnimation = nil
 triggers.isReady = false
 triggers.isSaving = false
 triggers.isSavingFake = false
