@@ -6,7 +6,6 @@ config.logEnable = false								-- will log to: /scripts/rf2ethos/rf2ethos.log
 config.logEnableScreen = false							-- if config.logEnable is true then also print to screen
 config.mspTxRxDebug = false								-- simple print of full msp payload that is sent and received
 config.reloadOnSave = false								-- trigger a reload on save
-config.useCompiler = true								-- compile the scripts (can be bypassed by /scripts/nocompile or /scripts/rf2ethos.nocompile)
 config.ethosVersion = 1510								-- min version of ethos supported by this script
 config.ethosVersionString = "ETHOS < V1.5.10"			-- string to print if ethos version error occurs
 config.defaultRateTable = 4 -- ACTUAL					-- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
@@ -32,6 +31,7 @@ local function event(widget, category, value, x, y)
 end
 
 local function create()
+    rf2ethos.compile.initialise()
     return rf2ethos.create()
 end
 

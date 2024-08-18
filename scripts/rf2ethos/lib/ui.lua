@@ -1208,7 +1208,7 @@ function ui.openPagePreferences(idx, title, script)
                 end
 
                 line = advpanel:addLine("   Switch")
-                rf2ethos.formFields[6] = form.addSourceField(line, nil, function()
+                rf2ethos.formFields[6] = form.addSwitchField(line, nil, function()
                     return rf2ethos.config.compilationswitchParam
                 end, function(newValue)
                     rf2ethos.config.compilationswitchParam = newValue

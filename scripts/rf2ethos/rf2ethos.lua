@@ -135,6 +135,8 @@ function rf2ethos.resetState()
     rf2ethos.triggers.escPowerCycle = false
     rf2ethos.escManufacturer = nil
     rf2ethos.escScript = nil
+	config.useCompiler = true
+	rf2ethos.config.useCompiler = true
     pageLoaded = 100
     pageTitle = nil
     pageFile = nil
