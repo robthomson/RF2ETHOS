@@ -112,7 +112,7 @@ rf2ethos.config.lcdHeight = nil
 rf2ethos.config.iconsizeParam = nil
 
 -- make the tx run with no fbl connected
-if config.simulateOnTransmitter == true then
+if config.simulateOnTransmitter == true or system:getVersion().simulation == true then
 	rf2ethos.runningInSimulator = true
 else
 	rf2ethos.runningInSimulator = system:getVersion().simulation
@@ -1134,6 +1134,20 @@ function rf2ethos.create()
 
     config.apiVersion = 0
 	config.environment = system.getVersion()
+
+	if system:getVersion().simulation == false then
+		local simpref = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir  .. "/preferences/demoswitch")
+		local s = rf2ethos.utils.explode(simpref, ",")
+		local simParam = system.getSource({category = s[1], member = s[2]})
+		if tonumber(simParam:value()) == 100  then
+			config.simulateOnTransmitter = true
+			rf2ethos.runningInSimulator = true
+		else
+			config.simulateOnTransmitter = false
+			rf2ethos.runningInSimulator = false
+		end
+	end
+
 
     rf2ethos.ui.openMainMenu()
 

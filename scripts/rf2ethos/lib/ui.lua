@@ -1232,7 +1232,7 @@ function ui.openPagePreferences(idx, title, script)
             end
 
             line = advpanel:addLine("Demo mode")
-            rf2ethos.formFields[7] = form.addSourceField(line, nil, function()
+            rf2ethos.formFields[7] = form.addSwitchField(line, nil, function()
                 return rf2ethos.config.demoswitchParam
             end, function(newValue)
                 rf2ethos.config.demoswitchParam = newValue
