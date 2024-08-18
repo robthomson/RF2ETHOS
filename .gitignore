@@ -1,4 +1,5 @@
-
 *.luac
 *.zip
 scripts/rf2ethos/preferences/watchdog.cfg
+*.sqlite
+.vs/*
