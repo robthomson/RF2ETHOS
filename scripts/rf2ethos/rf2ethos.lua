@@ -1142,6 +1142,7 @@ function rf2ethos.create()
 		if tonumber(simParam:value()) == 100  then
 			config.simulateOnTransmitter = true
 			rf2ethos.runningInSimulator = true
+			print("RF2ETHOS: Running in Demo Mode")
 		else
 			config.simulateOnTransmitter = false
 			rf2ethos.runningInSimulator = false
