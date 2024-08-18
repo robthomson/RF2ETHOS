@@ -1118,58 +1118,128 @@ function ui.openPagePreferences(idx, title, script)
     })
     rf2ethos.formNavigationFields['menu']:focus()
 
-    rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
-    if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then rf2ethos.config.iconsizeParam = 1 end
-    line = form.addLine("Button style")
-    rf2ethos.formFields[1] = form.addChoiceField(line, nil, {{"Text", 0}, {"Small image", 1}, {"Large images", 2}}, function()
-        return rf2ethos.config.iconsizeParam
-    end, function(newValue)
-        rf2ethos.config.iconsizeParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/iconsize", rf2ethos.config.iconsizeParam)
-    end)
+    local   uipanel = form.addExpansionPanel("User interface")
+            uipanel:open(true)
 
-    -- PROFILE
-    rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
-    if rf2ethos.config.profileswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
-        rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
+            rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
+            if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then rf2ethos.config.iconsizeParam = 1 end
 
-    line = form.addLine("Switch profile")
-    rf2ethos.formFields[2] = form.addSourceField(line, nil, function()
-        return rf2ethos.config.profileswitchParam
-    end, function(newValue)
-        rf2ethos.config.profileswitchParam = newValue
-        local member = rf2ethos.config.profileswitchParam:member()
-        local category = rf2ethos.config.profileswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/profileswitch", category .. "," .. member)
-    end)
+            line = uipanel:addLine("Button style")
+            rf2ethos.formFields[1] = form.addChoiceField(line, nil, {{"Text", 0}, {"Small image", 1}, {"Large images", 2}}, function()
+                return rf2ethos.config.iconsizeParam
+            end, function(newValue)
+                rf2ethos.config.iconsizeParam = newValue
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/iconsize", rf2ethos.config.iconsizeParam)
+            end)
 
-    rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rf2ethos.config.rateswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
-        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
+            -- PROFILE
+            rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
+            if rf2ethos.config.profileswitchParamPreference ~= nil then
+                local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
+                rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
+            end
 
-    line = form.addLine("Switch rates")
-    rf2ethos.formFields[3] = form.addSourceField(line, nil, function()
-        return rf2ethos.config.rateswitchParam
-    end, function(newValue)
-        rf2ethos.config.rateswitchParam = newValue
-        local member = rf2ethos.config.rateswitchParam:member()
-        local category = rf2ethos.config.rateswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/rateswitch", category .. "," .. member)
-    end)
+            line = uipanel:addLine("Switch profile")
+            rf2ethos.formFields[2] = form.addSourceField(line, nil, function()
+                return rf2ethos.config.profileswitchParam
+            end, function(newValue)
+                rf2ethos.config.profileswitchParam = newValue
+                local member = rf2ethos.config.profileswitchParam:member()
+                local category = rf2ethos.config.profileswitchParam:category()
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/profileswitch", category .. "," .. member)
+            end)
 
-    rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
-    line = form.addLine("Timeout")
-    rf2ethos.formFields[4] = form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
-        return rf2ethos.config.watchdogParam
-    end, function(newValue)
-        rf2ethos.config.watchdogParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
-    end)
+            -- RATES
+            rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
+            if rf2ethos.config.rateswitchParamPreference ~= nil then
+                local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
+                rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
+            end
+
+            line = uipanel:addLine("Switch rates")
+            rf2ethos.formFields[3] = form.addSourceField(line, nil, function()
+                return rf2ethos.config.rateswitchParam
+            end, function(newValue)
+                rf2ethos.config.rateswitchParam = newValue
+                local member = rf2ethos.config.rateswitchParam:member()
+                local category = rf2ethos.config.rateswitchParam:category()
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/rateswitch", category .. "," .. member)
+            end)
+
+
+    local   advpanel = form.addExpansionPanel("Advanced")
+            advpanel:open(true)
+
+            -- TIMEOUT
+            rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
+            if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
+            line = advpanel:addLine("Timeout")
+            rf2ethos.formFields[4] = form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
+                return rf2ethos.config.watchdogParam
+            end, function(newValue)
+                rf2ethos.config.watchdogParam = newValue
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
+            end)
+
+            -- COMPILATION
+            rf2ethos.config.compilationParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/compilation")
+            if rf2ethos.config.compilationParam == nil or rf2ethos.config.compilationParam == "" then rf2ethos.config.compilationParam = 0 end
+            line = advpanel:addLine("Compilation")
+            rf2ethos.formFields[5] = form.addChoiceField(line, nil, {{"Enable", 0}, {"Disable", 1},{"Use switch", 2}}, function()
+                return tonumber(rf2ethos.config.compilationParam)
+            end, function(newValue)
+                rf2ethos.config.compilationParam = newValue
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/compilation", rf2ethos.config.compilationParam)
+
+                if newValue == 2  then
+                    rf2ethos.formFields[6]:enable(true)
+                else
+                    rf2ethos.formFields[6]:enable(false)
+                end
+
+
+            end)
+
+                -- COMPILATION SWITCH
+                rf2ethos.config.compilationswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/compilationswitch")
+                if rf2ethos.config.compilationswitchParamPreference ~= nil then
+                    local s = rf2ethos.utils.explode(rf2ethos.config.compilationswitchParamPreference, ",")
+                    rf2ethos.config.compilationswitchParam = system.getSource({category = s[1], member = s[2]})
+                end
+
+                line = advpanel:addLine("   Switch")
+                rf2ethos.formFields[6] = form.addSwitchField(line, nil, function()
+                    return rf2ethos.config.compilationswitchParam
+                end, function(newValue)
+                    rf2ethos.config.compilationswitchParam = newValue
+                    local member = rf2ethos.config.compilationswitchParam:member()
+                    local category = rf2ethos.config.compilationswitchParam:category()
+                    rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/compilationswitch", category .. "," .. member)
+                end)
+
+                if tonumber(rf2ethos.config.compilationParam) == 2  then
+                    rf2ethos.formFields[6]:enable(true)
+                else
+                    rf2ethos.formFields[6]:enable(false)
+                end
+
+
+            -- DEMO MODE
+            rf2ethos.config.demoswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/demoswitch")
+            if rf2ethos.config.demoswitchParamPreference ~= nil then
+                local s = rf2ethos.utils.explode(rf2ethos.config.demoswitchParamPreference, ",")
+                rf2ethos.config.demoswitchParam = system.getSource({category = s[1], member = s[2]})
+            end
+
+            line = advpanel:addLine("Demo mode")
+            rf2ethos.formFields[7] = form.addSwitchField(line, nil, function()
+                return rf2ethos.config.demoswitchParam
+            end, function(newValue)
+                rf2ethos.config.demoswitchParam = newValue
+                local member = rf2ethos.config.demoswitchParam:member()
+                local category = rf2ethos.config.demoswitchParam:category()
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/demoswitch", category .. "," .. member)
+            end)
 
 end
 
