@@ -683,6 +683,12 @@ function rf2ethos.wakeupUI()
 			noLinkDialog:closeAllowed(false)
 			noLinkDialog:value(0)
 			rf2ethos.dialogs.nolinkValue = 0
+
+
+			if rf2ethos.config.audioParam == 0 then
+				system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
+			end				
+			
 			
 			-- check msp version of fbl
 			rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
@@ -719,6 +725,11 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = false
 				if rf2ethos.runningInSimulator ~= true then
+
+				if rf2ethos.config.audioParam == 0 then
+					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+				end					
+				
 					if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
 				end	
 			end
@@ -755,6 +766,10 @@ function rf2ethos.wakeupUI()
 					rf2ethos.dialogs.progress:message("Error.. we timed out")
 					rf2ethos.dialogs.progress:closeAllowed(true)
 				end
+				if rf2ethos.config.audioParam == 0 then
+					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+				end					
+				
 				--switch back to original page values
 				rf2ethos.Page = rf2ethos.PageTmp
 				rf2ethos.PageTmp = {}
@@ -835,6 +850,10 @@ function rf2ethos.wakeupUI()
             {
                 label = "        OK        ",
                 action = function()
+
+					if rf2ethos.config.audioParam == 0 then
+						system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
+					end	
 		
 					-- we have to fake a save dialog in sim as its not actually possible 
 					-- to save in sim!
@@ -842,7 +861,7 @@ function rf2ethos.wakeupUI()
 						rf2ethos.PageTmp = {}
 						rf2ethos.PageTmp = rf2ethos.Page
 						rf2ethos.triggers.isSaving = true
-						rf2ethos.triggers.triggerSave = false
+						rf2ethos.triggers.triggerSave = false							
 						saveSettings()
 					else
 						 -- when in sim we fake a save as not possible to really do
@@ -1135,6 +1154,11 @@ function rf2ethos.create()
     config.apiVersion = 0
 	config.environment = system.getVersion()
 
+
+    rf2ethos.config.audioParam = tonumber(rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio"))
+
+
+
 	if system:getVersion().simulation == false then
 		local simpref = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir  .. "/preferences/demoswitch")
 		local s = rf2ethos.utils.explode(simpref, ",")
@@ -1143,7 +1167,9 @@ function rf2ethos.create()
 			config.simulateOnTransmitter = true
 			rf2ethos.runningInSimulator = true
 			print("RF2ETHOS: Running in Demo Mode")
-			system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
+			if rf2ethos.config.audioParam == 0 then
+				system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
+			end	
 		else
 			config.simulateOnTransmitter = false
 			rf2ethos.runningInSimulator = false

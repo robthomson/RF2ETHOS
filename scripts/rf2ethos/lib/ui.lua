@@ -6,6 +6,10 @@ function ui.progessDisplay()
 		return
 	end
 
+	if rf2ethos.config.audioParam == 0 then
+		system.playFile(rf2ethos.config.toolDir .. "sounds/loading.wav")
+	end	
+
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
@@ -1121,6 +1125,20 @@ function ui.openPagePreferences(idx, title, script)
     local   uipanel = form.addExpansionPanel("User interface")
             uipanel:open(true)
 
+
+
+            rf2ethos.config.audioParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio")
+            if rf2ethos.config.audioParam == nil or rf2ethos.config.audioParam == "" then rf2ethos.config.audioParam = 0 end
+
+            line = uipanel:addLine("Audio")
+            rf2ethos.formFields[0] = form.addChoiceField(line, nil, {{"Enable", 0}, {"Disable", 1}}, function()
+                return rf2ethos.config.audioParam
+            end, function(newValue)
+                rf2ethos.config.audioParam = newValue
+                rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/audio", rf2ethos.config.audioParam)
+            end)
+
+
             rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
             if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then rf2ethos.config.iconsizeParam = 1 end
 
@@ -1131,6 +1149,7 @@ function ui.openPagePreferences(idx, title, script)
                 rf2ethos.config.iconsizeParam = newValue
                 rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/iconsize", rf2ethos.config.iconsizeParam)
             end)
+
 
             -- PROFILE
             rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
