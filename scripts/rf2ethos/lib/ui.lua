@@ -1131,7 +1131,7 @@ function ui.openPagePreferences(idx, title, script)
             if rf2ethos.config.audioParam == nil or rf2ethos.config.audioParam == "" then rf2ethos.config.audioParam = 0 end
 
             line = uipanel:addLine("Audio")
-            rf2ethos.formFields[0] = form.addChoiceField(line, nil, {{"Enable", 0}, {"Disable", 1}}, function()
+            rf2ethos.formFields[0] = form.addChoiceField(line, nil, {{"All", 0}, {"Alerts", 1}, {"Disable", 2}}, function()
                 return rf2ethos.config.audioParam
             end, function(newValue)
                 rf2ethos.config.audioParam = newValue

@@ -685,7 +685,7 @@ function rf2ethos.wakeupUI()
 			rf2ethos.dialogs.nolinkValue = 0
 
 
-			if rf2ethos.config.audioParam == 0 then
+			if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
 				system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
 			end				
 			
@@ -724,13 +724,13 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.nolinkValue = 0
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = false
-				if rf2ethos.runningInSimulator ~= true then
-
-				if rf2ethos.config.audioParam == 0 then
-					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
-				end					
-				
-					if rf2ethos.triggers.telemetryState ~= 1 then rf2ethos.triggers.exitAPP = true end
+				if rf2ethos.runningInSimulator ~= true then				
+					if rf2ethos.triggers.telemetryState ~= 1 then 
+							if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
+								system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+							end	
+							rf2ethos.triggers.exitAPP = true 
+					end
 				end	
 			end
 		end
@@ -766,10 +766,7 @@ function rf2ethos.wakeupUI()
 					rf2ethos.dialogs.progress:message("Error.. we timed out")
 					rf2ethos.dialogs.progress:closeAllowed(true)
 				end
-				if rf2ethos.config.audioParam == 0 then
-					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
-				end					
-				
+								
 				--switch back to original page values
 				rf2ethos.Page = rf2ethos.PageTmp
 				rf2ethos.PageTmp = {}
@@ -778,10 +775,16 @@ function rf2ethos.wakeupUI()
 			end
 		else
 			if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
+
+				if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
+					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+				end				
+			
 				if rf2ethos.dialogs.progress ~= nil then
 					rf2ethos.dialogs.progress:message("Error.. we timed out")
 					rf2ethos.dialogs.progress:closeAllowed(true)
 				end
+		
 				--switch back to original page values
 				rf2ethos.Page = rf2ethos.PageTmp
 				rf2ethos.PageTmp = {}		
@@ -800,6 +803,11 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.progressDisplayEsc = true
 				rf2ethos.dialogs.progressWatchDogESC = os.clock()
 				rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
+				
+				if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
+					system.playFile(rf2ethos.config.toolDir .. "sounds/powercycleesc.wav")
+				end						
+				
 				if rf2ethos.dialogs.progressESC ~= nil then
 					rf2ethos.dialogs.progressESC:value(0)
 					rf2ethos.dialogs.progressESC:closeAllowed(false)
@@ -832,6 +840,10 @@ function rf2ethos.wakeupUI()
 				if rf2ethos.dialogs.progressCounterESC >= 100 then
 					rf2ethos.dialogs.progressCounterESC = 0
 					if rf2ethos.dialogs.progressESC ~= nil then
+					
+					if rf2ethos.config.audioParam == 0 then
+						system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+					end						
 						rf2ethos.dialogs.progressESC:close()
 						rf2ethos.dialogs.progressDisplayEsc = false			
 						rf2ethos.triggers.escPowerCycle	= false					
@@ -1167,7 +1179,7 @@ function rf2ethos.create()
 			config.simulateOnTransmitter = true
 			rf2ethos.runningInSimulator = true
 			print("RF2ETHOS: Running in Demo Mode")
-			if rf2ethos.config.audioParam == 0 then
+			if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
 				system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
 			end	
 		else
@@ -1238,6 +1250,7 @@ function rf2ethos.event(widget, category, value, x, y)
             rf2ethos.escMode = false
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
+			rf2ethos.dialogs.progressDisplayEsc = false
             rf2ethos.ui.openMainMenu()
             return true
         end
