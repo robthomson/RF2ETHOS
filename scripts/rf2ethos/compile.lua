@@ -82,6 +82,9 @@ function compile.loadScript(script)
         elseif pref == 2 then
                 if tonumber(switchParam:value()) == 100  then
                     config.useCompiler = false
+					
+					system.playFile(toolDir .. "sounds/compdis.wav")	
+					
                 else
                     config.useCompiler = true
                 end

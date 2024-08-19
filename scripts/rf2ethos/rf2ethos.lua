@@ -1143,6 +1143,7 @@ function rf2ethos.create()
 			config.simulateOnTransmitter = true
 			rf2ethos.runningInSimulator = true
 			print("RF2ETHOS: Running in Demo Mode")
+			system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
 		else
 			config.simulateOnTransmitter = false
 			rf2ethos.runningInSimulator = false
