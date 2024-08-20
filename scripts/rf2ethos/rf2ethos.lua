@@ -364,7 +364,10 @@ local mspSaveSettings = {
 -- WRAPPER FUNCTION USED TO TRIGGER LOAD SETTINGS
 local mspLoadSettings = {
     processReply = function(self, buf)
-
+		
+		if rf2ethos.Page.minBytes == nil then
+			rf2ethos.Page.minBytes = 0
+		end
         rf2ethos.utils.log("rf2ethos.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. rf2ethos.Page.minBytes)
 		if rf2ethos.Page ~= nil then
 			rf2ethos.Page.values = buf
@@ -841,6 +844,10 @@ function rf2ethos.wakeupUI()
 					if rf2ethos.dialogs.progressESC ~= nil then
 					
 						rf2ethos.audio.playTimeout = true
+
+						if rf2ethos.PageTmp ~= nil then
+							rf2ethos.Page = rf2ethos.PageTmp
+						end	
 											
 						rf2ethos.dialogs.progressESC:close()
 						rf2ethos.dialogs.progressDisplayEsc = false			
