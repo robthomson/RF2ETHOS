@@ -79,6 +79,12 @@ rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
 
+rf2ethos.audio = {}
+rf2ethos.audio.playDemo = false
+rf2ethos.audio.playConnecting = false
+rf2ethos.audio.playTimeout = false
+rf2ethos.audio.playSaving = false
+rf2ethos.audio.playLoading = false
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -518,7 +524,7 @@ function rf2ethos.wakeupUI()
         system.exit()
         return
     end
-	
+
 	-- close progress loader.  this essentially just accelerates 
 	-- the close of the progress bar once the data is loaded.
 	-- so if not yet at 100%.. it says.. move there quickly
@@ -684,11 +690,9 @@ function rf2ethos.wakeupUI()
 			noLinkDialog:value(0)
 			rf2ethos.dialogs.nolinkValue = 0
 
+			rf2ethos.audio.playConnecting = true
 
-			if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-				system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
-			end				
-			
+		
 			
 			-- check msp version of fbl
 			rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
@@ -726,9 +730,7 @@ function rf2ethos.wakeupUI()
 				rf2ethos.triggers.badMspVersion = false
 				if rf2ethos.runningInSimulator ~= true then				
 					if rf2ethos.triggers.telemetryState ~= 1 then 
-							if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-								system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
-							end	
+							rf2ethos.audio.playTimeout = true
 							rf2ethos.triggers.exitAPP = true 
 					end
 				end	
@@ -776,10 +778,8 @@ function rf2ethos.wakeupUI()
 		else
 			if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
 
-				if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-					system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
-				end				
-			
+				rf2ethos.audio.playTimeout = true
+				
 				if rf2ethos.dialogs.progress ~= nil then
 					rf2ethos.dialogs.progress:message("Error.. we timed out")
 					rf2ethos.dialogs.progress:closeAllowed(true)
@@ -841,9 +841,8 @@ function rf2ethos.wakeupUI()
 					rf2ethos.dialogs.progressCounterESC = 0
 					if rf2ethos.dialogs.progressESC ~= nil then
 					
-					if rf2ethos.config.audioParam == 0 then
-						system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
-					end						
+						rf2ethos.audio.playTimeout = true
+											
 						rf2ethos.dialogs.progressESC:close()
 						rf2ethos.dialogs.progressDisplayEsc = false			
 						rf2ethos.triggers.escPowerCycle	= false					
@@ -863,9 +862,7 @@ function rf2ethos.wakeupUI()
                 label = "        OK        ",
                 action = function()
 
-					if rf2ethos.config.audioParam == 0 then
-						system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
-					end	
+					rf2ethos.audio.playSaving = true
 		
 					-- we have to fake a save dialog in sim as its not actually possible 
 					-- to save in sim!
@@ -1120,6 +1117,44 @@ function rf2ethos.wakeupUI()
 	-- check if rate or profile switches have been toggled
 	rf2ethos.profileSwitchCheck()
 	rf2ethos.rateSwitchCheck()	
+	
+	-- play audio
+	--alerts 
+	if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
+
+		if rf2ethos.audio.playConnecting == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
+			rf2ethos.audio.playConnecting = false
+		end		
+
+		if rf2ethos.audio.playDemo == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
+			rf2ethos.audio.playDemo = false
+		end		
+
+		if rf2ethos.audio.playTimeout == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+			rf2ethos.audio.playTimeout = false
+		end	
+		
+		if rf2ethos.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
+			rf2ethos.audio.playSaving = false
+		end	
+
+		if rf2ethos.audio.playLoading == true and rf2ethos.config.audioParam == 0 then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/loading.wav")
+			rf2ethos.audio.playLoading = false
+		end	
+	else
+		rf2ethos.audio.playLoading = false
+		rf2ethos.audio.playSaving = false
+		rf2ethos.audio.playTimeout = false
+		rf2ethos.audio.playDemo = false
+		rf2ethos.audio.playConnecting = false
+	end	
+
+
 
 
 
@@ -1179,12 +1214,11 @@ function rf2ethos.create()
 			config.simulateOnTransmitter = true
 			rf2ethos.runningInSimulator = true
 			print("RF2ETHOS: Running in Demo Mode")
-			if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-				system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
-			end	
+			rf2ethos.audio.playDemo = true
 		else
 			config.simulateOnTransmitter = false
 			rf2ethos.runningInSimulator = false
+			rf2ethos.audio.playDemo = false
 		end
 	end
 

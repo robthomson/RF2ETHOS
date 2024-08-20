@@ -6,9 +6,7 @@ function ui.progessDisplay()
 		return
 	end
 
-	if rf2ethos.config.audioParam == 0 then
-		system.playFile(rf2ethos.config.toolDir .. "sounds/loading.wav")
-	end	
+	rf2ethos.audio.playLoading = true
 
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()

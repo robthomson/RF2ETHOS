@@ -85,9 +85,7 @@ function compile.loadScript(script)
 					
 					local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
 					
-					if audioParam == 0 or audioParam == 1 then
-						system.playFile(toolDir .. "sounds/compdis.wav")
-					end
+					
 					
                 else
                     config.useCompiler = true
