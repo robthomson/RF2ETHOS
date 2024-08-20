@@ -85,6 +85,7 @@ rf2ethos.audio.playConnecting = false
 rf2ethos.audio.playTimeout = false
 rf2ethos.audio.playSaving = false
 rf2ethos.audio.playLoading = false
+rf2ethos.audio.playEscPowerCycle = false
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -804,9 +805,7 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.progressWatchDogESC = os.clock()
 				rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
 				
-				if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-					system.playFile(rf2ethos.config.toolDir .. "sounds/powercycleesc.wav")
-				end						
+				rf2ethos.audio.playEscPowerCycle = true				
 				
 				if rf2ethos.dialogs.progressESC ~= nil then
 					rf2ethos.dialogs.progressESC:value(0)
@@ -1136,6 +1135,11 @@ function rf2ethos.wakeupUI()
 			system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
 			rf2ethos.audio.playTimeout = false
 		end	
+
+		if rf2ethos.audio.playEscPowerCycle == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/powercycleesc.wav")
+			rf2ethos.audio.playEscPowerCycle = false
+		end	
 		
 		if rf2ethos.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
 			system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
@@ -1152,6 +1156,7 @@ function rf2ethos.wakeupUI()
 		rf2ethos.audio.playTimeout = false
 		rf2ethos.audio.playDemo = false
 		rf2ethos.audio.playConnecting = false
+		rf2ethos.audio.playEscPowerCycle = false
 	end	
 
 

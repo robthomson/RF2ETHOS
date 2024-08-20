@@ -84,9 +84,11 @@ function compile.loadScript(script)
                     config.useCompiler = false
 					
 					local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
-					
-					
-					
+
+					if audioParam == 0 or audioParam == 1 then
+						system.playFile(toolDir .. "sounds/compdis.wav")
+					end
+								
                 else
                     config.useCompiler = true
                 end
@@ -111,13 +113,13 @@ function compile.loadScript(script)
             system.compile(script)
             os.rename(script .. 'c', cachefile)
         end
-        print("Loading: " .. cachefile)
+        --print("Loading: " .. cachefile)
         return loadfile(cachefile)
     else
         if file_exists(cachefile) == true then
             os.remove(cachefile)
         end		
-		print("Loading: " .. script)
+		--print("Loading: " .. script)
         return loadfile(script)
     end
 
