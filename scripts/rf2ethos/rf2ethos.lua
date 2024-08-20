@@ -1298,7 +1298,7 @@ function rf2ethos.event(widget, category, value, x, y)
     if rf2ethos.escMenuState == 2 then
         if category == 5 or value == 35 then
             if rf2ethos.triggers.escPowerCycle == true then 
-				rf2ethos.dialogs.progressCounterESC = 100
+				rf2ethos.dialogs.progressCounterESC = 99
 				return true
 			else
 				if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
