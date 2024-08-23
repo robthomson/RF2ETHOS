@@ -124,7 +124,18 @@ end
 function MspQueueController:add(message)
     if message ~= nil then
         message = deepCopy(message)
-        -- rf2ethos.utils.log("Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1)
+		
+		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+			local logData = "Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1
+			rf2ethos.utils.log(logData)
+		
+			if rf2ethos.config.mspTxRxDebug == true then
+						print(logData)
+			end
+			
+		end			
+		
+        
         self.messageQueue[#self.messageQueue + 1] = message
         return self
     else

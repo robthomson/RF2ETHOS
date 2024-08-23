@@ -831,6 +831,10 @@ function ui.openPageServos(idx, title, script)
                     local value = rf2ethos.getFieldValue(f)
                     return value
                 end, function(value)
+
+					if f.postEdit then f.postEdit(rf2ethos.Page) end
+					if f.onChange then f.onChange(rf2ethos.Page) end				
+				
                     f.value = rf2ethos.saveFieldValue(f, value)
                     rf2ethos.saveValue(i)
                 end)
@@ -851,7 +855,7 @@ function ui.openPageServos(idx, title, script)
                 end
 				if f.onFocus ~= nil then
 					rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
-				end
+				end		
             end
         end
     end
@@ -893,6 +897,7 @@ function ui.fieldChoice(f, i)
     end, function(value)
         -- we do this hook to allow rates to be reset
         if f.postEdit then f.postEdit(rf2ethos.Page) end
+        if f.onChange then f.onChange(rf2ethos.Page) end		
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
@@ -943,6 +948,7 @@ function ui.fieldNumber(f, i)
         return value
     end, function(value)
         if f.postEdit then f.postEdit(rf2ethos.Page) end
+        if f.onChange then f.onChange(rf2ethos.Page) end
 
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
