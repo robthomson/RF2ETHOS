@@ -318,8 +318,9 @@ function ui.openPageEsc(idx, title, script)
         rf2ethos.config.iconsizeParam = tonumber(rf2ethos.config.iconsizeParam)
     end
 
-    local windowWidth = rf2ethos.config.lcdWidth
-    local windowHeight = rf2ethos.config.lcdHeight
+	local w, h = rf2ethos.utils.getWindowSize()	
+    local windowWidth = w
+    local windowHeight = h
     local padding = rf2ethos.radio.buttonPadding
 
     local sc
@@ -328,7 +329,7 @@ function ui.openPageEsc(idx, title, script)
     form.addLine(title)
 
     buttonW = 100
-    local x = windowWidth - buttonW
+    local x = windowWidth - buttonW - 10
 
     rf2ethos.formNavigationFields['menu']  = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
         text = "MENU",
@@ -612,8 +613,7 @@ function rf2ethos.openESCForm(folder, script)
     local windowHeight = rf2ethos.config.lcdHeight
     local y = rf2ethos.radio.linePaddingTop
 
-    local w = rf2ethos.config.lcdWidth
-    local h = rf2ethos.config.lcdHeight
+	local w, h = rf2ethos.utils.getWindowSize()	
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
@@ -627,7 +627,7 @@ function rf2ethos.openESCForm(folder, script)
     buttonH = rf2ethos.radio.navbuttonHeight
     line = form.addLine(rf2ethos.lastTitle .. ' / ' .. ESC.init.toolName .. ' / ' .. rf2ethos.Page.title)
 
-    rf2ethos.ui.navigationButtonsEscForm(rf2ethos.config.lcdWidth, rf2ethos.radio.linePaddingTop, buttonW, rf2ethos.radio.navbuttonHeight)
+    rf2ethos.ui.navigationButtonsEscForm(w, rf2ethos.radio.linePaddingTop, buttonW, rf2ethos.radio.navbuttonHeight)
 
     if rf2ethos.Page.escinfo then
         local model = rf2ethos.Page.escinfo[1].t
@@ -777,8 +777,11 @@ function ui.openPageServos(idx, title, script)
 
     local numPerRow = 2
 
-    local windowWidth = rf2ethos.config.lcdWidth
-    local windowHeight = rf2ethos.config.lcdHeight
+	local w, h = rf2ethos.utils.getWindowSize()	
+    local windowWidth = w
+    local windowHeight = h
+	
+
     local padding = rf2ethos.radio.buttonPadding
     local h = rf2ethos.radio.navbuttonHeight
     local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
@@ -792,7 +795,7 @@ function ui.openPageServos(idx, title, script)
     rf2ethos.lastPage = script
 
     rf2ethos.ui.fieldHeader(title)
-
+	
     -- we add a servo selector that is not part of msp table
     -- this is done as a selector - to pass a servoID on refresh
     if rf2ethos.Page.servoCount == 3 then
@@ -800,6 +803,7 @@ function ui.openPageServos(idx, title, script)
     else
         servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
     end
+
 
     -- we can now loop throught pages to get values
     formLineCnt = 0
@@ -1021,11 +1025,10 @@ function ui.fieldLabel(f, i, l)
 end
 
 function ui.fieldHeader(title)
-    local w = rf2ethos.config.lcdWidth
-    local h = rf2ethos.config.lcdHeight
+	local w, h = rf2ethos.utils.getWindowSize()	
     -- column starts at 59.4% of w
     padding = 5
-    colStart = math.floor((w * 59.4) / 100)
+    colStart = math.floor(((w) * 59.4) / 100)
     if rf2ethos.radio.navButtonOffset ~= nil then colStart = colStart - rf2ethos.radio.navButtonOffset end
 
     if rf2ethos.radio.buttonWidth == nil then
@@ -1035,9 +1038,11 @@ function ui.fieldHeader(title)
     end
     buttonH = rf2ethos.radio.navbuttonHeight
 
-    line = form.addLine(title)
-    rf2ethos.ui.navigationButtons(w, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
+    rf2ethos.formFields['menu'] = form.addLine(title)
+    rf2ethos.ui.navigationButtons(w-5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
+
+
 
 function ui.openPageDefault(idx, title, script)
 
@@ -1104,8 +1109,8 @@ function ui.openPagePreferences(idx, title, script)
 
     form.clear()
 
-    local w = rf2ethos.config.lcdWidth
-    local h = rf2ethos.config.lcdHeight
+	local w, h = rf2ethos.utils.getWindowSize()
+
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor((w * 59.4) / 100)
@@ -1352,8 +1357,10 @@ end
 function ui.navigationButtons(x, y, w, h)
 
     local helpWidth
+	local toolButtonWidth
     local section
     local page
+	local tb_padding
 
     help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
     section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
@@ -1365,19 +1372,32 @@ function ui.navigationButtons(x, y, w, h)
         helpWidth = 0
     end
 
-    rf2ethos.formNavigationFields['menu']  = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
+	if rf2ethos.Page.toolButton then 
+		toolButtonWidth = w - (w * 20) / 100
+		tb_padding = padding
+	else
+		toolButtonWidth = 0
+		tb_padding = 0
+	end	
+
+
+    rf2ethos.formNavigationFields['menu']  = form.addButton(line, {x = x - (toolButtonWidth + tb_padding) - (helpWidth + padding) - (w + padding) * 3, y = y, w = w, h = h}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
+			if rf2ethos.Page.onMenuExit then
+				rf2ethos.Page.onMenuExit(rf2ethos.Page)
+			end
+		
             rf2ethos.ui.openMainMenu()
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()
 
-    rf2ethos.formNavigationFields['save']  = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['save']  = form.addButton(line, {x = x - (toolButtonWidth + tb_padding) -(helpWidth + padding) - (w + padding) * 2, y = y, w = w, h = h}, {
         text = "SAVE",
         icon = nil,
         options = FONT_S,
@@ -1388,7 +1408,7 @@ function ui.navigationButtons(x, y, w, h)
         end
     })
 
-    rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = x - (helpWidth + padding) - (w + padding), y = y, w = w, h = h}, {
+    rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = x - (toolButtonWidth + tb_padding) - (helpWidth + padding) - (w + padding), y = y, w = w, h = h}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -1399,6 +1419,22 @@ function ui.navigationButtons(x, y, w, h)
 			return true
         end
     })
+
+
+	if toolButtonWidth > 0 and tonumber(rf2ethos.config.apiVersion) >= 12.07 then
+
+        rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - (toolButtonWidth + padding) - (helpWidth + padding), y = y, w = helpWidth, h = h}, {
+            text = "*",
+            icon = nil,
+            options = FONT_S,
+            paint = function()
+            end,
+            press = function()
+                rf2ethos.Page.toolButton()
+            end
+        })
+	
+	end
 
     if helpWidth > 0 then
 
@@ -1414,12 +1450,11 @@ function ui.navigationButtons(x, y, w, h)
             end
         })
 
-
-		
-
     end
 
 end
+
+
 
 function ui.openPagehelp(helpdata, section)
     local txtData

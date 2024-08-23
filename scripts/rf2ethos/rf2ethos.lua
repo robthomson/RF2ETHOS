@@ -14,7 +14,6 @@ triggers.triggerReloadNoPrompt = false
 triggers.triggerEscReload = false
 triggers.triggerEscMainMenu = false
 triggers.triggerEscLoader = false
-triggers.triggerMainMenu = false
 triggers.escPowerCycle = false
 triggers.isReady = false
 triggers.isSaving = false
@@ -490,14 +489,14 @@ function rf2ethos.wakeup(widget)
 
 	--keep cpu load down by running UI at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.3 then	
 		rf2ethos.wakeupSchedulerUI = now
 		rf2ethos.wakeupUI()
 	end	
 
 	--keep cpu load down by running Form at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerForm) >= 0.2 then	
+	if (now - rf2ethos.wakeupSchedulerForm) >= 0.4 then	
 		rf2ethos.wakeupSchedulerForm = now
 		rf2ethos.wakeupForm()
 	end	
@@ -529,6 +528,7 @@ function rf2ethos.wakeupUI()
         system.exit()
         return
     end
+
 
 	-- close progress loader.  this essentially just accelerates 
 	-- the close of the progress bar once the data is loaded.
@@ -1299,6 +1299,9 @@ function rf2ethos.event(widget, category, value, x, y)
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
 			rf2ethos.dialogs.progressDisplayEsc = false
+			if rf2ethos.Page.onMenuExit then
+				rf2ethos.Page.onMenuExit(rf2ethos.Page)
+			end			
             rf2ethos.ui.openMainMenu()
             return true
         end
@@ -1338,12 +1341,18 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+			if rf2ethos.Page.onMenuExit then
+				rf2ethos.Page.onMenuExit(rf2ethos.Page)
+			end			
             rf2ethos.ui.openMainMenu()
             return true
         end
         if value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+			if rf2ethos.Page.onMenuExit then
+				rf2ethos.Page.onMenuExit(rf2ethos.Page)
+			end			
             rf2ethos.ui.openMainMenu()
             return true
         end

@@ -2,9 +2,11 @@ local labels = {}
 local fields = {}
 
 local inFocus = false
+local triggerOverRideAll = false
+local inOverRideAll = false
 
 fields[#fields + 1] = {t = "ServoID (shown only for debug)", min = 0, max = 100, vals = {1}}
-fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}, onChange=function(self) self.servoCenterChanged(self) end,onFocus=function(self) self.servoCenterFocus(self)  end}
+fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
 
@@ -62,36 +64,7 @@ return {
         rf2ethos.lastChangedServo = servoIndex
         self.setValues(self, rf2ethos.lastChangedServo)
         rf2ethos.dataBindFields()
-    end,
-	servoCenterFocus = function(self)
-			if inFocus == false then
-				rf2ethos.Page.servoCenterFocusOn(self)
-				inFocus = true
-			else
-				rf2ethos.Page.servoCenterFocusOff(off)
-				inFocus = false
-			end	
-    end,
-	servoCenterFocusOn = function(self)
-		local servoIndex = rf2ethos.Page.fields[1].value -1
-		
-		local message = {
-			command = 193, -- MSP_SET_SERVO_OVERRIDE
-			payload = { servoIndex }
-		}
-		rf2ethos.mspHelper.writeU16(message.payload, 0)
-		rf2ethos.mspQueue:add(message)		
-	end,	
-	servoCenterFocusOff = function(self)
-		local servoIndex = rf2ethos.Page.fields[1].value -1
-		
-		local message = {
-			command = 193, -- MSP_SET_SERVO_OVERRIDE
-			payload = { servoIndex }
-		}
-		rf2ethos.mspHelper.writeU16(message.payload, 2001)
-		rf2ethos.mspQueue:add(message)		
-	end,	
+    end,	
 	servoCenterFocusAllOn = function(self)
 		for i = 0, #self.servoConfiguration do
 				local servoIndex = i
@@ -102,8 +75,11 @@ return {
 				rf2ethos.mspHelper.writeU16(message.payload, 0)
 				rf2ethos.mspQueue:add(message)	
 		end		
+		rf2ethos.triggers.isReady = true
 	end,
 	servoCenterFocusAllOff = function(self)
+	
+	
 		for i = 0, #self.servoConfiguration do
 				local servoIndex = i
 				local message = {
@@ -113,6 +89,7 @@ return {
 				rf2ethos.mspHelper.writeU16(message.payload, 2001)
 				rf2ethos.mspQueue:add(message)	
 		end		
+		rf2ethos.triggers.isReady = true
 	end,	
 	servoCenterChanged = function(self)
 
@@ -151,11 +128,96 @@ return {
 			   
 			--end   
 			rf2ethos.mspQueue:add(message)			
-		
+	
+    end,
+    toolButton = function(self)
+
+		local buttons = {
+					{
+						label = "        OK        ",
+						action = function()
+							
+							--we cant launch the loader here to se rely on the modules
+							--wakup function to do this
+							triggerOverRideAll = true
+							return true
+						end
+					}, {
+						label = "CANCEL",
+						action = function()
+							return true
+						end
+					}
+				}
+				local msg
+				local title
+				if inOverRideAll == false then
+					title = "Activate"
+					message = "Set all servos to their configured center position"
+				else
+					title = "Disable"
+					message = "Return control of the servos to the flight controller"
+				end
+				
+				form.openDialog({
+					width = nil,
+					title = title,
+					message = message,
+					buttons = buttons,
+					wakeup = function()
+					end,
+					paint = function()
+					end,
+					options = TEXT_LEFT
+				})
 
 
 
+    end,
+	wakeup =  function(self)
+		if triggerOverRideAll == true then
+			triggerOverRideAll = false
 
-		
-    end,	
+			if inOverRideAll == false then
+
+				rf2ethos.dialogs.progressDisplay = true
+				rf2ethos.dialogs.progressWatchDog = os.clock()
+				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Enabling servo overide.")
+				rf2ethos.dialogs.progress:value(0)
+				rf2ethos.dialogs.progress:closeAllowed(false)			
+			
+				rf2ethos.Page.servoCenterFocusAllOn(self)
+				inOverRideAll = true
+			else
+			
+				rf2ethos.dialogs.progressDisplay = true
+				rf2ethos.dialogs.progressWatchDog = os.clock()
+				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Disabling servo overide.")
+				rf2ethos.dialogs.progress:value(0)
+				rf2ethos.dialogs.progress:closeAllowed(false)
+			
+				rf2ethos.Page.servoCenterFocusAllOff(self)
+				inOverRideAll = false
+			end
+
+
+		end
+	end,
+	onMenuExit = function(self)
+
+			if inOverRideAll == true then
+				inOverRideAll = false
+				rf2ethos.dialogs.progressDisplay = true
+				rf2ethos.dialogs.progressWatchDog = os.clock()
+				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Disabling servo overide.")
+				rf2ethos.dialogs.progress:value(0)
+				rf2ethos.dialogs.progress:closeAllowed(false)
+			
+				rf2ethos.Page.servoCenterFocusAllOff(self)			
+				rf2ethos.triggers.closeProgressLoader = true
+			end	
+	
+	end,
+
+	
 }
