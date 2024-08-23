@@ -853,9 +853,11 @@ function ui.openPageServos(idx, title, script)
                         rf2ethos.formFields[i]:help(helpTxt)
                     end
                 end
-				if f.onFocus ~= nil then
-					rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
-				end		
+				if rf2ethos.config.ethosRunningVersion >= 1415 then
+					if f.onFocus ~= nil then
+						rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+					end	
+				end				
             end
         end
     end
@@ -954,8 +956,10 @@ function ui.fieldNumber(f, i)
         rf2ethos.saveValue(i)
     end)
 	
-	if f.onFocus ~= nil then
-		rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+	if rf2ethos.config.ethosRunningVersion >= 1415 then
+		if f.onFocus ~= nil then
+			rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+		end	
 	end	
 
     if f.default ~= nil then

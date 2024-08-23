@@ -117,6 +117,7 @@ rf2ethos.config.maxRetries = nil
 rf2ethos.config.lcdWidth = nil
 rf2ethos.config.lcdHeight = nil
 rf2ethos.config.iconsizeParam = nil
+rf2ethos.config.ethosRunningVersion = nil
 
 -- make the tx run with no fbl connected
 if config.simulateOnTransmitter == true or system:getVersion().simulation == true then
@@ -1212,6 +1213,7 @@ function rf2ethos.create()
 
     config.apiVersion = 0
 	config.environment = system.getVersion()
+	config.ethosRunningVersion = tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) 
 
 
     rf2ethos.config.audioParam = tonumber(rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio"))

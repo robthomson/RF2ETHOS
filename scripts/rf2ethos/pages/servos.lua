@@ -44,7 +44,10 @@ return {
     end,
     postLoad = function(self)
         -- rf2ethos.utils.log("postLoad")
-		rf2ethos.Page.servoCenterFocusAllOff(self)	
+		
+		if rf2ethos.config.ethosRunningVersion >= 1415 then
+			rf2ethos.Page.servoCenterFocusAllOff(self)	
+		end	
 		
 		rf2ethos.triggers.isReady = true
     end,
