@@ -849,6 +849,9 @@ function ui.openPageServos(idx, title, script)
                         rf2ethos.formFields[i]:help(helpTxt)
                     end
                 end
+				if f.onFocus ~= nil then
+					rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+				end
             end
         end
     end
@@ -897,7 +900,6 @@ end
 
 function ui.fieldNumber(f, i)
 
-
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
         if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
@@ -945,6 +947,10 @@ function ui.fieldNumber(f, i)
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
+	
+	if f.onFocus ~= nil then
+		rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+	end	
 
     if f.default ~= nil then
         local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
@@ -965,6 +971,7 @@ function ui.fieldNumber(f, i)
         end
     end
 
+	
 end
 
 function ui.fieldLabel(f, i, l)

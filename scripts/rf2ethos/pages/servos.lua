@@ -1,8 +1,9 @@
 local labels = {}
 local fields = {}
 
+
 fields[#fields + 1] = {t = "ServoID (shown only for debug)", min = 0, max = 100, vals = {1}}
-fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}}
+fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}, onFocus=function(self) self.servoCenterSelected(self)  end}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
 
@@ -54,5 +55,8 @@ return {
         rf2ethos.lastChangedServo = servoIndex
         self.setValues(self, rf2ethos.lastChangedServo)
         rf2ethos.dataBindFields()
-    end
+    end,
+	servoCenterSelected = function(self)
+			print("servo center was selected")
+    end,
 }
