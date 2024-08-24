@@ -4,9 +4,13 @@ local fields = {}
 local inFocus = false
 local triggerOverRideAll = false
 local inOverRideAll = false
+local triggerCenterChange = false
+local currentServoCenter
+local lastSetServoCenter
+
 
 fields[#fields + 1] = {t = "ServoID (shown only for debug)", min = 0, max = 100, vals = {1}}
-fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}}
+fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3},onChange=function(self) self.servoCenterTriggerChange(self) end,onFocus=function(self) self.servoCenterFocus(self)  end}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
 
@@ -90,7 +94,44 @@ return {
 				rf2ethos.mspQueue:add(message)	
 		end		
 		rf2ethos.triggers.isReady = true
+	end,
+	servoCenterFocus = function(self)
+			if inFocus == false then
+				rf2ethos.Page.servoCenterFocusOn(self)
+				inFocus = true
+			else
+				rf2ethos.Page.servoCenterFocusOff(off)
+				inFocus = false
+			end	
+    end,
+	servoCenterFocusOn = function(self)
+		local servoIndex = rf2ethos.Page.fields[1].value -1
+		
+		local message = {
+			command = 193, -- MSP_SET_SERVO_OVERRIDE
+			payload = { servoIndex }
+		}
+		rf2ethos.mspHelper.writeU16(message.payload, 0)
+		rf2ethos.mspQueue:add(message)		
 	end,	
+	servoCenterFocusOff = function(self)
+		local servoIndex = rf2ethos.Page.fields[1].value -1
+		
+		local message = {
+			command = 193, -- MSP_SET_SERVO_OVERRIDE
+			payload = { servoIndex }
+		}
+		rf2ethos.mspHelper.writeU16(message.payload, 2001)
+		rf2ethos.mspQueue:add(message)		
+	end,		
+	servoCenterTriggerChange = function(self)
+		if inOverRideAll == true or inFocus == true then
+			triggerCenterChange = true
+			currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
+		else
+			triggerCenterChange = false
+		end
+	end,
 	servoCenterChanged = function(self)
 
 			local servoIndex = rf2ethos.Page.fields[1].value -1
@@ -117,16 +158,18 @@ return {
 			rf2ethos.mspHelper.writeU16(message.payload, servoSpeed)
 			rf2ethos.mspHelper.writeU16(message.payload, servoFlags) 
 
-			--if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+			if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
 			   local logData = "{" .. rf2ethos.utils.joinTableItems(message.payload, ", ") .. "}"
 			   
 			   rf2ethos.utils.log(logData)
 			   
-				--if rf2ethos.config.mspTxRxDebug == true then
+				if rf2ethos.config.mspTxRxDebug == true then
 						print(logData)
-				--end			   
+				end			   
 			   
-			--end   
+			end   
+			lastSetServoCenter = servoCenter
+			print("Setting center to: " .. servoCenter)
 			rf2ethos.mspQueue:add(message)			
 	
     end,
@@ -175,6 +218,20 @@ return {
 
     end,
 	wakeup =  function(self)
+	
+
+		if rf2ethos.mspQueue:isProcessed() then
+			if currentServoCenter ~= nil then
+				if lastSetServoCenter ~= currentServoCenter then
+					if triggerCenterChange == true then
+							self.servoCenterChanged(self)
+							triggerCenterChange = false
+					end
+				end	
+			end
+		end	
+	
+	
 		if triggerOverRideAll == true then
 			triggerOverRideAll = false
 
@@ -199,8 +256,6 @@ return {
 				rf2ethos.Page.servoCenterFocusAllOff(self)
 				inOverRideAll = false
 			end
-
-
 		end
 	end,
 	onMenuExit = function(self)
