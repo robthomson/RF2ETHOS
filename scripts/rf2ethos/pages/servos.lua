@@ -64,6 +64,10 @@ local function servoChanged(self, servoIndex)
 end
 
 local function servoCenterFocusAllOn(self)
+
+
+	rf2ethos.audio.playServoOverideEnable = true
+
 	for i = 0, #self.servoConfiguration do
 			local servoIndex = i
 			local message = {
@@ -78,6 +82,7 @@ end
 
 
 local function servoCenterFocusAllOff(self)
+
 	for i = 0, #self.servoConfiguration do
 			local servoIndex = i
 			local message = {
@@ -101,6 +106,9 @@ local function servoCenterFocus(self)
 end
 
 local function servoCenterFocusOn(self)
+
+	rf2ethos.audio.playServoOverideEnable = true
+
 	local servoIndex = rf2ethos.Page.fields[1].value -1
 	
 	local message = {
@@ -112,6 +120,9 @@ local function servoCenterFocusOn(self)
 end
 
 local function servoCenterFocusOff(self)
+
+	rf2ethos.audio.playServoOverideDisable = true
+
 	local servoIndex = rf2ethos.Page.fields[1].value -1
 	
 	local message = {
@@ -214,6 +225,9 @@ end
 local function onMenuExit(self)
 
 			if inOverRideAll == true or inFocus == true then
+			
+				rf2ethos.audio.playServoOverideDisable = true
+				
 				inOverRideAll = false
 				inFocus = false
 				
@@ -254,6 +268,8 @@ local function wakeup(self)
 			triggerOverRideAll = false
 
 			if inOverRideAll == false then
+			
+				rf2ethos.audio.playServoOverideEnable = true
 
 				rf2ethos.dialogs.progressDisplay = true
 				rf2ethos.dialogs.progressWatchDog = os.clock()
@@ -264,6 +280,8 @@ local function wakeup(self)
 				rf2ethos.Page.servoCenterFocusAllOn(self)
 				inOverRideAll = true
 			else
+			
+				rf2ethos.audio.playServoOverideDisable = true
 			
 				rf2ethos.dialogs.progressDisplay = true
 				rf2ethos.dialogs.progressWatchDog = os.clock()
