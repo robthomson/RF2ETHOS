@@ -7,10 +7,11 @@ local inOverRideAll = false
 local triggerCenterChange = false
 local currentServoCenter
 local lastSetServoCenter
+local lastServoChangeTime = os.clock()
 
 
 fields[#fields + 1] = {t = "ServoID (shown only for debug)", min = 0, max = 100, vals = {1}}
-fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3},onChange=function(self) self.servoCenterTriggerChange(self) end,onFocus=function(self) self.servoCenterFocus(self)  end}
+fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3},onFocus=function(self) self.servoCenterFocus(self)  end}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
 
@@ -43,6 +44,9 @@ local function postLoad(self)
 		if rf2ethos.config.ethosRunningVersion >= 1415 then
 			rf2ethos.Page.servoCenterFocusAllOff(self)	
 		end	
+		
+		currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
+		lastSetServoCenter = currentServoCenter
 		
 		rf2ethos.triggers.isReady = true
 end
@@ -91,7 +95,7 @@ local function servoCenterFocus(self)
 		rf2ethos.Page.servoCenterFocusOn(self)
 		inFocus = true
 	else
-		rf2ethos.Page.servoCenterFocusOff(off)
+		rf2ethos.Page.servoCenterFocusOff(self)
 		inFocus = false
 	end	
 end
@@ -118,16 +122,12 @@ local function servoCenterFocusOff(self)
 	rf2ethos.mspQueue:add(message)		
 end
 
-local function servoCenterTriggerChange(self)
-	if inOverRideAll == true or inFocus == true then
-		triggerCenterChange = true
-		currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
-	else
-		triggerCenterChange = false
-	end
-end
-
 local function servoCenterChanged(self)
+
+	if rf2ethos.Page.fields[1].value == nil then
+			print("Servo index was nil.. aborting")
+			return
+	end
 
 	local servoIndex = rf2ethos.Page.fields[1].value -1
 	local servoCenter = math.floor(rf2ethos.Page.fields[2].value)
@@ -163,7 +163,6 @@ local function servoCenterChanged(self)
 		end			   
 	   
 	end   
-	lastSetServoCenter = servoCenter
 	print("Setting center to: " .. servoCenter)
 	rf2ethos.mspQueue:add(message)			
 
@@ -214,8 +213,10 @@ end
 
 local function onMenuExit(self)
 
-			if inOverRideAll == true then
+			if inOverRideAll == true or inFocus == true then
 				inOverRideAll = false
+				inFocus = false
+				
 				rf2ethos.dialogs.progressDisplay = true
 				rf2ethos.dialogs.progressWatchDog = os.clock()
 				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Disabling servo overide.")
@@ -225,22 +226,28 @@ local function onMenuExit(self)
 				rf2ethos.Page.servoCenterFocusAllOff(self)			
 				rf2ethos.triggers.closeProgressLoader = true
 			end	
-	
+						
+
 	end
 
 local function wakeup(self)
 	
 
-		if rf2ethos.mspQueue:isProcessed() then
-			if currentServoCenter ~= nil then
-				if lastSetServoCenter ~= currentServoCenter then
-					if triggerCenterChange == true then
-							self.servoCenterChanged(self)
-							triggerCenterChange = false
-					end
-				end	
+		-- filter changes to servo center - essentially preventing queue getting flooded	
+		if inFocus == true or inOverRideAll == true then
+		
+			currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
+
+			local now = os.clock()
+			local settleTime = 0.85
+			if ((now - lastServoChangeTime) >= settleTime) and  rf2ethos.mspQueue:isProcessed() then
+				if currentServoCenter ~= lastSetServoCenter then
+					lastSetServoCenter = currentServoCenter
+					lastServoChangeTime = now
+					self.servoCenterChanged(self)
+				end
 			end
-		end	
+		end
 	
 	
 		if triggerOverRideAll == true then
@@ -292,7 +299,6 @@ return {
 	servoCenterFocus = servoCenterFocus,
 	servoCenterFocusOn = servoCenterFocusOn,	
 	servoCenterFocusOff = servoCenterFocusOff,		
-	servoCenterTriggerChange = servoCenterTriggerChange,
 	servoCenterChanged = servoCenterChanged,
     toolButton = toolButton,
 	wakeup =  wakeup,
