@@ -37,6 +37,10 @@ labels[#labels + 1] = {t = "", label = "line12", inline_size = 13.6}
 fields[#fields + 1] = {t = "Min", help = "gyroDynamicNotchMinHz", label = "line12", inline = 2, min = 10, max = 200, default = 25, unit = "Hz", vals = {22, 23}}
 fields[#fields + 1] = {t = "Max", help = "gyroDynamicNotchMaxHz", label = "line12", inline = 1, min = 100, max = 500, default = 245, unit = "Hz", vals = {24, 25}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 92, -- msp_FILTER_CONFIG
     write = 93, -- msp_SET_FILTER_CONFIG
