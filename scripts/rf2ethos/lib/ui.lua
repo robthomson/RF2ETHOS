@@ -1564,8 +1564,20 @@ function ui.openPagehelp(helpdata, section)
 
     local message = ""
 
+
+	-- find point that qr starts
+    local qw = rf2ethos.radio.helpQrCodeSize	
+	local qh = rf2ethos.radio.helpQrCodeSize + rf2ethos.radio.buttonPadding
+    local qx = (rf2ethos.config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2) - rf2ethos.radio.buttonPadding
+	
     -- wrap text because of image on right
-    for k, v in ipairs(txtData) do message = message .. v .. "\r\n\r\n" end
+    for k, v in ipairs(txtData) do 
+		local count = rf2ethos.utils.countCarriageReturns(message)
+
+		message = message .. rf2ethos.utils.wrapText(v,qx) .. "\r\n\r\n" 
+
+	end
+
 
     local buttons = {
         {

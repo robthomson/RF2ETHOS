@@ -1309,9 +1309,11 @@ function rf2ethos.event(widget, category, value, x, y)
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
 			rf2ethos.dialogs.progressDisplayEsc = false
-			if rf2ethos.Page.onMenuExit then
-				rf2ethos.Page.onMenuExit(rf2ethos.Page)
-			end			
+			if rf2ethos.Page then
+				if rf2ethos.Page.onMenuExit then
+					rf2ethos.Page.onMenuExit(rf2ethos.Page)
+				end		
+			end
             rf2ethos.ui.openMainMenu()
             return true
         end
