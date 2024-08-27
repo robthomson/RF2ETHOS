@@ -230,13 +230,9 @@ local function onMenuExit(self)
 				
 				inOverRideAll = false
 				inFocus = false
-				
-				rf2ethos.dialogs.progressDisplay = true
-				rf2ethos.dialogs.progressWatchDog = os.clock()
-				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Disabling servo overide.")
-				rf2ethos.dialogs.progress:value(0)
-				rf2ethos.dialogs.progress:closeAllowed(false)
-			
+							
+				rf2ethos.ui.progessDisplay("Servo overide...","Disabling servo overide.")	
+					
 				rf2ethos.Page.servoCenterFocusAllOff(self)			
 				rf2ethos.triggers.closeProgressLoader = true
 			end	
@@ -271,11 +267,7 @@ local function wakeup(self)
 			
 				rf2ethos.audio.playServoOverideEnable = true
 
-				rf2ethos.dialogs.progressDisplay = true
-				rf2ethos.dialogs.progressWatchDog = os.clock()
-				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Enabling servo overide.")
-				rf2ethos.dialogs.progress:value(0)
-				rf2ethos.dialogs.progress:closeAllowed(false)			
+				rf2ethos.ui.progessDisplay("Servo overide...","Enabling servo overide.")	
 			
 				rf2ethos.Page.servoCenterFocusAllOn(self)
 				inOverRideAll = true
@@ -283,11 +275,7 @@ local function wakeup(self)
 			
 				rf2ethos.audio.playServoOverideDisable = true
 			
-				rf2ethos.dialogs.progressDisplay = true
-				rf2ethos.dialogs.progressWatchDog = os.clock()
-				rf2ethos.dialogs.progress = form.openProgressDialog("Servo overide...", "Disabling servo overide.")
-				rf2ethos.dialogs.progress:value(0)
-				rf2ethos.dialogs.progress:closeAllowed(false)
+				rf2ethos.ui.progessDisplay("Servo overide...","Disabling servo overide.")	
 			
 				rf2ethos.Page.servoCenterFocusAllOff(self)
 				inOverRideAll = false

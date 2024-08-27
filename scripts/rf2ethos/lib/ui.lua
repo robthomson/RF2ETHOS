@@ -1,21 +1,120 @@
 local ui = {}
 
-function ui.progessDisplay()
-
+function ui.progessDisplay(title,message)
 	if rf2ethos.dialogs.progressDisplay == true then
 		return
 	end
 
 	rf2ethos.audio.playLoading = true
 
+	if title == nil then
+		title = "Loading..."
+	end
+	if message == nil then
+		message = "Loading data from flight controller."
+	end
+
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
-    rf2ethos.dialogs.progress = form.openProgressDialog("Loading...", "Loading data from flight controller.")
+    rf2ethos.dialogs.progress = form.openProgressDialog(title, message)
 	if rf2ethos.dialogs.progress ~= nil then
 		rf2ethos.dialogs.progress:value(0)
 		rf2ethos.dialogs.progress:closeAllowed(false)
 	end
 end
+
+function ui.progessNolinkDisplay()
+	rf2ethos.dialogs.nolinkDisplay = true
+	rf2ethos.dialogs.noLink = form.openProgressDialog("Connecting", "Connecting")
+	rf2ethos.dialogs.noLink:closeAllowed(false)
+	rf2ethos.dialogs.noLink:value(0)
+end
+
+function ui.progessDisplayESC()
+	rf2ethos.dialogs.progressDisplayEsc = true
+	rf2ethos.dialogs.progressWatchDogESC = os.clock()
+	rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
+	rf2ethos.dialogs.progressESC:value(0)
+end
+
+function ui.progessDisplaySaving()
+	rf2ethos.dialogs.saveDisplay = true
+	rf2ethos.dialogs.saveWatchDog = os.clock()
+	rf2ethos.dialogs.save = form.openProgressDialog("Saving...", "Saving data...")
+	rf2ethos.dialogs.save:value(0)
+	rf2ethos.dialogs.save:closeAllowed(false)
+end
+
+-- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
+function ui.progessDisplayValue(value)
+		
+	if value >= 100 then
+		rf2ethos.dialogs.progress:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.progress:message(message)
+		end		
+		return
+	end
+		
+	local now = os.clock()
+	if (now - rf2ethos.dialogs.progressRateLimit) >= rf2ethos.dialogs.progressRate then
+		rf2ethos.dialogs.progressRateLimit = now
+		rf2ethos.dialogs.progress:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.progress:message(message)
+		end	
+	end	
+	
+end
+
+-- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
+function ui.progessDisplaySavingValue(value,message)
+		
+	if value >= 100 then
+		rf2ethos.dialogs.save:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.save:message(message)
+		end
+		return
+	end
+		
+	local now = os.clock()
+	if (now - rf2ethos.dialogs.saveRateLimit) >= rf2ethos.dialogs.saveRate then
+		rf2ethos.dialogs.saveRateLimit = now
+		rf2ethos.dialogs.save:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.save:message(message)
+		end		
+	end	
+	
+end
+
+-- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
+function ui.noLinkValue(value,message)
+		
+	if value >= 100 then
+		rf2ethos.dialogs.noLink:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.noLink:message(message)
+		end
+		return
+	end
+		
+	local now = os.clock()
+	if (now - rf2ethos.dialogs.nolinkRateLimit) >= rf2ethos.dialogs.nolinkRate then
+		rf2ethos.dialogs.nolinkRateLimit = now
+		rf2ethos.dialogs.noLink:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.noLink:message(message)
+		end		
+		print("allow")
+	else
+		print("not")
+	end	
+	
+end
+
+
 
 function ui.openMainMenu()
 
