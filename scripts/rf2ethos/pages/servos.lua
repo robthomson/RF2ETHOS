@@ -179,7 +179,7 @@ local function servoCenterChanged(self)
 
 end
 
-local function toolButton(self)
+local function onToolMenu(self)
 
 	local buttons = {
 				{
@@ -222,7 +222,7 @@ local function toolButton(self)
 
 end
 
-local function onMenuExit(self)
+local function onNavMenu(self)
 
 			if inOverRideAll == true or inFocus == true then
 			
@@ -306,9 +306,9 @@ return {
 	servoCenterFocusOn = servoCenterFocusOn,	
 	servoCenterFocusOff = servoCenterFocusOff,		
 	servoCenterChanged = servoCenterChanged,
-    toolButton = toolButton,
+    onToolMenu = onToolMenu,
 	wakeup =  wakeup,
-	onMenuExit = onMenuExit,
+	onNavMenu = onNavMenu,
 
 	
 }

@@ -1,6 +1,7 @@
 local ui = {}
 
 function ui.progessDisplay(title,message)
+
 	if rf2ethos.dialogs.progressDisplay == true then
 		return
 	end
@@ -437,6 +438,11 @@ function ui.openPageEsc(idx, title, script)
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
             rf2ethos.escMode = false
+			
+			if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+				rf2ethos.Page.onNavMenu(rf2ethos.Page)
+			end
+			
             rf2ethos.ui.openMainMenu()
         end
     })
@@ -564,6 +570,11 @@ function ui.openPageEscTool(folder)
         paint = function()
         end,
         press = function()
+		
+			if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+				rf2ethos.Page.onNavMenu(rf2ethos.Page)
+			end
+			
             rf2ethos.triggers.triggerEscMainMenu = true
         end
     })
@@ -1233,6 +1244,11 @@ function ui.openPagePreferences(idx, title, script)
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
             rf2ethos.escMode = false
+			
+			if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+				rf2ethos.Page.onNavMenu(rf2ethos.Page)
+			end
+			
             rf2ethos.ui.openMainMenu()
         end
     })
@@ -1393,6 +1409,11 @@ function ui.navigationButtonsEscForm(x, y, w, h)
             rf2ethos.escMode = true
             rf2ethos.escNotReadyCount = 0
             collectgarbage()
+
+			if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+				rf2ethos.Page.onNavMenu(rf2ethos.Page)
+			end			
+			
             ui.openPageEscTool(rf2ethos.escManufacturer)
         end
     })
@@ -1405,6 +1426,11 @@ function ui.navigationButtonsEscForm(x, y, w, h)
         paint = function()
         end,
         press = function()
+
+			if rf2ethos.Page and  rf2ethos.Page.onSaveMenu then
+				rf2ethos.Page.onSaveMenu(rf2ethos.Page)
+			end		
+		
             rf2ethos.escNotReadyCount = 0
             rf2ethos.triggers.triggerSave = true
         end
@@ -1424,6 +1450,11 @@ function ui.navigationButtonsEscForm(x, y, w, h)
                     action = function()
                         -- trigger RELOAD
 						rf2ethos.triggers.triggerEscReload = true
+
+						if rf2ethos.Page and  rf2ethos.Page.onReloadMenu then
+							rf2ethos.Page.onReloadMenu(rf2ethos.Page)
+						end						
+						
                         return true
                     end
                 }, {
@@ -1468,7 +1499,7 @@ function ui.navigationButtons(x, y, w, h)
         helpWidth = 0
     end
 
-	if rf2ethos.Page.toolButton and tonumber(rf2ethos.config.apiVersion) >= 12.07 then 
+	if rf2ethos.Page.onToolMenu and tonumber(rf2ethos.config.apiVersion) >= 12.07 then 
 		toolButtonWidth = w - (w * 20) / 100
 		tb_padding = padding
 	else
@@ -1484,8 +1515,8 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
-			if rf2ethos.Page.onMenuExit then
-				rf2ethos.Page.onMenuExit(rf2ethos.Page)
+			if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+				rf2ethos.Page.onNavMenu(rf2ethos.Page)
 			end
 		
             rf2ethos.ui.openMainMenu()
@@ -1500,6 +1531,11 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
+
+			if rf2ethos.Page and  rf2ethos.Page.onSaveMenu then
+				rf2ethos.Page.onSaveMenu(rf2ethos.Page)
+			end		
+		
             rf2ethos.triggers.triggerSave = true
         end
     })
@@ -1511,6 +1547,11 @@ function ui.navigationButtons(x, y, w, h)
         paint = function()
         end,
         press = function()
+
+			if rf2ethos.Page and  rf2ethos.Page.onReloadMenu then
+				rf2ethos.Page.onReloadMenu(rf2ethos.Page)
+			end		
+		
             rf2ethos.triggers.triggerReload = true
 			return true
         end
@@ -1526,7 +1567,7 @@ function ui.navigationButtons(x, y, w, h)
             paint = function()
             end,
             press = function()
-                rf2ethos.Page.toolButton()
+                rf2ethos.Page.onToolMenu()
             end
         })
 	
@@ -1542,6 +1583,11 @@ function ui.navigationButtons(x, y, w, h)
             paint = function()
             end,
             press = function()
+
+				if rf2ethos.Page and  rf2ethos.Page.onHelpMenu then
+					rf2ethos.Page.onHelpMenu(rf2ethos.Page)
+				end			
+			
                 rf2ethos.ui.openPagehelp(help.data, section)
             end
         })

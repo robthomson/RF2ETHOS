@@ -14,34 +14,27 @@ A page is expected to return certain key details.
 
 An example as follows
 return {
-    read = 123, 			-- MSP CODE TO RECEIVE DATA (if using msp)
-    write = 456, 			-- MSP CODE TO SEND DATA (if using msp)
-    title = "Page Title",  		-- TITLE
-    reboot = false,			-- RUN REBOOT AFTER SENDING MSP
-    eepromWrite = true,			-- WRITE EPPROM AFTER SENDING MSP
-    minBytes = 25,			-- MINIMUM EXPECTED BYTES FOR A VALID MSP EXCHANGE
-    labels = labels,			-- LABELS USED BY ETHOS FORMS TO RENDER PAGE LABELS (see more below)
-    fields = fields,			-- FIELDS USED BY ETHOS FORMS TO RENDER FIELDS FOR DATA CAPTURE (see more below)
-    refreshswitch = false,		-- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
-    simulatorResponse = {4,10},		-- A VALID BYTE STRING USED WITHIN THE SIMULATOR
-    postRead = function(self) 		-- A FUNCTON RUN WHEN MSP READ COMPLETES
-	return self
-    end,
-    postLoad = function(self)   	-- A FUNCTION RUN WHEN MSP LOAD HAS COMPLETED
-	return self
-    end,
-    preSave = function(self)		-- A FUNCTION RUN ON THE PAGES DATA JUST PRIOR TO DOING AN MSP WRITE
-		return self 
-    end,
-    preSavePayload = function(payload)	-- A FUNCTION RUN ON THE PAYLOAD JUST PRIOR TO DOING AN MSP WRITE
-		return payload 
-    end,
-    wakeup = function(self)		-- A WAKEUP FUNCTION THAT RUNS EVERY 0.2ms. USE FOR ANYTHING THAT HAS TO HAPPEN ASYNC
-		return self 
-    end,
-    paint = function(self)		-- A HOOK INTO A FUNCTION CALLED WHENEVER THE LCD IS REDRAWN TO SCREEN
-		return self 
-    end	
+    read = 123, 						-- MSP CODE TO RECEIVE DATA (if using msp)
+    write = 456, 						-- MSP CODE TO SEND DATA (if using msp)
+    title = "Page Title",  				-- TITLE
+    reboot = false,						-- RUN REBOOT AFTER SENDING MSP
+    eepromWrite = true,					-- WRITE EPPROM AFTER SENDING MSP
+    minBytes = 25,						-- MINIMUM EXPECTED BYTES FOR A VALID MSP EXCHANGE
+    labels = labels,					-- LABELS USED BY ETHOS FORMS TO RENDER PAGE LABELS (see more below)
+    fields = fields,					-- FIELDS USED BY ETHOS FORMS TO RENDER FIELDS FOR DATA CAPTURE (see more below)
+    refreshswitch = false,				-- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
+    simulatorResponse = {4,10},			-- A VALID BYTE STRING USED WITHIN THE SIMULATOR
+    postRead = postRead, 				-- A FUNCTON RUN WHEN MSP READ COMPLETES
+    postLoad = postLoad,   				-- A FUNCTION RUN WHEN MSP LOAD HAS COMPLETED
+    preSave = preSave,					-- A FUNCTION RUN ON THE PAGES DATA JUST PRIOR TO DOING AN MSP WRITE
+	preSavePayload = preSavePayload,	-- A FUNCTION RUN ON THE PAYLOAD JUST PRIOR TO DOING AN MSP WRITE
+    wakeup = wakeup,					-- A WAKEUP FUNCTION THAT RUNS EVERY 0.2ms. USE FOR ANYTHING THAT HAS TO HAPPEN ASYNC
+    paint = paint,						-- A HOOK INTO A FUNCTION CALLED WHENEVER THE LCD IS REDRAWN TO SCREEN
+	onNavMenu = onNavMenu,				-- A function to run when you press the menu button
+	onSaveMenu = onSaveMenu,			-- A function to run when you press the menu button
+	onReloadMenu = onReloadMenu,		-- A function to run when you press the menu button
+	onHelpMenu = onHelpMenu,		-- A function to run when you press the menu button
+ 	onToolMenu = onToolMenu,			-- An additional menu button with associated functon	
 }
 
 == 
@@ -88,7 +81,6 @@ The following provides an example summary of the parameters you can use.
 - tableIdxInc	=> Shift all elements from table up/down by the value set. So you can shit +/- <value> 
 - postedit	=> a function called whenever the field is changed
 - onFocus	=> a function called whenever the field is in focus (not yet available)
-- postFocus	=> a function called whenever the field looses focus (not yet available)
 
 
 
