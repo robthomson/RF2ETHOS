@@ -85,6 +85,8 @@ rf2ethos.audio.playTimeout = false
 rf2ethos.audio.playSaving = false
 rf2ethos.audio.playLoading = false
 rf2ethos.audio.playEscPowerCycle = false
+rf2ethos.audio.playServoOverideDisable = false
+rf2ethos.audio.playServoOverideEnable = false
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -1148,6 +1150,16 @@ function rf2ethos.wakeupUI()
 			system.playFile(rf2ethos.config.toolDir .. "sounds/powercycleesc.wav")
 			rf2ethos.audio.playEscPowerCycle = false
 		end	
+
+		if rf2ethos.audio.playServoOverideEnable == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/soverideen.wav")
+			rf2ethos.audio.playServoOverideEnable = false
+		end	
+
+		if rf2ethos.audio.playServoOverideDisable == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/soveridedis.wav")
+			rf2ethos.audio.playServoOverideDisable = false
+		end			
 		
 		if rf2ethos.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
 			system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
@@ -1158,6 +1170,9 @@ function rf2ethos.wakeupUI()
 			system.playFile(rf2ethos.config.toolDir .. "sounds/loading.wav")
 			rf2ethos.audio.playLoading = false
 		end	
+		
+		
+		
 	else
 		rf2ethos.audio.playLoading = false
 		rf2ethos.audio.playSaving = false
@@ -1165,6 +1180,8 @@ function rf2ethos.wakeupUI()
 		rf2ethos.audio.playDemo = false
 		rf2ethos.audio.playConnecting = false
 		rf2ethos.audio.playEscPowerCycle = false
+		rf2ethos.audio.playServoOverideDisable = false
+		rf2ethos.audio.playServoOverideEnable = false		
 	end	
 
 

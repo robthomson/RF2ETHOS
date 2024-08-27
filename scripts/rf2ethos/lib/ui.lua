@@ -1372,7 +1372,7 @@ function ui.navigationButtons(x, y, w, h)
         helpWidth = 0
     end
 
-	if rf2ethos.Page.toolButton then 
+	if rf2ethos.Page.toolButton and tonumber(rf2ethos.config.apiVersion) >= 12.07 then 
 		toolButtonWidth = w - (w * 20) / 100
 		tb_padding = padding
 	else
