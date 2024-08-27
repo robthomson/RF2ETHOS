@@ -81,6 +81,7 @@ rf2ethos.wakeupSchedulerForm = os.clock()
 rf2ethos.audio = {}
 rf2ethos.audio.playDemo = false
 rf2ethos.audio.playConnecting = false
+rf2ethos.audio.playConnected = false
 rf2ethos.audio.playTimeout = false
 rf2ethos.audio.playSaving = false
 rf2ethos.audio.playLoading = false
@@ -697,10 +698,8 @@ function rf2ethos.wakeupUI()
 			noLinkDialog:value(0)
 			rf2ethos.dialogs.nolinkValue = 0
 
-			rf2ethos.audio.playConnecting = true
-
-		
-			
+			--rf2ethos.audio.playConnecting = true
+	
 			-- check msp version of fbl
 			rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .."ui_init.lua"))()
 			rf2ethos.init.f()
@@ -710,8 +709,8 @@ function rf2ethos.wakeupUI()
 	-- this is directly related to the loop above.  if the progress box is visible we then wait for a telemetry link
 	-- to be established - and associated msp version checks to finish. all the while incremeting the loader
 	-- until we time out.
-	if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
-
+	--if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
+	if (rf2ethos.dialogs.nolinkDisplay == true ) and rf2ethos.dialogs.progressDisplayEsc ~= true then
 		if rf2ethos.triggers.telemetryState == 1 then
 			if rf2ethos.config.apiVersion ~= nil then
 				rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 15
@@ -722,7 +721,6 @@ function rf2ethos.wakeupUI()
 			rf2ethos.dialogs.nolinkValue = rf2ethos.dialogs.nolinkValue + 1
 		end
 
-		
 		if rf2ethos.dialogs.nolinkValue >= 100 and rf2ethos.mspQueue:isProcessed() then
 		
 			if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
@@ -735,6 +733,7 @@ function rf2ethos.wakeupUI()
 				rf2ethos.dialogs.nolinkValue = 0
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = false
+				rf2ethos.audio.playConnected = true
 				if rf2ethos.runningInSimulator ~= true then				
 					if rf2ethos.triggers.telemetryState ~= 1 then 
 							rf2ethos.audio.playTimeout = true
@@ -1131,6 +1130,12 @@ function rf2ethos.wakeupUI()
 	--alerts 
 	if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
 
+
+		if rf2ethos.audio.playConnected == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/connected.wav")
+			rf2ethos.audio.playConnected = false
+		end		
+
 		if rf2ethos.audio.playConnecting == true then
 			system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
 			rf2ethos.audio.playConnecting = false
@@ -1179,6 +1184,7 @@ function rf2ethos.wakeupUI()
 		rf2ethos.audio.playTimeout = false
 		rf2ethos.audio.playDemo = false
 		rf2ethos.audio.playConnecting = false
+		rf2ethos.audio.playConnected = false
 		rf2ethos.audio.playEscPowerCycle = false
 		rf2ethos.audio.playServoOverideDisable = false
 		rf2ethos.audio.playServoOverideEnable = false		
