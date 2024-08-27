@@ -198,7 +198,7 @@ local function toolButton(self)
 					end
 				}
 			}
-			local msg
+			local message
 			local title
 			if inOverRideAll == false then
 				title = "Activate"
