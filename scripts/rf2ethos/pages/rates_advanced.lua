@@ -48,6 +48,28 @@ local function defaultRates(x)
 end
 
 
+local function preSavePayload(payload)	
+	if rf2ethos.triggers.resetRates == true then
+		rf2ethos.triggers.resetRates = false
+		rf2ethos.NewRateTable = rf2ethos.Page.values[1]
+		payload =  defaultRates(rf2ethos.NewRateTable)			
+	end
+	
+	return payload 
+end	
+
+local function postLoad(self)
+	rf2ethos.triggers.isReady = true
+end
+
+local function postRead(self)
+
+end
+
+local function flagRateChange(self)
+   rf2ethos.triggers.resetRates = true
+end
+
 return {
     read = 111, -- msp_RC_TUNING
     write = 204, -- msp_SET_RC_TUNING
@@ -62,24 +84,8 @@ return {
     cols = cols,
     simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
     rTableName = rTableName,
-    flagRateChange = function(self)
-        -- --rf2ethos.utils.log("We need to reset the rates tables on save")
-        rf2ethos.triggers.resetRates = true
-    end,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true
-    end,
-	preSavePayload = function(payload)	
-		if rf2ethos.triggers.resetRates == true then
-			rf2ethos.triggers.resetRates = false
-			rf2ethos.NewRateTable = rf2ethos.Page.values[1]
-			payload =  defaultRates(rf2ethos.NewRateTable)			
-		end
-		
-		return payload 
-    end	
+    flagRateChange = flagRateChange,
+    postRead = postRead,
+    postLoad = postLoad,
+	preSavePayload = preSavePayload
 }
