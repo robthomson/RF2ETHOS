@@ -107,9 +107,6 @@ function ui.noLinkValue(value,message)
 		if message ~= nil then
 			rf2ethos.dialogs.noLink:message(message)
 		end		
-		print("allow")
-	else
-		print("not")
 	end	
 	
 end
