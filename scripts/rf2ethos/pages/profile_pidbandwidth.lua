@@ -18,6 +18,9 @@ fields[#fields + 1] = {t = "R", help = "profilesPIDBandwidthBtermCutoff", inline
 fields[#fields + 1] = {t = "P", help = "profilesPIDBandwidthBtermCutoff", inline = 2, label = "bcutoff", min = 0, max = 250, default = 15, vals = {40}}
 fields[#fields + 1] = {t = "Y", help = "profilesPIDBandwidthBtermCutoff", inline = 1, label = "bcutoff", min = 0, max = 250, default = 20, vals = {41}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
 
 return {
     read = 94, -- msp_PID_PROFILE
@@ -30,11 +33,5 @@ return {
     labels = labels,
     simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

@@ -17,8 +17,26 @@ local fields = mytable.fields
 
 fields[13] = {t = "Rates Type",hidden=true,ratetype = 1, min = 0,max = 5,vals = {1}}
 
+local function postLoad(self)
+	-- if the activeRateTable is not what we are displaying
+	-- then we need to trigger a reload of the page
+	local v = rf2ethos.Page.values[1]
+	if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
 
+	if rf2ethos.activeRateTable ~= nil then
+		if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
+			rf2ethos.RateTable = rf2ethos.activeRateTable 
+			rf2ethos.triggers.reload = true
+			return
+		end
+	end
 
+	rf2ethos.triggers.isReady = true
+end	
+
+local function flagRateChange(self)
+	rf2ethos.triggers.resetRates = true
+end
 
 return {
     read = 111, -- msp_RC_TUNING
@@ -34,29 +52,7 @@ return {
     cols = mytable.cols,
     simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
     rTableName = mytable.rTableName,
-    flagRateChange = function(self)
-        -- --rf2ethos.utils.log("We need to reset the rates tables on save")
-        rf2ethos.triggers.resetRates = true
-    end,
-    postRead = function(self)
-
-    end,
-    postLoad = function(self)
- 
-		-- if the activeRateTable is not what we are displaying
-		-- then we need to trigger a reload of the page
-		local v = rf2ethos.Page.values[1]
-		if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
-
-		if rf2ethos.activeRateTable ~= nil then
-			if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
-				rf2ethos.RateTable = rf2ethos.activeRateTable 
-				rf2ethos.triggers.reload = true
-				return
-			end
-		end
-
-		rf2ethos.triggers.isReady = true
-    end	
+    flagRateChange = flagRateChange,
+    postLoad = postLoad
 
 }

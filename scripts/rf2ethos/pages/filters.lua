@@ -47,11 +47,5 @@ return {
     simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
     labels = labels,
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

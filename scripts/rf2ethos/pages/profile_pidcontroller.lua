@@ -28,6 +28,10 @@ fields[#fields + 1] = {t = "R", help = "profilesItermRelax", inline = 3, label =
 fields[#fields + 1] = {t = "P", help = "profilesItermRelax", inline = 2, label = 15, min = 1, max = 100, default = 10, vals = {19}}
 fields[#fields + 1] = {t = "Y", help = "profilesItermRelax", inline = 1, label = 15, min = 1, max = 100, default = 10, vals = {20}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 94, -- msp_PID_PROFILE
     write = 95, -- msp_SET_PID_PROFILE
@@ -39,11 +43,5 @@ return {
     labels = labels,
     simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

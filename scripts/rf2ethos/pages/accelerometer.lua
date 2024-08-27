@@ -8,9 +8,6 @@ local function postLoad(self)
 		rf2ethos.triggers.isReady = true		
 end
 
-local function postRead(self)
-
-end
 
 return {
     read = 240, -- msp_ACC_TRIM
@@ -22,6 +19,5 @@ return {
     minBytes = 4,
     labels = labels,
     fields = fields,
-    postRead = postRead,
     postLoad = postLoad
 }

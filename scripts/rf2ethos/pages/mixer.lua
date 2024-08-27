@@ -27,6 +27,10 @@ fields[#fields + 1] = {t = "Idle throttle%", help = "mixerTailMotorIdle", t2 = "
 
 fields[#fields + 1] = {t = "Center trim", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 42, -- msp_MIXER_CONFIG
     write = 43, -- msp_SET_MIXER_CONFIG
@@ -37,11 +41,5 @@ return {
     minBytes = 19,
     labels = labels,
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

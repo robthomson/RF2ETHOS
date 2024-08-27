@@ -21,6 +21,11 @@ fields[#fields + 1] = {t = "Limit", help = "govTTALimit", inline = 1, label = 3,
 
 fields[#fields + 1] = {t = "Max throttle", help = "govMaxThrottle", min = 40, max = 100, default = 100, unit = "%", vals = {13}}
 
+
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 148, -- msp_GOVERNOR_PROFILE
     write = 149, -- msp_SET_GOVERNOR_PROFILE
@@ -32,11 +37,5 @@ return {
     minBytes = 13,
     labels = labels,
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

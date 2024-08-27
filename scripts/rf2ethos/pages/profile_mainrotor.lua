@@ -16,6 +16,9 @@ fields[#fields + 1] = {t = "Ratio", help = "profilesCyclicCrossCouplingRatio", i
 labels[#labels + 1] = {t = "", label = "cycliccc3", inline_size = 40.15}
 fields[#fields + 1] = {t = "Cutoff", help = "profilesCyclicCrossCouplingCutoff", inline = 1, label = "cycliccc3", line = true, min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
 
 return {
     read = 94, -- msp_PID_PROFILE
@@ -28,11 +31,5 @@ return {
     labels = labels,
     simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }

@@ -36,6 +36,10 @@ fields[15] = {help = "profilesBoost", row = 1, col = 6, min = 0, max = 1000, def
 fields[16] = {help = "profilesBoost", row = 2, col = 6, min = 0, max = 1000, default = 0, vals = {27, 28}}
 fields[17] = {help = "profilesBoost", row = 3, col = 6, min = 0, max = 1000, default = 0, vals = {29, 30}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 112, -- msp_PID_TUNING
     write = 202, -- msp_SET_PID_TUNING
@@ -48,11 +52,5 @@ return {
     fields = fields,
     rows = rows,
     cols = cols,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end,
+    postLoad = postLoad
 }

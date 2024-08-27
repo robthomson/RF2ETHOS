@@ -24,6 +24,10 @@ fields[#fields + 1] = {t = "Volt. filter cutoff", help = "govVoltageFilterHz", m
 fields[#fields + 1] = {t = "TTA bandwidth", help = "govTTABandwidth", min = 0, max = 250, unit = "Hz", default = 0, vals = {23}}
 fields[#fields + 1] = {t = "Precomp bandwidth", help = "govTTAPrecomp", min = 0, max = 250, unit = "Hz", default = 10, vals = {24}}
 
+local function postLoad(self)
+		rf2ethos.triggers.isReady = true		
+end
+
 return {
     read = 142, -- msp_GOVERNOR_CONFIG
     write = 143, -- msp_SET_GOVERNOR_CONFIG
@@ -34,11 +38,5 @@ return {
     minBytes = 24,
     labels = labels,
     fields = fields,
-    postRead = function(self)
-        -- rf2ethos.utils.log("postRead")
-    end,
-    postLoad = function(self)
-        -- rf2ethos.utils.log("postLoad")
-		rf2ethos.triggers.isReady = true		
-    end
+    postLoad = postLoad
 }
