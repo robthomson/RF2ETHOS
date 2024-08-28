@@ -583,7 +583,8 @@ end
 -- /scripts/rf2ethosmsp/pages/esc/<TYPE>/pages.lua
 function ui.openPageEscTool(folder)
 
-
+	rf2ethos.formFields = {}
+	rf2ethos.formLines = {}
     -- rf2ethos.utils.log("ui.openPageEscTool")
 
     rf2ethos.escMenuState = 2
@@ -791,7 +792,10 @@ function rf2ethos.openESCForm(folder, script)
 
         rf2ethos.ui.fieldLabel(f, i, l)
 
-        if f.table or f.type == 1 then
+
+		if f.type == 0 then
+			rf2ethos.ui.fieldText(f, i)
+        elseif f.table or f.type == 1 then
             rf2ethos.ui.fieldChoice(f, i)
         else
             rf2ethos.ui.fieldNumber(f, i)
@@ -1027,7 +1031,7 @@ function ui.fieldChoice(f, i)
         posText = p.posText
         posField = p.posField
 
-        field = form.addStaticText(line, posText, f.t)
+        field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
     else
         if f.t ~= nil then
             if f.t2 ~= nil then f.t = f.t2 end
@@ -1035,12 +1039,12 @@ function ui.fieldChoice(f, i)
             if f.label ~= nil then f.t = "    " .. f.t end
         end
         formLineCnt = formLineCnt + 1
-        line = form.addLine(f.t)
+        rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
         posField = nil
         postText = nil
     end
 
-    rf2ethos.formFields[i] = form.addChoiceField(line, posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
+    rf2ethos.formFields[i] = form.addChoiceField(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
         local value = rf2ethos.getFieldValue(f)
 
         return value
@@ -1053,6 +1057,8 @@ function ui.fieldChoice(f, i)
     end)
 end
 
+
+
 function ui.fieldNumber(f, i)
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
@@ -1062,7 +1068,7 @@ function ui.fieldNumber(f, i)
         posText = p.posText
         posField = p.posField
 
-        field = form.addStaticText(line, posText, f.t)
+        field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
     else
         if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
@@ -1075,7 +1081,7 @@ function ui.fieldNumber(f, i)
 
         formLineCnt = formLineCnt + 1
 
-        line = form.addLine(f.t)
+        rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
 
         posField = nil
         postText = nil
@@ -1098,7 +1104,7 @@ function ui.fieldNumber(f, i)
 	if maxValue == nil then
 		maxValue = 0
 	end
-    rf2ethos.formFields[i] = form.addNumberField(line, posField, minValue, maxValue, function()
+    rf2ethos.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
         local value = rf2ethos.getFieldValue(f)
 
         return value
@@ -1138,6 +1144,53 @@ function ui.fieldNumber(f, i)
 	
 end
 
+function ui.fieldStaticText(f, i)
+
+    if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
+        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        posText = p.posText
+        posField = p.posField
+
+        field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+    else
+        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+
+        if f.t ~= nil then
+
+            if f.label ~= nil then f.t = "    " .. f.t end
+        else
+            f.t = ""
+        end
+
+        formLineCnt = formLineCnt + 1
+
+        rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+
+        posField = nil
+        postText = nil
+    end
+
+    if HideMe == true then
+        -- posField = {x = 2000, y = 0, w = 20, h = 20}
+    end
+	
+	rf2ethos.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.getFieldValue(f))
+    
+	if rf2ethos.config.ethosRunningVersion >= 1415 then
+		if f.onFocus ~= nil then
+			rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+		end	
+	end	
+
+    if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+    if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+    if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
+
+	
+end
+
 function ui.fieldLabel(f, i, l)
 
 
@@ -1164,8 +1217,8 @@ function ui.fieldLabel(f, i, l)
             if label.type == nil then label.type = 0 end
 
             formLineCnt = formLineCnt + 1
-            line = form.addLine(labelName)
-            form.addStaticText(line, nil, "")
+            rf2ethos.formLines[formLineCnt] = form.addLine(labelName)
+            form.addStaticText(rf2ethos.formLines[formLineCnt], nil, "")
 
             rf2ethos.lastLabel = f.label
         end
@@ -1198,6 +1251,8 @@ function ui.openPageDefault(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
+	rf2ethos.formFields = {}
+	rf2ethos.formLines = {}
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -1236,7 +1291,10 @@ function ui.openPageDefault(idx, title, script)
 		
 		if f.hidden ~= true then
 
-			if f.table or f.type == 1 then
+
+			if f.type == 0 then
+				rf2ethos.ui.fieldStaticText(f, i)
+			elseif f.table or f.type == 1 then
 				rf2ethos.ui.fieldChoice(f, i)
 			else
 				rf2ethos.ui.fieldNumber(f, i)

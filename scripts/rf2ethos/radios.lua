@@ -19,7 +19,8 @@ local supportedRadios = {
             buttonWidthSmall = 120,
             buttonHeightSmall = 120,
             buttonPaddingSmall = 10,
-            linePaddingTop = 8
+            linePaddingTop = 8,
+			formRowHeight = 50
         }
     },
     -- TANDEM X18, TWIN X Lite (480x320)
@@ -39,7 +40,8 @@ local supportedRadios = {
             buttonWidthSmall = 87,
             buttonHeightSmall = 97,
             buttonPaddingSmall = 7,
-            linePaddingTop = 6
+            linePaddingTop = 6,
+			formRowHeight = 50
         }
     },
     -- Horus X10, Horus X12 (480x272)
@@ -59,7 +61,8 @@ local supportedRadios = {
             buttonWidthSmall = 87,
             buttonHeightSmall = 97,
             buttonPaddingSmall = 7,
-            linePaddingTop = 6
+            linePaddingTop = 6,
+			formRowHeight = 50
         }
     },
     -- Twin X14 (632x314)
@@ -80,7 +83,8 @@ local supportedRadios = {
             buttonWidthSmall = 97,
             buttonHeightSmall = 97,
             buttonPaddingSmall = 8,
-            linePaddingTop = 6
+            linePaddingTop = 6,
+			formRowHeight = 50
         }
     }
 }

@@ -2,20 +2,53 @@ local fields = {}
 local labels = {}
 local fcStatus = {}
 local dataflashSummary = {}
+local wakeupScheduler = os.clock()
+local status = {}
+local firstRun = true
+
+fields[1] = { t = "Arming Flags",  value="-", type=0}
+fields[2] = { t = "Dataflash Free Space",  value="-" ,type=0 }
+fields[3] = { t = "Real-time load", value = "-",type=0}
+fields[4] = { t = "CPU load", value = "-" ,type=0}
 
 
-fields[#fields + 1] = { t = "Arming Flags",  value=0}
 
-fields[#fields + 1] = { t = "Dataflash Free Space",  value=0  }
+local function getStatus()
+    local message = {
+        command = 101, -- MSP_STATUS
+        processReply = function(self, buf)
+            --status.pidCycleTime = rf2ethos.mspHelper.readU16(buf)
+            --status.gyroCycleTime = rf2ethos.mspHelper.readU16(buf)
+            buf.offset = 12
+            status.realTimeLoad = rf2ethos.mspHelper.readU16(buf)
+            --print("Real-time load: "..tostring(status.realTimeLoad))
+            status.cpuLoad = rf2ethos.mspHelper.readU16(buf)
+            --print("CPU load: "..tostring(status.cpuLoad))
+            buf.offset = 18
+            status.armingDisableFlags = rf2ethos.mspHelper.readU32(buf)
+            buf.offset = 24
+            status.profile = rf2ethos.mspHelper.readU8(buf)
+            --print("Profile: "..tostring(status.profile))
+            buf.offset = 26
+            status.rateProfile = rf2ethos.mspHelper.readU8(buf)
+			--print("Rate Profile: "..tostring(status.rateProfile))
 
-fields[#fields + 1] = { t = "Real-time load",   value = 0, scale = 10 }
-fields[#fields + 1] = { t = "CPU load",     	value = 0, scale = 10  }
+	
+
+        end,
+        simulatorResponse = { 240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1 }
+    }
+
+    rf2ethos.mspQueue:add(message)
+end
 
 
 
 local function postLoad(self)
 	rf2ethos.triggers.isReady = true
 end	
+
+
 
 local function armingDisableFlagsToString(flags)
     local t = ""
@@ -60,22 +93,62 @@ local function getFreeDataflashSpace()
     return string.format("%.1f MB", freeSpace / (1024 * 1024))
 end
 
+
 local function wakeup()
+		
+
+
+		local now = os.clock()
+		if (now - wakeupScheduler) >= 2 or firstRun == true then	
+			wakeupScheduler = now
+			firstRun = false
+			if rf2ethos.mspQueue:isProcessed() then
+
+			
+				getStatus()
+				
+				
+				lcd.invalidate()
+				
+				
+				if status.realTimeLoad ~= nil then
+					local value = status.realTimeLoad
+					rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function() return value end, function(value) end)
+					rf2ethos.formFields[3]:suffix("%")	
+					rf2ethos.formFields[3]:decimals(1)	
+					rf2ethos.formFields[3]:enable(false)
+				end
+				if status.cpuLoad ~= nil then
+					local value = status.cpuLoad
+					rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function() return value end, function(value) end)
+					rf2ethos.formFields[4]:suffix("%")	
+					rf2ethos.formFields[4]:decimals(1)	
+					rf2ethos.formFields[4]:enable(false)						
+				end
+				
+
+
+			end
+		end	
+
+
 
 end
 
+
+
 return {
-    read = 111, 
-    write = 204, 
+    read = nil, 
+    write = nil, 
     title = "Status",
     reboot = false,
     eepromWrite = false,
-    minBytes = 25,
+    minBytes = 0,
 	wakeup = wakeup,
     labels = labels,
     fields = fields,
     refreshswitch = false,
     simulatorResponse = {},
-    postLoad = postLoad
-
+    postLoad = postLoad,
+	navButtons={menu=true,save=false,reload=false,tool=false,help=false}
 }

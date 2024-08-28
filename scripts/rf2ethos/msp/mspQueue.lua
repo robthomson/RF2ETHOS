@@ -57,7 +57,7 @@ function MspQueueController:processQueue()
         cmd, buf, err = mspPollReply()
     else
         if not self.currentMessage.simulatorResponse then
-            -- rf2ethos.utils.log("No simulator response for command " .. tostring(self.currentMessage.command))
+            rf2ethos.utils.log("No simulator response for command " .. tostring(self.currentMessage.command))
             self.currentMessage = nil
             return
         end
@@ -122,6 +122,7 @@ local function deepCopy(original)
 end
 
 function MspQueueController:add(message)
+
     if message ~= nil then
         message = deepCopy(message)
 		
@@ -139,7 +140,7 @@ function MspQueueController:add(message)
         self.messageQueue[#self.messageQueue + 1] = message
         return self
     else
-        -- rf2ethos.utils.log("Unable to queue - nil message.  Check function is callable")
+        rf2ethos.utils.log("Unable to queue - nil message.  Check function is callable")
         -- this can go wrong if the function is declared below save function!!!
     end
 end

@@ -396,7 +396,7 @@ local mspLoadSettings = {
 
 -- READ AN MSP PAGE
 function rf2ethos.readPage()
-    if type(rf2ethos.Page.read) == "function" then
+	if type(rf2ethos.Page.read) == "function" then
         rf2ethos.Page.read(rf2ethos.Page)
     else
         mspLoadSettings.command = rf2ethos.Page.read
@@ -454,9 +454,18 @@ end
 
 -- REQUEST A PAGE OVER MSP. THIS RUNS ON MOST CLOCK CYCLES WHEN DATA IS BEING REQUESTED
 local function requestPage()
+
+	-- this is done to allow progress loader to continue and close
+	-- if returned read value is nil
+	if rf2ethos.Page.read == nil then
+		rf2ethos.Page.read = 0
+	end
+
     if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
         rf2ethos.Page.reqTS = os.clock()
-        if rf2ethos.Page.read then rf2ethos.readPage() end
+        if rf2ethos.Page.read then 
+			rf2ethos.readPage() 
+		end
     end
 end
 
