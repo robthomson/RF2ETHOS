@@ -4,12 +4,14 @@ local fcStatus = {}
 local dataflashSummary = {}
 local wakeupScheduler = os.clock()
 local status = {}
+local summary = {}
 local firstRun = true
+local triggerEraseDataFlash = false
 
-fields[1] = { t = "Arming Flags",  value="-", type=0}
-fields[2] = { t = "Dataflash Free Space",  value="-" ,type=0 }
-fields[3] = { t = "Real-time load", value = "-",type=0}
-fields[4] = { t = "CPU load", value = "-" ,type=0}
+fields[1] = { t = "Arming Flags",  value="0", type=2,disable=true}
+fields[2] = { t = "Dataflash Free Space",  value="0" ,type=2,disable=true }
+fields[3] = { t = "Real-time load", value = "0",type=2,disable=true}
+fields[4] = { t = "CPU load", value = "0" ,type=2,disable=true}
 
 
 
@@ -42,6 +44,39 @@ local function getStatus()
     rf2ethos.mspQueue:add(message)
 end
 
+local function getDataflashSummary()
+    local message = {
+        command = 70, -- MSP_DATAFLASH_SUMMARY
+        processReply = function(self, buf)
+            --rf2ethos.print("buf length: "..#buf)
+            local flags = rf2ethos.mspHelper.readU8(buf)
+            summary.ready = (flags & 1) ~= 0
+            summary.supported = (flags & 2) ~= 0
+            summary.sectors = rf2ethos.mspHelper.readU32(buf)
+            summary.totalSize = rf2ethos.mspHelper.readU32(buf)
+            summary.usedSize = rf2ethos.mspHelper.readU32(buf)
+            --rf2ethos.print("summary.ready: "..tostring(summary.ready))
+            --rf2ethos.print("summary.supported: "..tostring(summary.supported))
+            --rf2ethos.print("summary.sectors: "..tostring(summary.sectors))
+            --rf2ethos.print("summary.totalSize: "..tostring(summary.totalSize))
+            --rf2ethos.print("summary.usedSize: "..tostring(summary.usedSize))
+
+        end,
+        simulatorResponse = { 3, 1,0,0,0, 0,4,0,0, 0,3,0,0 }
+    }
+    rf2ethos.mspQueue:add(message)
+end
+
+local function eraseDataflash()
+    local message = {
+        command = 72, -- MSP_DATAFLASH_ERASE
+        processReply = function(self, buf)
+            local summary = {}
+        end,
+        simulatorResponse = { }
+    }
+    rf2ethos.mspQueue:add(message)
+end
 
 
 local function postLoad(self)
@@ -83,58 +118,115 @@ local function armingDisableFlagsToString(flags)
             if i == 25 then t = t .. "Arm Switch" end
         end
     end
-    if t == "" then t = "-" end
+    if t == "" then t = "N/A" end
     return t
 end
 
 local function getFreeDataflashSpace()
-    if not dataflashSummary.supported then return "N/A" end
-    local freeSpace = dataflashSummary.totalSize - dataflashSummary.usedSize
+    if not summary.supported then return "N/A" end
+    local freeSpace = summary.totalSize - summary.usedSize
     return string.format("%.1f MB", freeSpace / (1024 * 1024))
 end
 
 
 local function wakeup()
 		
+		if triggerEraseDataFlash == true then
+				rf2ethos.audio.playEraseFlash = true
+				triggerEraseDataFlash = false
+				
+				rf2ethos.ui.progessDisplay("Erasing...","Erasing dataflash.")	
+				rf2ethos.Page.eraseDataflash()
+				rf2ethos.triggers.isReady = true
+		end
+		
+		if triggerEraseDataFlash == false then
+			local now = os.clock()
+			if (now - wakeupScheduler) >= 2 or firstRun == true then	
+				wakeupScheduler = now
+				firstRun = false
+				if rf2ethos.mspQueue:isProcessed() then
 
 
-		local now = os.clock()
-		if (now - wakeupScheduler) >= 2 or firstRun == true then	
-			wakeupScheduler = now
-			firstRun = false
-			if rf2ethos.mspQueue:isProcessed() then
 
-			
-				getStatus()
 				
-				
-				lcd.invalidate()
-				
-				
-				if status.realTimeLoad ~= nil then
-					local value = status.realTimeLoad
-					rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function() return value end, function(value) end)
-					rf2ethos.formFields[3]:suffix("%")	
-					rf2ethos.formFields[3]:decimals(1)	
-					rf2ethos.formFields[3]:enable(false)
+					getStatus()
+					getDataflashSummary()
+
+					if status.armingDisableFlags ~= nil then
+							local value = armingDisableFlagsToString(status.armingDisableFlags)
+							rf2ethos.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function() return value end, function(newValue) text = value end)
+							rf2ethos.formFields[1]:enable(false)				
+					end
+
+
+					if summary.supported == true then
+							local value = getFreeDataflashSpace()
+							rf2ethos.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function() return value end, function(newValue) text = value end)
+							rf2ethos.formFields[2]:enable(false)						
+					end
+					
+					if status.realTimeLoad ~= nil then
+						local value = status.realTimeLoad
+						rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function() return value end, function(value) end)
+						rf2ethos.formFields[3]:suffix("%")	
+						rf2ethos.formFields[3]:decimals(1)	
+						rf2ethos.formFields[3]:enable(false)
+					end
+					if status.cpuLoad ~= nil then
+						local value = status.cpuLoad
+						rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function() return value end, function(value) end)
+						rf2ethos.formFields[4]:suffix("%")	
+						rf2ethos.formFields[4]:decimals(1)	
+						rf2ethos.formFields[4]:enable(false)						
+					end
+					
+
 				end
-				if status.cpuLoad ~= nil then
-					local value = status.cpuLoad
-					rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function() return value end, function(value) end)
-					rf2ethos.formFields[4]:suffix("%")	
-					rf2ethos.formFields[4]:decimals(1)	
-					rf2ethos.formFields[4]:enable(false)						
-				end
-				
-
-
-			end
-		end	
-
+			end	
+		end
 
 
 end
 
+local function onToolMenu(self)
+
+	local buttons = {
+				{
+					label = "        OK        ",
+					action = function()
+						
+						--we cant launch the loader here to se rely on the modules
+						--wakup function to do this
+						triggerEraseDataFlash = true
+						return true
+					end
+				}, {
+					label = "CANCEL",
+					action = function()
+						return true
+					end
+				}
+			}
+			local message
+			local title
+
+			title = "Erase"
+			message = "Would you like to erase the dataflash?"
+
+			form.openDialog({
+				width = nil,
+				title = title,
+				message = message,
+				buttons = buttons,
+				wakeup = function()
+				end,
+				paint = function()
+				end,
+				options = TEXT_LEFT
+			})
+
+end
 
 
 return {
@@ -150,5 +242,7 @@ return {
     refreshswitch = false,
     simulatorResponse = {},
     postLoad = postLoad,
-	navButtons={menu=true,save=false,reload=false,tool=false,help=false}
+	eraseDataflash = eraseDataflash,
+    onToolMenu = onToolMenu,	
+	navButtons={menu=true,save=false,reload=false,tool=true,help=false}
 }

@@ -1055,6 +1055,8 @@ function ui.fieldChoice(f, i)
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
+	
+	if f.disable == true then rf2ethos.formFields[i]:enable(false) end
 end
 
 
@@ -1133,7 +1135,8 @@ function ui.fieldNumber(f, i)
     if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
     if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
     if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
-
+	if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+			
     if f.help ~= nil then
         if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
             local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']

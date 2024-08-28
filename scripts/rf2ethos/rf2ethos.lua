@@ -88,6 +88,7 @@ rf2ethos.audio.playLoading = false
 rf2ethos.audio.playEscPowerCycle = false
 rf2ethos.audio.playServoOverideDisable = false
 rf2ethos.audio.playServoOverideEnable = false
+rf2ethos.audio.playEraseFlash = false
 
 rf2ethos.dialogs = {}
 rf2ethos.dialogs.progress = false
@@ -1126,6 +1127,10 @@ function rf2ethos.wakeupUI()
 	--alerts 
 	if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
 
+		if rf2ethos.audio.playEraseFlash == true then
+			system.playFile(rf2ethos.config.toolDir .. "sounds/eraseflash.wav")
+			rf2ethos.audio.playEraseFlash = false
+		end		
 
 		if rf2ethos.audio.playConnected == true then
 			system.playFile(rf2ethos.config.toolDir .. "sounds/connected.wav")
