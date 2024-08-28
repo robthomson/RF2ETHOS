@@ -91,7 +91,7 @@ function ui.progessDisplaySavingValue(value,message)
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
-function ui.noLinkValue(value,message)
+function ui.progessDisplayNoLinkValue(value,message)
 		
 	if value >= 100 then
 		rf2ethos.dialogs.noLink:value(value)
@@ -113,6 +113,14 @@ function ui.noLinkValue(value,message)
 end
 
 
+function ui.progessDisplayESCValue(value,message)
+		
+		rf2ethos.dialogs.nolinkRateLimit = now
+		rf2ethos.dialogs.noLink:value(value)
+		if message ~= nil then
+			rf2ethos.dialogs.noLink:message(message)
+		end		
+end
 
 function ui.openMainMenu()
 

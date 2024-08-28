@@ -101,8 +101,8 @@ rf2ethos.dialogs.progressESC = false
 rf2ethos.dialogs.progressDisplayEsc = false
 rf2ethos.dialogs.progressWatchDogESC = nil
 rf2ethos.dialogs.progressCounterESC = 0
-rf2ethos.dialogs.progressWatchDogESCRateLimit = os.clock()
-rf2ethos.dialogs.progressWatchDogESCRate = 1.5 -- how many times per second we can change dialog value
+rf2ethos.dialogs.progressESCRateLimit = os.clock()
+rf2ethos.dialogs.progressESCRate = 1.5 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.save = false
 rf2ethos.dialogs.saveDisplay = false
@@ -744,7 +744,7 @@ function rf2ethos.wakeupUI()
 				end	
 			end
 		end
-		rf2ethos.ui.noLinkValue(rf2ethos.dialogs.nolinkValueCounter)
+		rf2ethos.ui.progessDisplayNoLinkValue(rf2ethos.dialogs.nolinkValueCounter)
 	end
 
     -- a watchdog to enable the close button when saving data if we exheed the save timout
@@ -813,7 +813,7 @@ function rf2ethos.wakeupUI()
 				rf2ethos.audio.playEscPowerCycle = true				
 				
 				if rf2ethos.dialogs.progressESC ~= nil then
-					rf2ethos.dialogs.progressESC:value(0)
+					rf2ethos.ui.progessDisplayESCValue(0)
 					rf2ethos.dialogs.progressESC:closeAllowed(false)
 				end
 			else
@@ -823,14 +823,14 @@ function rf2ethos.wakeupUI()
 				end
 	
 				-- we rate limit the progress to keep things low cpu	
-				if (os.clock() - rf2ethos.dialogs.progressWatchDogESCRateLimit) >= rf2ethos.dialogs.progressWatchDogESCRate then
+				if (os.clock() - rf2ethos.dialogs.progressESCRateLimit) >= rf2ethos.dialogs.progressESCRate then
 
 					rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/"..rf2ethos.escManufacturer.."/esc_info.lua"))()
 					collectgarbage()				
 				
 					rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 2				
-					rf2ethos.dialogs.progressWatchDogESCRateLimit = os.clock()					
-					rf2ethos.dialogs.progressESC:value(rf2ethos.dialogs.progressCounterESC)
+					rf2ethos.dialogs.progressESCRateLimit = os.clock()					
+					rf2ethos.ui.progessDisplayESCValue(rf2ethos.dialogs.progressCounterESC)
 				end
 
 				if rf2ethos.Page.escinfo then
