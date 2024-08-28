@@ -555,7 +555,7 @@ function rf2ethos.wakeupUI()
 			rf2ethos.dialogs.progressWatchDog = nil
 			rf2ethos.dialogs.progressDisplay = false
 			if rf2ethos.dialogs.progress ~= nil then
-				rf2ethos.dialogs.progress:close()	
+				rf2ethos.ui.progessDisplayClose()
 			end
 			rf2ethos.dialogs.progressCounter = 0
 			rf2ethos.triggers.closeProgressLoader = false
@@ -565,7 +565,7 @@ function rf2ethos.wakeupUI()
 	-- close esc progress loader.  this essentially just instant closes the
 	-- esc loader when dealing with esc that require a power cycle to connect.
 	if rf2ethos.triggers.closeProgressLoaderESC == true then
-			rf2ethos.dialogs.progressESC:close()
+			rf2ethos.ui.progessDisplayESCClose()
 	end	
 
 	-- make the ui go to the main page of the esc in the event that theMsg
@@ -599,7 +599,7 @@ function rf2ethos.wakeupUI()
 		end	
 		
 		if rf2ethos.dialogs.save ~= nil then
-			rf2ethos.ui.progessDisplaySavingValue(rf2ethos.dialogs.saveProgressCounter)
+			rf2ethos.ui.progessDisplaySaveValue(rf2ethos.dialogs.saveProgressCounter)
 		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
@@ -608,7 +608,7 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
 			if rf2ethos.dialogs.save ~= nil then
-				rf2ethos.dialogs.save:close()		
+				rf2ethos.ui.progessDisplaySaveClose()		
 
 				if rf2ethos.config.reloadOnSave == true then
 					rf2ethos.triggers.triggerReloadNoPrompt = true
@@ -626,7 +626,7 @@ function rf2ethos.wakeupUI()
 		rf2ethos.dialogs.saveProgressCounter = rf2ethos.dialogs.saveProgressCounter + 10		
 
 		if rf2ethos.dialogs.save ~= nil then
-			rf2ethos.ui.progessDisplaySavingValue(rf2ethos.dialogs.saveProgressCounter)
+			rf2ethos.ui.progessDisplaySaveValue(rf2ethos.dialogs.saveProgressCounter)
 		end
 
         if rf2ethos.dialogs.saveProgressCounter >= 100 then
@@ -634,7 +634,7 @@ function rf2ethos.wakeupUI()
             rf2ethos.dialogs.saveProgressCounter = 0
             rf2ethos.dialogs.saveDisplay = false
             rf2ethos.dialogs.saveWatchDog = nil
-			rf2ethos.dialogs.save:close()						
+			rf2ethos.ui.progessDisplaySaveClose()						
         end
     end
 
@@ -692,10 +692,10 @@ function rf2ethos.wakeupUI()
 	if rf2ethos.triggers.telemetryState ~= 1 and rf2ethos.dialogs.progressDisplayEsc ~= true then
 	
 		if rf2ethos.dialogs.progress then
-			rf2ethos.dialogs.progress:close()
+			rf2ethos.ui.progessDisplayClose()
 		end
 		if rf2ethos.dialogs.save then
-			rf2ethos.dialogs.save:close()
+			rf2ethos.ui.progessDisplaySaveClose()
 		end
 	
 		if rf2ethos.dialogs.nolinkDisplay == false then
@@ -726,12 +726,12 @@ function rf2ethos.wakeupUI()
 		if rf2ethos.dialogs.nolinkValueCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
 		
 			if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0  then
-				rf2ethos.dialogs.noLink:close()
+				rf2ethos.ui.progessNolinkDisplayClose()
 				rf2ethos.dialogs.nolinkValueCounter = 0
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = true
 			else 
-				rf2ethos.dialogs.noLink:close()
+				rf2ethos.ui.progessNolinkDisplayClose()
 				rf2ethos.dialogs.nolinkValueCounter = 0
 				rf2ethos.dialogs.nolinkDisplay = false
 				rf2ethos.triggers.badMspVersion = false
@@ -751,7 +751,7 @@ function rf2ethos.wakeupUI()
     if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.saveTimeout = rf2ethos.config.watchdogParam end
     if rf2ethos.dialogs.saveDisplay == true then
         if rf2ethos.dialogs.saveWatchDog ~= nil then
-            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (tonumber(rf2ethos.protocol.saveTimeout)) then rf2ethos.dialogs.save:closeAllowed(true) end
+            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (tonumber(rf2ethos.protocol.saveTimeout)) then rf2ethos.ui.progessDisplaySaveCloseAllowed(true) end
         end
     end
 
@@ -773,8 +773,8 @@ function rf2ethos.wakeupUI()
 		if rf2ethos.triggers.escPowerCycle == true then
 			if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout) + 30) then
 				if rf2ethos.dialogs.progress ~= nil then
-					rf2ethos.dialogs.progress:message("Error.. we timed out")
-					rf2ethos.dialogs.progress:closeAllowed(true)
+					rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
+					rf2ethos.ui.progessDisplayCloseAllowed(true)
 				end
 								
 				--switch back to original page values
@@ -789,8 +789,8 @@ function rf2ethos.wakeupUI()
 				rf2ethos.audio.playTimeout = true
 				
 				if rf2ethos.dialogs.progress ~= nil then
-					rf2ethos.dialogs.progress:message("Error.. we timed out")
-					rf2ethos.dialogs.progress:closeAllowed(true)
+					rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
+					rf2ethos.ui.progessDisplayCloseAllowed(true)
 				end
 		
 				--switch back to original page values
@@ -814,7 +814,7 @@ function rf2ethos.wakeupUI()
 				
 				if rf2ethos.dialogs.progressESC ~= nil then
 					rf2ethos.ui.progessDisplayESCValue(0)
-					rf2ethos.dialogs.progressESC:closeAllowed(false)
+					rf2ethos.ui.progessDisplayESCClose(false)
 				end
 			else
 		
@@ -851,7 +851,7 @@ function rf2ethos.wakeupUI()
 							rf2ethos.Page = rf2ethos.PageTmp
 						end	
 											
-						rf2ethos.dialogs.progressESC:close()
+						rf2ethos.ui.progessDisplayESCClose()
 						rf2ethos.dialogs.progressDisplayEsc = false			
 						rf2ethos.triggers.escPowerCycle	= false					
 					end	
@@ -1011,15 +1011,15 @@ function rf2ethos.wakeupUI()
             if rf2ethos.dialogs.saveDisplay == false then
                 rf2ethos.triggers.saveFailed = false
                 rf2ethos.dialogs.saveProgressCounter = 0
-				rf2ethos.ui.progessDisplaySaving()
+				rf2ethos.ui.progessDisplaySave()
                 rf2ethos.mspQueue.retryCount = 0
             end
             if rf2ethos.pageState == rf2ethos.pageStatus.saving then
-                rf2ethos.ui.progessDisplaySavingValue(rf2ethos.dialogs.saveProgressCounter,"Saving data...")
+                rf2ethos.ui.progessDisplaySaveValue(rf2ethos.dialogs.saveProgressCounter,"Saving data...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.eepromWrite then
-                rf2ethos.ui.progessDisplaySavingValue(rf2ethos.dialogs.saveProgressCounter,"Saving data...")
+                rf2ethos.ui.progessDisplaySaveValue(rf2ethos.dialogs.saveProgressCounter,"Saving data...")
             elseif rf2ethos.pageState == rf2ethos.pageStatus.rebooting then
-                rf2ethos.ui.progessDisplaySavingValue(rf2ethos.dialogs.saveProgressCounter,"Rebooting...")
+                rf2ethos.ui.progessDisplaySaveValue(rf2ethos.dialogs.saveProgressCounter,"Rebooting...")
             end
             
         else
@@ -1032,7 +1032,7 @@ function rf2ethos.wakeupUI()
 			if rf2ethos.dialogs.saveDisplay == false then
                 rf2ethos.triggers.saveFailed = false
                 rf2ethos.dialogs.saveProgressCounter = 0
-				rf2ethos.ui.progessDisplaySaving()
+				rf2ethos.ui.progessDisplaySave()
                 rf2ethos.mspQueue.retryCount = 0
 				rf2ethos.triggers.closeSaveFake = true
 				rf2ethos.triggers.isSavingFake = false
@@ -1303,8 +1303,8 @@ function rf2ethos.event(widget, category, value, x, y)
     -- close esc main type selection menu
     if rf2ethos.escMenuState == 1 then
         if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
             rf2ethos.escMode = false
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
@@ -1325,8 +1325,8 @@ function rf2ethos.event(widget, category, value, x, y)
 				rf2ethos.dialogs.progressCounterESC = 99
 				return true
 			else
-				if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
-				if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
+				if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
+				if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
 				rf2ethos.escMode = true
 				rf2ethos.escManufacturer = nil
 				rf2ethos.escScript = nil
@@ -1338,8 +1338,8 @@ function rf2ethos.event(widget, category, value, x, y)
     -- close esc tool menu
     if rf2ethos.escMenuState == 3 then
         if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
             rf2ethos.escMode = true
             rf2ethos.escScript = nil
             collectgarbage()
@@ -1351,8 +1351,8 @@ function rf2ethos.event(widget, category, value, x, y)
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
 
         if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
 			if rf2ethos.Page.onMenuExit then
 				rf2ethos.Page.onMenuExit(rf2ethos.Page)
 			end			
@@ -1360,8 +1360,8 @@ function rf2ethos.event(widget, category, value, x, y)
             return true
         end
         if value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
 			if rf2ethos.Page.onMenuExit then
 				rf2ethos.Page.onMenuExit(rf2ethos.Page)
 			end			
@@ -1369,8 +1369,8 @@ function rf2ethos.event(widget, category, value, x, y)
             return true
         end
         if value == KEY_ENTER_LONG then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
             rf2ethos.triggers.triggerSave = true
             system.killEvents(KEY_ENTER_BREAK)
             return true
@@ -1380,8 +1380,8 @@ function rf2ethos.event(widget, category, value, x, y)
 
     if rf2ethos.uiState == rf2ethos.uiStatus.MainMenu then
         if value == KEY_ENTER_LONG then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.dialogs.progress:close() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.dialogs.save:close() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
             system.killEvents(KEY_ENTER_BREAK)
             return true
         end
@@ -1392,16 +1392,16 @@ end
 
 function rf2ethos.close()
 	if rf2ethos.dialogs.progress then
-		rf2ethos.dialogs.progress:close()
+		rf2ethos.ui.progessDisplayClose()
 	end
 	if rf2ethos.dialogs.save then
-		rf2ethos.dialogs.save:close()
+		rf2ethos.ui.progessDisplaySaveClose()
 	end
 	if rf2ethos.dialogs.progressESC then
-		rf2ethos.dialogs.progressESC:close()
+		rf2ethos.ui.progessDisplayESCClose()
 	end
 	if rf2ethos.dialogs.noLink then
-		rf2ethos.dialogs.noLink:close()
+		rf2ethos.ui.progessNolinkDisplayClose()
 	end
     invalidatePages()
     rf2ethos.resetState()

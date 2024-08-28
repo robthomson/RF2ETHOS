@@ -38,7 +38,7 @@ function ui.progessDisplayESC()
 	rf2ethos.dialogs.progressESC:value(0)
 end
 
-function ui.progessDisplaySaving()
+function ui.progessDisplaySave()
 	rf2ethos.dialogs.saveDisplay = true
 	rf2ethos.dialogs.saveWatchDog = os.clock()
 	rf2ethos.dialogs.save = form.openProgressDialog("Saving...", "Saving data...")
@@ -69,7 +69,7 @@ function ui.progessDisplayValue(value)
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
-function ui.progessDisplaySavingValue(value,message)
+function ui.progessDisplaySaveValue(value,message)
 		
 	if value >= 100 then
 		rf2ethos.dialogs.save:value(value)
@@ -88,6 +88,35 @@ function ui.progessDisplaySavingValue(value,message)
 		end		
 	end	
 	
+end
+
+function ui.progessDisplayClose()
+	rf2ethos.dialogs.progress:close()
+end
+
+function ui.progessDisplayCloseAllowed(status)
+	rf2ethos.dialogs.progress:closeAllowed(status)
+end
+
+function ui.progessDisplayMessage(message)
+	rf2ethos.dialogs.progress:message(message)
+end
+
+function ui.progessDisplaySaveClose()
+	rf2ethos.dialogs.save:close()
+end
+
+function ui.progessDisplaySaveCloseAllowed(status)
+	rf2ethos.dialogs.progress:closeAllowed(status)
+end
+
+
+function ui.progessDisplayESCClose()
+	rf2ethos.dialogs.progressESC:close()
+end
+
+function ui.progessNolinkDisplayClose()
+	rf2ethos.dialogs.noLink:close()
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
