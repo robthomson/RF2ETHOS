@@ -162,10 +162,14 @@ end
 
 function utils.scaleValue(value, f)
     local v
-    v = value * utils.decimalInc(f.decimals)
-    if f.scale ~= nil then v = v / f.scale end
-    v = utils.round(v)
-    return v
+	if value ~= nil then
+		v = value * utils.decimalInc(f.decimals)
+		if f.scale ~= nil then v = v / f.scale end
+		v = utils.round(v)
+		return v
+	else
+		return nil
+	end
 end
 
 function utils.decimalInc(dec)

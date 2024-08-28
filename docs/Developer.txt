@@ -30,11 +30,12 @@ return {
 	preSavePayload = preSavePayload,	-- A FUNCTION RUN ON THE PAYLOAD JUST PRIOR TO DOING AN MSP WRITE
     wakeup = wakeup,					-- A WAKEUP FUNCTION THAT RUNS EVERY 0.2ms. USE FOR ANYTHING THAT HAS TO HAPPEN ASYNC
     paint = paint,						-- A HOOK INTO A FUNCTION CALLED WHENEVER THE LCD IS REDRAWN TO SCREEN
-	onNavMenu = onNavMenu,				-- A function to run when you press the menu button
-	onSaveMenu = onSaveMenu,			-- A function to run when you press the menu button
-	onReloadMenu = onReloadMenu,		-- A function to run when you press the menu button
-	onHelpMenu = onHelpMenu,		-- A function to run when you press the menu button
- 	onToolMenu = onToolMenu,			-- An additional menu button with associated functon	
+	onNavMenu = onNavMenu,				-- A function to run when you press the menu button (overide default)
+	onSaveMenu = onSaveMenu,			-- A function to run when you press the menu button (overide default)
+	onReloadMenu = onReloadMenu,		-- A function to run when you press the menu button (overide default)
+	onHelpMenu = onHelpMenu,			-- A function to run when you press the menu button (overide default)
+ 	onToolMenu = onToolMenu,			-- An additional menu button with associated function (no default - tool is custom)
+	navButtons = {}						-- a defined list of nav buttons to show {menu=true,save=true,reload=true,help=true}
 }
 
 == 

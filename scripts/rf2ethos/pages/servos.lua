@@ -236,9 +236,10 @@ local function onNavMenu(self)
 				rf2ethos.Page.servoCenterFocusAllOff(self)			
 				rf2ethos.triggers.closeProgressLoader = true
 			end	
-						
+		
+		rf2ethos.ui.openMainMenu()
 
-	end
+end
 
 local function wakeup(self)
 	
@@ -309,6 +310,6 @@ return {
     onToolMenu = onToolMenu,
 	wakeup =  wakeup,
 	onNavMenu = onNavMenu,
-
+	navButtons={menu=true,save=true,reload=true,tool=true,help=true}
 	
 }

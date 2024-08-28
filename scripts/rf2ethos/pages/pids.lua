@@ -52,5 +52,5 @@ return {
     fields = fields,
     rows = rows,
     cols = cols,
-    postLoad = postLoad
+    postLoad = postLoad,
 }
