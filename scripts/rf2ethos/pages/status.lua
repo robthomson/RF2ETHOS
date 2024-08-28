@@ -5,8 +5,8 @@ local dataflashSummary = {}
 local wakeupScheduler = os.clock()
 local status = {}
 local summary = {}
-local firstRun = true
 local triggerEraseDataFlash = false
+
 
 fields[1] = { t = "Arming Flags",  value="0", type=2,disable=true}
 fields[2] = { t = "Dataflash Free Space",  value="0" ,type=2,disable=true }
@@ -80,7 +80,8 @@ end
 
 
 local function postLoad(self)
-	rf2ethos.triggers.isReady = true
+	getStatus()
+	getDataflashSummary()	
 end	
 
 
@@ -131,6 +132,10 @@ end
 
 local function wakeup()
 		
+		if status.armingDisableFlags ~= nil or summary.supported ~= nil then
+			rf2ethos.triggers.isReady = true
+		end	
+		
 		if triggerEraseDataFlash == true then
 				rf2ethos.audio.playEraseFlash = true
 				triggerEraseDataFlash = false
@@ -142,14 +147,11 @@ local function wakeup()
 		
 		if triggerEraseDataFlash == false then
 			local now = os.clock()
-			if (now - wakeupScheduler) >= 2 or firstRun == true then	
+			if (now - wakeupScheduler) >= 2 then	
 				wakeupScheduler = now
 				firstRun = false
 				if rf2ethos.mspQueue:isProcessed() then
-
-
-
-				
+	
 					getStatus()
 					getDataflashSummary()
 
@@ -244,5 +246,5 @@ return {
     postLoad = postLoad,
 	eraseDataflash = eraseDataflash,
     onToolMenu = onToolMenu,	
-	navButtons={menu=true,save=false,reload=false,tool=true,help=false}
+	navButtons={menu=true,save=false,reload=false,tool=true,help=true}
 }

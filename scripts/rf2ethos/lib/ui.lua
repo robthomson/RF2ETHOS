@@ -1711,14 +1711,20 @@ end
 
 function ui.openPagehelp(helpdata, section)
     local txtData
+	local qr
 
     if section == "rates" then
         txtData = helpdata[section]["table"][rf2ethos.RateTable]
     else
         txtData = helpdata[section]["TEXT"]
     end
-    local qr = rf2ethos.config.toolDir .. helpdata[section]["qrCODE"]
-
+	if helpdata[section]["qrCODE"] ~= nil then
+		qr = rf2ethos.config.toolDir .. helpdata[section]["qrCODE"]
+	else
+		qr = nil
+	end
+	
+	
     local message = ""
 
 
@@ -1745,7 +1751,12 @@ function ui.openPagehelp(helpdata, section)
         }	
     }
 
-    local bitmap = lcd.loadBitmap(qr)
+	local bitmap
+	if qr ~= nil then
+		bitmap = lcd.loadBitmap(qr)
+	else
+		bitmap = nil
+	end
 
     form.openDialog({
         width = rf2ethos.config.lcdWidth,
@@ -1764,10 +1775,11 @@ function ui.openPagehelp(helpdata, section)
             local qh = rf2ethos.radio.helpQrCodeSize
 
 			
-
-            local qy = rf2ethos.radio.buttonPadding
-            local qx = rf2ethos.config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2
-            lcd.drawBitmap(qx, qy, bitmap, qw, qh)
+			if qr ~= nil then
+				local qy = rf2ethos.radio.buttonPadding
+				local qx = rf2ethos.config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2
+				lcd.drawBitmap(qx, qy, bitmap, qw, qh)
+			end
 
 
 

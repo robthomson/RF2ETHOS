@@ -154,20 +154,16 @@ data["governor"] = {}
 data["governor"]["qrCODE"] = "gfx/qr/governor.png"
 data["governor"]["TEXT"] = {"These paramers apply globally to the governor - regardless of the profile in use.", "Broadly - each parameter is simply a time value in seconds for each governor action."}
 
---[[
--- HARDWARE - ESC
-data["esc"] = {
-				"Adjust esc.. blah..",
-				"Additional line"
-				}
-]] --
 
--- TOOLS COPY PROFILES
---[[
-data["copy_profiles"] = {
-				"Copy profiles",
-				"Additional line"
+-- STATUS
+data["status"] = {}
+data["status"]["qrCODE"] = nil
+data["status"]["TEXT"] = {
+				"Use this page to view your current flight controller status.  This can be usefull when determining why your heli will not arm.",
+				"To erase the dataflash for more log file storage, press the button on the menu denoted by a '*'"
 				}
-]] --
+
+
+
 
 return {data = data}
