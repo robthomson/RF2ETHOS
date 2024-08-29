@@ -97,7 +97,7 @@ rf2ethos.dialogs.progressDisplay = false
 rf2ethos.dialogs.progressWatchDog = nil
 rf2ethos.dialogs.progressCounter = 0
 rf2ethos.dialogs.progressRateLimit = os.clock()
-rf2ethos.dialogs.progressRate = 0.5  --how many times per second we can change dialog value
+rf2ethos.dialogs.progressRate = 0.1  --how many times per second we can change dialog value
 
 rf2ethos.dialogs.progressESC = false
 rf2ethos.dialogs.progressDisplayEsc = false
@@ -111,13 +111,13 @@ rf2ethos.dialogs.saveDisplay = false
 rf2ethos.dialogs.saveWatchDog = nil
 rf2ethos.dialogs.saveProgressCounter = 0
 rf2ethos.dialogs.saveRateLimit = os.clock()
-rf2ethos.dialogs.saveRate = 0.5  --how many times per second we can change dialog value
+rf2ethos.dialogs.saveRate = 0.1  --how many times per second we can change dialog value
 
 rf2ethos.dialogs.nolink = false
 rf2ethos.dialogs.nolinkDisplay = false
 rf2ethos.dialogs.nolinkValueCounter = 0
 rf2ethos.dialogs.nolinkRateLimit = os.clock()
-rf2ethos.dialogs.nolinkRate = 0.5 -- how many times per second we can change dialog value
+rf2ethos.dialogs.nolinkRate = 0.1 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.badversion = false
 rf2ethos.dialogs.badversionDisplay = false
@@ -510,14 +510,14 @@ function rf2ethos.wakeup(widget)
 
 	--keep cpu load down by running UI at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerUI) >= 0.1 then	
+	if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 then	
 		rf2ethos.wakeupSchedulerUI = now
 		rf2ethos.wakeupUI()
 	end	
 
 	--keep cpu load down by running Form at reduced interval
 	local now = os.clock()
-	if (now - rf2ethos.wakeupSchedulerForm) >= 0.15 then	
+	if (now - rf2ethos.wakeupSchedulerForm) >= 0.1 then	
 		rf2ethos.wakeupSchedulerForm = now
 		rf2ethos.wakeupForm()
 	end	
