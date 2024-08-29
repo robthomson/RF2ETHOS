@@ -6,13 +6,15 @@ local wakeupScheduler = os.clock()
 local status = {}
 local summary = {}
 local triggerEraseDataFlash = false
+local enableWakeup = false
 
 
-fields[1] = { t = "Arming Flags",  value="0", type=2,disable=true}
-fields[2] = { t = "Dataflash Free Space",  value="0" ,type=2,disable=true }
-fields[3] = { t = "Real-time load", value = "0",type=2,disable=true}
-fields[4] = { t = "CPU load", value = "0" ,type=2,disable=true}
-
+fields[1] = { t = "Arming Flags",  value="0", type=2, disable=true}
+fields[2] = { t = "Dataflash Free Space",  value="0" ,type=2, disable=true }
+fields[3] = { t = "Real-time load", value = "0",type=2, disable=true}
+fields[4] = { t = "CPU load", value = "0" ,type=2, disable=true}
+fields[5] = { t = "PID profile", value = "0" ,type=2, disable=true}
+fields[6] = { t = "Rate Profile", value = "0" ,type=2, disable=true}
 
 
 local function getStatus()
@@ -80,10 +82,20 @@ end
 
 
 local function postLoad(self)
-	getStatus()
-	getDataflashSummary()	
+	print("postLoad")	
 end	
 
+local function postRead(self)
+print("postLoad")	
+end
+
+
+local function readMSP()
+	getStatus()
+	getDataflashSummary()
+	rf2ethos.triggers.isReady = true
+	enableWakeup = true
+end
 
 
 local function armingDisableFlagsToString(flags)
@@ -132,61 +144,73 @@ end
 
 local function wakeup()
 		
-		if status.armingDisableFlags ~= nil or summary.supported ~= nil then
+	-- prevent wakeup running until after initialised
+	if enableWakeup	== false then
+		return
+	end
+		
+	if triggerEraseDataFlash == true then
+			rf2ethos.audio.playEraseFlash = true
+			triggerEraseDataFlash = false
+			
+			rf2ethos.ui.progessDisplay("Erasing...","Erasing dataflash.")	
+			rf2ethos.Page.eraseDataflash()
 			rf2ethos.triggers.isReady = true
-		end	
-		
-		if triggerEraseDataFlash == true then
-				rf2ethos.audio.playEraseFlash = true
-				triggerEraseDataFlash = false
-				
-				rf2ethos.ui.progessDisplay("Erasing...","Erasing dataflash.")	
-				rf2ethos.Page.eraseDataflash()
-				rf2ethos.triggers.isReady = true
-		end
-		
-		if triggerEraseDataFlash == false then
-			local now = os.clock()
-			if (now - wakeupScheduler) >= 2 then	
-				wakeupScheduler = now
-				firstRun = false
-				if rf2ethos.mspQueue:isProcessed() then
+	end
 	
-					getStatus()
-					getDataflashSummary()
+	if triggerEraseDataFlash == false then
+		local now = os.clock()
+		if (now - wakeupScheduler) >= 2 then	
+			wakeupScheduler = now
+			firstRun = false
+			if rf2ethos.mspQueue:isProcessed() then
 
-					if status.armingDisableFlags ~= nil then
-							local value = armingDisableFlagsToString(status.armingDisableFlags)
-							rf2ethos.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function() return value end, function(newValue) text = value end)
-							rf2ethos.formFields[1]:enable(false)				
-					end
+				getStatus()
+				getDataflashSummary()
 
-
-					if summary.supported == true then
-							local value = getFreeDataflashSpace()
-							rf2ethos.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function() return value end, function(newValue) text = value end)
-							rf2ethos.formFields[2]:enable(false)						
-					end
-					
-					if status.realTimeLoad ~= nil then
-						local value = status.realTimeLoad
-						rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function() return value end, function(value) end)
-						rf2ethos.formFields[3]:suffix("%")	
-						rf2ethos.formFields[3]:decimals(1)	
-						rf2ethos.formFields[3]:enable(false)
-					end
-					if status.cpuLoad ~= nil then
-						local value = status.cpuLoad
-						rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function() return value end, function(value) end)
-						rf2ethos.formFields[4]:suffix("%")	
-						rf2ethos.formFields[4]:decimals(1)	
-						rf2ethos.formFields[4]:enable(false)						
-					end
-					
-
+				if status.armingDisableFlags ~= nil then
+						local value = armingDisableFlagsToString(status.armingDisableFlags)
+						rf2ethos.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function() return value end, function(newValue) text = value end)
+						rf2ethos.formFields[1]:enable(false)				
 				end
-			end	
-		end
+
+				if summary.supported == true then
+						local value = getFreeDataflashSpace()
+						rf2ethos.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function() return value end, function(newValue) text = value end)
+						rf2ethos.formFields[2]:enable(false)						
+				end
+				
+				if status.realTimeLoad ~= nil then
+					local value = status.realTimeLoad
+					rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function() return value end, function(value) end)
+					rf2ethos.formFields[3]:suffix("%")	
+					rf2ethos.formFields[3]:decimals(1)	
+					rf2ethos.formFields[3]:enable(false)
+				end
+				if status.cpuLoad ~= nil then
+					local value = status.cpuLoad
+					rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function() return value end, function(value) end)
+					rf2ethos.formFields[4]:suffix("%")	
+					rf2ethos.formFields[4]:decimals(1)	
+					rf2ethos.formFields[4]:enable(false)						
+				end
+				
+				if status.profile ~= nil then
+					local value = status.profile
+					rf2ethos.formFields[5] = form.addNumberField(rf2ethos.formLines[5], nil, value, value, function() return value end, function(value) end)
+					rf2ethos.formFields[5]:enable(false)						
+				end				
+
+				if status.rateProfile ~= nil then
+					local value = status.rateProfile
+					rf2ethos.formFields[6] = form.addNumberField(rf2ethos.formLines[6], nil, value, value, function() return value end, function(value) end)	
+					rf2ethos.formFields[6]:enable(false)						
+				end	
+				
+				rf2ethos.triggers.closeProgressLoader = true
+			end
+		end	
+	end
 
 
 end
@@ -232,7 +256,7 @@ end
 
 
 return {
-    read = nil, 
+    read = readMSP, 
     write = nil, 
     title = "Status",
     reboot = false,
@@ -244,6 +268,7 @@ return {
     refreshswitch = false,
     simulatorResponse = {},
     postLoad = postLoad,
+	postRead = postRead,
 	eraseDataflash = eraseDataflash,
     onToolMenu = onToolMenu,	
 	navButtons={menu=true,save=false,reload=false,tool=true,help=true}
