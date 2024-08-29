@@ -22,8 +22,7 @@ labels[#labels + 1] = {t = "", label = "start3", inline_size = 40.6}
 fields[#fields + 1] = {t = "Auto Restart", inline = 1, label = "start3", units = "s", min = 0, max = 90, vals = {mspHeaderBytes + 72}}
 
 local foundEsc = false
-local foundEscDone = false 
-
+local foundEscDone = false
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -50,8 +49,8 @@ return {
         -- Startup Time
         f = self.fields[3]
         f.value = f.value + 4
-		
-		rf2ethos.triggers.isReady = true		
+
+        rf2ethos.triggers.isReady = true
     end,
     postRead = function(self)
         -- rf2ethos.utils.log("postRead")
@@ -61,11 +60,11 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-			foundEsc = false
-            --rf2ethos.triggers.isReady = true
+            foundEsc = false
+            -- rf2ethos.triggers.isReady = true
         else
-			foundEsc = true
-		end
+            foundEsc = true
+        end
     end,
     preSave = function(self)
 
@@ -77,11 +76,11 @@ return {
         -- return self.values
     end,
     wakeup = function(self)
-	
-		if foundEsc == true and foundEscDone == false then
-			foundEscDone = true
-			rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-		end
-				
-    end		
+
+        if foundEsc == true and foundEscDone == false then
+            foundEscDone = true
+            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+        end
+
+    end
 }

@@ -1,8 +1,6 @@
 local labels = {}
 local fields = {}
 
-
-
 labels[#labels + 1] = {t = "Collective Pitch Compensation", t2 = "Col. Pitch Compensation", label = "cpcomp", inline_size = 40.15}
 fields[#fields + 1] = {t = "", help = "profilesPitchFFCollective", inline = 1, label = "cpcomp", min = 0, max = 250, default = 0, vals = {28}}
 
@@ -17,7 +15,7 @@ labels[#labels + 1] = {t = "", label = "cycliccc3", inline_size = 40.15}
 fields[#fields + 1] = {t = "Cutoff", help = "profilesCyclicCrossCouplingCutoff", inline = 1, label = "cycliccc3", line = true, min = 1, max = 250, default = 15, unit = "Hz", vals = {36}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

@@ -28,7 +28,7 @@ labels[#labels + 1] = {t = "", label = "brake2", inline_size = 40.6}
 fields[#fields + 1] = {t = "Brake Force %", inline = 1, label = "brake2", min = 0, max = 100, vals = {mspHeaderBytes + 75}}
 
 local foundEsc = false
-local foundEscDone = false 
+local foundEscDone = false
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -57,10 +57,10 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            --rf2ethos.triggers.isReady = true
-			foundEsc = false
-		else
-			foundEsc = true
+            -- rf2ethos.triggers.isReady = true
+            foundEsc = false
+        else
+            foundEsc = true
         end
     end,
     postLoad = function(self)
@@ -70,14 +70,14 @@ return {
         self.escinfo[1].t = model
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
-		--rf2ethos.triggers.isReady = true		
+        -- rf2ethos.triggers.isReady = true		
     end,
     wakeup = function(self)
-	
-		if foundEsc == true and foundEscDone == false then
-			foundEscDone = true
-			rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-		end
-				
-    end		
+
+        if foundEsc == true and foundEscDone == false then
+            foundEscDone = true
+            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+        end
+
+    end
 }

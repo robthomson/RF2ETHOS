@@ -1,7 +1,6 @@
 local labels = {}
 local fields = {}
 
-
 -- pid controller bandwidth
 labels[#labels + 1] = {t = "PID Bandwidth", inline_size = 8.15, label = "pidbandwidth", type = 1}
 fields[#fields + 1] = {t = "R", help = "profilesPIDBandwidth", inline = 3, label = "pidbandwidth", min = 0, max = 250, default = 50, vals = {11}}
@@ -19,7 +18,7 @@ fields[#fields + 1] = {t = "P", help = "profilesPIDBandwidthBtermCutoff", inline
 fields[#fields + 1] = {t = "Y", help = "profilesPIDBandwidthBtermCutoff", inline = 1, label = "bcutoff", min = 0, max = 250, default = 20, vals = {41}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

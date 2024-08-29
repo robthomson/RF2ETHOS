@@ -23,11 +23,11 @@ end
 function MspQueueController:processQueue()
     if self:isProcessed() then
         ELRS_PAUSE_TELEMETRY = false
-		rf2ethos.triggers.mspBusy = false
+        rf2ethos.triggers.mspBusy = false
         return
     end
     ELRS_PAUSE_TELEMETRY = true
-	rf2ethos.triggers.mspBusy = true
+    rf2ethos.triggers.mspBusy = true
 
     if not self.currentMessage then
         self.currentMessage = popFirstElement(self.messageQueue)
@@ -37,12 +37,12 @@ function MspQueueController:processQueue()
     local cmd, buf, err
     -- rf2ethos.utils.log("retryCount: "..self.retryCount)
 
-	local lastTimeInterval
-	if rf2ethos.escMode == true then
-		lastTimeInterval = 1  -- this is particually needed for HW esc.  
-	else
-		lastTimeInterval = 0.5
-	end
+    local lastTimeInterval
+    if rf2ethos.escMode == true then
+        lastTimeInterval = 1 -- this is particually needed for HW esc.  
+    else
+        lastTimeInterval = 0.5
+    end
 
     if not rf2ethos.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
@@ -68,45 +68,37 @@ function MspQueueController:processQueue()
         err = nil
     end
 
-    if cmd then 
-		
-		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then	
-			local logData = "Requesting:  {" .. tostring(cmd) .."}"
+    if cmd then
 
-			rf2ethos.utils.log(logData) 
-			
-			if rf2ethos.config.mspTxRxDebug == true then
-						print(logData)
-			end			
-			
-		end	
-			
-	end
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+            local logData = "Requesting:  {" .. tostring(cmd) .. "}"
+
+            rf2ethos.utils.log(logData)
+
+            if rf2ethos.config.mspTxRxDebug == true then print(logData) end
+
+        end
+
+    end
 
     if (cmd == self.currentMessage.command and not err) or (self.currentMessage.command == 68 and self.retryCount == 2) -- 68 = MSP_REBOOT
     or (self.currentMessage.command == 217 and err and self.retryCount == 2) -- ESC
     then
 
-		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
-			local logData = "Received:      {" .. rf2ethos.utils.joinTableItems(buf, ", ") .. "}"
-			rf2ethos.utils.log(logData)
-			
-			if rf2ethos.config.mspTxRxDebug == true then
-					if #buf > 0 then
-						print(logData)
-					end	
-			end
-			
-		end			
-			
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+            local logData = "Received:      {" .. rf2ethos.utils.joinTableItems(buf, ", ") .. "}"
+            rf2ethos.utils.log(logData)
+
+            if rf2ethos.config.mspTxRxDebug == true then if #buf > 0 then print(logData) end end
+
+        end
+
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
     elseif self.retryCount > self.maxRetries then
-        --rf2ethos.utils.log("Max retries reached, aborting queue")
+        -- rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
-        if self.currentMessage.errorHandler then
-            self.currentMessage:errorHandler()
-        end
+        if self.currentMessage.errorHandler then self.currentMessage:errorHandler() end
         self.currentMessage = nil
     end
 end
@@ -127,18 +119,15 @@ function MspQueueController:add(message)
 
     if message ~= nil then
         message = deepCopy(message)
-		
-		if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
-			local logData = "Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1
-			rf2ethos.utils.log(logData)
-		
-			if rf2ethos.config.mspTxRxDebug == true then
-						print(logData)
-			end
-			
-		end			
-		
-        
+
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+            local logData = "Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1
+            rf2ethos.utils.log(logData)
+
+            if rf2ethos.config.mspTxRxDebug == true then print(logData) end
+
+        end
+
         self.messageQueue[#self.messageQueue + 1] = message
         return self
     else

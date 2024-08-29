@@ -37,7 +37,7 @@ fields[16] = {help = "profilesBoost", row = 2, col = 6, min = 0, max = 1000, def
 fields[17] = {help = "profilesBoost", row = 3, col = 6, min = 0, max = 1000, default = 0, vals = {29, 30}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {
@@ -52,5 +52,5 @@ return {
     fields = fields,
     rows = rows,
     cols = cols,
-    postLoad = postLoad,
+    postLoad = postLoad
 }

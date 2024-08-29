@@ -51,7 +51,7 @@ function bitReplace(value, replaceValue, field)
 end
 
 local foundEsc = false
-local foundEscDone = false 
+local foundEscDone = false
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -85,8 +85,8 @@ return {
         -- set BEC voltage max (8.4 or 12.3)
         f = self.fields[3]
         f.max = (self.svFlags & (1 << escFlags.bec12v)) == 0 and 84 or 123
-		
-		--rf2ethos.triggers.isReady = true
+
+        -- rf2ethos.triggers.isReady = true
     end,
     postRead = function(self)
         if self.values[1] ~= mspSignature then
@@ -94,11 +94,11 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            --rf2ethos.triggers.isReady = true
-			foundEsc = false
+            -- rf2ethos.triggers.isReady = true
+            foundEsc = false
             return
-		else
-			foundEsc = true
+        else
+            foundEsc = true
         end
     end,
     preSave = function(self)
@@ -110,13 +110,13 @@ return {
         return self.values
     end,
     wakeup = function(self)
-	
-		if foundEsc == true and foundEscDone == false then
-		
-			foundEscDone = true
-			rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-		end
-				
-    end		
+
+        if foundEsc == true and foundEscDone == false then
+
+            foundEscDone = true
+            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+        end
+
+    end
 }
 

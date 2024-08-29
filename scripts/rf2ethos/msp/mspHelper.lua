@@ -23,7 +23,7 @@ local mspHelper = {
         local value = buf[offset] + buf[offset + 1] * 256 + buf[offset + 2] * 65536 + buf[offset + 3] * 16777216
         buf.offset = offset + 4
         return value
-    end,	
+    end,
     writeU8 = function(buf, value)
         buf[#buf + 1] = value % 256
     end,
@@ -39,7 +39,7 @@ local mspHelper = {
     end,
     writeRAW = function(buf, value)
         buf[#buf + 1] = value
-    end,	
+    end
 }
 
 return mspHelper

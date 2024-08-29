@@ -29,7 +29,7 @@ fields[#fields + 1] = {t = "P", help = "profilesItermRelax", inline = 2, label =
 fields[#fields + 1] = {t = "Y", help = "profilesItermRelax", inline = 1, label = 15, min = 1, max = 100, default = 10, vals = {20}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

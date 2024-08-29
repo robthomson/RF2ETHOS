@@ -87,7 +87,7 @@ labels[#labels + 1] = {subpage = 5, t = "Horizon mode", inline_size = 13.6, labe
 fields[#fields + 1] = {subpage = 5, t = "Gain", help = "profilesHorizonModeGain", inline = 2, label = 13, min = 0, max = 200, default = 40, vals = {31}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

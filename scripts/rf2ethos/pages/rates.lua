@@ -14,28 +14,27 @@ local mytable = assert(compile.loadScript(tables[rf2ethos.RateTable]))()
 
 local fields = mytable.fields
 
-
-fields[13] = {t = "Rates Type",hidden=true,ratetype = 1, min = 0,max = 5,vals = {1}}
+fields[13] = {t = "Rates Type", hidden = true, ratetype = 1, min = 0, max = 5, vals = {1}}
 
 local function postLoad(self)
-	-- if the activeRateTable is not what we are displaying
-	-- then we need to trigger a reload of the page
-	local v = rf2ethos.Page.values[1]
-	if v ~= nil then rf2ethos.activeRateTable  = math.floor(v) end
+    -- if the activeRateTable is not what we are displaying
+    -- then we need to trigger a reload of the page
+    local v = rf2ethos.Page.values[1]
+    if v ~= nil then rf2ethos.activeRateTable = math.floor(v) end
 
-	if rf2ethos.activeRateTable ~= nil then
-		if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
-			rf2ethos.RateTable = rf2ethos.activeRateTable 
-			rf2ethos.triggers.reload = true
-			return
-		end
-	end
+    if rf2ethos.activeRateTable ~= nil then
+        if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
+            rf2ethos.RateTable = rf2ethos.activeRateTable
+            rf2ethos.triggers.reload = true
+            return
+        end
+    end
 
-	rf2ethos.triggers.isReady = true
-end	
+    rf2ethos.triggers.isReady = true
+end
 
 local function flagRateChange(self)
-	rf2ethos.triggers.resetRates = true
+    rf2ethos.triggers.resetRates = true
 end
 
 return {

@@ -21,9 +21,8 @@ fields[#fields + 1] = {t = "Limit", help = "govTTALimit", inline = 1, label = 3,
 
 fields[#fields + 1] = {t = "Max throttle", help = "govMaxThrottle", min = 40, max = 100, default = 100, unit = "%", vals = {13}}
 
-
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

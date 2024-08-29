@@ -28,7 +28,7 @@ fields[#fields + 1] = {t = "Idle throttle%", help = "mixerTailMotorIdle", t2 = "
 fields[#fields + 1] = {t = "Center trim", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

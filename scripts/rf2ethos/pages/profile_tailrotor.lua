@@ -1,7 +1,6 @@
 local labels = {}
 local fields = {}
 
-
 -- tail rotor settings
 labels[#labels + 1] = {t = "Yaw stop gain", label = "ysgain", inline_size = 13.6}
 fields[#fields + 1] = {t = "CW", help = "profilesYawStopGainCW", inline = 2, label = "ysgain", min = 25, max = 250, default = 80, vals = {21}}
@@ -16,7 +15,7 @@ fields[#fields + 1] = {t = "Gain", help = "profilesYawFFImpulseGain", inline = 2
 fields[#fields + 1] = {t = "Decay", help = "profilesyawFFImpulseDecay", inline = 1, label = "colimpff", min = 0, max = 250, default = 25, unit = "s", vals = {27}}
 
 local function postLoad(self)
-	rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

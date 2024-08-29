@@ -31,7 +31,7 @@ labels[#labels + 1] = {subpage = 1, t = "", label = "rescue3", inline_size = 40.
 fields[#fields + 1] = {t = "Accel", help = "profilesRescueMaxAccel", label = "rescue3", inline = 1, min = 1, max = 10000, default = 2000, unit = "°/^2", vals = {27, 28}}
 
 local function postLoad(self)
-		rf2ethos.triggers.isReady = true		
+    rf2ethos.triggers.isReady = true
 end
 
 return {

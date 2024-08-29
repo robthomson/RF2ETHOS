@@ -11,7 +11,7 @@ local spref
 local s
 
 function compile.initialise()
-       readConfig = false
+    readConfig = false
 end
 
 local function file_exists(name)
@@ -25,10 +25,10 @@ local function file_exists(name)
 end
 
 local function baseName()
-	local baseName
-	baseName = config.toolDir:gsub("/scripts/","")
-	baseName = baseName:gsub("/","")
-	return baseName
+    local baseName
+    baseName = config.toolDir:gsub("/scripts/", "")
+    baseName = baseName:gsub("/", "")
+    return baseName
 end
 
 local function loadPreference(preference)
@@ -60,52 +60,44 @@ end
 function compile.loadScript(script)
 
     -- we need to add code to stop this reading every time function runs
-	local cachefile
-	cachefile = toolDir .. "compiled/" .. script:gsub("/", "_") .. "c"
+    local cachefile
+    cachefile = toolDir .. "compiled/" .. script:gsub("/", "_") .. "c"
 
-   
-    if readConfig == false or readConfig == nil then 
+    if readConfig == false or readConfig == nil then
 
         readConfig = true
 
         -- read preference
-        pref = tonumber(loadPreference(toolDir  .. "/preferences/compilation"))
-        spref = loadPreference(toolDir  .. "/preferences/compilationswitch")
+        pref = tonumber(loadPreference(toolDir .. "/preferences/compilation"))
+        spref = loadPreference(toolDir .. "/preferences/compilationswitch")
         s = explode(spref, ",")
-	    switchParam = system.getSource({category = s[1], member = s[2]})	
-            
+        switchParam = system.getSource({category = s[1], member = s[2]})
+
         if pref == 0 or pref == nil then
             config.useCompiler = true
             -- check physical overrides
         elseif pref == 1 then
-            config.useCompiler = false 
+            config.useCompiler = false
         elseif pref == 2 then
-                if tonumber(switchParam:value()) == 100  then
-                    config.useCompiler = false
-					
-					local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
+            if tonumber(switchParam:value()) == 100 then
+                config.useCompiler = false
 
-					if audioParam == 0 or audioParam == 1 then
-						system.playFile(toolDir .. "sounds/compdis.wav")
-					end
-								
-                else
-                    config.useCompiler = true
-                end
+                local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
+
+                if audioParam == 0 or audioParam == 1 then system.playFile(toolDir .. "sounds/compdis.wav") end
+
+            else
+                config.useCompiler = true
+            end
         end
 
     end
 
-
     -- overrides
     if config.useCompiler == true then
-        if file_exists("/scripts/" .. baseName() .. ".nocompile" ) == true then
-		    config.useCompiler = false
-	    end
+        if file_exists("/scripts/" .. baseName() .. ".nocompile") == true then config.useCompiler = false end
 
-        if file_exists("/scripts/nocompile" ) == true  then
-		    config.useCompiler = false
-	    end
+        if file_exists("/scripts/nocompile") == true then config.useCompiler = false end
     end
 
     if config.useCompiler == true then
@@ -113,13 +105,11 @@ function compile.loadScript(script)
             system.compile(script)
             os.rename(script .. 'c', cachefile)
         end
-        --print("Loading: " .. cachefile)
+        -- print("Loading: " .. cachefile)
         return loadfile(cachefile)
     else
-        if file_exists(cachefile) == true then
-            os.remove(cachefile)
-        end		
-		--print("Loading: " .. script)
+        if file_exists(cachefile) == true then os.remove(cachefile) end
+        -- print("Loading: " .. script)
         return loadfile(script)
     end
 

@@ -45,7 +45,7 @@ local function bitReplace(value, replaceValue, field)
 end
 
 local foundEsc = false
-local foundEscDone = false 
+local foundEscDone = false
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -70,7 +70,7 @@ return {
         self.escinfo[2].t = version
         self.escinfo[3].t = firmware
 
-		--rf2ethos.triggers.isReady = true
+        -- rf2ethos.triggers.isReady = true
     end,
     postRead = function(self)
         if self.values[1] ~= mspSignature then
@@ -78,19 +78,19 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            --rf2ethos.triggers.isReady = true
-			foundEsc = false
+            -- rf2ethos.triggers.isReady = true
+            foundEsc = false
             return
-		else
-			foundEsc = true
+        else
+            foundEsc = true
         end
     end,
     wakeup = function(self)
-	
-		if foundEsc == true and foundEscDone == false then
-			foundEscDone = true
-			rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-		end
-				
-    end	
+
+        if foundEsc == true and foundEscDone == false then
+            foundEscDone = true
+            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+        end
+
+    end
 }

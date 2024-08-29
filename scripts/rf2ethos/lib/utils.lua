@@ -1,22 +1,19 @@
 local utils = {}
 
-
 function utils.wrapText(text, width)
     local lines = {}
     local line = ""
- 
-	
-	local height
+
+    local height
     for word in text:gmatch("%S+") do
 
-		local lw,lh = lcd.getTextSize(line)
-		local ww,wh = lcd.getTextSize(word)
-		
-		
+        local lw, lh = lcd.getTextSize(line)
+        local ww, wh = lcd.getTextSize(word)
+
         if lw + ww + 5 > width then
             table.insert(lines, line)
             line = word
-								
+
         else
             if lw > 0 then
                 line = line .. " " .. word
@@ -25,14 +22,11 @@ function utils.wrapText(text, width)
             end
         end
     end
-    
-    if #line > 0 then
-        table.insert(lines, line)
-    end
-    
+
+    if #line > 0 then table.insert(lines, line) end
+
     return table.concat(lines, "\n")
 end
-
 
 function utils.countCarriageReturns(text)
     local _, count = text:gsub("\r", "")
@@ -162,14 +156,14 @@ end
 
 function utils.scaleValue(value, f)
     local v
-	if value ~= nil then
-		v = value * utils.decimalInc(f.decimals)
-		if f.scale ~= nil then v = v / f.scale end
-		v = utils.round(v)
-		return v
-	else
-		return nil
-	end
+    if value ~= nil then
+        v = value * utils.decimalInc(f.decimals)
+        if f.scale ~= nil then v = v / f.scale end
+        v = utils.round(v)
+        return v
+    else
+        return nil
+    end
 end
 
 function utils.decimalInc(dec)
@@ -273,19 +267,15 @@ end
 
 function utils.log(msg)
 
+    if rf2ethos.config.logEnable == true then
 
+        if rf2ethos.config.logEnableScreen == true then print(msg) end
 
-	if rf2ethos.config.logEnable == true then
-	
-		if rf2ethos.config.logEnableScreen == true then
-				print(msg)
-		end	
-	
-		local f = io.open(rf2ethos.config.toolDir .. "/rf2ethos.log", 'a')
-		io.write(f, tostring(msg) .. "\n")
-		io.close(f)
-		
-	end
+        local f = io.open(rf2ethos.config.toolDir .. "/rf2ethos.log", 'a')
+        io.write(f, tostring(msg) .. "\n")
+        io.close(f)
+
+    end
 end
 
 -- print a table out to debug console

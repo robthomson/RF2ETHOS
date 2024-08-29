@@ -1,7 +1,6 @@
 local labels = {}
 local fields = {}
 
-
 if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
 
 fields[#fields + 1] = {
@@ -32,34 +31,31 @@ labels[#labels + 1] = {t = "Collective dynamics", label = "coldynamics", inline_
 fields[#fields + 1] = {t = "Time", help = "profilesRatesDynamicsTime", inline = 2, label = "coldynamics", min = 0, max = 250, vals = {23}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", help = "profilesRatesDynamicsAcc", inline = 1, label = "coldynamics", min = 0, max = 50000, vals = {24, 25}, unit = "°/^s", mult = 10, step = 10}
 
-
-
 -- rate table defaults
 local function defaultRates(x)
     local defaults = {}
-    defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} 				-- NONE
-    defaults[1] = {1, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 203, 0, 1, 0, 0, 0} 		-- BF
-    defaults[2] = {2, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0} 			-- RACEFL
-    defaults[3] = {3, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0} 		-- KISS
-    defaults[4] = {4, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 48, 0, 48, 0, 0, 0} 		-- ACTUAL
-    defaults[5] = {5, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 250, 0, 104, 0, 0, 0} 	-- QUICK
+    defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} -- NONE
+    defaults[1] = {1, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 203, 0, 1, 0, 0, 0} -- BF
+    defaults[2] = {2, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0} -- RACEFL
+    defaults[3] = {3, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0} -- KISS
+    defaults[4] = {4, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 48, 0, 48, 0, 0, 0} -- ACTUAL
+    defaults[5] = {5, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 250, 0, 104, 0, 0, 0} -- QUICK
 
     return defaults[x]
 end
 
+local function preSavePayload(payload)
+    if rf2ethos.triggers.resetRates == true then
+        rf2ethos.triggers.resetRates = false
+        rf2ethos.NewRateTable = rf2ethos.Page.values[1]
+        payload = defaultRates(rf2ethos.NewRateTable)
+    end
 
-local function preSavePayload(payload)	
-	if rf2ethos.triggers.resetRates == true then
-		rf2ethos.triggers.resetRates = false
-		rf2ethos.NewRateTable = rf2ethos.Page.values[1]
-		payload =  defaultRates(rf2ethos.NewRateTable)			
-	end
-	
-	return payload 
-end	
+    return payload
+end
 
 local function postLoad(self)
-	rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.isReady = true
 end
 
 local function postRead(self)
@@ -67,7 +63,7 @@ local function postRead(self)
 end
 
 local function flagRateChange(self)
-   rf2ethos.triggers.resetRates = true
+    rf2ethos.triggers.resetRates = true
 end
 
 return {
@@ -87,5 +83,5 @@ return {
     flagRateChange = flagRateChange,
     postRead = postRead,
     postLoad = postLoad,
-	preSavePayload = preSavePayload
+    preSavePayload = preSavePayload
 }

@@ -24,7 +24,7 @@ fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {ms
 -- fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes + 39, mspHeaderBytes + 40}, tableIdxInc = -1,table = teleProtocol}
 
 local foundEsc = false
-local foundEscDone = false 
+local foundEscDone = false
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -47,7 +47,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-            --rf2ethos.triggers.isReady = true
+            -- rf2ethos.triggers.isReady = true
             return
         end
     end,
@@ -57,7 +57,7 @@ return {
             self.escinfo[1].t = ""
             self.escinfo[2].t = ""
             self.escinfo[2].t = ""
-			foundEsc = false
+            foundEsc = false
             return
         else
             local model = getEscType(self)
@@ -66,20 +66,20 @@ return {
             self.escinfo[1].t = model
             self.escinfo[2].t = version
             self.escinfo[3].t = firmware
-			foundEsc = true
+            foundEsc = true
         end
-		--rf2ethos.triggers.isReady = true
+        -- rf2ethos.triggers.isReady = true
     end,
     preSavePayload = function(payload)
         payload[2] = 0
         return payload
     end,
     wakeup = function(self)
-	
-		if foundEsc == true and foundEscDone == false then
-			foundEscDone = true
-			rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-		end
-				
-    end		
+
+        if foundEsc == true and foundEscDone == false then
+            foundEscDone = true
+            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+        end
+
+    end
 }

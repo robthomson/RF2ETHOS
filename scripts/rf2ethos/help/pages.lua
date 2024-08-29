@@ -4,11 +4,8 @@ data = {}
 data["pids"] = {}
 data["pids"]["qrCODE"] = "gfx/qr/pids.png"
 data["pids"]["TEXT"] = {
-    "Increase D, P, I in order until each wobbles, then back off.", 
-	"Set F for a good response in full stick flips and rolls.", 
-	"If necessary, tweak P:D ratio to set response damping to your liking.",
-    "Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", 
-	"Increase B if you want sharper response."
+    "Increase D, P, I in order until each wobbles, then back off.", "Set F for a good response in full stick flips and rolls.", "If necessary, tweak P:D ratio to set response damping to your liking.",
+    "Increase O until wobbles occur when jabbing elevator at full collective, back off a bit.", "Increase B if you want sharper response."
 }
 
 -- FLIGHT TUNING RATES
@@ -89,7 +86,9 @@ data["profile_pidcontroller"]["TEXT"] = {
 -- ADVANCED TUNING - PID BANDWIDTH
 data["profile_pidbandwidth"] = {}
 data["profile_pidbandwidth"]["qrCODE"] = "gfx/qr/pidbandwidth.png"
-data["profile_pidbandwidth"]["TEXT"] = {"PID Bandwidth: Overall bandwidth in HZ used by the PID loop.", "D-term cutoff: D-term cutoff frequency in HZ.", "B-term cutoff: B-term cutoff frequency in HZ."}
+data["profile_pidbandwidth"]["TEXT"] = {
+    "PID Bandwidth: Overall bandwidth in HZ used by the PID loop.", "D-term cutoff: D-term cutoff frequency in HZ.", "B-term cutoff: B-term cutoff frequency in HZ."
+}
 
 -- ADVANCED TUNING - AUTO LEVEL
 data["profile_autolevel"] = {}
@@ -154,16 +153,12 @@ data["governor"] = {}
 data["governor"]["qrCODE"] = "gfx/qr/governor.png"
 data["governor"]["TEXT"] = {"These paramers apply globally to the governor - regardless of the profile in use.", "Broadly - each parameter is simply a time value in seconds for each governor action."}
 
-
 -- STATUS
 data["status"] = {}
 data["status"]["qrCODE"] = nil
 data["status"]["TEXT"] = {
-				"Use this page to view your current flight controller status.  This can be usefull when determining why your heli will not arm.",
-				"To erase the dataflash for more log file storage, press the button on the menu denoted by a '*'"
-				}
-
-
-
+    "Use this page to view your current flight controller status.  This can be usefull when determining why your heli will not arm.",
+    "To erase the dataflash for more log file storage, press the button on the menu denoted by a '*'"
+}
 
 return {data = data}

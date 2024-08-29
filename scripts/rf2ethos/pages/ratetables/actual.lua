@@ -1,11 +1,11 @@
 local rTableName = "ACTUAL"
 local rows = {"Roll", "Pitch", "Yaw", "Col"}
-local  cols
+local cols
 
 if rf2ethos.radio.text == 2 then
-	cols = {"Cntr. Sens.", "Max Rate", "Expo"}
+    cols = {"Cntr. Sens.", "Max Rate", "Expo"}
 else
-	cols = {"Center Sensitivity", "Max Rate", "Expo"}
+    cols = {"Center Sensitivity", "Max Rate", "Expo"}
 end
 local fields = {}
 
@@ -25,9 +25,4 @@ fields[#fields + 1] = {row = 2, col = 3, min = 0, max = 100, vals = {9}, decimal
 fields[#fields + 1] = {row = 3, col = 3, min = 0, max = 100, vals = {15}, decimals = 2, scale = 100, default = 0}
 fields[#fields + 1] = {row = 4, col = 3, min = 0, max = 100, vals = {21}, decimals = 2, scale = 100, default = 0}
 
-return {
-	rTableName = rTableName,
-	rows = rows,
-	cols = cols,
-	fields = fields
-}
+return {rTableName = rTableName, rows = rows, cols = cols, fields = fields}
