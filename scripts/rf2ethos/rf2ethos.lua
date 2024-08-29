@@ -27,6 +27,7 @@ triggers.closeSaveFake = false
 triggers.badMspVersion = false
 triggers.badMspVersionDisplay = false
 triggers.closeProgressLoader = false
+triggers.mspBusy = false
 
 rf2ethos = {}
 rf2ethos.compile = compile
