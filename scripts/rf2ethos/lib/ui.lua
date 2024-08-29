@@ -1228,6 +1228,72 @@ function ui.fieldStaticText(f, i)
 	
 end
 
+function ui.fieldText(f, i)
+
+    if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
+        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        posText = p.posText
+        posField = p.posField
+
+        field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+    else
+        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+
+        if f.t ~= nil then
+
+            if f.label ~= nil then f.t = "    " .. f.t end
+        else
+            f.t = ""
+        end
+
+        formLineCnt = formLineCnt + 1
+
+        rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+
+        posField = nil
+        postText = nil
+    end
+
+    if HideMe == true then
+        -- posField = {x = 2000, y = 0, w = 20, h = 20}
+    end
+	
+    rf2ethos.formFields[i] = form.addTextField(rf2ethos.formLines[formLineCnt], posField, 
+				function() 
+					local value = rf2ethos.getFieldValue(f)
+					return value				
+				end, 
+				function(value)
+				if f.postEdit then f.postEdit(rf2ethos.Page) end
+				if f.onChange then f.onChange(rf2ethos.Page) end
+
+				f.value = rf2ethos.saveFieldValue(f, value)
+				rf2ethos.saveValue(i)
+			end)
+			
+			
+	
+	if rf2ethos.config.ethosRunningVersion >= 1415 then
+		if f.onFocus ~= nil then
+			rf2ethos.formFields[i]:onFocus(function() f.onFocus(rf2ethos.Page) end)
+		end	
+	end	
+
+	if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+			
+    if f.help ~= nil then
+        if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
+            local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+            rf2ethos.formFields[i]:help(helpTxt)
+        end
+    end
+
+	
+end
+
+
 function ui.fieldLabel(f, i, l)
 
 
@@ -1333,8 +1399,10 @@ function ui.openPageDefault(idx, title, script)
 				rf2ethos.ui.fieldStaticText(f, i)
 			elseif f.table or f.type == 1 then
 				rf2ethos.ui.fieldChoice(f, i)
-			else
+			elseif f.type == 2 then	
 				rf2ethos.ui.fieldNumber(f, i)
+			else
+				rf2ethos.ui.fieldText(f, i)
 			end
 			
 		end	

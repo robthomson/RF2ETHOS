@@ -460,12 +460,6 @@ end
 -- REQUEST A PAGE OVER MSP. THIS RUNS ON MOST CLOCK CYCLES WHEN DATA IS BEING REQUESTED
 local function requestPage()
 
-
-	--if type(rf2ethos.Page.read) == 'function' then
-	--	rf2ethos.Page.read = rf2ethos.Page.read()
-	--end
-
-
     if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
         rf2ethos.Page.reqTS = os.clock()
         if rf2ethos.Page.read then 

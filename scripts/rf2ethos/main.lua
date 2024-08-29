@@ -2,6 +2,7 @@
 local config = {}
 config.toolName = "RF2ETHOS"							-- name of the tool
 config.toolDir = "/scripts/rf2ethos/"					-- base path the script is installed into
+config.Version = "2.1.0"
 config.logEnable = false							-- will log to: /scripts/rf2ethos/rf2ethos.log
 config.logEnableScreen = false							-- if config.logEnable is true then also print to screen
 config.mspTxRxDebug = false							-- simple print of full msp payload that is sent and received
@@ -10,6 +11,12 @@ config.ethosVersion = 1510								-- min version of ethos supported by this scri
 config.ethosVersionString = "ETHOS < V1.5.10"			-- string to print if ethos version error occurs
 config.defaultRateTable = 4 -- ACTUAL					-- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
 config.supportedMspApiVersion = { "12.06", "12.07" }	-- supported msp versions
+config.project = "Rotorflight"
+config.developerLead = "Rob Thomson"
+config.contributors0 = "Bender,Egon,Bob00"
+config.contributors1 = "Bladescraper,Bsongis"
+
+config.license = "GPL3"
 config.simulateOnTransmitter = false					-- make the transmitter run as if its running in the SIM (no fbl required)
 
 local icon = lcd.loadMask(config.toolDir .. "RF.png")
