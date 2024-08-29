@@ -459,9 +459,9 @@ local function requestPage()
 
 	-- this is done to allow progress loader to continue and close
 	-- if returned read value is nil
-	if rf2ethos.Page.read == nil then
-		rf2ethos.Page.read = 0
-	end
+	--if rf2ethos.Page.read == nil then
+	--	rf2ethos.Page.read = 0
+	--end
 
     if not rf2ethos.Page.reqTS or rf2ethos.Page.reqTS + rf2ethos.protocol.pageReqTimeout <= os.clock() then
         rf2ethos.Page.reqTS = os.clock()
