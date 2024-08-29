@@ -261,6 +261,7 @@ function ui.openMainMenu()
                     paint = function()
                     end,
                     press = function()
+						rf2ethos.mainMenuLastSelected = pidx
 						rf2ethos.ui.progessDisplay()
                         if pvalue.script == "pids.lua" then
                             rf2ethos.ui.openPagePid(pidx, pvalue.title, pvalue.script)
@@ -279,6 +280,11 @@ function ui.openMainMenu()
                         end
                     end
                 })
+
+
+				if rf2ethos.mainMenuLastSelected == pidx then
+					rf2ethos.formFields[pidx]:focus()
+				end
 
                 lc = lc + 1
 
@@ -560,10 +566,16 @@ function ui.openPageEsc(idx, title, script)
             paint = function()
             end,
             press = function()
+				rf2ethos.escMenuLastSelected = pidx
+				rf2ethos.escToolMenuLastSelected = 1 -- reset as have changed
 				ui.progessDisplay()
                 rf2ethos.ui.openPageEscInfo(pvalue.folder)
             end
         })
+
+		if rf2ethos.escMenuLastSelected == pidx then
+			rf2ethos.formFields[pidx]:focus()
+		end
 
         lc = lc + 1
 
@@ -720,11 +732,16 @@ function ui.openPageEscTool(folder)
             paint = function()
             end,
             press = function()
+				rf2ethos.escToolMenuLastSelected  = pidx
 				ui.progessDisplay()
                 rf2ethos.openESCFormInit(folder, pvalue.script)
 				
             end
         })
+		
+		if rf2ethos.escToolMenuLastSelected == pidx then
+			rf2ethos.formFields[pidx]:focus()
+		end		
 
         if rf2ethos.escUnknown == true then  rf2ethos.formFields[pidx]:enable(false) end
 

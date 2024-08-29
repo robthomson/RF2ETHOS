@@ -78,6 +78,9 @@ rf2ethos.sensor = {}
 rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
+rf2ethos.mainMenuLastSelected = 1
+rf2ethos.escMenuLastSelected = 1
+rf2ethos.escToolMenuLastSelected = 1
 
 rf2ethos.audio = {}
 rf2ethos.audio.playDemo = false
