@@ -519,6 +519,10 @@ function ui.openPageEsc(idx, title, script)
             end
         })
 
+		if pvalue.disabled == true then
+			rf2ethos.formFields[pidx]:enable(false)
+		end
+
         if rf2ethos.escMenuLastSelected == pidx then rf2ethos.formFields[pidx]:focus() end
 
         lc = lc + 1
