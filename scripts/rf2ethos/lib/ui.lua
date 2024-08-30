@@ -1586,6 +1586,11 @@ function ui.navigationButtons(x, y, w, h)
     local xOffset = 0
     local padding = 5
     local wS = w - (w * 20) / 100
+	local helpOffset = 0
+	local toolOffset = 0 
+	local reloadOffset = 0
+	local saveOffset = 0
+	local menuOffset = 0
 
     local navButtons
     if rf2ethos.Page.navButtons == nil then
@@ -1594,72 +1599,59 @@ function ui.navigationButtons(x, y, w, h)
         navButtons = rf2ethos.Page.navButtons
     end
 
+	-- calc all offsets
+	-- these are done 'early' to enable the actual placement of the buttons on
+	-- display to be rendered by ethos in the right order - for scrolling via
+	-- keypad to work.
     if navButtons.help ~= nil and navButtons.help == true then
-
         xOffset = xOffset + wS + padding
-
-        local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
-        local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-
-        rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - xOffset, y = y, w = wS, h = h}, {
-            text = "?",
-            icon = nil,
-            options = FONT_S,
-            paint = function()
-            end,
-            press = function()
-                if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
-                    rf2ethos.Page.onHelpMenu(rf2ethos.Page)
-                else
-                    rf2ethos.ui.openPagehelp(help.data, section)
-                end
-            end
-        })
-    end
-
+	end	
+	helpOffset = x - xOffset
+	
     if navButtons.tool ~= nil and navButtons.tool == true then
-
         xOffset = xOffset + wS + padding
-
-        rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - xOffset, y = y, w = wS, h = h}, {
-            text = "*",
-            icon = nil,
-            options = FONT_S,
-            paint = function()
-            end,
-            press = function()
-                rf2ethos.Page.onToolMenu()
-            end
-        })
-    end
+	end
+	toolOffset = x - xOffset
 
     if navButtons.reload ~= nil and navButtons.reload == true then
-
         xOffset = xOffset + w + padding
+	end
+	reloadOffset = x - xOffset
 
-        rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = x - xOffset, y = y, w = w, h = h}, {
-            text = "RELOAD",
+    if navButtons.save ~= nil and navButtons.save == true then
+        xOffset = xOffset + w + padding
+	end
+	saveOffset = x - xOffset	
+
+    if navButtons.menu ~= nil and navButtons.menu == true then
+        xOffset = xOffset + w + padding
+	end
+	menuOffset = x - xOffset	
+
+	-- MENU BTN
+    if navButtons.menu ~= nil and navButtons.menu == true then
+
+        rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = menuOffset, y = y, w = w, h = h}, {
+            text = "MENU",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-
-                if rf2ethos.Page and rf2ethos.Page.onReloadMenu then
-                    rf2ethos.Page.onReloadMenu(rf2ethos.Page)
+                if rf2ethos.Page and rf2ethos.Page.onNavMenu then
+                    rf2ethos.Page.onNavMenu(rf2ethos.Page)
                 else
-                    rf2ethos.triggers.triggerReload = true
+                    rf2ethos.ui.openMainMenu()
                 end
-                return true
             end
         })
+        rf2ethos.formNavigationFields['menu']:focus()
     end
 
+	-- SAVE BTN
     if navButtons.save ~= nil and navButtons.save == true then
 
-        xOffset = xOffset + w + padding
-
-        rf2ethos.formNavigationFields['save'] = form.addButton(line, {x = x - xOffset, y = y, w = w, h = h}, {
+        rf2ethos.formNavigationFields['save'] = form.addButton(line, {x = saveOffset, y = y, w = w, h = h}, {
             text = "SAVE",
             icon = nil,
             options = FONT_S,
@@ -1675,25 +1667,62 @@ function ui.navigationButtons(x, y, w, h)
         })
     end
 
-    if navButtons.menu ~= nil and navButtons.menu == true then
+	-- RELOAD BTN
+    if navButtons.reload ~= nil and navButtons.reload == true then
 
-        xOffset = xOffset + w + padding
-
-        rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - xOffset, y = y, w = w, h = h}, {
-            text = "MENU",
+        rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = reloadOffset, y = y, w = w, h = h}, {
+            text = "RELOAD",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-                if rf2ethos.Page and rf2ethos.Page.onNavMenu then
-                    rf2ethos.Page.onNavMenu(rf2ethos.Page)
+
+                if rf2ethos.Page and rf2ethos.Page.onReloadMenu then
+                    rf2ethos.Page.onReloadMenu(rf2ethos.Page)
                 else
-                    rf2ethos.ui.openMainMenu()
+                    rf2ethos.triggers.triggerReload = true
+                end
+                return true
+            end
+        })
+    end	
+	
+	-- TOOL BUTTON
+    if navButtons.tool ~= nil and navButtons.tool == true then
+
+        rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = toolOffset, y = y, w = wS, h = h}, {
+            text = "*",
+            icon = nil,
+            options = FONT_S,
+            paint = function()
+            end,
+            press = function()
+                rf2ethos.Page.onToolMenu()
+            end
+        })
+    end	
+
+	-- HELP BUTTON
+    if navButtons.help ~= nil and navButtons.help == true then
+
+        local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
+        local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
+
+        rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = helpOffset, y = y, w = wS, h = h}, {
+            text = "?",
+            icon = nil,
+            options = FONT_S,
+            paint = function()
+            end,
+            press = function()
+                if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
+                    rf2ethos.Page.onHelpMenu(rf2ethos.Page)
+                else
+                    rf2ethos.ui.openPagehelp(help.data, section)
                 end
             end
         })
-        rf2ethos.formNavigationFields['menu']:focus()
     end
 
 end

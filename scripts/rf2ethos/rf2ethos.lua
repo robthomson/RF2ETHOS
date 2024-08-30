@@ -693,12 +693,16 @@ function rf2ethos.wakeupUI()
                 rf2ethos.dialogs.nolinkValueCounter = 0
                 rf2ethos.dialogs.nolinkDisplay = false
                 rf2ethos.triggers.badMspVersion = false
-                rf2ethos.audio.playConnected = true
+                
                 if rf2ethos.runningInSimulator ~= true then
                     if rf2ethos.triggers.telemetryState ~= 1 then
                         rf2ethos.audio.playTimeout = true
                         rf2ethos.triggers.exitAPP = true
+					else
+						rf2ethos.audio.playConnected = true
                     end
+				else
+					rf2ethos.audio.playConnected = true
                 end
             end
         end
