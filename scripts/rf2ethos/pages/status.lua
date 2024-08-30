@@ -12,8 +12,8 @@ fields[1] = {t = "Arming Flags", value = "0", type = 2, disable = true}
 fields[2] = {t = "Dataflash Free Space", value = "0", type = 2, disable = true}
 fields[3] = {t = "Real-time load", value = "0", type = 2, disable = true}
 fields[4] = {t = "CPU load", value = "0", type = 2, disable = true}
-fields[5] = {t = "PID profile", value = "0", type = 2, disable = true}
-fields[6] = {t = "Rate Profile", value = "0", type = 2, disable = true}
+--fields[5] = {t = "PID profile", value = "0", type = 2, disable = true}
+--fields[6] = {t = "Rate Profile", value = "0", type = 2, disable = true}
 
 local function getStatus()
     local message = {
@@ -199,6 +199,7 @@ local function wakeup()
                     rf2ethos.formFields[4]:enable(false)
                 end
 
+				--[[
                 if status.profile ~= nil then
                     local value = status.profile
                     rf2ethos.formFields[5] = form.addNumberField(rf2ethos.formLines[5], nil, value, value, function()
@@ -216,6 +217,7 @@ local function wakeup()
                     end)
                     rf2ethos.formFields[6]:enable(false)
                 end
+				]]--
 
                 rf2ethos.triggers.closeProgressLoader = true
             end
