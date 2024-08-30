@@ -139,7 +139,7 @@ end
 local function servoCenterChanged(self)
 
     if rf2ethos.Page.fields[1].value == nil then
-        print("Servo index was nil.. aborting")
+        rf2ethos.utils.log("Servo index was nil.. aborting")
         return
     end
 
@@ -175,7 +175,7 @@ local function servoCenterChanged(self)
         if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
     end
-    print("Setting center to: " .. servoCenter)
+    rf2ethos.utils.log("Setting center to: " .. servoCenter)
     rf2ethos.mspQueue:add(message)
 
 end
