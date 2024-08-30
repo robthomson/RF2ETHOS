@@ -1056,10 +1056,6 @@ function ui.fieldNumber(f, i)
         maxValue = maxValue * f.mult
     end
 
-    if HideMe == true then
-        -- posField = {x = 2000, y = 0, w = 20, h = 20}
-    end
-
     if minValue == nil then minValue = 0 end
     if maxValue == nil then maxValue = 0 end
     rf2ethos.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
