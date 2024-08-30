@@ -106,7 +106,7 @@ rf2ethos.dialogs.progressDisplayEsc = false
 rf2ethos.dialogs.progressWatchDogESC = nil
 rf2ethos.dialogs.progressCounterESC = 0
 rf2ethos.dialogs.progressESCRateLimit = os.clock()
-rf2ethos.dialogs.progressESCRate = 1.5 -- how many times per second we can change dialog value
+rf2ethos.dialogs.progressESCRate = 2.5 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.save = false
 rf2ethos.dialogs.saveDisplay = false
@@ -768,10 +768,6 @@ function rf2ethos.wakeupUI()
 
             rf2ethos.audio.playEscPowerCycle = true
 
-            if rf2ethos.dialogs.progressESC ~= nil then
-                rf2ethos.ui.progessDisplayESCValue(0)
-                rf2ethos.ui.progessDisplayESCClose(false)
-            end
         else
 
             if rf2ethos.mspQueue:isProcessed() then requestPage() end
@@ -782,7 +778,7 @@ function rf2ethos.wakeupUI()
                 rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. rf2ethos.escManufacturer .. "/esc_info.lua"))()
                 collectgarbage()
 
-                rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 2
+                rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 5
                 rf2ethos.dialogs.progressESCRateLimit = os.clock()
                 rf2ethos.ui.progessDisplayESCValue(rf2ethos.dialogs.progressCounterESC)
             end

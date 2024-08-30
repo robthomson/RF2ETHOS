@@ -26,8 +26,12 @@ function ui.progessNolinkDisplay()
 end
 
 function ui.progessDisplayESC()
+
+	if rf2ethos.dialogs.progressDisplay == true then
+	--	ui.progessDisplayClose()
+	end
+
     rf2ethos.dialogs.progressDisplayEsc = true
-    rf2ethos.dialogs.progressWatchDogESC = os.clock()
     rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
     rf2ethos.dialogs.progressESC:value(0)
 end
@@ -132,9 +136,8 @@ function ui.progessDisplayESCValue(value, message)
 
     if rf2ethos.triggers.mspBusy == true then return end
 
-    rf2ethos.dialogs.nolinkRateLimit = now
-    rf2ethos.dialogs.noLink:value(value)
-    if message ~= nil then rf2ethos.dialogs.noLink:message(message) end
+    rf2ethos.dialogs.progressESC:value(value)
+    if message ~= nil then rf2ethos.dialogs.progressESC:message(message) end
 end
 
 function ui.openMainMenu()
