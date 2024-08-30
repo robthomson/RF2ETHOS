@@ -4,11 +4,7 @@ local labels = {}
 local version = rf2ethos.config.Version
 local ethosVersion = rf2ethos.config.environment.major .. "." .. rf2ethos.config.environment.minor .. "." .. rf2ethos.config.environment.revision
 local apiVersion = rf2ethos.config.apiVersion
-local project = rf2ethos.config.project
-local developerLead = rf2ethos.config.developerLead
-local contributors0 = rf2ethos.config.contributors0
-local contributors1 = rf2ethos.config.contributors1
-local license = rf2ethos.config.license
+
 
 local supportedMspVersion = ""
 for i, v in ipairs(rf2ethos.config.supportedMspApiVersion) do
@@ -19,21 +15,61 @@ for i, v in ipairs(rf2ethos.config.supportedMspApiVersion) do
     end
 end
 
-fields[1] = {t = "RF2ETHOS Version", value = version, type = 3, disable = true}
+if rf2ethos.config.useCompiler == true then
+	compilation = "ON"
+else
+	compilation = "OFF"
+end
+
+if rf2ethos.runningInSimulator == true then
+	simulation = "ON"
+else
+	simulation = "OFF"
+end
+
+
+fields[1] = {t = "Version", value = version, type = 3, disable = true}
 fields[2] = {t = "Ethos Version", value = ethosVersion, type = 3, disable = true}
 fields[3] = {t = "MSP Version", value = apiVersion, type = 3, disable = true}
 fields[4] = {t = "Supported MSP Versions", value = supportedMspVersion, type = 3, disable = true}
-fields[5] = {t = "Licence", value = license, type = 3, disable = true}
-fields[6] = {t = "Project", value = project, type = 3, disable = true}
-fields[7] = {t = "Rotorflight Developer", value = "Dr Rudder", type = 3, disable = true}
-fields[8] = {t = "RF2ETHOS Developer", value = developerLead, type = 3, disable = true}
-fields[9] = {t = "Contributors", value = contributors0, type = 3, disable = true}
-fields[10] = {t = "-", value = contributors1, type = 3, disable = true}
-fields[11] = {t = "Website", value = "www.rotorflight.org", type = 3, disable = true}
+fields[5] = {t = "Compilation", value = compilation, type = 3, disable = true}
+fields[6] = {t = "Simulation", value = simulation, type = 3, disable = true}
 
 function readMSP()
     rf2ethos.triggers.isReady = true
     rf2ethos.triggers.closeProgressLoader = true
+end
+
+function onToolMenu()
+
+	
+	opener = "Rotorflight is an Opensource project. Contribution from other like minded people, keen to assist in making this software even better is welcomed and encouraged. You do not have to be a hardcore programmer to help"
+	credits = "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil (PDK), Robert Burrow, Keith Williams, Bertrand Songis... and many more who have spent hours testing and providing feedback!"
+	license = "You may copy, distribute and modify the software as long as you track changes/dates in source files. Any modifications to or software including (via compiler) GPL-licensed code must also be made available under the GPL along with build & install instructions."
+
+	message = opener .. "\r\n\r\n" .. credits .. "\r\n\r\n" .. license .. "\r\n\r\n" 
+
+    local buttons = {
+        {
+            label = "CLOSE",
+            action = function()
+                return true
+            end
+        }
+    }
+
+    form.openDialog({
+        width = rf2ethos.config.lcdWidth,
+        title = "Credits",
+        message = message,
+        buttons = buttons,
+        wakeup = function()
+        end,
+        paint = function()
+        end,
+        options = TEXT_LEFT
+    })
+
 end
 
 return {
@@ -48,5 +84,6 @@ return {
     fields = fields,
     refreshswitch = false,
     simulatorResponse = {},
-    navButtons = {menu = true, save = false, reload = false, tool = false, help = false}
+	onToolMenu = onToolMenu,
+    navButtons = {menu = true, save = false, reload = false, tool = true, help = true}
 }
