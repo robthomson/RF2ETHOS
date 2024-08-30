@@ -168,6 +168,7 @@ function rf2ethos.resetState()
     rf2ethos.triggers.badMspVersion = false
     rf2ethos.dialogs.progressDisplayEsc = false
     ELRS_PAUSE_TELEMETRY = false
+	CRSF_PAUSE_TELEMETRY = false
 
 end
 
