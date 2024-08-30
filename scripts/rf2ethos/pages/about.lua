@@ -5,7 +5,6 @@ local version = rf2ethos.config.Version
 local ethosVersion = rf2ethos.config.environment.major .. "." .. rf2ethos.config.environment.minor .. "." .. rf2ethos.config.environment.revision
 local apiVersion = rf2ethos.config.apiVersion
 
-
 local supportedMspVersion = ""
 for i, v in ipairs(rf2ethos.config.supportedMspApiVersion) do
     if i == 1 then
@@ -16,17 +15,16 @@ for i, v in ipairs(rf2ethos.config.supportedMspApiVersion) do
 end
 
 if rf2ethos.config.useCompiler == true then
-	compilation = "ON"
+    compilation = "ON"
 else
-	compilation = "OFF"
+    compilation = "OFF"
 end
 
 if rf2ethos.runningInSimulator == true then
-	simulation = "ON"
+    simulation = "ON"
 else
-	simulation = "OFF"
+    simulation = "OFF"
 end
-
 
 fields[1] = {t = "Version", value = version, type = 3, disable = true}
 fields[2] = {t = "Ethos Version", value = ethosVersion, type = 3, disable = true}
@@ -42,12 +40,14 @@ end
 
 function onToolMenu()
 
-	
-	opener = "Rotorflight is an Opensource project. Contribution from other like minded people, keen to assist in making this software even better is welcomed and encouraged. You do not have to be a hardcore programmer to help"
-	credits = "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil (PDK), Robert Burrow, Keith Williams, Bertrand Songis... and many more who have spent hours testing and providing feedback!"
-	license = "You may copy, distribute and modify the software as long as you track changes/dates in source files. Any modifications to or software including (via compiler) GPL-licensed code must also be made available under the GPL along with build & install instructions."
+    opener =
+        "Rotorflight is an Opensource project. Contribution from other like minded people, keen to assist in making this software even better is welcomed and encouraged. You do not have to be a hardcore programmer to help"
+    credits =
+        "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil (PDK), Robert Burrow, Keith Williams, Bertrand Songis... and many more who have spent hours testing and providing feedback!"
+    license =
+        "You may copy, distribute and modify the software as long as you track changes/dates in source files. Any modifications to or software including (via compiler) GPL-licensed code must also be made available under the GPL along with build & install instructions."
 
-	message = opener .. "\r\n\r\n" .. credits .. "\r\n\r\n" .. license .. "\r\n\r\n" 
+    message = opener .. "\r\n\r\n" .. credits .. "\r\n\r\n" .. license .. "\r\n\r\n"
 
     local buttons = {
         {
@@ -84,6 +84,6 @@ return {
     fields = fields,
     refreshswitch = false,
     simulatorResponse = {},
-	onToolMenu = onToolMenu,
+    onToolMenu = onToolMenu,
     navButtons = {menu = true, save = false, reload = false, tool = true, help = true}
 }

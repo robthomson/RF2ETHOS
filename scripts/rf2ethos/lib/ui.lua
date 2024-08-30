@@ -27,9 +27,9 @@ end
 
 function ui.progessDisplayESC()
 
-	if rf2ethos.dialogs.progressDisplay == true then
-	--	ui.progessDisplayClose()
-	end
+    if rf2ethos.dialogs.progressDisplay == true then
+        --	ui.progessDisplayClose()
+    end
 
     rf2ethos.dialogs.progressDisplayEsc = true
     rf2ethos.dialogs.progressESC = form.openProgressDialog("Searching...", "Please power cycle the esc")
@@ -519,9 +519,7 @@ function ui.openPageEsc(idx, title, script)
             end
         })
 
-		if pvalue.disabled == true then
-			rf2ethos.formFields[pidx]:enable(false)
-		end
+        if pvalue.disabled == true then rf2ethos.formFields[pidx]:enable(false) end
 
         if rf2ethos.escMenuLastSelected == pidx then rf2ethos.formFields[pidx]:focus() end
 

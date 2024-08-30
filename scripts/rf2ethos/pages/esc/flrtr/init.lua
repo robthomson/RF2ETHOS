@@ -2,7 +2,7 @@ local toolName = "FLY ROTOR"
 moduleName = "flrtr"
 moduleTitle = "FLRTR"
 
-mspSignature = 0x11 --0xA5
+mspSignature = 0x11 -- 0xA5
 mspHeaderBytes = 2
 mspBytes = 60 -- 66
 

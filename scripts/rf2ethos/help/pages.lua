@@ -165,10 +165,8 @@ data["status"]["TEXT"] = {
 data["about"] = {}
 data["about"]["qrCODE"] = "gfx/qr/about.png"
 data["about"]["TEXT"] = {
-    "This page provides some usefull information that you may be asked for when requesting support.",
-    "For support, please first read the help pages on www.rotorflight.org",
-	"If stuck or further assistanace required, drop past out discord group by scanning the qr code on the right."
+    "This page provides some usefull information that you may be asked for when requesting support.", "For support, please first read the help pages on www.rotorflight.org",
+    "If stuck or further assistanace required, drop past out discord group by scanning the qr code on the right."
 }
-
 
 return {data = data}
