@@ -43,7 +43,7 @@ function onToolMenu()
     opener =
         "Rotorflight is an Opensource project. Contribution from other like minded people, keen to assist in making this software even better is welcomed and encouraged. You do not have to be a hardcore programmer to help"
     credits =
-        "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil (PDK), Robert Burrow, Keith Williams, Bertrand Songis... and many more who have spent hours testing and providing feedback!"
+        "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil Kaighin, Robert Burrow, Keith Williams, Bertrand Songis... and many more who have spent hours testing and providing feedback!"
     license =
         "You may copy, distribute and modify the software as long as you track changes/dates in source files. Any modifications to or software including (via compiler) GPL-licensed code must also be made available under the GPL along with build & install instructions."
 
