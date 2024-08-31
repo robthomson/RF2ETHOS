@@ -45,7 +45,7 @@ function ui.progessDisplaySave()
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
-function ui.progessDisplayValue(value)
+function ui.progessDisplayValue(value,message)
 
     if rf2ethos.triggers.mspBusy == true then return end
 
