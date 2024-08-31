@@ -6,7 +6,7 @@ mspSignature = 0x53
 mspHeaderBytes = 2
 mspBytes = 84
 
-rf2ethos.cfg.apiVersion = 0
+rf2ethos.config.apiVersion = 0
 mcuId = nil
 -- runningInSimulator = string.sub(select(2,getVersion()), -4) == "simu"
 

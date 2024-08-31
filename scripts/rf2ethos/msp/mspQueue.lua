@@ -73,12 +73,12 @@ function MspQueueController:processQueue()
 
     if cmd then
 
-        if rf2ethos.cfg.mspTxRxDebug == true or rf2ethos.cfg.logEnable == true then
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
             local logData = "Requesting:  {" .. tostring(cmd) .. "}"
 
             rf2ethos.utils.log(logData)
 
-            if rf2ethos.cfg.mspTxRxDebug == true then print(logData) end
+            if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
         end
 
@@ -88,11 +88,11 @@ function MspQueueController:processQueue()
     or (self.currentMessage.command == 217 and err and self.retryCount == 2) -- ESC
     then
 
-        if rf2ethos.cfg.mspTxRxDebug == true or rf2ethos.cfg.logEnable == true then
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
             local logData = "Received:      {" .. rf2ethos.utils.joinTableItems(buf, ", ") .. "}"
             rf2ethos.utils.log(logData)
 
-            if rf2ethos.cfg.mspTxRxDebug == true then if #buf > 0 then print(logData) end end
+            if rf2ethos.config.mspTxRxDebug == true then if #buf > 0 then print(logData) end end
 
         end
 
@@ -123,11 +123,11 @@ function MspQueueController:add(message)
     if message ~= nil then
         message = deepCopy(message)
 
-        if rf2ethos.cfg.mspTxRxDebug == true or rf2ethos.cfg.logEnable == true then
+        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
             local logData = "Queueing command " .. message.command .. " at position " .. #self.messageQueue + 1
             rf2ethos.utils.log(logData)
 
-            if rf2ethos.cfg.mspTxRxDebug == true then print(logData) end
+            if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
         end
 

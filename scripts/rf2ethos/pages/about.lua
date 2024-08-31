@@ -1,12 +1,12 @@
 local fields = {}
 local labels = {}
 
-local version = rf2ethos.cfg.Version
-local ethosVersion = rf2ethos.cfg.environment.major .. "." .. rf2ethos.cfg.environment.minor .. "." .. rf2ethos.cfg.environment.revision
-local apiVersion = rf2ethos.cfg.apiVersion
+local version = rf2ethos.config.Version
+local ethosVersion = rf2ethos.config.environment.major .. "." .. rf2ethos.config.environment.minor .. "." .. rf2ethos.config.environment.revision
+local apiVersion = rf2ethos.config.apiVersion
 
 local supportedMspVersion = ""
-for i, v in ipairs(rf2ethos.cfg.supportedMspApiVersion) do
+for i, v in ipairs(rf2ethos.config.supportedMspApiVersion) do
     if i == 1 then
         supportedMspVersion = v
     else
@@ -14,7 +14,7 @@ for i, v in ipairs(rf2ethos.cfg.supportedMspApiVersion) do
     end
 end
 
-if rf2ethos.cfg.useCompiler == true then
+if rf2ethos.config.useCompiler == true then
     compilation = "ON"
 else
     compilation = "OFF"
@@ -59,7 +59,7 @@ function onToolMenu()
     }
 
     form.openDialog({
-        width = rf2ethos.cfg.lcdWidth,
+        width = rf2ethos.config.lcdWidth,
         title = "Credits",
         message = message,
         buttons = buttons,

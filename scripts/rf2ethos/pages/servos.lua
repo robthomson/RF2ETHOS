@@ -48,7 +48,7 @@ end
 
 local function postLoad(self)
 
-    if rf2ethos.cfg.ethosRunningVersion >= 1415 then rf2ethos.Page.servoCenterFocusAllOff(self) end
+    if rf2ethos.config.ethosRunningVersion >= 1415 then rf2ethos.Page.servoCenterFocusAllOff(self) end
 
     currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
     lastSetServoCenter = currentServoCenter
@@ -167,12 +167,12 @@ local function servoCenterChanged(self)
     rf2ethos.mspHelper.writeU16(message.payload, servoSpeed)
     rf2ethos.mspHelper.writeU16(message.payload, servoFlags)
 
-    if rf2ethos.cfg.mspTxRxDebug == true or rf2ethos.cfg.logEnable == true then
+    if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
         local logData = "{" .. rf2ethos.utils.joinTableItems(message.payload, ", ") .. "}"
 
         rf2ethos.utils.log(logData)
 
-        if rf2ethos.cfg.mspTxRxDebug == true then print(logData) end
+        if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
     end
     rf2ethos.utils.log("Setting center to: " .. servoCenter)

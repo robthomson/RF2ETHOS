@@ -267,11 +267,11 @@ end
 
 function utils.log(msg)
 
-    if rf2ethos.cfg.logEnable == true then
+    if rf2ethos.config.logEnable == true then
 
-        if rf2ethos.cfg.logEnableScreen == true then print(msg) end
+        if rf2ethos.config.logEnableScreen == true then print(msg) end
 
-        local f = io.open(rf2ethos.cfg.toolDir .. "/rf2ethos.log", 'a')
+        local f = io.open(rf2ethos.config.toolDir .. "/rf2ethos.log", 'a')
         io.write(f, tostring(msg) .. "\n")
         io.close(f)
 

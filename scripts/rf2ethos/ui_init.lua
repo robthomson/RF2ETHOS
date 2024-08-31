@@ -1,4 +1,4 @@
-local SUPPORTED_API_VERSIONS = rf2ethos.cfg.supportedMspApiVersion
+local SUPPORTED_API_VERSIONS = rf2ethos.config.supportedMspApiVersion
 
 local mspApiVersion = assert(compile.loadScript("msp/mspApiVersion.lua"))()
 local returnTable = {f = nil, t = ""}
@@ -34,7 +34,7 @@ local function init()
             returnTable.t = "This version of the Lua scripts \ncan't be used with the selected model (" .. apiVersionAsString .. ")."
         else
             -- received correct API version, proceed
-            rf2ethos.cfg.apiVersion = apiVersion
+            rf2ethos.config.apiVersion = apiVersion
             return true
         end
     end
