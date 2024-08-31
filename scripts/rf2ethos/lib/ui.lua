@@ -1690,7 +1690,6 @@ function ui.navigationButtons(x, y, w, h)
 	
 	-- TOOL BUTTON
     if navButtons.tool ~= nil and navButtons.tool == true then
-
         rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = toolOffset, y = y, w = wS, h = h}, {
             text = "*",
             icon = nil,
