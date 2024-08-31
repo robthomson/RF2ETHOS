@@ -1,14 +1,14 @@
 local labels = {}
 local tables = {}
 
-tables[0] = rf2ethos.config.toolDir .. "pages/ratetables/none.lua"
-tables[1] = rf2ethos.config.toolDir .. "pages/ratetables/betaflight.lua"
-tables[2] = rf2ethos.config.toolDir .. "pages/ratetables/raceflight.lua"
-tables[3] = rf2ethos.config.toolDir .. "pages/ratetables/kiss.lua"
-tables[4] = rf2ethos.config.toolDir .. "pages/ratetables/actual.lua"
-tables[5] = rf2ethos.config.toolDir .. "pages/ratetables/quick.lua"
+tables[0] = rf2ethos.cfg.toolDir .. "pages/ratetables/none.lua"
+tables[1] = rf2ethos.cfg.toolDir .. "pages/ratetables/betaflight.lua"
+tables[2] = rf2ethos.cfg.toolDir .. "pages/ratetables/raceflight.lua"
+tables[3] = rf2ethos.cfg.toolDir .. "pages/ratetables/kiss.lua"
+tables[4] = rf2ethos.cfg.toolDir .. "pages/ratetables/actual.lua"
+tables[5] = rf2ethos.cfg.toolDir .. "pages/ratetables/quick.lua"
 
-if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
+if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.cfg.defaultRateTable end
 
 local mytable = assert(compile.loadScript(tables[rf2ethos.RateTable]))()
 

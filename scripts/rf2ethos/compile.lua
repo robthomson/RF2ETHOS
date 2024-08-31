@@ -2,7 +2,7 @@ compile = {}
 
 local arg = {...}
 local config = arg[1]
-local toolDir = config.toolDir
+local toolDir = cfg.toolDir
 
 local readConfig
 local switchParam
@@ -26,7 +26,7 @@ end
 
 local function baseName()
     local baseName
-    baseName = config.toolDir:gsub("/scripts/", "")
+    baseName = cfg.toolDir:gsub("/scripts/", "")
     baseName = baseName:gsub("/", "")
     return baseName
 end
@@ -74,33 +74,33 @@ function compile.loadScript(script)
         switchParam = system.getSource({category = s[1], member = s[2]})
 
         if pref == 0 or pref == nil then
-            config.useCompiler = true
+            cfg.useCompiler = true
             -- check physical overrides
         elseif pref == 1 then
-            config.useCompiler = false
+            cfg.useCompiler = false
         elseif pref == 2 then
             if tonumber(switchParam:value()) == 100 then
-                config.useCompiler = false
+                cfg.useCompiler = false
 
                 local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
 
                 if audioParam == 0 or audioParam == 1 then system.playFile(toolDir .. "sounds/compdis.wav") end
 
             else
-                config.useCompiler = true
+                cfg.useCompiler = true
             end
         end
 
     end
 
     -- overrides
-    if config.useCompiler == true then
-        if file_exists("/scripts/" .. baseName() .. ".nocompile") == true then config.useCompiler = false end
+    if cfg.useCompiler == true then
+        if file_exists("/scripts/" .. baseName() .. ".nocompile") == true then cfg.useCompiler = false end
 
-        if file_exists("/scripts/nocompile") == true then config.useCompiler = false end
+        if file_exists("/scripts/nocompile") == true then cfg.useCompiler = false end
     end
 
-    if config.useCompiler == true then
+    if cfg.useCompiler == true then
         if file_exists(cachefile) ~= true then
             system.compile(script)
             os.rename(script .. 'c', cachefile)

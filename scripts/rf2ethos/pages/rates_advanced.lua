@@ -1,7 +1,7 @@
 local labels = {}
 local fields = {}
 
-if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
+if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.cfg.defaultRateTable end
 
 fields[#fields + 1] = {
     t = "Rates Type",
