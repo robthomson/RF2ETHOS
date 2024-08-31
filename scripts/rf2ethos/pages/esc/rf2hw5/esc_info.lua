@@ -71,7 +71,7 @@ return {
             rf2ethos.triggers.isReady = true
         end
 
-        if foundEsc == false and rf2ethos.dia.progressCounter >= 85 then
+        if foundEsc == false and rf2ethos.dialogs.progressCounter >= 85 then
             rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
             rf2ethos.triggers.isReady = true
         end
