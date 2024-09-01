@@ -966,13 +966,12 @@ function ui.openPageServos(idx, title, script)
                         rf2ethos.formFields[i]:help(helpTxt)
                     end
                 end
-                if rf2ethos.config.ethosRunningVersion >= 1415 then
-                    if f.onFocus ~= nil then
-                        rf2ethos.formFields[i]:onFocus(function()
-                            f.onFocus(rf2ethos.Page)
-                        end)
-                    end
-                end
+				if f.onFocus ~= nil then
+					rf2ethos.formFields[i]:onFocus(function()
+						f.onFocus(rf2ethos.Page)
+					end)
+				end
+				if f.disable == true then rf2ethos.formFields[i]:enable(false) end
             end
         end
     end

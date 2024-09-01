@@ -10,17 +10,8 @@ local lastSetServoCenter
 local lastServoChangeTime = os.clock()
 
 fields[#fields + 1] = {t = "ServoID (shown only for debug)", min = 0, max = 100, vals = {1}}
-fields[#fields + 1] = {
-    t = "Center",
-    help = "servoMid",
-    min = 50,
-    max = 2250,
-    default = 1500,
-    vals = {2, 3},
-    onFocus = function(self)
-        self.servoCenterFocus(self)
-    end
-}
+--fields[#fields + 1] = {t = "Center",help = "servoMid",min = 50,max = 2250,default = 1500,vals = {2, 3},onFocus = function(self) self.servoCenterFocus(self)end}
+fields[#fields + 1] = {t = "Center",help = "servoMid",min = 50,max = 2250,default = 1500,vals = {2, 3},disable=false}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
 
@@ -202,10 +193,10 @@ local function onToolMenu(self)
     local message
     local title
     if inOverRideAll == false then
-        title = "Activate"
-        message = "Set all servos to their configured center position"
+        title = "Enable servo overide"
+        message = "Set all servos to their configured center position. \r\n\r\nThis will result in all values on this page being saved when adjusting the servo center point."
     else
-        title = "Disable"
+        title = "Disable servo overide"
         message = "Return control of the servos to the flight controller"
     end
 
