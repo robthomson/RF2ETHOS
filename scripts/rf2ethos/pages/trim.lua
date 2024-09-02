@@ -1,0 +1,262 @@
+local labels = {}
+local fields = {}
+
+local triggerOverRide = false
+local inOverRide = false
+local lastChangeTime = os.clock()
+local currentRollTrim
+local currentRollTrimLast
+local currentPitchTrim
+local currentPitchTrimLast
+local currentCollectiveTrim
+local currentCollectiveTrimLast
+local currentYawTrim
+local currentYawTrimLast
+local currentIdleThrottleTrim
+local currentIdleThrottleTrimLast
+
+fields[#fields + 1] = {t = "Roll trim %", help = "mixerSwashTrim", xlabel = "line5", xinline = 1, min = -1000, max = 1000, vals = {12, 13}, decimals = 1, scale = 10}
+
+fields[#fields + 1] = {t = "Pitch trim %", help = "mixerSwashTrim", xlabel = "line6", xinline = 1, min = -1000, max = 1000, vals = {14, 15}, decimals = 1, scale = 10}
+
+fields[#fields + 1] = {t = "Col. trim %", help = "mixerSwashTrim", xlabel = "line7", xinline = 1, min = -1000, max = 1000, vals = {16, 17}, decimals = 1, scale = 10}
+
+if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} end
+
+if rf2ethos.tailMode == 0 then fields[#fields + 1] = {t = "Yaw. trim %", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10} end
+
+local function saveData()
+
+    local payload = rf2ethos.Page.values
+    local message = {command = 43, payload = payload}
+    rf2ethos.mspQueue:add(message)
+
+    local message = {command = 250, payload = {}}
+    rf2ethos.mspQueue:add(message)
+
+end
+
+local function mixerOn(self)
+
+    rf2ethos.audio.playMixerOverideEnable = true
+
+    for i = 1, 4 do
+
+        local message = {
+            command = 191, -- MSP_SET_SERVO_OVERRIDE
+            payload = {i}
+        }
+        rf2ethos.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.mspQueue:add(message)
+
+    end
+
+    rf2ethos.triggers.isReady = true
+end
+
+local function mixerOff(self)
+
+    rf2ethos.audio.playMixerOverideDisable = true
+
+    for i = 1, 4 do
+        local message = {
+            command = 191, -- MSP_SET_SERVO_OVERRIDE
+            payload = {i}
+        }
+        rf2ethos.mspHelper.writeU16(message.payload, 2501)
+        rf2ethos.mspQueue:add(message)
+    end
+
+    rf2ethos.triggers.isReady = true
+end
+
+local function postLoad(self)
+
+    if rf2ethos.tailMode == nil then
+        local v = rf2ethos.Page.values[2]
+        rf2ethos.tailMode = math.floor(v)
+        rf2ethos.triggers.reload = true
+        return
+    end
+
+    -- existing
+    currentRollTrim = rf2ethos.Page.fields[1].value
+    currentPitchTrim = rf2ethos.Page.fields[2].value
+    currentCollectiveTrim = rf2ethos.Page.fields[3].value
+
+    if rf2ethos.tailModeActive == 1 or rf2ethos.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.Page.fields[4].value end
+
+    if rf2ethos.tailModeActive == 0 then currentYawTrim = rf2ethos.Page.fields[4].value end
+    rf2ethos.triggers.isReady = true
+end
+
+local function wakeup(self)
+
+    -- filter changes to mixer - essentially preventing queue getting flooded	
+    if inOverRide == true then
+
+        currentRollTrim = rf2ethos.Page.fields[1].value
+        local now = os.clock()
+        local settleTime = 0.85
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if currentRollTrim ~= currentRollTrimLast then
+                currentRollTrimLast = currentRollTrim
+                lastChangeTime = now
+                self.saveData(self)
+            end
+        end
+
+        currentPitchTrim = rf2ethos.Page.fields[2].value
+        local now = os.clock()
+        local settleTime = 0.85
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if currentPitchTrim ~= currentPitchTrimLast then
+                currentPitchTrimLast = currentPitchTrim
+                lastChangeTime = now
+                self.saveData(self)
+            end
+        end
+
+        currentCollectiveTrim = rf2ethos.Page.fields[3].value
+        local now = os.clock()
+        local settleTime = 0.85
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if currentCollectiveTrim ~= currentCollectiveTrimLast then
+                currentCollectiveTrimLast = currentCollectiveTrim
+                lastChangeTime = now
+                self.saveData(self)
+            end
+        end
+
+        if rf2ethos.tailModeActive == 1 or rf2ethos.tailModeActive == 2 then
+            currentIdleThrottleTrim = rf2ethos.Page.fields[4].value
+            local now = os.clock()
+            local settleTime = 0.85
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+                if currentIdleThrottleTrim ~= currentIdleThrottleTrimLast then
+                    currentIdleThrottleTrimLast = currentIdleThrottleTrim
+                    lastChangeTime = now
+                    self.saveData(self)
+                end
+            end
+        end
+
+        if rf2ethos.tailModeActive == 0 then
+            currentYawTrim = rf2ethos.Page.fields[5].value
+            local now = os.clock()
+            local settleTime = 0.85
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+                if currentYawTrim ~= currentYawTrimLast then
+                    currentYawTrimLast = currentYawTrim
+                    lastChangeTime = now
+                    self.saveData(self)
+                end
+            end
+        end
+
+    end
+
+    if triggerOverRide == true then
+        triggerOverRide = false
+
+        if inOverRide == false then
+
+            rf2ethos.audio.playMixerOverideEnable = true
+
+            rf2ethos.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
+
+            rf2ethos.Page.mixerOn(self)
+            inOverRide = true
+        else
+
+            rf2ethos.audio.playMixerOverideDisable = true
+
+            rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+
+            rf2ethos.Page.mixerOff(self)
+            inOverRide = false
+        end
+    end
+
+end
+
+local function onToolMenu(self)
+
+    local buttons = {
+        {
+            label = "        OK        ",
+            action = function()
+
+                -- we cant launch the loader here to se rely on the modules
+                -- wakup function to do this
+                triggerOverRide = true
+                return true
+            end
+        }, {
+            label = "CANCEL",
+            action = function()
+                return true
+            end
+        }
+    }
+    local message
+    local title
+    if inOverRide == false then
+        title = "Enable mixer overide"
+        message = "Set all servos to their configured center position. \r\n\r\nThis will result in all values on this page being saved when adjusting the servo trim."
+    else
+        title = "Disable mixer overide"
+        message = "Return control of the servos to the flight controller."
+    end
+
+    form.openDialog({
+        width = nil,
+        title = title,
+        message = message,
+        buttons = buttons,
+        wakeup = function()
+        end,
+        paint = function()
+        end,
+        options = TEXT_LEFT
+    })
+
+end
+
+local function onNavMenu(self)
+
+    if inOverRide == true or inFocus == true then
+        rf2ethos.audio.playMixerOverideDisable = true
+
+        inOverRide = false
+        inFocus = false
+
+        rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+
+        mixerOff(self)
+        rf2ethos.triggers.closeProgressLoader = true
+    end
+
+    rf2ethos.ui.openMainMenu()
+
+end
+
+return {
+    read = 42, -- msp_MIXER_CONFIG
+    write = 43, -- msp_SET_MIXER_CONFIG
+    eepromWrite = true,
+    reboot = false,
+    title = "Mixer",
+    simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+    minBytes = 19,
+    labels = labels,
+    fields = fields,
+    mixerOff = mixerOff,
+    mixerOn = mixerOn,
+    postLoad = postLoad,
+    onToolMenu = onToolMenu,
+    onNavMenu = onNavMenu,
+    wakeup = wakeup,
+    saveData = saveData,
+    navButtons = {menu = true, save = true, reload = true, tool = true, help = true}
+}

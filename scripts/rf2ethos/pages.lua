@@ -8,6 +8,7 @@ pages[#pages + 1] = {title = "Rates", section = 1, script = "rates.lua", image =
 pages[#pages + 1] = {title = "Main Rotor", section = 1, script = "profile_mainrotor.lua", image = "mainrotor.png"}
 pages[#pages + 1] = {title = "Tail Rotor", section = 1, script = "profile_tailrotor.lua", image = "tailrotor.png"}
 pages[#pages + 1] = {title = "Governor", section = 1, script = "profile_governor.lua", image = "governor.png"}
+pages[#pages + 1] = {title = "Trim", section = 1, script = "trim.lua", image = "trim.png"}
 
 sections[#sections + 1] = {title = "Advanced", section = 2}
 pages[#pages + 1] = {title = "PID Controller", section = 2, script = "profile_pidcontroller.lua", image = "pids-controller.png"}

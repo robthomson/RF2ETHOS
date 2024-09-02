@@ -45,7 +45,7 @@ function ui.progessDisplaySave()
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
-function ui.progessDisplayValue(value,message)
+function ui.progessDisplayValue(value, message)
 
     if rf2ethos.triggers.mspBusy == true then return end
 
@@ -908,7 +908,7 @@ function ui.openPageServos(idx, title, script)
 
     -- we add a servo selector that is not part of msp table
     -- this is done as a selector - to pass a servoID on refresh
-    if rf2ethos.Page.servoCount == 3 then
+    if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
         servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
     else
         servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
@@ -966,12 +966,12 @@ function ui.openPageServos(idx, title, script)
                         rf2ethos.formFields[i]:help(helpTxt)
                     end
                 end
-				if f.onFocus ~= nil then
-					rf2ethos.formFields[i]:onFocus(function()
-						f.onFocus(rf2ethos.Page)
-					end)
-				end
-				if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+                if f.onFocus ~= nil then
+                    rf2ethos.formFields[i]:onFocus(function()
+                        f.onFocus(rf2ethos.Page)
+                    end)
+                end
+                if f.disable == true then rf2ethos.formFields[i]:enable(false) end
             end
         end
     end
@@ -1585,11 +1585,11 @@ function ui.navigationButtons(x, y, w, h)
     local xOffset = 0
     local padding = 5
     local wS = w - (w * 20) / 100
-	local helpOffset = 0
-	local toolOffset = 0 
-	local reloadOffset = 0
-	local saveOffset = 0
-	local menuOffset = 0
+    local helpOffset = 0
+    local toolOffset = 0
+    local reloadOffset = 0
+    local saveOffset = 0
+    local menuOffset = 0
 
     local navButtons
     if rf2ethos.Page.navButtons == nil then
@@ -1598,36 +1598,26 @@ function ui.navigationButtons(x, y, w, h)
         navButtons = rf2ethos.Page.navButtons
     end
 
-	-- calc all offsets
-	-- these are done 'early' to enable the actual placement of the buttons on
-	-- display to be rendered by ethos in the right order - for scrolling via
-	-- keypad to work.
-    if navButtons.help ~= nil and navButtons.help == true then
-        xOffset = xOffset + wS + padding
-	end	
-	helpOffset = x - xOffset
-	
-    if navButtons.tool ~= nil and navButtons.tool == true then
-        xOffset = xOffset + wS + padding
-	end
-	toolOffset = x - xOffset
+    -- calc all offsets
+    -- these are done 'early' to enable the actual placement of the buttons on
+    -- display to be rendered by ethos in the right order - for scrolling via
+    -- keypad to work.
+    if navButtons.help ~= nil and navButtons.help == true then xOffset = xOffset + wS + padding end
+    helpOffset = x - xOffset
 
-    if navButtons.reload ~= nil and navButtons.reload == true then
-        xOffset = xOffset + w + padding
-	end
-	reloadOffset = x - xOffset
+    if navButtons.tool ~= nil and navButtons.tool == true then xOffset = xOffset + wS + padding end
+    toolOffset = x - xOffset
 
-    if navButtons.save ~= nil and navButtons.save == true then
-        xOffset = xOffset + w + padding
-	end
-	saveOffset = x - xOffset	
+    if navButtons.reload ~= nil and navButtons.reload == true then xOffset = xOffset + w + padding end
+    reloadOffset = x - xOffset
 
-    if navButtons.menu ~= nil and navButtons.menu == true then
-        xOffset = xOffset + w + padding
-	end
-	menuOffset = x - xOffset	
+    if navButtons.save ~= nil and navButtons.save == true then xOffset = xOffset + w + padding end
+    saveOffset = x - xOffset
 
-	-- MENU BTN
+    if navButtons.menu ~= nil and navButtons.menu == true then xOffset = xOffset + w + padding end
+    menuOffset = x - xOffset
+
+    -- MENU BTN
     if navButtons.menu ~= nil and navButtons.menu == true then
 
         rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = menuOffset, y = y, w = w, h = h}, {
@@ -1647,7 +1637,7 @@ function ui.navigationButtons(x, y, w, h)
         rf2ethos.formNavigationFields['menu']:focus()
     end
 
-	-- SAVE BTN
+    -- SAVE BTN
     if navButtons.save ~= nil and navButtons.save == true then
 
         rf2ethos.formNavigationFields['save'] = form.addButton(line, {x = saveOffset, y = y, w = w, h = h}, {
@@ -1666,7 +1656,7 @@ function ui.navigationButtons(x, y, w, h)
         })
     end
 
-	-- RELOAD BTN
+    -- RELOAD BTN
     if navButtons.reload ~= nil and navButtons.reload == true then
 
         rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = reloadOffset, y = y, w = w, h = h}, {
@@ -1685,9 +1675,9 @@ function ui.navigationButtons(x, y, w, h)
                 return true
             end
         })
-    end	
-	
-	-- TOOL BUTTON
+    end
+
+    -- TOOL BUTTON
     if navButtons.tool ~= nil and navButtons.tool == true then
         rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = toolOffset, y = y, w = wS, h = h}, {
             text = "*",
@@ -1699,9 +1689,9 @@ function ui.navigationButtons(x, y, w, h)
                 rf2ethos.Page.onToolMenu()
             end
         })
-    end	
+    end
 
-	-- HELP BUTTON
+    -- HELP BUTTON
     if navButtons.help ~= nil and navButtons.help == true then
 
         local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()

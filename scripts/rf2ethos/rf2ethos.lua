@@ -70,6 +70,7 @@ rf2ethos.pageState = rf2ethos.pageStatus.display
 rf2ethos.lastLabel = nil
 rf2ethos.NewRateTable = nil
 rf2ethos.RateTable = nil
+rf2ethos.tailMode = nil
 rf2ethos.fieldHelpTxt = nil
 rf2ethos.protocol = {}
 rf2ethos.radio = {}
@@ -91,6 +92,8 @@ rf2ethos.audio.playLoading = false
 rf2ethos.audio.playEscPowerCycle = false
 rf2ethos.audio.playServoOverideDisable = false
 rf2ethos.audio.playServoOverideEnable = false
+rf2ethos.audio.playMixerOverideDisable = false
+rf2ethos.audio.playMixerOverideEnable = false
 rf2ethos.audio.playEraseFlash = false
 
 rf2ethos.dialogs = {}
@@ -168,7 +171,8 @@ function rf2ethos.resetState()
     rf2ethos.triggers.badMspVersion = false
     rf2ethos.dialogs.progressDisplayEsc = false
     ELRS_PAUSE_TELEMETRY = false
-	CRSF_PAUSE_TELEMETRY = false
+    CRSF_PAUSE_TELEMETRY = false
+    rf2ethos.tailMode = nil
 
 end
 
@@ -508,6 +512,22 @@ end
 -- THE GUTS OF ETHOS FORMS IS HANDLED WITHIN THIS FUNCTION
 function rf2ethos.wakeupUI()
 
+    -- find tail mixer config
+    -- this will only every happen on statup
+    if rf2ethos.tailMode == nil and rf2ethos.mspQueue:isProcessed() then
+        local message = {
+            command = 42, -- MIXER
+            processReply = function(self, buf)
+                if #buf >= 10 then
+                    local mode = buf[2]
+                    rf2ethos.tailMode = mode
+                end
+            end,
+            simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        }
+        rf2ethos.mspQueue:add(message)
+    end
+
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
     if rf2ethos.triggers.exitAPP == true then
@@ -663,7 +683,7 @@ function rf2ethos.wakeupUI()
 
             -- check msp version of fbl
             rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .. "ui_init.lua"))()
-            rf2ethos.init.f()
+
         end
     end
 
@@ -694,16 +714,16 @@ function rf2ethos.wakeupUI()
                 rf2ethos.dialogs.nolinkValueCounter = 0
                 rf2ethos.dialogs.nolinkDisplay = false
                 rf2ethos.triggers.badMspVersion = false
-                
+
                 if rf2ethos.runningInSimulator ~= true then
                     if rf2ethos.triggers.telemetryState ~= 1 then
                         rf2ethos.audio.playTimeout = true
                         rf2ethos.triggers.exitAPP = true
-					else
-						rf2ethos.audio.playConnected = true
+                    else
+                        rf2ethos.audio.playConnected = true
                     end
-				else
-					rf2ethos.audio.playConnected = true
+                else
+                    rf2ethos.audio.playConnected = true
                 end
             end
         end
@@ -1093,6 +1113,16 @@ function rf2ethos.wakeupUI()
         if rf2ethos.audio.playServoOverideDisable == true then
             system.playFile(rf2ethos.config.toolDir .. "sounds/soveridedis.wav")
             rf2ethos.audio.playServoOverideDisable = false
+        end
+
+        if rf2ethos.audio.playMixerOverideEnable == true then
+            system.playFile(rf2ethos.config.toolDir .. "sounds/moverideen.wav")
+            rf2ethos.audio.playMixerOverideEnable = false
+        end
+
+        if rf2ethos.audio.playMixerOverideDisable == true then
+            system.playFile(rf2ethos.config.toolDir .. "sounds/moveridedis.wav")
+            rf2ethos.audio.playMixerOverideDisable = false
         end
 
         if rf2ethos.audio.playSaving == true and rf2ethos.config.audioParam == 0 then

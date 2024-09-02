@@ -65,6 +65,14 @@ data["profile_tailrotor"]["TEXT"] = {
     "Collective Impulse FF: Impulse tail precompensation for collective inputs. If you need extra tail precompensation at the beginning of collective input."
 }
 
+-- FLIGHT TUNING - TRIM
+data["trim"] = {}
+data["trim"]["qrCODE"] = "gfx/qr/mixer.png"
+data["trim"]["TEXT"] = {
+    "Link trims: Use to trim out small leveling issues in your swash plate. Typically only used if the swash links are non-adjustable.",
+    "Motorised tail: If using a motorised tail, use this to set the minimum idle speed and zero yaw."
+}
+
 -- FLIGHT TUNING - GOVERNOR
 data["profile_governor"] = {}
 data["profile_governor"]["qrCODE"] = "gfx/qr/governor.png"
@@ -128,11 +136,7 @@ data["servos"]["TEXT"] = {
 -- HARDWARE - MIXER
 data["mixer"] = {}
 data["mixer"]["qrCODE"] = "gfx/qr/mixer.png"
-data["mixer"]["TEXT"] = {
-    "Swashplate: Adust swash plate geometry, phase angles, and limits.",
-    "Link trims: Use to trim out small leveling issues in your swash plate. Typically only used if the swash links are non-adjustable.",
-    "Motorised tail: If using a motorised tail, use this to set the minimum idle speed and zero yaw."
-}
+data["mixer"]["TEXT"] = {"Adust swash plate geometry, phase angles, and limits."}
 
 -- HARDWARE - ACCELEROMETER
 data["accelerometer"] = {}
