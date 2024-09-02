@@ -1,5 +1,10 @@
 local utils = {}
 
+function utils.stringInArray(array, s)
+    for i, value in ipairs(array) do if value == s then return true end end
+    return false
+end
+
 function utils.wrapText(text, width)
     local lines = {}
     local line = ""

@@ -78,6 +78,7 @@ rf2ethos.sensor = {}
 rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
+rf2ethos.wakeupSchedulerBgChecks = os.clock() 
 rf2ethos.mainMenuLastSelected = 1
 rf2ethos.escMenuLastSelected = 1
 rf2ethos.escToolMenuLastSelected = 1
@@ -173,6 +174,8 @@ function rf2ethos.resetState()
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false
     rf2ethos.tailMode = nil
+	rf2ethos.config.apiVersion = nil
+	rf2ethos.audio = {}
 
 end
 
@@ -494,7 +497,53 @@ function rf2ethos.wakeup(widget)
         rf2ethos.wakeupForm()
     end
 
+	-- bgchecks
+    -- keep cpu load down by running Form at reduced interval
+    local now = os.clock()
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 then
+        rf2ethos.wakeupSchedulerBgChecks = now
+        rf2ethos.wakeupBgChecks()
+    end
+	
 end
+
+
+-- BACKGROUND checks
+function rf2ethos.wakeupBgChecks()
+
+    if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
+        local message = {
+            command = 1, -- MIXER
+            processReply = function(self, buf)
+                if #buf >= 3 then
+                    local version = buf[2] + buf[3] / 100
+                    rf2ethos.config.apiVersion = version
+					print("MSP Version: " .. rf2ethos.config.apiVersion)
+                end
+            end,
+            simulatorResponse = {0, 12, 7}
+        }
+        rf2ethos.mspQueue:add(message)
+    end	
+	
+
+    if rf2ethos.tailMode == nil and rf2ethos.mspQueue:isProcessed() then
+        local message = {
+            command = 42, -- MIXER
+            processReply = function(self, buf)
+                if #buf >= 10 then
+                    local mode = buf[2]
+                    rf2ethos.tailMode = mode
+					print("Tail mode: " .. rf2ethos.tailMode)
+                end
+            end,
+            simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+        }
+        rf2ethos.mspQueue:add(message)
+    end
+		
+
+end	
 
 -- WAKEUPFORM.  RUN A FUNCTION CALLED wakeup THAT IS RETURNED WHEN REQUESTING A PAGE
 -- THIS ESSENTIALLY GIVES US A TIMER THAT CAN BE USED BY A PAGE THAT HAS LOADED TO
@@ -508,25 +557,11 @@ function rf2ethos.wakeupForm()
     end
 end
 
+
 -- WAKUP UI.  UI RUNS AT LOWER INTERVAL, TO SAVE CPU POWER.
 -- THE GUTS OF ETHOS FORMS IS HANDLED WITHIN THIS FUNCTION
 function rf2ethos.wakeupUI()
 
-    -- find tail mixer config
-    -- this will only every happen on statup
-    if rf2ethos.tailMode == nil and rf2ethos.mspQueue:isProcessed() then
-        local message = {
-            command = 42, -- MIXER
-            processReply = function(self, buf)
-                if #buf >= 10 then
-                    local mode = buf[2]
-                    rf2ethos.tailMode = mode
-                end
-            end,
-            simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        }
-        rf2ethos.mspQueue:add(message)
-    end
 
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
@@ -681,9 +716,6 @@ function rf2ethos.wakeupUI()
 
             rf2ethos.ui.progessNolinkDisplay()
 
-            -- check msp version of fbl
-            rf2ethos.init = rf2ethos.init or assert(compile.loadScript(rf2ethos.config.toolDir .. "ui_init.lua"))()
-
         end
     end
 
@@ -693,37 +725,35 @@ function rf2ethos.wakeupUI()
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
     if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.dialogs.progressDisplayEsc ~= true then
         if rf2ethos.triggers.telemetryState == 1 then
-            if rf2ethos.config.apiVersion ~= nil then
-                rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 15
-            else
-                rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
-            end
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
         else
             rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 1
         end
 
         if rf2ethos.dialogs.nolinkValueCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
 
-            if rf2ethos.init.f() == false and rf2ethos.getRSSI() ~= 0 then
+            if rf2ethos.config.apiVersion == nil and rf2ethos.getRSSI() ~= 0 then
                 rf2ethos.ui.progessNolinkDisplayClose()
                 rf2ethos.dialogs.nolinkValueCounter = 0
                 rf2ethos.dialogs.nolinkDisplay = false
-                rf2ethos.triggers.badMspVersion = true
             else
                 rf2ethos.ui.progessNolinkDisplayClose()
                 rf2ethos.dialogs.nolinkValueCounter = 0
                 rf2ethos.dialogs.nolinkDisplay = false
-                rf2ethos.triggers.badMspVersion = false
 
                 if rf2ethos.runningInSimulator ~= true then
                     if rf2ethos.triggers.telemetryState ~= 1 then
                         rf2ethos.audio.playTimeout = true
                         rf2ethos.triggers.exitAPP = true
                     else
-                        rf2ethos.audio.playConnected = true
+						if rf2ethos.triggers.badMspVersion ~= true then
+							rf2ethos.audio.playConnected = true
+						end	
                     end
                 else
-                    rf2ethos.audio.playConnected = true
+					if rf2ethos.triggers.badMspVersion ~= true then
+						rf2ethos.audio.playConnected = true
+					end	
                 end
             end
         end
@@ -936,8 +966,17 @@ function rf2ethos.wakeupUI()
     end
 
     -- show an error if msp version is bad
-    if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false then
-        if rf2ethos.triggers.badMspVersion == true then
+    if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false and rf2ethos.dialogs.nolinkDisplay == false then
+	
+		local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
+        if not rf2ethos.utils.stringInArray(rf2ethos.config.supportedMspApiVersion, apiVersionAsString) then
+            rf2ethos.triggers.badMspVersion = true
+		else
+            rf2ethos.triggers.badMspVersion = false
+        end
+	
+	
+        if rf2ethos.triggers.badMspVersion == true  then
             local buttons = {
                 {
                     label = "   OK   ",
@@ -950,8 +989,8 @@ function rf2ethos.wakeupUI()
 
             if rf2ethos.triggers.badMspVersionDisplay == false then
                 local message
-                if rf2ethos.config.apiVersion ~= 0 then
-                    message = rf2ethos.init.t
+                if rf2ethos.config.apiVersion ~= nil then
+                    message = "This version of the Lua scripts \ncan't be used with the selected model (" .. rf2ethos.config.apiVersion .. ")."
                 else
                     message = "Unable to determine msp version in use."
                 end
@@ -1187,7 +1226,7 @@ function rf2ethos.create()
 
     rf2ethos.uiState = rf2ethos.uiStatus.init
 
-    config.apiVersion = 0
+    config.apiVersion = nil
     config.environment = system.getVersion()
     config.ethosRunningVersion = tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision))
 
