@@ -518,7 +518,7 @@ function rf2ethos.wakeupBgChecks()
                 if #buf >= 3 then
                     local version = buf[2] + buf[3] / 100
                     rf2ethos.config.apiVersion = version
-					print("MSP Version: " .. rf2ethos.config.apiVersion)
+					rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
                 end
             end,
             simulatorResponse = {0, 12, 7}
@@ -534,7 +534,7 @@ function rf2ethos.wakeupBgChecks()
                 if #buf >= 10 then
                     local mode = buf[2]
                     rf2ethos.tailMode = mode
-					print("Tail mode: " .. rf2ethos.tailMode)
+					rf2ethos.utils.log("Tail mode: " .. rf2ethos.tailMode)
                 end
             end,
             simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
