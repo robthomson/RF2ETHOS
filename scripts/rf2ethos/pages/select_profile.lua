@@ -127,7 +127,7 @@ return {
     fields = fields,
 	wakeup = wakeup,
 	onSaveMenu=onSaveMenu,
-    refreshswitch = false,
+    refreshswitch = true,
     simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
     postLoad = postLoad,
     navButtons = {menu = true, save = true, reload = true, tool = false, help = true}
