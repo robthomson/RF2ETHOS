@@ -725,7 +725,7 @@ function rf2ethos.wakeupUI()
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
     if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.dialogs.progressDisplayEsc ~= true then
         if rf2ethos.triggers.telemetryState == 1 then
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
         else
             rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 1
         end

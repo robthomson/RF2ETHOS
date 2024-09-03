@@ -1719,6 +1719,7 @@ function ui.openPagehelp(helpdata, section)
     local txtData
     local qr
 
+
     if section == "rates" then
         txtData = helpdata[section]["table"][rf2ethos.RateTable]
     else

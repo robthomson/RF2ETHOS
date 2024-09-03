@@ -173,4 +173,13 @@ data["about"]["TEXT"] = {
     "If stuck or further assistanace required, drop past out discord group by scanning the qr code on the right."
 }
 
+-- SELECT PROFILE
+data["select_profile"] = {}
+data["select_profile"]["qrCODE"] = nil
+data["select_profile"]["TEXT"] = {
+    "Set the current flight profile or rate profile you would like to use",
+	"Note. If you set a profile from this tool, you will disable the use of any switch based adjustment changes to the profile until you power cycle the fbl unit.",
+	"This feature is by design to prevent conflicts between the two modes of operation."
+}
+
 return {data = data}
