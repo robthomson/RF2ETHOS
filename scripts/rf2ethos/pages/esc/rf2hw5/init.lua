@@ -6,7 +6,6 @@ mspSignature = 0xFD
 mspHeaderBytes = 2
 mspBytes = 60 --
 
-rf2ethos.config.apiVersion = 0
 mcuId = nil
 
 function getText(page, st, en)
