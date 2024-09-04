@@ -182,6 +182,5 @@ end
 
 return {
     title = "Preferences",
-    navButtons = {menu = true, save = false, reload = false, tool = false, help = false},
 	ui = openPagePreferences
 }
