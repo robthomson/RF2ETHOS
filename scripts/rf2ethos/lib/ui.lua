@@ -237,8 +237,6 @@ function ui.openMainMenu()
                         rf2ethos.ui.progessDisplay()
                         if pvalue.script == "pids.lua" then
                             rf2ethos.ui.openPagePid(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "servos.lua" then
-                            rf2ethos.ui.openPageServos(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "rates.lua" then
                             rf2ethos.ui.openPageRates(pidx, pvalue.title, pvalue.script)
                         elseif pvalue.script == "esc.lua" then
@@ -872,112 +870,6 @@ function ui.openPagePid(idx, title, script)
 
 end
 
-function ui.openPageServos(idx, title, script)
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
-    collectgarbage()
-
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-
-    local numPerRow = 2
-
-    local w, h = rf2ethos.utils.getWindowSize()
-    local windowWidth = w
-    local windowHeight = h
-
-    local padding = rf2ethos.radio.buttonPadding
-    local h = rf2ethos.radio.navbuttonHeight
-    local w = ((windowWidth) / numPerRow) - (padding * numPerRow - 1)
-
-    local y = rf2ethos.radio.linePaddingTop
-
-    longPage = false
-
-    form.clear()
-
-    rf2ethos.lastPage = script
-
-    rf2ethos.ui.fieldHeader(title)
-
-    -- we add a servo selector that is not part of msp table
-    -- this is done as a selector - to pass a servoID on refresh
-    if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
-        servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
-    else
-        servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
-    end
-
-    -- we can now loop throught pages to get values
-    formLineCnt = 0
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
-        local pageValue = f
-        local pageIdx = i
-        local currentField = i
-
-        if i == 1 then
-            line = form.addLine("Servo")
-            rf2ethos.formFields[i] = form.addChoiceField(line, nil, rf2ethos.utils.convertPageValueTable(servoTable), function()
-                value = rf2ethos.lastChangedServo
-                if rf2ethos.Page == nil then
-                    rf2ethos.triggers.reload = true
-                else
-                    rf2ethos.Page.fields[1].value = value
-                end
-                return value
-            end, function(value)
-                rf2ethos.Page.servoChanged(rf2ethos.Page, value)
-                return true
-            end)
-        else
-            if f.hideme == nil or f.hideme == false then
-                line = form.addLine(f.t)
-                rf2ethos.formFields[i] = form.addNumberField(line, nil, f.min, f.max, function()
-                    local value = rf2ethos.getFieldValue(f)
-                    return value
-                end, function(value)
-
-                    if f.postEdit then f.postEdit(rf2ethos.Page) end
-                    if f.onChange then f.onChange(rf2ethos.Page) end
-
-                    f.value = rf2ethos.saveFieldValue(f, value)
-                    rf2ethos.saveValue(i)
-                end)
-                if f.default ~= nil then
-                    local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
-                    if f.mult ~= nil then default = default * f.mult end
-                    rf2ethos.formFields[i]:default(default)
-                else
-                    rf2ethos.formFields[i]:default(0)
-                end
-                if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-                if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-                if f.help ~= nil then
-                    if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                        local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                        rf2ethos.formFields[i]:help(helpTxt)
-                    end
-                end
-                if f.onFocus ~= nil then
-                    rf2ethos.formFields[i]:onFocus(function()
-                        f.onFocus(rf2ethos.Page)
-                    end)
-                end
-                if f.disable == true then rf2ethos.formFields[i]:enable(false) end
-            end
-        end
-    end
-
-end
-
 function ui.getLabel(id, page)
     for i, v in ipairs(page) do if id ~= nil then if v.label == id then return v end end end
 end
@@ -1011,8 +903,8 @@ function ui.fieldChoice(f, i)
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
-        if f.postEdit then f.postEdit(rf2ethos.Page) end
-        if f.onChange then f.onChange(rf2ethos.Page) end
+        if f.postEdit then f.postEdit(rf2ethos.Page,value) end
+        if f.onChange then f.onChange(rf2ethos.Page,value) end
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
