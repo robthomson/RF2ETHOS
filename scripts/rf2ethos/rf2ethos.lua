@@ -1089,11 +1089,8 @@ function rf2ethos.wakeupUI()
     if rf2ethos.triggers.reload == true then
         rf2ethos.ui.progessDisplay()
         rf2ethos.triggers.reload = false
-        if rf2ethos.lastScript == "pids.lua" or rf2ethos.lastIdx == 1 then
-            rf2ethos.ui.openPagePid(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-        elseif rf2ethos.lastScript == "rates.lua" then
-            rf2ethos.ui.openPageRates(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-        elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
+		
+		if rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
             rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
         elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
             rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)

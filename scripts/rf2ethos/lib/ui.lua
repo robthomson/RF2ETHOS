@@ -235,16 +235,9 @@ function ui.openMainMenu()
                     press = function()
                         rf2ethos.mainMenuLastSelected = pidx
                         rf2ethos.ui.progessDisplay()
-                        if pvalue.script == "pids.lua" then
-                            rf2ethos.ui.openPagePid(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "rates.lua" then
-                            rf2ethos.ui.openPageRates(pidx, pvalue.title, pvalue.script)
-                        elseif pvalue.script == "esc.lua" then
+                        if pvalue.script == "esc.lua" then
                             rf2ethos.ui.openPageEsc(pidx, pvalue.title, pvalue.script)
-                            rf2ethos.triggers.closeProgressLoader = true
-                        elseif pvalue.script == "preferences.lua" then
-                            rf2ethos.ui.openPagePreferences(pidx, pvalue.title, pvalue.script)
-                            rf2ethos.triggers.closeProgressLoader = true
+                            rf2ethos.triggers.closeProgressLoader = true 
                         else
                             rf2ethos.ui.openPageDefault(pidx, pvalue.title, pvalue.script)
                         end
@@ -262,125 +255,6 @@ function ui.openMainMenu()
     end
 end
 
-function ui.openPageRates(idx, title, script)
-
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
-    collectgarbage()
-
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
-    rf2ethos.lastPage = script
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-
-    longPage = false
-
-    form.clear()
-
-    rf2ethos.ui.fieldHeader(title)
-
-    local numCols = #rf2ethos.Page.cols
-
-    -- we dont use the global due to scrollers
-    local screenWidth, screenHeight = rf2ethos.getWindowSize()
-
-    local padding = 10
-    local paddingTop = rf2ethos.radio.linePaddingTop
-    local h = rf2ethos.radio.navbuttonHeight
-    local w = ((screenWidth * 70 / 100) / numCols)
-    local paddingRight = 10
-    local positions = {}
-    local positions_r = {}
-    local pos
-
-    line = form.addLine(rf2ethos.Page.rTableName)
-
-    local loc = numCols
-    local posX = screenWidth - paddingRight
-    local posY = paddingTop
-
-    local c = 1
-    while loc > 0 do
-        local colLabel = rf2ethos.Page.cols[loc]
-
-        positions[loc] = posX - w
-        positions_r[c] = posX - w
-
-        lcd.font(FONT_STD)
-        local tsizeW, tsizeH = lcd.getTextSize(colLabel)
-
-        local posTxt = (positions_r[c] + w) - tsizeW
-
-        pos = {x = posTxt, y = posY, w = w, h = h}
-        form.addStaticText(line, pos, colLabel)
-
-        posX = math.floor(posX - w)
-
-        loc = loc - 1
-        c = c + 1
-    end
-
-    -- display each row
-    local rateRows = {}
-    for ri, rv in ipairs(rf2ethos.Page.rows) do rateRows[ri] = form.addLine(rv) end
-
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
-        local pageIdx = i
-        local currentField = i
-
-        if f.hidden == nil or f.hidden == false then
-            posX = positions[f.col]
-
-            pos = {x = posX + padding, y = posY, w = w - padding, h = h}
-
-            minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
-            maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
-            if f.mult ~= nil then
-                minValue = minValue * f.mult
-                maxValue = maxValue * f.mult
-            end
-            if f.scale ~= nil then
-                minValue = minValue / f.scale
-                maxValue = maxValue / f.scale
-            end
-
-            rf2ethos.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
-                local value
-                if rf2ethos.activeRateTable == 0 then
-                    value = 0
-                else
-                    value = rf2ethos.getFieldValue(f)
-                end
-                return value
-            end, function(value)
-                f.value = rf2ethos.saveFieldValue(f, value)
-                rf2ethos.saveValue(i)
-            end)
-            if f.default ~= nil then
-                local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
-                if f.mult ~= nil then default = math.floor(default * f.mult) end
-                if f.scale ~= nil then default = math.floor(default / f.scale) end
-                rf2ethos.formFields[i]:default(default)
-            else
-                rf2ethos.formFields[i]:default(0)
-            end
-            if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-            if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-            if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
-            if f.help ~= nil then
-                if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                    local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                    rf2ethos.formFields[i]:help(helpTxt)
-                end
-            end
-            if f.disable == true then rf2ethos.formFields[i]:enable(false) end
-        end
-    end
-
-end
 
 function ui.progressDisplay()
 
@@ -769,106 +643,6 @@ function rf2ethos.openESCForm(folder, script)
 
 end
 
-function ui.openPagePid(idx, title, script)
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
-    collectgarbage()
-
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
-    rf2ethos.lastPage = script
-
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-
-    longPage = false
-
-    form.clear()
-
-    rf2ethos.ui.fieldHeader(title)
-    local numCols
-    if rf2ethos.Page.cols ~= nil then
-        numCols = #rf2ethos.Page.cols
-    else
-        numCols = 6
-    end
-    local screenWidth = rf2ethos.config.lcdWidth - 10
-    local padding = 10
-    local paddingTop = rf2ethos.radio.linePaddingTop
-    local h = rf2ethos.radio.navbuttonHeight
-    local w = ((screenWidth * 70 / 100) / numCols)
-    local paddingRight = 20
-    local positions = {}
-    local positions_r = {}
-    local pos
-
-    line = form.addLine("")
-
-    local loc = numCols
-    local posX = screenWidth - paddingRight
-    local posY = paddingTop
-
-    local c = 1
-    while loc > 0 do
-        local colLabel = rf2ethos.Page.cols[loc]
-        pos = {x = posX, y = posY, w = w, h = h}
-        form.addStaticText(line, pos, colLabel)
-        positions[loc] = posX - w + paddingRight
-        positions_r[c] = posX - w + paddingRight
-        posX = math.floor(posX - w)
-        loc = loc - 1
-        c = c + 1
-    end
-
-    -- display each row
-    local pidRows = {}
-    for ri, rv in ipairs(rf2ethos.Page.rows) do pidRows[ri] = form.addLine(rv) end
-
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
-        local pageIdx = i
-        local currentField = i
-
-        posX = positions[f.col]
-
-        pos = {x = posX + padding, y = posY, w = w - padding, h = h}
-
-        minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
-        maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
-        if f.mult ~= nil then
-            minValue = minValue * f.mult
-            maxValue = maxValue * f.mult
-        end
-
-        rf2ethos.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
-            local value = rf2ethos.getFieldValue(f)
-            return value
-        end, function(value)
-            f.value = rf2ethos.saveFieldValue(f, value)
-            rf2ethos.saveValue(i)
-        end)
-        if f.default ~= nil then
-            local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
-            if f.mult ~= nil then default = default * f.mult end
-            rf2ethos.formFields[i]:default(default)
-        else
-            rf2ethos.formFields[i]:default(0)
-        end
-        if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-        if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-        if f.help ~= nil then
-            if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                rf2ethos.formFields[i]:help(helpTxt)
-            end
-        end
-    end
-
-end
 
 function ui.getLabel(id, page)
     for i, v in ipairs(page) do if id ~= nil then if v.label == id then return v end end end
@@ -1163,233 +937,60 @@ function ui.openPageDefault(idx, title, script)
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
+	
+	if rf2ethos.Page.ui then
+		rf2ethos.Page.ui(idx,title,script)
+	else
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+		rf2ethos.lastIdx = idx
+		rf2ethos.lastTitle = title
+		rf2ethos.lastScript = script
 
-    local fieldAR = {}
+		local fieldAR = {}
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
+		rf2ethos.uiState = rf2ethos.uiStatus.pages
+		rf2ethos.triggers.isReady = false
 
-    longPage = false
+		longPage = false
 
-    form.clear()
+		form.clear()
 
-    rf2ethos.lastPage = script
+		rf2ethos.lastPage = script
 
-    rf2ethos.ui.fieldHeader(title)
+		rf2ethos.ui.fieldHeader(title)
 
-    formLineCnt = 0
+		formLineCnt = 0
 
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
-        local pageValue = f
-        local pageIdx = i
-        local currentField = i
+		for i = 1, #rf2ethos.Page.fields do
+			local f = rf2ethos.Page.fields[i]
+			local l = rf2ethos.Page.labels
+			local pageValue = f
+			local pageIdx = i
+			local currentField = i
 
-        rf2ethos.ui.fieldLabel(f, i, l)
+			rf2ethos.ui.fieldLabel(f, i, l)
 
-        if f.hidden ~= true then
+			if f.hidden ~= true then
 
-            if f.type == 0 then
-                rf2ethos.ui.fieldStaticText(f, i)
-            elseif f.table or f.type == 1 then
-                rf2ethos.ui.fieldChoice(f, i)
-            elseif f.type == 2 then
-                rf2ethos.ui.fieldNumber(f, i)
-            elseif f.type == 3 then
-                rf2ethos.ui.fieldText(f, i)
-            else
-                rf2ethos.ui.fieldNumber(f, i)
-            end
+				if f.type == 0 then
+					rf2ethos.ui.fieldStaticText(f, i)
+				elseif f.table or f.type == 1 then
+					rf2ethos.ui.fieldChoice(f, i)
+				elseif f.type == 2 then
+					rf2ethos.ui.fieldNumber(f, i)
+				elseif f.type == 3 then
+					rf2ethos.ui.fieldText(f, i)
+				else
+					rf2ethos.ui.fieldNumber(f, i)
+				end
 
-        end
-    end
-
-end
-
-function ui.openPagePreferences(idx, title, script)
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
-    rf2ethos.Page = nil
-
-    form.clear()
-
-    local w, h = rf2ethos.utils.getWindowSize()
-
-    -- column starts at 59.4% of w
-    padding = 5
-    colStart = math.floor((w * 59.4) / 100)
-    if rf2ethos.radio.navButtonOffset ~= nil then colStart = colStart - rf2ethos.radio.navButtonOffset end
-
-    if rf2ethos.radio.buttonWidth == nil then
-        buttonW = (w - colStart) / 3 - padding
-    else
-        buttonW = rf2ethos.radio.buttonWidth
-    end
-    buttonH = rf2ethos.radio.navbuttonHeight
-
-    local x = w
-
-    line = form.addLine("Preferences")
-
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - (buttonW + padding) * 1, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = buttonH}, {
-        text = "MENU",
-        icon = nil,
-        options = FONT_S,
-        paint = function()
-        end,
-        press = function()
-            rf2ethos.lastIdx = nil
-            rf2ethos.lastPage = nil
-            rf2ethos.escMode = false
-
-            if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
-
-            rf2ethos.ui.openMainMenu()
-        end
-    })
-    rf2ethos.formNavigationFields['menu']:focus()
-
-    local uipanel = form.addExpansionPanel("User interface")
-    uipanel:open(true)
-
-    rf2ethos.config.audioParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio")
-    if rf2ethos.config.audioParam == nil or rf2ethos.config.audioParam == "" then rf2ethos.config.audioParam = 0 end
-
-    line = uipanel:addLine("Audio")
-    rf2ethos.formFields[0] = form.addChoiceField(line, nil, {{"All", 0}, {"Alerts", 1}, {"Disable", 2}}, function()
-        return rf2ethos.config.audioParam
-    end, function(newValue)
-        rf2ethos.config.audioParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/audio", rf2ethos.config.audioParam)
-    end)
-
-    rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
-    if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then rf2ethos.config.iconsizeParam = 1 end
-
-    line = uipanel:addLine("Button style")
-    rf2ethos.formFields[1] = form.addChoiceField(line, nil, {{"Text", 0}, {"Small image", 1}, {"Large images", 2}}, function()
-        return rf2ethos.config.iconsizeParam
-    end, function(newValue)
-        rf2ethos.config.iconsizeParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/iconsize", rf2ethos.config.iconsizeParam)
-    end)
-
-    -- PROFILE
-    rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
-    if rf2ethos.config.profileswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
-        rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
-
-    line = uipanel:addLine("Switch profile")
-    rf2ethos.formFields[2] = form.addSourceField(line, nil, function()
-        return rf2ethos.config.profileswitchParam
-    end, function(newValue)
-        rf2ethos.config.profileswitchParam = newValue
-        local member = rf2ethos.config.profileswitchParam:member()
-        local category = rf2ethos.config.profileswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/profileswitch", category .. "," .. member)
-    end)
-
-    -- RATES
-    rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
-    if rf2ethos.config.rateswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
-        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
-
-    line = uipanel:addLine("Switch rates")
-    rf2ethos.formFields[3] = form.addSourceField(line, nil, function()
-        return rf2ethos.config.rateswitchParam
-    end, function(newValue)
-        rf2ethos.config.rateswitchParam = newValue
-        local member = rf2ethos.config.rateswitchParam:member()
-        local category = rf2ethos.config.rateswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/rateswitch", category .. "," .. member)
-    end)
-
-    local advpanel = form.addExpansionPanel("Advanced")
-    advpanel:open(true)
-
-    -- TIMEOUT
-    rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
-    line = advpanel:addLine("Timeout")
-    rf2ethos.formFields[4] = form.addChoiceField(line, nil, {{"Default", 15}, {"10s", 10}, {"15s", 15}, {"20s", 20}, {"25s", 25}, {"30s", 30}}, function()
-        return rf2ethos.config.watchdogParam
-    end, function(newValue)
-        rf2ethos.config.watchdogParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/watchdog", rf2ethos.config.watchdogParam)
-    end)
-
-    -- COMPILATION
-    rf2ethos.config.compilationParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/compilation")
-    if rf2ethos.config.compilationParam == nil or rf2ethos.config.compilationParam == "" then rf2ethos.config.compilationParam = 0 end
-    line = advpanel:addLine("Compilation")
-    rf2ethos.formFields[5] = form.addChoiceField(line, nil, {{"Enable", 0}, {"Disable", 1}, {"Use switch", 2}}, function()
-        return tonumber(rf2ethos.config.compilationParam)
-    end, function(newValue)
-        rf2ethos.config.compilationParam = newValue
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/compilation", rf2ethos.config.compilationParam)
-
-        if newValue == 2 then
-            rf2ethos.formFields[6]:enable(true)
-        else
-            rf2ethos.formFields[6]:enable(false)
-        end
-
-    end)
-
-    -- COMPILATION SWITCH
-    rf2ethos.config.compilationswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/compilationswitch")
-    if rf2ethos.config.compilationswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.compilationswitchParamPreference, ",")
-        rf2ethos.config.compilationswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
-
-    line = advpanel:addLine("   Switch")
-    rf2ethos.formFields[6] = form.addSwitchField(line, nil, function()
-        return rf2ethos.config.compilationswitchParam
-    end, function(newValue)
-        rf2ethos.config.compilationswitchParam = newValue
-        local member = rf2ethos.config.compilationswitchParam:member()
-        local category = rf2ethos.config.compilationswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/compilationswitch", category .. "," .. member)
-    end)
-
-    if tonumber(rf2ethos.config.compilationParam) == 2 then
-        rf2ethos.formFields[6]:enable(true)
-    else
-        rf2ethos.formFields[6]:enable(false)
-    end
-
-    -- DEMO MODE
-    rf2ethos.config.demoswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/demoswitch")
-    if rf2ethos.config.demoswitchParamPreference ~= nil then
-        local s = rf2ethos.utils.explode(rf2ethos.config.demoswitchParamPreference, ",")
-        rf2ethos.config.demoswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
-
-    line = advpanel:addLine("Demo mode")
-    rf2ethos.formFields[7] = form.addSwitchField(line, nil, function()
-        return rf2ethos.config.demoswitchParam
-    end, function(newValue)
-        rf2ethos.config.demoswitchParam = newValue
-        local member = rf2ethos.config.demoswitchParam:member()
-        local category = rf2ethos.config.demoswitchParam:category()
-        rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/demoswitch", category .. "," .. member)
-    end)
+			end
+		end
+	end
 
 end
+
+
 
 function ui.navigationButtonsEscForm(x, y, w, h)
 

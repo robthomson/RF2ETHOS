@@ -40,6 +40,107 @@ local function postLoad(self)
     rf2ethos.triggers.isReady = true
 end
 
+function openPagePid(idx, title, script)
+
+    rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.triggers.isReady = false
+
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+    collectgarbage()
+
+    rf2ethos.lastIdx = idx
+    rf2ethos.lastTitle = title
+    rf2ethos.lastScript = script
+    rf2ethos.lastPage = script
+
+    rf2ethos.uiState = rf2ethos.uiStatus.pages
+
+    longPage = false
+
+    form.clear()
+
+    rf2ethos.ui.fieldHeader(title)
+    local numCols
+    if rf2ethos.Page.cols ~= nil then
+        numCols = #rf2ethos.Page.cols
+    else
+        numCols = 6
+    end
+    local screenWidth = rf2ethos.config.lcdWidth - 10
+    local padding = 10
+    local paddingTop = rf2ethos.radio.linePaddingTop
+    local h = rf2ethos.radio.navbuttonHeight
+    local w = ((screenWidth * 70 / 100) / numCols)
+    local paddingRight = 20
+    local positions = {}
+    local positions_r = {}
+    local pos
+
+    line = form.addLine("")
+
+    local loc = numCols
+    local posX = screenWidth - paddingRight
+    local posY = paddingTop
+
+    local c = 1
+    while loc > 0 do
+        local colLabel = rf2ethos.Page.cols[loc]
+        pos = {x = posX, y = posY, w = w, h = h}
+        form.addStaticText(line, pos, colLabel)
+        positions[loc] = posX - w + paddingRight
+        positions_r[c] = posX - w + paddingRight
+        posX = math.floor(posX - w)
+        loc = loc - 1
+        c = c + 1
+    end
+
+    -- display each row
+    local pidRows = {}
+    for ri, rv in ipairs(rf2ethos.Page.rows) do pidRows[ri] = form.addLine(rv) end
+
+    for i = 1, #rf2ethos.Page.fields do
+        local f = rf2ethos.Page.fields[i]
+        local l = rf2ethos.Page.labels
+        local pageIdx = i
+        local currentField = i
+
+        posX = positions[f.col]
+
+        pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+
+        minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
+        maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
+        if f.mult ~= nil then
+            minValue = minValue * f.mult
+            maxValue = maxValue * f.mult
+        end
+
+        rf2ethos.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
+            local value = rf2ethos.getFieldValue(f)
+            return value
+        end, function(value)
+            f.value = rf2ethos.saveFieldValue(f, value)
+            rf2ethos.saveValue(i)
+        end)
+        if f.default ~= nil then
+            local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
+            if f.mult ~= nil then default = default * f.mult end
+            rf2ethos.formFields[i]:default(default)
+        else
+            rf2ethos.formFields[i]:default(0)
+        end
+        if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+        if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+        if f.help ~= nil then
+            if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
+                local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+                rf2ethos.formFields[i]:help(helpTxt)
+            end
+        end
+    end
+
+end
+
 return {
     read = 112, -- msp_PID_TUNING
     write = 202, -- msp_SET_PID_TUNING
@@ -52,5 +153,6 @@ return {
     fields = fields,
     rows = rows,
     cols = cols,
-    postLoad = postLoad
+    postLoad = postLoad,
+	ui = openPagePid
 }

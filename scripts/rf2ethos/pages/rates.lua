@@ -37,6 +37,126 @@ local function flagRateChange(self)
     rf2ethos.triggers.resetRates = true
 end
 
+function openPageRates(idx, title, script)
+
+    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+    collectgarbage()
+
+    rf2ethos.lastIdx = idx
+    rf2ethos.lastTitle = title
+    rf2ethos.lastScript = script
+    rf2ethos.lastPage = script
+
+    rf2ethos.uiState = rf2ethos.uiStatus.pages
+
+    longPage = false
+
+    form.clear()
+
+    rf2ethos.ui.fieldHeader(title)
+
+    local numCols = #rf2ethos.Page.cols
+
+    -- we dont use the global due to scrollers
+    local screenWidth, screenHeight = rf2ethos.getWindowSize()
+
+    local padding = 10
+    local paddingTop = rf2ethos.radio.linePaddingTop
+    local h = rf2ethos.radio.navbuttonHeight
+    local w = ((screenWidth * 70 / 100) / numCols)
+    local paddingRight = 10
+    local positions = {}
+    local positions_r = {}
+    local pos
+
+    line = form.addLine(rf2ethos.Page.rTableName)
+
+    local loc = numCols
+    local posX = screenWidth - paddingRight
+    local posY = paddingTop
+
+    local c = 1
+    while loc > 0 do
+        local colLabel = rf2ethos.Page.cols[loc]
+
+        positions[loc] = posX - w
+        positions_r[c] = posX - w
+
+        lcd.font(FONT_STD)
+        local tsizeW, tsizeH = lcd.getTextSize(colLabel)
+
+        local posTxt = (positions_r[c] + w) - tsizeW
+
+        pos = {x = posTxt, y = posY, w = w, h = h}
+        form.addStaticText(line, pos, colLabel)
+
+        posX = math.floor(posX - w)
+
+        loc = loc - 1
+        c = c + 1
+    end
+
+    -- display each row
+    local rateRows = {}
+    for ri, rv in ipairs(rf2ethos.Page.rows) do rateRows[ri] = form.addLine(rv) end
+
+    for i = 1, #rf2ethos.Page.fields do
+        local f = rf2ethos.Page.fields[i]
+        local l = rf2ethos.Page.labels
+        local pageIdx = i
+        local currentField = i
+
+        if f.hidden == nil or f.hidden == false then
+            posX = positions[f.col]
+
+            pos = {x = posX + padding, y = posY, w = w - padding, h = h}
+
+            minValue = f.min * rf2ethos.utils.decimalInc(f.decimals)
+            maxValue = f.max * rf2ethos.utils.decimalInc(f.decimals)
+            if f.mult ~= nil then
+                minValue = minValue * f.mult
+                maxValue = maxValue * f.mult
+            end
+            if f.scale ~= nil then
+                minValue = minValue / f.scale
+                maxValue = maxValue / f.scale
+            end
+
+            rf2ethos.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
+                local value
+                if rf2ethos.activeRateTable == 0 then
+                    value = 0
+                else
+                    value = rf2ethos.getFieldValue(f)
+                end
+                return value
+            end, function(value)
+                f.value = rf2ethos.saveFieldValue(f, value)
+                rf2ethos.saveValue(i)
+            end)
+            if f.default ~= nil then
+                local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
+                if f.mult ~= nil then default = math.floor(default * f.mult) end
+                if f.scale ~= nil then default = math.floor(default / f.scale) end
+                rf2ethos.formFields[i]:default(default)
+            else
+                rf2ethos.formFields[i]:default(0)
+            end
+            if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
+            if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+            if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
+            if f.help ~= nil then
+                if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
+                    local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+                    rf2ethos.formFields[i]:help(helpTxt)
+                end
+            end
+            if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+        end
+    end
+
+end
+
 return {
     read = 111, -- msp_RC_TUNING
     write = 204, -- msp_SET_RC_TUNING
@@ -52,6 +172,7 @@ return {
     simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
     rTableName = mytable.rTableName,
     flagRateChange = flagRateChange,
-    postLoad = postLoad
+    postLoad = postLoad,
+	ui = openPageRates,
 
 }
