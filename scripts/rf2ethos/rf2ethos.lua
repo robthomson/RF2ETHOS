@@ -1093,8 +1093,6 @@ function rf2ethos.wakeupUI()
             rf2ethos.ui.openPagePid(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
         elseif rf2ethos.lastScript == "rates.lua" then
             rf2ethos.ui.openPageRates(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-        elseif rf2ethos.lastScript == "servos.lua" then
-            rf2ethos.ui.openPageServos(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
         elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
             rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
         elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
