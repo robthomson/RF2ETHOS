@@ -7,7 +7,7 @@ function ui.progessDisplay(title, message)
     rf2ethos.audio.playLoading = true
 
     if title == nil then title = "Loading..." end
-    if message == nil then message = "Loading data from flight controller." end
+    if message == nil then message = "Loading data from flight controller..." end
 
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
@@ -76,28 +76,36 @@ function ui.progessDisplaySaveValue(value, message)
 end
 
 function ui.progessDisplayClose()
-    rf2ethos.dialogs.progress:close()
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.progress:close()
+	end	
 end
 
 function ui.progessDisplayCloseAllowed(status)
-    rf2ethos.dialogs.progress:closeAllowed(status)
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.progress:closeAllowed(status)
+	end	
 end
 
 function ui.progessDisplayMessage(message)
-    rf2ethos.dialogs.progress:message(message)
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.progress:message(message)
+	end	
 end
 
 function ui.progessDisplaySaveClose()
-    rf2ethos.dialogs.save:close()
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.save:close()
+	end
 end
 
 function ui.progessDisplaySaveCloseAllowed(status)
-    rf2ethos.dialogs.progress:closeAllowed(status)
+	if rf2ethos.dialogs.progress ~= nil then
+		rf2ethos.dialogs.progress:closeAllowed(status)
+	end	
 end
 
-function ui.progessDisplayESCClose()
-    rf2ethos.dialogs.progressESC:close()
-end
+
 
 function ui.progessNolinkDisplayClose()
     rf2ethos.dialogs.noLink:close()
@@ -123,13 +131,6 @@ function ui.progessDisplayNoLinkValue(value, message)
 
 end
 
-function ui.progessDisplayESCValue(value, message)
-
-    if rf2ethos.triggers.mspBusy == true then return end
-
-    rf2ethos.dialogs.progressESC:value(value)
-    if message ~= nil then rf2ethos.dialogs.progressESC:message(message) end
-end
 
 function ui.openMainMenu()
 
