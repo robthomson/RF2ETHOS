@@ -1,11 +1,15 @@
-function openPagePreferences(idx, title, script)
+local function postLoad(self)
+	rf2ethos.triggers.closeProgressLoader = true
+end
+
+local function openPage(idx, title, script)
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
 
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-    rf2ethos.Page = nil
+    --rf2ethos.Page = nil
 
     form.clear()
 
@@ -176,11 +180,13 @@ function openPagePreferences(idx, title, script)
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/demoswitch", category .. "," .. member)
     end)
 
-	rf2ethos.triggers.closeProgressLoader = true
+	postLoad()
 
 end
 
+
+
 return {
     title = "Preferences",
-	ui = openPagePreferences
+	openPage = openPage
 }

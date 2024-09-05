@@ -37,7 +37,7 @@ local function flagRateChange(self)
     rf2ethos.triggers.resetRates = true
 end
 
-function openPageRates(idx, title, script)
+local function openPage(idx, title, script)
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -173,6 +173,6 @@ return {
     rTableName = mytable.rTableName,
     flagRateChange = flagRateChange,
     postLoad = postLoad,
-	ui = openPageRates,
+	openPage = openPage,
 
 }

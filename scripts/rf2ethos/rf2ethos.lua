@@ -1095,7 +1095,7 @@ function rf2ethos.wakeupUI()
         elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
             rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
         else
-            rf2ethos.ui.openPageDefault(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+            rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
         end
         rf2ethos.profileSwitchCheck()
         rf2ethos.rateSwitchCheck()

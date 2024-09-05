@@ -40,7 +40,7 @@ local function postLoad(self)
     rf2ethos.triggers.isReady = true
 end
 
-function openPagePid(idx, title, script)
+local function openPage(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -154,5 +154,5 @@ return {
     rows = rows,
     cols = cols,
     postLoad = postLoad,
-	ui = openPagePid
+	openPage = openPage
 }

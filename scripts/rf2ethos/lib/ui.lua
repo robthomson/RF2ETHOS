@@ -239,7 +239,7 @@ function ui.openMainMenu()
                             rf2ethos.ui.openPageEsc(pidx, pvalue.title, pvalue.script)
                             rf2ethos.triggers.closeProgressLoader = true 
                         else
-                            rf2ethos.ui.openPageDefault(pidx, pvalue.title, pvalue.script)
+                            rf2ethos.ui.openPage(pidx, pvalue.title, pvalue.script)
                         end
                     end
                 })
@@ -928,7 +928,7 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w - 5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPageDefault(idx, title, script)
+function ui.openPage(idx, title, script)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -938,8 +938,8 @@ function ui.openPageDefault(idx, title, script)
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 	
-	if rf2ethos.Page.ui then
-		rf2ethos.Page.ui(idx,title,script)
+	if rf2ethos.Page.openPage then
+		rf2ethos.Page.openPage(idx,title,script)	
 	else
 
 		rf2ethos.lastIdx = idx
