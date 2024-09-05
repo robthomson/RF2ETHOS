@@ -1284,7 +1284,7 @@ end
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 function rf2ethos.event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+     print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if value == EVT_VIRTUAL_PREV_LONG then
         print("Forcing exit")
@@ -1302,7 +1302,7 @@ function rf2ethos.event(widget, category, value, x, y)
             rf2ethos.escManufacturer = nil
             rf2ethos.escScript = nil
             rf2ethos.dialogs.progressDisplayEsc = false
-            if rf2ethos.Page then if rf2ethos.Page.onMenuExit then rf2ethos.Page.onMenuExit(rf2ethos.Page) end end
+            if rf2ethos.Page then if rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end end
             rf2ethos.ui.openMainMenu()
             return true
         end
@@ -1342,14 +1342,14 @@ function rf2ethos.event(widget, category, value, x, y)
         if category == 5 or value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
-            if rf2ethos.Page.onMenuExit then rf2ethos.Page.onMenuExit(rf2ethos.Page) end
+            if rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
             rf2ethos.ui.openMainMenu()
             return true
         end
         if value == 35 then
             if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
-            if rf2ethos.Page.onMenuExit then rf2ethos.Page.onMenuExit(rf2ethos.Page) end
+            if rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
             rf2ethos.ui.openMainMenu()
             return true
         end
