@@ -606,7 +606,7 @@ function rf2ethos.wakeupUI()
         rf2ethos.lastPage = nil
         invalidatePages()
 
-        rf2ethos.ui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+        rf2ethos.escui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
 
     end
 
@@ -819,7 +819,7 @@ function rf2ethos.wakeupUI()
 
         if rf2ethos.dialogs.progressDisplayEsc ~= true then
 
-            rf2ethos.ui.progessDisplayESC()
+            rf2ethos.escui.progessDisplayESC()
 
             rf2ethos.audio.playEscPowerCycle = true
 
@@ -835,7 +835,7 @@ function rf2ethos.wakeupUI()
 
                 rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 5
                 rf2ethos.dialogs.progressESCRateLimit = os.clock()
-                rf2ethos.ui.progessDisplayESCValue(rf2ethos.dialogs.progressCounterESC)
+                rf2ethos.escui.progessDisplayESCValue(rf2ethos.dialogs.progressCounterESC)
             end
 
             if rf2ethos.Page.escinfo then
@@ -851,7 +851,7 @@ function rf2ethos.wakeupUI()
 
                     if rf2ethos.PageTmp ~= nil then rf2ethos.Page = rf2ethos.PageTmp end
 
-                    rf2ethos.ui.progessDisplayESCClose()
+                    rf2ethos.escui.progessDisplayESCClose()
                     rf2ethos.dialogs.progressDisplayEsc = false
                     rf2ethos.triggers.escPowerCycle = false
                 end
@@ -962,7 +962,7 @@ function rf2ethos.wakeupUI()
     if rf2ethos.triggers.triggerEscReload == true then
         rf2ethos.triggers.triggerEscReload = false
         rf2ethos.ui.progessDisplay()
-        rf2ethos.openESCFormInit(rf2ethos.escManufacturer, rf2ethos.escScript)
+        rf2ethos.escui.openESCFormInit(rf2ethos.escManufacturer, rf2ethos.escScript)
     end
 
     -- show an error if msp version is bad
@@ -1091,9 +1091,9 @@ function rf2ethos.wakeupUI()
         rf2ethos.triggers.reload = false
 		
 		if rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
-            rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
+            rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer)
         elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
-            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
         else
             rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
         end
@@ -1319,7 +1319,7 @@ function rf2ethos.event(widget, category, value, x, y)
                 rf2ethos.escMode = true
                 rf2ethos.escManufacturer = nil
                 rf2ethos.escScript = nil
-                rf2ethos.ui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+                rf2ethos.escui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
                 return true
             end
         end
@@ -1327,12 +1327,12 @@ function rf2ethos.event(widget, category, value, x, y)
     -- close esc tool menu
     if rf2ethos.escMenuState == 3 then
         if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
+            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.escui.progessDisplayClose() end
             if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
             rf2ethos.escMode = true
             rf2ethos.escScript = nil
             collectgarbage()
-            rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
+            rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer)
             return true
         end
     end
@@ -1378,7 +1378,7 @@ end
 function rf2ethos.close()
     if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
     if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
-    if rf2ethos.dialogs.progressESC then rf2ethos.ui.progessDisplayESCClose() end
+    if rf2ethos.dialogs.progressESC and rf2ethos.escui then rf2ethos.escui.progessDisplayESCClose() end
     if rf2ethos.dialogs.noLink then rf2ethos.ui.progessNolinkDisplayClose() end
     invalidatePages()
     rf2ethos.resetState()

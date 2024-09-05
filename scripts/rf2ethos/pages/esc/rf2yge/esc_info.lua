@@ -66,10 +66,10 @@ return {
 
         if foundEsc == true and foundEscDone == false then
             foundEscDone = true
-            rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer)
+            rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer)
         end
 
-        if foundEsc == false and rf2ethos.dialogs.progressCounter >= 85 then rf2ethos.ui.openPageEscTool(rf2ethos.escManufacturer) end
+        if foundEsc == false and rf2ethos.dialogs.progressCounter >= 85 then rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer) end
 
     end
 }

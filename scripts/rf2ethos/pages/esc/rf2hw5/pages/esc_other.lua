@@ -76,7 +76,7 @@ return {
 
         if foundEsc == true and foundEscDone == false then
             foundEscDone = true
-            rf2ethos.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
+            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
         end
 
     end
