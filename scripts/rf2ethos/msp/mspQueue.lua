@@ -56,12 +56,16 @@ function MspQueueController:processQueue()
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
 			
+			--[[
+			do not do this.  it interupts msp processing
 			if rf2ethos.dialogs.progressDisplay == true and rf2ethos.triggers.isSaving == false and self.retryCount > 1 then
 				rf2ethos.ui.progessDisplayMessage("Loading data from flight controller...[Retry "..self.retryCount - 1 .. "]")
 			end			
 			if rf2ethos.triggers.isSaving == true and self.retryCount > 1 then
 				rf2ethos.ui.progessDisplayMessage("Saving data...[Retry "..self.retryCount - 1 .. "]")
 			end		
+			]]--
+			
 			
 			
         end
