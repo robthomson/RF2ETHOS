@@ -144,7 +144,8 @@ function ui.openMainMenu()
     rf2ethos.lastTitle = nil
     rf2ethos.lastScript = nil
     rf2ethos.lastPage = nil
-	rf2ethos.escMode = false
+
+	rf2ethos.protocol.mspIntervalOveride = nil
 
     -- reset page to nil as should be nil on this page
     -- rf2ethos.Page = nil
@@ -556,6 +557,7 @@ function ui.openPage(idx, title, script,extra1,extra2,extra3,extra5,extra5)
     rf2ethos.triggers.isReady = false
     rf2ethos.formFields = {}
     rf2ethos.formLines = {}
+	
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()

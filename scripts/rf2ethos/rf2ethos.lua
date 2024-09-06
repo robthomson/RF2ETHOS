@@ -495,6 +495,7 @@ end
 -- BACKGROUND checks
 function rf2ethos.wakeupBgChecks()
 
+
     if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
         local message = {
             command = 1, -- MIXER
@@ -546,6 +547,7 @@ end
 -- THE GUTS OF ETHOS FORMS IS HANDLED WITHIN THIS FUNCTION
 function rf2ethos.wakeupUI()
 
+	
 
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff

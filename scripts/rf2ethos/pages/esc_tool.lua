@@ -55,6 +55,7 @@ local function openPage(pidx, title, script)
 	local folder = title
 
     ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
+	
 
 	mspSignature = ESC.mspSignature
 	mspHeaderBytes = ESC.mspHeaderBytes

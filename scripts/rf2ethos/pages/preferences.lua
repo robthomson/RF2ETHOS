@@ -40,7 +40,6 @@ local function openPage(idx, title, script)
         press = function()
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
-            rf2ethos.escMode = false
 
             if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
 

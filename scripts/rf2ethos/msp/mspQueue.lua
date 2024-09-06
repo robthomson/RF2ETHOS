@@ -37,14 +37,15 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    -- rf2ethos.utils.log("retryCount: "..self.retryCount)
 
-    local lastTimeInterval
-    if rf2ethos.escMode == true then
-        lastTimeInterval = 1 -- this is particually needed for HW esc.  
-    else
-        lastTimeInterval = 0.5
-    end
+	local lastTimeInterval
+
+
+	if rf2ethos.protocol.mspIntervalOveride ~= nil then
+		lastTimeInterval = rf2ethos.protocol.mspIntervalOveride 
+	else
+		lastTimeInterval = 0.5		
+	end
 
     if not rf2ethos.runningInSimulator then
         if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
