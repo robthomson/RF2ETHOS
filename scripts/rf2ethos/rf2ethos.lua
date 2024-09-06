@@ -11,10 +11,6 @@ triggers.noRFMsg = false
 triggers.triggerSave = false
 triggers.triggerReload = false
 triggers.triggerReloadNoPrompt = false
-triggers.triggerEscReload = false
-triggers.triggerEscMainMenu = false
-triggers.triggerEscLoader = false
-triggers.escPowerCycle = false
 triggers.isReady = false
 triggers.isSaving = false
 triggers.isSavingFake = false
@@ -55,13 +51,6 @@ rf2ethos.lastIdx = nil
 rf2ethos.lastTitle = nil
 rf2ethos.lastScript = nil
 rf2ethos.gfx_buttons = {}
-rf2ethos.esc_buttons = {}
-rf2ethos.esctool_buttons = {}
-rf2ethos.escMode = false
-rf2ethos.escMenuState = 0
-rf2ethos.escManufacturer = nil
-rf2ethos.escScript = nil
-rf2ethos.escUnknown = false
 rf2ethos.uiStatus = {init = 1, mainMenu = 2, pages = 3, confirm = 4}
 rf2ethos.pageStatus = {display = 1, editing = 2, saving = 3, eepromWrite = 4, rebooting = 5}
 rf2ethos.telemetryStatus = {ok = 1, noSensor = 2, noTelemetry = 3}
@@ -80,8 +69,7 @@ rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
 rf2ethos.wakeupSchedulerBgChecks = os.clock() 
 rf2ethos.mainMenuLastSelected = 1
-rf2ethos.escMenuLastSelected = 1
-rf2ethos.escToolMenuLastSelected = 1
+
 
 rf2ethos.audio = {}
 rf2ethos.audio.playDemo = false
@@ -154,10 +142,6 @@ end
 -- RESET ALL VALUES TO DEFAULTS. FUNCTION IS CALLED WHEN THE CLOSE EVENT RUNS
 function rf2ethos.resetState()
 
-    rf2ethos.escMode = false
-    rf2ethos.triggers.escPowerCycle = false
-    rf2ethos.escManufacturer = nil
-    rf2ethos.escScript = nil
     config.useCompiler = true
     rf2ethos.config.useCompiler = true
     pageLoaded = 100
@@ -590,26 +574,6 @@ function rf2ethos.wakeupUI()
         end
     end
 
-    -- close esc progress loader.  this essentially just instant closes the
-    -- esc loader when dealing with esc that require a power cycle to connect.
-    if rf2ethos.triggers.closeProgressLoaderESC == true then rf2ethos.ui.progessDisplayESCClose() end
-
-    -- make the ui go to the main page of the esc in the event that theMsg
-    -- trigger is received.
-    if rf2ethos.triggers.triggerEscMainMenu == true then
-        rf2ethos.triggers.triggerEscMainMenu = false
-        rf2ethos.escMode = false
-        rf2ethos.triggers.escPowerCycle = false
-        rf2ethos.escNotReadyCount = 0
-        rf2ethos.escUnknown = false
-        rf2ethos.lastIdx = nil
-        rf2ethos.lastPage = nil
-        invalidatePages()
-
-        rf2ethos.escui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-
-    end
-
     -- close save loader.  this essentially just accelerates 
     -- the close of the progress bar once the data is loaded.
     -- so if not yet at 100%.. it says.. move there quickly
@@ -707,7 +671,7 @@ function rf2ethos.wakeupUI()
     -- if we do not have a telemetry link then we need to show a connecting dialog box.
     -- this runs at all times except when we are displaying the esc search box.  we then
     -- supress this one and display a different one as timeouts and process is different
-    if rf2ethos.triggers.telemetryState ~= 1 and rf2ethos.dialogs.progressDisplayEsc ~= true then
+    if rf2ethos.triggers.telemetryState ~= 1 then
 
         if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
         if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
@@ -781,85 +745,21 @@ function rf2ethos.wakeupUI()
             rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
         end
 
-        if rf2ethos.triggers.escPowerCycle == true then
-            if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout) + 30) then
-                if rf2ethos.dialogs.progress ~= nil then
-                    rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
-                    rf2ethos.ui.progessDisplayCloseAllowed(true)
-                end
+		if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
 
-                -- switch back to original page values
-                rf2ethos.Page = rf2ethos.PageTmp
-                rf2ethos.PageTmp = {}
-                rf2ethos.dialogs.progressCounter = 0
-                rf2ethos.dialogs.progressDisplay = false
-            end
-        else
-            if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
+			rf2ethos.audio.playTimeout = true
 
-                rf2ethos.audio.playTimeout = true
+			if rf2ethos.dialogs.progress ~= nil then
+				rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
+				rf2ethos.ui.progessDisplayCloseAllowed(true)
+			end
 
-                if rf2ethos.dialogs.progress ~= nil then
-                    rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
-                    rf2ethos.ui.progessDisplayCloseAllowed(true)
-                end
-
-                -- switch back to original page values
-                rf2ethos.Page = rf2ethos.PageTmp
-                rf2ethos.PageTmp = {}
-                rf2ethos.dialogs.progressCounter = 0
-                rf2ethos.dialogs.progressDisplay = false
-            end
-        end
-    end
-
-    -- a progress loader that is used when searching for a speed controller
-    -- this functionality is triggered only when an esc requires a power cycle to initialise
-    if rf2ethos.triggers.escPowerCycle == true and rf2ethos.escUnknown == true then
-
-        if rf2ethos.dialogs.progressDisplayEsc ~= true then
-
-            rf2ethos.escui.progessDisplayESC()
-
-            rf2ethos.audio.playEscPowerCycle = true
-
-        else
-
-            if rf2ethos.mspQueue:isProcessed() then requestPage() end
-
-            -- we rate limit the progress to keep things low cpu	
-            if (os.clock() - rf2ethos.dialogs.progressESCRateLimit) >= rf2ethos.dialogs.progressESCRate then
-
-                rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. rf2ethos.escManufacturer .. "/esc_info.lua"))()
-                collectgarbage()
-
-                rf2ethos.dialogs.progressCounterESC = rf2ethos.dialogs.progressCounterESC + 5
-                rf2ethos.dialogs.progressESCRateLimit = os.clock()
-                rf2ethos.escui.progessDisplayESCValue(rf2ethos.dialogs.progressCounterESC)
-            end
-
-            if rf2ethos.Page.escinfo then
-                local model = rf2ethos.Page.escinfo[1].t
-                if model ~= "" then rf2ethos.triggers.closeProgressLoaderESC = true end
-            end
-
-            if rf2ethos.dialogs.progressCounterESC >= 100 then
-                rf2ethos.dialogs.progressCounterESC = 0
-                if rf2ethos.dialogs.progressESC ~= nil then
-
-                    rf2ethos.audio.playTimeout = true
-
-                    if rf2ethos.PageTmp ~= nil then rf2ethos.Page = rf2ethos.PageTmp end
-
-                    rf2ethos.escui.progessDisplayESCClose()
-                    rf2ethos.dialogs.progressDisplayEsc = false
-                    rf2ethos.triggers.escPowerCycle = false
-                end
-                rf2ethos.triggers.triggerEscLoader = false
-
-            end
-
-        end
+			-- switch back to original page values
+			rf2ethos.Page = rf2ethos.PageTmp
+			rf2ethos.PageTmp = {}
+			rf2ethos.dialogs.progressCounter = 0
+			rf2ethos.dialogs.progressDisplay = false
+		end
 
     end
 
@@ -896,15 +796,9 @@ function rf2ethos.wakeupUI()
                 end
             }
         }
-        local theTitle
-        local theMsg
-        if rf2ethos.escMode == true then
-            theTitle = "Save settings"
-            theMsg = "Save current page to the speed controller"
-        else
-            theTitle = "Save settings"
-            theMsg = "Save current page to flight controller"
-        end
+        local theTitle = "Save settings"
+        local theMsg = "Save current page to flight controller"
+
         form.openDialog({
             width = nil,
             title = theTitle,
@@ -958,15 +852,8 @@ function rf2ethos.wakeupUI()
         rf2ethos.triggers.triggerReload = false
     end
 
-    -- and esc reload was triggered
-    if rf2ethos.triggers.triggerEscReload == true then
-        rf2ethos.triggers.triggerEscReload = false
-        rf2ethos.ui.progessDisplay()
-        rf2ethos.escui.openESCFormInit(rf2ethos.escManufacturer, rf2ethos.escScript)
-    end
-
     -- show an error if msp version is bad
-    if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.escMode == false and rf2ethos.dialogs.nolinkDisplay == false then
+    if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.dialogs.nolinkDisplay == false then
 	
 		local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
         if not rf2ethos.utils.stringInArray(rf2ethos.config.supportedMspApiVersion, apiVersionAsString) then
@@ -1090,13 +977,8 @@ function rf2ethos.wakeupUI()
         rf2ethos.ui.progessDisplay()
         rf2ethos.triggers.reload = false
 		
-		if rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript == nil then
-            rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer)
-        elseif rf2ethos.escMode == true and rf2ethos.escManufacturer ~= nil and rf2ethos.escScript ~= nil then
-            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-        else
-            rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-        end
+		rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+
         rf2ethos.profileSwitchCheck()
         rf2ethos.rateSwitchCheck()
     end
@@ -1293,49 +1175,6 @@ function rf2ethos.event(widget, category, value, x, y)
         return 0
     end
 
-    -- close esc main type selection menu
-    if rf2ethos.escMenuState == 1 then
-        if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
-            rf2ethos.escMode = false
-            rf2ethos.escManufacturer = nil
-            rf2ethos.escScript = nil
-            rf2ethos.dialogs.progressDisplayEsc = false
-            if rf2ethos.Page then if rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end end
-            rf2ethos.ui.openMainMenu()
-            return true
-        end
-    end
-    -- close esc pages menu
-    if rf2ethos.escMenuState == 2 then
-        if category == 5 or value == 35 then
-            if rf2ethos.triggers.escPowerCycle == true then
-                rf2ethos.dialogs.progressCounterESC = 99
-                return true
-            else
-                if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
-                if rf2ethos.dialogs.progressDisplay == true then rf2ethos.ui.progessDisplayClose() end
-                rf2ethos.escMode = true
-                rf2ethos.escManufacturer = nil
-                rf2ethos.escScript = nil
-                rf2ethos.escui.openPageEsc(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
-                return true
-            end
-        end
-    end
-    -- close esc tool menu
-    if rf2ethos.escMenuState == 3 then
-        if category == 5 or value == 35 then
-            if rf2ethos.dialogs.progressDisplay == true then rf2ethos.escui.progessDisplayClose() end
-            if rf2ethos.dialogs.saveDisplay == true then rf2ethos.ui.progessDisplaySaveClose() end
-            rf2ethos.escMode = true
-            rf2ethos.escScript = nil
-            collectgarbage()
-            rf2ethos.escui.openPageEscTool(rf2ethos.escManufacturer)
-            return true
-        end
-    end
 
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
 
@@ -1378,7 +1217,6 @@ end
 function rf2ethos.close()
     if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
     if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
-    if rf2ethos.dialogs.progressESC and rf2ethos.escui then rf2ethos.escui.progessDisplayESCClose() end
     if rf2ethos.dialogs.noLink then rf2ethos.ui.progessNolinkDisplayClose() end
     invalidatePages()
     rf2ethos.resetState()
