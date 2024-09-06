@@ -12,6 +12,8 @@ function ui.progessDisplay(title, message)
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog(title, message)
+	rf2ethos.dialogs.progressDisplay = true	
+	rf2ethos.dialogs.progressCounter = 0
     if rf2ethos.dialogs.progress ~= nil then
         rf2ethos.dialogs.progress:value(0)
         rf2ethos.dialogs.progress:closeAllowed(false)
@@ -147,12 +149,10 @@ function ui.openMainMenu()
 
 	rf2ethos.protocol.mspIntervalOveride = nil
 
-    -- reset page to nil as should be nil on this page
-    -- rf2ethos.Page = nil
 
     rf2ethos.triggers.isReady = false
     rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
-    rf2ethos.triggers.escPowerCycle = false
+    rf2ethos.triggers.disableRssiTimeout = false
 
 
     -- size of buttons

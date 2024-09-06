@@ -24,6 +24,7 @@ triggers.badMspVersion = false
 triggers.badMspVersionDisplay = false
 triggers.closeProgressLoader = false
 triggers.mspBusy = false
+triggers.disableRssiTimeout = false
 
 rf2ethos = {}
 rf2ethos.compile = compile
@@ -563,11 +564,11 @@ function rf2ethos.wakeupUI()
     -- so if not yet at 100%.. it says.. move there quickly
     if rf2ethos.triggers.closeProgressLoader == true then
         if rf2ethos.dialogs.progressCounter <= 100 then
-            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 20
+            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
             if rf2ethos.dialogs.progress ~= nil then rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter) end
         end
 
-        if rf2ethos.dialogs.progressCounter >= 120 then
+        if rf2ethos.dialogs.progressCounter >= 101 then
             rf2ethos.dialogs.progressWatchDog = nil
             rf2ethos.dialogs.progressDisplay = false
             if rf2ethos.dialogs.progress ~= nil then rf2ethos.ui.progessDisplayClose() end
@@ -673,7 +674,7 @@ function rf2ethos.wakeupUI()
     -- if we do not have a telemetry link then we need to show a connecting dialog box.
     -- this runs at all times except when we are displaying the esc search box.  we then
     -- supress this one and display a different one as timeouts and process is different
-    if rf2ethos.triggers.telemetryState ~= 1 then
+    if rf2ethos.triggers.telemetryState ~= 1 and rf2ethos.triggers.disableRssiTimeout == false then
 
         if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
         if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
@@ -689,7 +690,7 @@ function rf2ethos.wakeupUI()
     -- to be established - and associated msp version checks to finish. all the while incremeting the loader
     -- until we time out.
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
-    if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.dialogs.progressDisplayEsc ~= true then
+    if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.triggers.disableRssiTimeout == false then
         if rf2ethos.triggers.telemetryState == 1 then
             rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
         else
@@ -737,15 +738,13 @@ function rf2ethos.wakeupUI()
     -- a watchdog to enable the close button on a progress box dialog when loading data from the fbl
     if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progressWatchDog ~= nil then
 
-        if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam end
+        --if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 
+		--	then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
+		--end
 
-        if rf2ethos.dialogs.progressCounter <= 40 then
-            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 10
-            rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
-        else
-            rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
-            rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
-        end
+        rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
+        rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
+
 
 		if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
 
@@ -1090,7 +1089,9 @@ function rf2ethos.create()
 
     -- load msp timeout
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then rf2ethos.config.watchdogParam = 15 end
+    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then 
+		rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
+	end
 
     rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
     rf2ethos.protocol = assert(compile.loadScript(rf2ethos.config.toolDir .. "protocols.lua"))()

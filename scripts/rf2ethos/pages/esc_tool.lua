@@ -8,15 +8,22 @@ local simulatorResponse
 local escDetails = {}
 local foundESC = false
 local foundESCupdateTag = false
-
+local showPowerCycleLoader = false
+local showPowerCycleLoaderInProgress = false
 local ESC
+local powercycleLoader
+local powercycleLoaderCounter = 0
+local powercycleLoaderRateLimit = 2
+local showPowerCycleLoaderFinished = false
 
 local modelField
 local versionField
 local firmwareField
 
 local findTimeoutClock = os.clock()
-local findTimeout = 5
+local findTimeout = math.floor(rf2ethos.protocol.pageReqTimeout * 0.5)
+
+
 
 local modelLine
 local modelText
@@ -103,6 +110,10 @@ local function openPage(pidx, title, script)
         press = function()
 			--rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
 			rf2ethos.Page = nil
+			local foundESC = false
+			local foundESCupdateTag = false
+			local showPowerCycleLoader = false
+			local showPowerCycleLoaderInProgress = false
 			rf2ethos.triggers.triggerReload = true
         end
     })
@@ -221,6 +232,7 @@ local function wakeup()
 	-- enable the form
 	if foundESC == true and foundESCupdateTag == false then
 		foundESCupdateTag = true
+		
 		if escDetails.model ~= nil and escDetails.model ~= nil and  escDetails.firmware ~= nil then
 			local text = escDetails.model .. " " .. escDetails.version .. " " .. escDetails.firmware
 			rf2ethos.escHeaderLineText = text
@@ -231,15 +243,75 @@ local function wakeup()
 			  rf2ethos.formFields[i]:enable(true)
 		end
 		
+		if ESC.powerCycle == true and showPowerCycleLoader == true then
+			powercycleLoader:close()
+			powercycleLoaderCounter = 0
+			showPowerCycleLoaderInProgress = false
+			showPowerCycleLoader = false
+			showPowerCycleLoaderFinished = true
+			rf2ethos.triggers.isReady = true			
+		end
+		
 		rf2ethos.triggers.closeProgressLoader = true
 		
 	end
 	
-	if foundESCupdateTag == false and (findTimeoutClock <= os.clock() - findTimeout) then
+	if showPowerCycleLoaderFinished == false and foundESCupdateTag == false and showPowerCycleLoader == false and ((findTimeoutClock <= os.clock() - findTimeout) or rf2ethos.dialogs.progressCounter >= 101)then
 		rf2ethos.ui.progessDisplayClose()
+		rf2ethos.dialogs.progressDisplay = false
 		rf2ethos.triggers.isReady = true
-		modelText = form.addStaticText(modelLine, modelTextPos, "UNKNOWN")
+		
+		if ESC.powerCycle ~= true  then
+			modelText = form.addStaticText(modelLine, modelTextPos, "UNKNOWN")
+		end
+		
+		if ESC.powerCycle == true then
+			showPowerCycleLoader = true
+		end
+		
 	end
+	
+	if showPowerCycleLoaderInProgress == true then
+		
+
+
+			local now = os.clock()
+			if (now - powercycleLoaderRateLimit) >= 2 then
+			
+				getESCDetails()
+			
+				powercycleLoaderRateLimit = now
+				powercycleLoaderCounter = powercycleLoaderCounter + 10
+				powercycleLoader:value(powercycleLoaderCounter)
+				
+				if powercycleLoaderCounter >= 100 then
+						powercycleLoader:close()
+						modelText = form.addStaticText(modelLine, modelTextPos, "UNKNOWN")
+						showPowerCycleLoaderInProgress = false
+						showPowerCycleLoader = false
+						rf2ethos.audio.playTimeout = true
+						showPowerCycleLoaderFinished = true
+						rf2ethos.triggers.isReady = false
+				end
+				
+			end		
+		
+		
+	end	
+	
+	if showPowerCycleLoader == true then
+		if showPowerCycleLoaderInProgress == false then
+			showPowerCycleLoaderInProgress = true
+			rf2ethos.audio.playEscPowerCycle = true
+			powercycleLoader  = form.openProgressDialog("Searching...", "Please power cycle the speed controller...")
+			powercycleLoader:value(0)
+			powercycleLoader:closeAllowed(false)
+		end	
+	end
+	
+
+	
+
 
 end
 
