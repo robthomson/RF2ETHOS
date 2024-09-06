@@ -1,6 +1,12 @@
 local labels = {}
 local fields = {}
-local escinfo = {}
+
+local folder = "yge"
+local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
+local mspHeaderBytes = ESC.mspHeaderBytes
+local mspSignature = ESC.mspSignature
+
+
 
 local offOn = {"Off", "On"}
 
@@ -16,9 +22,6 @@ local motorTimingFromUI = {0, 17, 18, 19, 1, 2, 3, 4, 5, 6}
 
 local freewheel = {"Off", "Auto", "*unused*", "Always On"}
 
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "ESC"}
 
@@ -32,20 +35,30 @@ fields[#fields + 1] = {t = "Motor Timing", min = 0, max = #motorTiming, tableIdx
 fields[#fields + 1] = {t = "Active Freewheel", min = 0, max = #freewheel, tableIdxInc = -1, vals = {mspHeaderBytes + 21, mspHeaderBytes + 22}, table = freewheel}
 fields[#fields + 1] = {t = "F3C Autorotation", min = 0, max = 1, tableIdxInc = -1, vals = {mspHeaderBytes + 53}, table = offOn}
 
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
-
-local function bitExtract(value, field)
-    return (value >> field) & 1
-end
-
-local function bitReplace(value, replaceValue, field)
-    return value & ~(1 << field) | ((replaceValue & 1) << field)
-end
-
 local foundEsc = false
 local foundEscDone = false
+
+function postLoad()
+	rf2ethos.triggers.isReady = true
+end
+
+local function onNavMenu(self)
+	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+end
+
+local function event(widget, category, value, x, y)
+	
+	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+	 if category == 5 or value == 35 then
+		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+		return true
+	 end
+	 
+	 return false
+end
+
+
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -62,35 +75,10 @@ return {
     },
     svTiming = 0,
     svFlags = 0,
-    postLoad = function(self)
-        local model = getEscTypeLabel(self.values)
-        local version = getUInt(self, {29, 30, 31, 32})
-        local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
-
-        -- rf2ethos.triggers.isReady = true
-    end,
-    postRead = function(self)
-        if self.values[1] ~= mspSignature then
-            -- self.values = nil
-            self.escinfo[1].t = ""
-            self.escinfo[2].t = ""
-            self.escinfo[2].t = ""
-            -- rf2ethos.triggers.isReady = true
-            foundEsc = false
-            return
-        else
-            foundEsc = true
-        end
-    end,
-    wakeup = function(self)
-
-        if foundEsc == true and foundEscDone == false then
-            foundEscDone = true
-            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-        end
-
-    end
+	postLoad = postLoad,
+	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+	onNavMenu = onNavMenu,
+	event = event,
+	pageTitle = "Esc / Yge / Advanced",
+	headerLine = rf2ethos.escHeaderLineText	
 }

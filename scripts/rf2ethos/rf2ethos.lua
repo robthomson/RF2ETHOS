@@ -68,7 +68,7 @@ rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
 rf2ethos.wakeupSchedulerBgChecks = os.clock() 
-rf2ethos.mainMenuLastSelected = 1
+rf2ethos.menuLastSelected = {}
 
 
 rf2ethos.audio = {}
@@ -1175,6 +1175,13 @@ function rf2ethos.event(widget, category, value, x, y)
         return 0
     end
 
+    if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
+        if rf2ethos.Page.event then
+            -- run the pages wakeup function if it exists
+            return rf2ethos.Page.event(widget, category, value, x, y)
+        end
+    end
+	
 
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
 

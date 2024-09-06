@@ -1,6 +1,11 @@
 local labels = {}
 local fields = {}
-local escinfo = {}
+
+local folder = "yge"
+local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
+local mspHeaderBytes = ESC.mspHeaderBytes
+local mspSignature = ESC.mspSignature
+
 
 -- update pole count label text
 local function updatePoles(self)
@@ -20,9 +25,7 @@ end
 
 local foundEsc = false
 local foundEscDone = false
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
+
 
 labels[#labels + 1] = {t = "ESC"}
 
@@ -38,6 +41,26 @@ fields[#fields + 1] = {t = "Pinion Teeth", min = 1, max = 255, vals = {mspHeader
 fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {mspHeaderBytes + 35, mspHeaderBytes + 36}}
 fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes + 37, mspHeaderBytes + 38}}
 
+function postLoad()
+	rf2ethos.triggers.isReady = true
+end
+
+local function onNavMenu(self)
+	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+end
+
+local function event(widget, category, value, x, y)
+	
+	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+	 if category == 5 or value == 35 then
+		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+		return true
+	 end
+	 
+	 return false
+end
+
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -52,36 +75,11 @@ return {
         165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
         19, 2, 0, 20, 0, 22, 0, 0, 0
     },
-    updatePoles = updatePoles,
-    updateRatio = updateRatio,
-    postRead = function(self)
-        if self.values[1] ~= mspSignature then
-            -- self.values = nil
-            self.escinfo[1].t = ""
-            self.escinfo[2].t = ""
-            self.escinfo[2].t = ""
-            -- rf2ethos.triggers.isReady = true
-            foundEsc = false
-            return
-        else
-            foundEsc = true
-        end
-    end,
-    postLoad = function(self)
-        local model = getEscTypeLabel(self.values)
-        local version = getUInt(self, {29, 30, 31, 32})
-        local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
-        -- rf2ethos.triggers.isReady = true
-    end,
-    wakeup = function(self)
-
-        if foundEsc == true and foundEscDone == false then
-            foundEscDone = true
-            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-        end
-
-    end
+	postLoad = postLoad,
+	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+	onNavMenu = onNavMenu,
+	event = event,
+	pageTitle = "Esc / Yge / Other",
+	headerLine = rf2ethos.escHeaderLineText	
+  
 }

@@ -24,6 +24,8 @@ return {
     fields = fields,					-- FIELDS USED BY ETHOS FORMS TO RENDER FIELDS FOR DATA CAPTURE (see more below)
     refreshswitch = false,				-- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
     simulatorResponse = {4,10},			-- A VALID BYTE STRING USED WITHIN THE SIMULATOR
+	pageTitle = "string"				-- USE THIS PAGE TITLE INSTEAD OF AUTO DETECTED
+	headerLine = "string"				-- AN OPTIONAL LINE BELOW THE NAV THAT HOLDS TEXT
     postRead = postRead, 				-- A FUNCTON RUN WHEN MSP READ COMPLETES
     postLoad = postLoad,   				-- A FUNCTION RUN WHEN MSP LOAD HAS COMPLETED
     preSave = preSave,					-- A FUNCTION RUN ON THE PAGES DATA JUST PRIOR TO DOING AN MSP WRITE
@@ -39,6 +41,7 @@ return {
 	openPage = openPage					-- alternative function to render page. excected format of:  openPage(idx, title, script)
 										   it will need to end with  rf2ethos.triggers.closeProgressLoader = true or the
 										   progress dialog will not close.  or use postLoad to trigger this.
+										
 }
 
 == 

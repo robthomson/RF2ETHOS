@@ -1,6 +1,11 @@
 local labels = {}
 local fields = {}
-local escinfo = {}
+
+local folder = "yge"
+local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
+local mspHeaderBytes = ESC.mspHeaderBytes
+local mspSignature = ESC.mspSignature
+
 
 local escMode = {"Free (Attention!)", "Heli Ext Governor", "Heli Governor", "Heli Governor Store", "Aero Glider", "Aero Motor", "Aero F3A"}
 
@@ -10,9 +15,6 @@ local cuttoff = {"Off", "Slow Down", "Cutoff"}
 
 local cuttoffVoltage = {"2.9 V", "3.0 V", "3.1 V", "3.2 V", "3.3 V", "3.4 V"}
 
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "ESC", label = "esc1", inline_size = 40.6}
 fields[#fields + 1] = {t = "ESC Mode", inline = 1, label = "esc1", min = 1, max = #escMode, vals = {mspHeaderBytes + 3, mspHeaderBytes + 4}, tableIdxInc = -1, table = escMode}
@@ -42,13 +44,26 @@ fields[#fields + 1] = {
 -- labels[#labels + 1] = {t = "", label = "limits3", inline_size = 40.6}
 -- fields[#fields + 1] = {t = "Current Limit", units = "A", inline = 1, label = "limits3", min = 1, max = 65500, decimals = 2, vals = {mspHeaderBytes+55, mspHeaderBytes+56}}
 
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
-escinfo[#escinfo + 1] = {t = ""}
-
-function bitReplace(value, replaceValue, field)
-    return value & ~(1 << field) | ((replaceValue & 1) << field)
+function postLoad()
+	rf2ethos.triggers.isReady = true
 end
+
+local function onNavMenu(self)
+	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+end
+
+local function event(widget, category, value, x, y)
+	
+	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+	 if category == 5 or value == 35 then
+		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+		return true
+	 end
+	 
+	 return false
+end
+
 
 local foundEsc = false
 local foundEscDone = false
@@ -67,56 +82,11 @@ return {
         19, 2, 0, 20, 0, 22, 0, 0, 0
     },
     svFlags = 0,
-
-    postLoad = function(self)
-        local model = getEscTypeLabel(self.values)
-        local version = getUInt(self, {29, 30, 31, 32})
-        local firmware = string.format("%.5f", getUInt(self, {25, 26, 27, 28}) / 100000)
-        self.escinfo[1].t = model
-        self.escinfo[2].t = version
-        self.escinfo[3].t = firmware
-
-        -- direction
-        -- save flags, changed bit will be applied in pre-save
-        local f = self.fields[2]
-        self.svFlags = getPageValue(self, f.vals[1])
-        f.value = (self.svFlags & (1 << escFlags.spinDirection)) ~= 0 and 1 or 0
-
-        -- set BEC voltage max (8.4 or 12.3)
-        f = self.fields[3]
-        f.max = (self.svFlags & (1 << escFlags.bec12v)) == 0 and 84 or 123
-
-        -- rf2ethos.triggers.isReady = true
-    end,
-    postRead = function(self)
-        if self.values[1] ~= mspSignature then
-            -- self.values = nil
-            self.escinfo[1].t = ""
-            self.escinfo[2].t = ""
-            self.escinfo[2].t = ""
-            -- rf2ethos.triggers.isReady = true
-            foundEsc = false
-            return
-        else
-            foundEsc = true
-        end
-    end,
-    preSave = function(self)
-        -- direction
-        -- apply bits to saved flags
-        -- local f = self.fields[2]
-        -- self.svFlags = bitReplace(self.svFlags, f.value, escFlags.spinDirection)
-        -- setPageValue(self, f.vals[1], self.svFlags)
-        return self.values
-    end,
-    wakeup = function(self)
-
-        if foundEsc == true and foundEscDone == false then
-
-            foundEscDone = true
-            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-        end
-
-    end
+	postLoad = postLoad,
+	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+	onNavMenu = onNavMenu,
+	event = event,
+	pageTitle = "Esc / Yge / Basic",
+	headerLine = rf2ethos.escHeaderLineText	
 }
 

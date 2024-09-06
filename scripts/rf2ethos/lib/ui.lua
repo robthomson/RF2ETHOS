@@ -134,8 +134,6 @@ end
 
 function ui.openMainMenu()
 
-	-- clear out this lib if it exists to save ram
-	rf2ethos.escui = nil
 
     local MainMenu = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages.lua"))()
 
@@ -146,6 +144,7 @@ function ui.openMainMenu()
     rf2ethos.lastTitle = nil
     rf2ethos.lastScript = nil
     rf2ethos.lastPage = nil
+	rf2ethos.escMode = false
 
     -- reset page to nil as should be nil on this page
     -- rf2ethos.Page = nil
@@ -153,7 +152,7 @@ function ui.openMainMenu()
     rf2ethos.triggers.isReady = false
     rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
     rf2ethos.triggers.escPowerCycle = false
-    rf2ethos.escMenuState = 0
+
 
     -- size of buttons
     rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
@@ -196,6 +195,13 @@ function ui.openMainMenu()
     local panel
 
     form.clear()
+	
+	if rf2ethos.gfx_buttons["mainmenu"] == nil then
+		rf2ethos.gfx_buttons["mainmenu"] = {}
+	end
+	if rf2ethos.menuLastSelected["mainmenu"] == nil then	
+		rf2ethos.menuLastSelected["mainmenu"] = 1
+	end	
 
     for idx, value in ipairs(MainMenu.sections) do
 
@@ -216,25 +222,25 @@ function ui.openMainMenu()
                 if lc >= 0 then x = (buttonW + padding) * lc end
 
                 if rf2ethos.config.iconsizeParam ~= 0 then
-                    if rf2ethos.gfx_buttons[pidx] == nil then rf2ethos.gfx_buttons[pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/menu/" .. pvalue.image) end
+                    if rf2ethos.gfx_buttons["mainmenu"][pidx] == nil then rf2ethos.gfx_buttons["mainmenu"][pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/menu/" .. pvalue.image) end
                 else
-                    rf2ethos.gfx_buttons[pidx] = nil
+                    rf2ethos.gfx_buttons["mainmenu"][pidx] = nil
                 end
 
                 rf2ethos.formFields[pidx] = form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
                     text = pvalue.title,
-                    icon = rf2ethos.gfx_buttons[pidx],
+                    icon = rf2ethos.gfx_buttons["mainmenu"][pidx],
                     options = FONT_S,
                     paint = function()
                     end,
                     press = function()
-                        rf2ethos.mainMenuLastSelected = pidx
+                        rf2ethos.menuLastSelected["mainmenu"] = pidx
                         rf2ethos.ui.progessDisplay()
                         rf2ethos.ui.openPage(pidx, pvalue.title, pvalue.script)
                     end
                 })
 
-                if rf2ethos.mainMenuLastSelected == pidx then rf2ethos.formFields[pidx]:focus() end
+                if rf2ethos.menuLastSelected["mainmenu"] == pidx then rf2ethos.formFields[pidx]:focus() end
 
                 lc = lc + 1
 
@@ -544,7 +550,7 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w - 5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPage(idx, title, script)
+function ui.openPage(idx, title, script,extra1,extra2,extra3,extra5,extra5)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
@@ -555,7 +561,7 @@ function ui.openPage(idx, title, script)
     collectgarbage()
 	
 	if rf2ethos.Page.openPage then
-		rf2ethos.Page.openPage(idx,title,script)	
+		rf2ethos.Page.openPage(idx,title,script,extra1,extra2,extra3,extra5,extra5)	
 	else
 
 		rf2ethos.lastIdx = idx
@@ -573,7 +579,16 @@ function ui.openPage(idx, title, script)
 
 		rf2ethos.lastPage = script
 
-		rf2ethos.ui.fieldHeader(title)
+		if rf2ethos.Page.pageTitle ~= nil then
+			rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
+		else
+			rf2ethos.ui.fieldHeader(title)
+		end
+
+		if rf2ethos.Page.headerLine ~= nil then
+			local headerLine = form.addLine("")
+			local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
+		end
 
 		formLineCnt = 0
 
