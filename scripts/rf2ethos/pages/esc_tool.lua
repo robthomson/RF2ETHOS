@@ -48,8 +48,12 @@ end
 
 local function openPage(pidx, title, script)
 
-
+	rf2ethos.lastIdx = pidx
+	rf2ethos.lastTitle = title
+	rf2ethos.lastScript = script
+		
 	local folder = title
+
     ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
 
 	mspSignature = ESC.mspSignature
@@ -76,7 +80,7 @@ local function openPage(pidx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - buttonW - 5, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -84,9 +88,25 @@ local function openPage(pidx, title, script)
         end,
         press = function()
 			rf2ethos.ui.openPage(pidx, "Esc", "esc.lua")
+			
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()
+
+    rf2ethos.formNavigationFields['refresh'] = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+        text = "RELOAD",
+        icon = nil,
+        options = FONT_S,
+        paint = function()
+        end,
+        press = function()
+			--rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+			rf2ethos.Page = nil
+			rf2ethos.triggers.triggerReload = true
+        end
+    })
+    rf2ethos.formNavigationFields['menu']:focus()
+
 
     ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/pages.lua"))()
 
