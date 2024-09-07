@@ -294,6 +294,7 @@ local function event(widget, category, value, x, y)
     -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if category == 5 or value == 35 then
+        if powercycleLoader then powercycleLoader:close() end
         rf2ethos.ui.openPage(pidx, "Esc", "esc.lua")
         return true
     end

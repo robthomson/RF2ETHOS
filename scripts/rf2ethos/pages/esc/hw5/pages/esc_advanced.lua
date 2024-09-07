@@ -26,6 +26,7 @@ function postLoad()
 end
 
 local function onNavMenu(self)
+    rf2ethos.triggers.escToolEnableButtons = true
     rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
