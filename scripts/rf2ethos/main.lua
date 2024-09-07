@@ -14,6 +14,7 @@ config.ethosVersionString = "ETHOS < V1.5.14"        -- string to print if ethos
 config.defaultRateTable = 4 -- ACTUAL                -- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
 config.supportedMspApiVersion = {"12.06", "12.07"}   -- supported msp versions
 config.simulateOnTransmitter = false                 -- make the transmitter run as if its running in the SIM (no fbl required)
+config.skipRssiSensorCheck = false                   -- skip checking for a valid signal when loading connecting to the fbl
 -- LuaFormatter on
 
 local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")

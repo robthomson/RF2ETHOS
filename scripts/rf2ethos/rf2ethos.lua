@@ -133,7 +133,7 @@ end
 
 -- RETURN THE CURRENT RSSI SENSOR VALUE 
 function rf2ethos.getRSSI()
-    if rf2ethos.runningInSimulator == true then return 100 end
+    if rf2ethos.runningInSimulator == true or rf2ethos.config.skipRssiSensorCheck == true then return 100 end
 
     if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() then return rf2ethos.rssiSensor:value() end
     return 0
