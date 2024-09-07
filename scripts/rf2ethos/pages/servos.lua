@@ -10,13 +10,23 @@ local lastSetServoCenter
 local lastServoChangeTime = os.clock()
 
 if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
-	servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
+    servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT"}
 else
-	servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
+    servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
 end
 
-
-fields[#fields + 1] = {t = "Servo", min = 0, max = 100,value=0, tableIdxInc=-1 ,vals = {1},table=servoTable,onChange = function(self,value) self.servoChanged(rf2ethos.Page, value) end}
+fields[#fields + 1] = {
+    t = "Servo",
+    min = 0,
+    max = 100,
+    value = 0,
+    tableIdxInc = -1,
+    vals = {1},
+    table = servoTable,
+    onChange = function(self, value)
+        self.servoChanged(rf2ethos.Page, value)
+    end
+}
 -- fields[#fields + 1] = {t = "Center",help = "servoMid",min = 50,max = 2250,default = 1500,vals = {2, 3},onFocus = function(self) self.servoCenterFocus(self)end}
 fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}, disable = false}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
@@ -46,7 +56,7 @@ end
 
 local function postLoad(self)
 
-    --if rf2ethos.config.ethosRunningVersion >= 1415 then rf2ethos.Page.servoCenterFocusAllOff(self) end
+    -- if rf2ethos.config.ethosRunningVersion >= 1415 then rf2ethos.Page.servoCenterFocusAllOff(self) end
 
     currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
     lastSetServoCenter = currentServoCenter

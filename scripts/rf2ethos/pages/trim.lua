@@ -128,8 +128,6 @@ local function wakeup(self)
             end
         end
 
-
-
         if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
             currentIdleThrottleTrim = rf2ethos.Page.fields[4].value
             local now = os.clock()
@@ -145,7 +143,6 @@ local function wakeup(self)
 
         if rf2ethos.tailMode == 0 then
             currentYawTrim = rf2ethos.Page.fields[4].value
-			print( currentYawTrim)
             local now = os.clock()
             local settleTime = 0.85
             if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then

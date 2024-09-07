@@ -2,21 +2,21 @@
 local config = {}
 
 -- LuaFormatter off
-config.toolName = "RF2ETHOS" 								-- name of the tool
-config.toolDir = "/scripts/rf2ethos/" 						-- base path the script is installed into
-config.Version = "2.1.0"									-- version number of this software release
-config.logEnable = false 									-- will log to: /scripts/rf2ethos/rf2ethos.log
-config.logEnableScreen = false 							    -- if config.logEnable is true then also print to screen
-config.mspTxRxDebug = false									-- simple print of full msp payload that is sent and received
-config.reloadOnSave = false 								-- trigger a reload on save
-config.ethosVersion = 1514 								    -- min version of ethos supported by this script
-config.ethosVersionString = "ETHOS < V1.5.14" 				-- string to print if ethos version error occurs
-config.defaultRateTable = 4 -- ACTUAL						-- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
-config.supportedMspApiVersion = {"12.06", "12.07"} 		    -- supported msp versions
-config.simulateOnTransmitter = false 						-- make the transmitter run as if its running in the SIM (no fbl required)
+config.toolName = "RF2ETHOS"                         -- name of the tool
+config.toolDir = "/scripts/rf2ethos/"                -- base path the script is installed into
+config.Version = "2.1.0"                             -- version number of this software release
+config.logEnable = false                             -- will log to: /scripts/rf2ethos/rf2ethos.log
+config.logEnableScreen = false                       -- if config.logEnable is true then also print to screen
+config.mspTxRxDebug = false                          -- simple print of full msp payload that is sent and received
+config.reloadOnSave = false                          -- trigger a reload on save
+config.ethosVersion = 1514                           -- min version of ethos supported by this script
+config.ethosVersionString = "ETHOS < V1.5.14"        -- string to print if ethos version error occurs
+config.defaultRateTable = 4 -- ACTUAL                -- default rate table - typically this will be ACTUAL, but can be changed if user always uses a different one
+config.supportedMspApiVersion = {"12.06", "12.07"}   -- supported msp versions
+config.simulateOnTransmitter = false                 -- make the transmitter run as if its running in the SIM (no fbl required)
 -- LuaFormatter on
 
-local icon = lcd.loadMask(config.toolDir .. "RF.png")
+local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")
 
 compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)
 

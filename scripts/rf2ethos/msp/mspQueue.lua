@@ -37,11 +37,11 @@ function MspQueueController:processQueue()
     end
 
     local cmd, buf, err
-    -- rf2ethos.utils.log("retryCount: "..self.retryCount)
 
     local lastTimeInterval
-    if rf2ethos.escMode == true then
-        lastTimeInterval = 1 -- this is particually needed for HW esc.  
+
+    if rf2ethos.protocol.mspIntervalOveride ~= nil then
+        lastTimeInterval = rf2ethos.protocol.mspIntervalOveride
     else
         lastTimeInterval = 0.5
     end
@@ -55,8 +55,8 @@ function MspQueueController:processQueue()
             end
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
-			
-			--[[
+
+            --[[
 			do not do this.  it interupts msp processing
 			if rf2ethos.dialogs.progressDisplay == true and rf2ethos.triggers.isSaving == false and self.retryCount > 1 then
 				rf2ethos.ui.progessDisplayMessage("Loading data from flight controller...[Retry "..self.retryCount - 1 .. "]")
@@ -64,10 +64,8 @@ function MspQueueController:processQueue()
 			if rf2ethos.triggers.isSaving == true and self.retryCount > 1 then
 				rf2ethos.ui.progessDisplayMessage("Saving data...[Retry "..self.retryCount - 1 .. "]")
 			end		
-			]]--
-			
-			
-			
+			]] --
+
         end
 
         mspProcessTxQ()

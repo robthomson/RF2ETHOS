@@ -178,7 +178,7 @@ data["select_profile"] = {}
 data["select_profile"]["qrCODE"] = nil
 data["select_profile"]["TEXT"] = {
     "Set the current flight profile or rate profile you would like to use",
-	"If you use use a switch on your radio to change flight or rate modes, this will over-ride this choice as soon as you toggle the switch."
+    "If you use use a switch on your radio to change flight or rate modes, this will over-ride this choice as soon as you toggle the switch."
 }
 
 return {data = data}

@@ -34,5 +34,4 @@ sections[#sections + 1] = {title = "Setup", section = 6}
 pages[#pages + 1] = {title = "Preferences", section = 6, script = "preferences.lua", image = "settings.png"}
 pages[#pages + 1] = {title = "About", section = 6, script = "about.lua", image = "about.png"}
 
-
 return {pages = pages, sections = sections}

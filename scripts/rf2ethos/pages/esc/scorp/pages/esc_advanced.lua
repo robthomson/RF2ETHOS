@@ -1,12 +1,12 @@
 local labels = {}
 local fields = {}
-local escinfo = {}
+
+local folder = "scorp"
+local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
+local mspHeaderBytes = ESC.mspHeaderBytes
+local mspSignature = ESC.mspSignature
 
 local onOff = {"On", "Off"}
-
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
-escinfo[#escinfo + 1] = {t = "---"}
 
 labels[#labels + 1] = {t = "Scorpion ESC"}
 
@@ -23,6 +23,27 @@ fields[#fields + 1] = {t = "Motor Startup Sound", min = 0, max = #onOff, vals = 
 local foundEsc = false
 local foundEscDone = false
 
+function postLoad()
+    rf2ethos.triggers.isReady = true
+end
+
+local function onNavMenu(self)
+    rf2ethos.triggers.escToolEnableButtons = true
+    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+end
+
+local function event(widget, category, value, x, y)
+
+    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        return true
+    end
+
+    return false
+end
+
 return {
     read = 217, -- msp_ESC_PARAMETERS
     write = 218, -- msp_SET_ESC_PARAMETERS
@@ -38,45 +59,14 @@ return {
         83, 128, 84, 114, 105, 98, 117, 110, 117, 115, 32, 69, 83, 67, 45, 54, 83, 45, 56, 48, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 3, 0, 3, 0, 1, 0, 3, 0, 136, 19, 22, 3, 16, 39, 64, 31, 136,
         19, 0, 0, 1, 0, 7, 2, 0, 6, 63, 0, 160, 15, 64, 31, 208, 7, 100, 0, 0, 0, 200, 0, 0, 0, 1, 0, 0, 0, 200, 250, 0, 0
     },
-    postRead = function(self)
-        if self.values[1] ~= mspSignature then
-            self.values = nil
-            self.escinfo[1].t = ""
-            self.escinfo[2].t = ""
-            self.escinfo[2].t = ""
-            -- rf2ethos.triggers.isReady = true
-        end
-        return
-    end,
-    postLoad = function(self)
-        if self.values[1] ~= mspSignature then
-            -- self.values = nil
-            self.escinfo[1].t = ""
-            self.escinfo[2].t = ""
-            self.escinfo[2].t = ""
-            foundEsc = false
-            return
-        else
-            local model = getEscType(self)
-            local version = "v" .. getUInt(self, {59, 60})
-            local firmware = string.format("%08X", getUInt(self, {55, 56, 57, 58}))
-            self.escinfo[1].t = model
-            self.escinfo[2].t = version
-            self.escinfo[3].t = firmware
-            foundEsc = true
-        end
-        -- rf2ethos.triggers.isReady = true
-    end,
     preSavePayload = function(payload)
         payload[2] = 0
         return payload
     end,
-    wakeup = function(self)
-
-        if foundEsc == true and foundEscDone == false then
-            foundEscDone = true
-            rf2ethos.escui.openESCForm(rf2ethos.escManufacturer, rf2ethos.escScript)
-        end
-
-    end
+    postLoad = postLoad,
+    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+    onNavMenu = onNavMenu,
+    event = event,
+    pageTitle = "Esc / Scorpion / Advanced",
+    headerLine = rf2ethos.escHeaderLineText
 }

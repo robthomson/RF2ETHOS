@@ -1,5 +1,5 @@
 local function postLoad(self)
-	rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.triggers.closeProgressLoader = true
 end
 
 local function openPage(idx, title, script)
@@ -9,7 +9,7 @@ local function openPage(idx, title, script)
     rf2ethos.lastIdx = idx
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
-    --rf2ethos.Page = nil
+    -- rf2ethos.Page = nil
 
     form.clear()
 
@@ -40,7 +40,6 @@ local function openPage(idx, title, script)
         press = function()
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
-            rf2ethos.escMode = false
 
             if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
 
@@ -180,13 +179,8 @@ local function openPage(idx, title, script)
         rf2ethos.utils.storePreference(rf2ethos.config.toolDir .. "/preferences/demoswitch", category .. "," .. member)
     end)
 
-	postLoad()
+    postLoad()
 
 end
 
-
-
-return {
-    title = "Preferences",
-	openPage = openPage
-}
+return {title = "Preferences", openPage = openPage}
