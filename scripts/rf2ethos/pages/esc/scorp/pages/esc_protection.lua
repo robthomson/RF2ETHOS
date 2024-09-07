@@ -20,26 +20,25 @@ local foundEsc = false
 local foundEscDone = false
 
 function postLoad()
-	rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-	rf2ethos.triggers.escToolEnableButtons = true
-	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.triggers.escToolEnableButtons = true
+    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
-	
-	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-	 if category == 5 or value == 35 then
-		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
-		return true
-	 end
-	 
-	 return false
+    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        return true
+    end
+
+    return false
 end
-
 
 return {
     read = 217, -- msp_ESC_PARAMETERS
@@ -60,10 +59,10 @@ return {
         payload[2] = 0
         return payload
     end,
-	postLoad = postLoad,
-	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-	onNavMenu = onNavMenu,
-	event = event,
-	pageTitle = "Esc / Scorpion / Limits",
-	headerLine = rf2ethos.escHeaderLineText	
+    postLoad = postLoad,
+    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+    onNavMenu = onNavMenu,
+    event = event,
+    pageTitle = "Esc / Scorpion / Limits",
+    headerLine = rf2ethos.escHeaderLineText
 }

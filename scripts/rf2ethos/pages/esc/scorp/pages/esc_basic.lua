@@ -1,7 +1,6 @@
 local labels = {}
 local fields = {}
 
-
 local folder = "scorp"
 local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/init.lua"))()
 local mspHeaderBytes = ESC.mspHeaderBytes
@@ -20,8 +19,6 @@ local becVoltage = {"5.1 V", "6.1 V", "7.3 V", "8.3 V", "Disabled"}
 
 local teleProtocol = {"Standard", "VBar", "Jeti Exbus", "Unsolicited", "Futaba SBUS"}
 
-
-
 labels[#labels + 1] = {t = "Scorpion ESC"}
 
 fields[#fields + 1] = {t = "ESC Mode", min = 0, max = #escMode, vals = {mspHeaderBytes + 33, mspHeaderBytes + 34}, tableIdxInc = -1, table = escMode}
@@ -31,26 +28,25 @@ fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {ms
 -- not a good idea to allow this to be changed
 -- fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes + 39, mspHeaderBytes + 40}, tableIdxInc = -1,table = teleProtocol}
 
-
 function postLoad()
-	rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-	rf2ethos.triggers.escToolEnableButtons = true
-	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.triggers.escToolEnableButtons = true
+    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
-	
-	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-	 if category == 5 or value == 35 then
-		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
-		return true
-	 end
-	 
-	 return false
+    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        return true
+    end
+
+    return false
 end
 
 return {
@@ -70,11 +66,11 @@ return {
     preSavePayload = function(payload)
         payload[2] = 0
         return payload
-    end,	
-	postLoad = postLoad,
-	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-	onNavMenu = onNavMenu,
-	event = event,
-	pageTitle = "Esc / Scorpion / Basic",
-	headerLine = rf2ethos.escHeaderLineText	
+    end,
+    postLoad = postLoad,
+    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+    onNavMenu = onNavMenu,
+    event = event,
+    pageTitle = "Esc / Scorpion / Basic",
+    headerLine = rf2ethos.escHeaderLineText
 }

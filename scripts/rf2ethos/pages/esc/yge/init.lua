@@ -44,34 +44,31 @@ function getUInt(page, vals)
 end
 
 local function getEscModel(buffer)
-	return getEscTypeLabel(buffer)
+    return getEscTypeLabel(buffer)
 end
 
 local function getEscVersion(buffer)
-	return getUInt(buffer, {29, 30, 31, 32})
+    return getUInt(buffer, {29, 30, 31, 32})
 end
 
 local function getEscFirmware(buffer)
-	return string.format("%.5f", getUInt(buffer, {25, 26, 27, 28}) / 100000)
+    return string.format("%.5f", getUInt(buffer, {25, 26, 27, 28}) / 100000)
 end
 
-return {toolName = toolName, 
-		powerCycle = false, 
-		mspSignature = 0xA5, 
-		mspHeaderBytes = mspHeaderBytes, 
-		mspBytes = 60,
-		getEscModel = getEscModel,
-		getEscVersion = getEscVersion,
-		getEscFirmware = getEscFirmware,		
-		simulatorResponse = {
+return {
+    toolName = toolName,
+    powerCycle = false,
+    mspSignature = 0xA5,
+    mspHeaderBytes = mspHeaderBytes,
+    mspBytes = 60,
+    getEscModel = getEscModel,
+    getEscVersion = getEscVersion,
+    getEscFirmware = getEscFirmware,
+    simulatorResponse = {
         165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
         19, 2, 0, 20, 0, 22, 0, 0, 0
-		},		
-		}
-
-
-
-
+    }
+}
 
 --[[
 local toolName = "YGE"
@@ -137,4 +134,4 @@ mcuId = nil
 
 return {toolName = toolName, mspSignature = mspSignature, mspHeaderBytes = mspHeaderBytes, mspBytes = mspBytes}
 
-]]--
+]] -- 

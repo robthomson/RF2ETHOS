@@ -13,7 +13,6 @@ fields[2] = {t = "Dataflash Free Space", value = "0", type = 2, disable = true}
 fields[3] = {t = "Real-time load", value = "0", type = 2, disable = true}
 fields[4] = {t = "CPU load", value = "0", type = 2, disable = true}
 
-
 local function getStatus()
     local message = {
         command = 101, -- MSP_STATUS
@@ -52,7 +51,6 @@ local function getDataflashSummary()
             summary.sectors = rf2ethos.mspHelper.readU32(buf)
             summary.totalSize = rf2ethos.mspHelper.readU32(buf)
             summary.usedSize = rf2ethos.mspHelper.readU32(buf)
-
 
         end,
         simulatorResponse = {3, 1, 0, 0, 0, 0, 4, 0, 0, 0, 3, 0, 0}

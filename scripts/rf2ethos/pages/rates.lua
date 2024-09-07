@@ -173,6 +173,6 @@ return {
     rTableName = mytable.rTableName,
     flagRateChange = flagRateChange,
     postLoad = postLoad,
-	openPage = openPage,
+    openPage = openPage
 
 }

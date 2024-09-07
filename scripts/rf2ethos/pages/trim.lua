@@ -128,8 +128,6 @@ local function wakeup(self)
             end
         end
 
-
-
         if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
             currentIdleThrottleTrim = rf2ethos.Page.fields[4].value
             local now = os.clock()

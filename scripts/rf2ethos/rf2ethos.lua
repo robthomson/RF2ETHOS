@@ -68,9 +68,8 @@ rf2ethos.sensor = {}
 rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerForm = os.clock()
-rf2ethos.wakeupSchedulerBgChecks = os.clock() 
+rf2ethos.wakeupSchedulerBgChecks = os.clock()
 rf2ethos.menuLastSelected = {}
-
 
 rf2ethos.audio = {}
 rf2ethos.audio.playDemo = false
@@ -159,8 +158,8 @@ function rf2ethos.resetState()
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false
     rf2ethos.tailMode = nil
-	rf2ethos.config.apiVersion = nil
-	rf2ethos.audio = {}
+    rf2ethos.config.apiVersion = nil
+    rf2ethos.audio = {}
 
 end
 
@@ -482,20 +481,18 @@ function rf2ethos.wakeup(widget)
         rf2ethos.wakeupForm()
     end
 
-	-- bgchecks
+    -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
     if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
     end
-	
-end
 
+end
 
 -- BACKGROUND checks
 function rf2ethos.wakeupBgChecks()
-
 
     if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
         local message = {
@@ -504,14 +501,13 @@ function rf2ethos.wakeupBgChecks()
                 if #buf >= 3 then
                     local version = buf[2] + buf[3] / 100
                     rf2ethos.config.apiVersion = version
-					rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
+                    rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
                 end
             end,
             simulatorResponse = {0, 12, 7}
         }
         rf2ethos.mspQueue:add(message)
-    end	
-	
+    end
 
     if rf2ethos.tailMode == nil and rf2ethos.mspQueue:isProcessed() then
         local message = {
@@ -520,16 +516,15 @@ function rf2ethos.wakeupBgChecks()
                 if #buf >= 10 then
                     local mode = buf[2]
                     rf2ethos.tailMode = mode
-					rf2ethos.utils.log("Tail mode: " .. rf2ethos.tailMode)
+                    rf2ethos.utils.log("Tail mode: " .. rf2ethos.tailMode)
                 end
             end,
             simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
         }
         rf2ethos.mspQueue:add(message)
     end
-		
 
-end	
+end
 
 -- WAKEUPFORM.  RUN A FUNCTION CALLED wakeup THAT IS RETURNED WHEN REQUESTING A PAGE
 -- THIS ESSENTIALLY GIVES US A TIMER THAT CAN BE USED BY A PAGE THAT HAS LOADED TO
@@ -543,12 +538,9 @@ function rf2ethos.wakeupForm()
     end
 end
 
-
 -- WAKUP UI.  UI RUNS AT LOWER INTERVAL, TO SAVE CPU POWER.
 -- THE GUTS OF ETHOS FORMS IS HANDLED WITHIN THIS FUNCTION
 function rf2ethos.wakeupUI()
-
-	
 
     -- exit app called : quick abort
     -- as we dont need to run the rest of the stuff
@@ -679,11 +671,7 @@ function rf2ethos.wakeupUI()
         if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
         if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
 
-        if rf2ethos.dialogs.nolinkDisplay == false then
-
-            rf2ethos.ui.progessNolinkDisplay()
-
-        end
+        if rf2ethos.dialogs.nolinkDisplay == false then rf2ethos.ui.progessNolinkDisplay() end
     end
 
     -- this is directly related to the loop above.  if the progress box is visible we then wait for a telemetry link
@@ -713,14 +701,10 @@ function rf2ethos.wakeupUI()
                         rf2ethos.audio.playTimeout = true
                         rf2ethos.triggers.exitAPP = true
                     else
-						if rf2ethos.triggers.badMspVersion ~= true then
-							rf2ethos.audio.playConnected = true
-						end	
+                        if rf2ethos.triggers.badMspVersion ~= true then rf2ethos.audio.playConnected = true end
                     end
                 else
-					if rf2ethos.triggers.badMspVersion ~= true then
-						rf2ethos.audio.playConnected = true
-					end	
+                    if rf2ethos.triggers.badMspVersion ~= true then rf2ethos.audio.playConnected = true end
                 end
             end
         end
@@ -738,29 +722,28 @@ function rf2ethos.wakeupUI()
     -- a watchdog to enable the close button on a progress box dialog when loading data from the fbl
     if rf2ethos.dialogs.progressDisplay == true and rf2ethos.dialogs.progressWatchDog ~= nil then
 
-        --if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 
-		--	then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
-		--end
+        -- if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 
+        --	then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
+        -- end
 
         rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
         rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
 
+        if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
 
-		if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
+            rf2ethos.audio.playTimeout = true
 
-			rf2ethos.audio.playTimeout = true
+            if rf2ethos.dialogs.progress ~= nil then
+                rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
+                rf2ethos.ui.progessDisplayCloseAllowed(true)
+            end
 
-			if rf2ethos.dialogs.progress ~= nil then
-				rf2ethos.ui.progessDisplayMessage("Error.. we timed out")
-				rf2ethos.ui.progessDisplayCloseAllowed(true)
-			end
-
-			-- switch back to original page values
-			rf2ethos.Page = rf2ethos.PageTmp
-			rf2ethos.PageTmp = {}
-			rf2ethos.dialogs.progressCounter = 0
-			rf2ethos.dialogs.progressDisplay = false
-		end
+            -- switch back to original page values
+            rf2ethos.Page = rf2ethos.PageTmp
+            rf2ethos.PageTmp = {}
+            rf2ethos.dialogs.progressCounter = 0
+            rf2ethos.dialogs.progressDisplay = false
+        end
 
     end
 
@@ -855,16 +838,15 @@ function rf2ethos.wakeupUI()
 
     -- show an error if msp version is bad
     if rf2ethos.uiState == rf2ethos.uiStatus.mainMenu and rf2ethos.dialogs.nolinkDisplay == false then
-	
-		local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
+
+        local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
         if not rf2ethos.utils.stringInArray(rf2ethos.config.supportedMspApiVersion, apiVersionAsString) then
             rf2ethos.triggers.badMspVersion = true
-		else
+        else
             rf2ethos.triggers.badMspVersion = false
         end
-	
-	
-        if rf2ethos.triggers.badMspVersion == true  then
+
+        if rf2ethos.triggers.badMspVersion == true then
             local buttons = {
                 {
                     label = "   OK   ",
@@ -977,8 +959,8 @@ function rf2ethos.wakeupUI()
     if rf2ethos.triggers.reload == true then
         rf2ethos.ui.progessDisplay()
         rf2ethos.triggers.reload = false
-		
-		rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
+
+        rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, rf2ethos.lastScript)
 
         rf2ethos.profileSwitchCheck()
         rf2ethos.rateSwitchCheck()
@@ -1089,9 +1071,9 @@ function rf2ethos.create()
 
     -- load msp timeout
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then 
-		rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
-	end
+    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
+        rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
+    end
 
     rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
     rf2ethos.protocol = assert(compile.loadScript(rf2ethos.config.toolDir .. "protocols.lua"))()
@@ -1169,7 +1151,7 @@ end
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 function rf2ethos.event(widget, category, value, x, y)
 
-    --print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if value == EVT_VIRTUAL_PREV_LONG then
         print("Forcing exit")
@@ -1184,7 +1166,6 @@ function rf2ethos.event(widget, category, value, x, y)
             return rf2ethos.Page.event(widget, category, value, x, y)
         end
     end
-	
 
     if rf2ethos.uiState == rf2ethos.uiStatus.pages then
 

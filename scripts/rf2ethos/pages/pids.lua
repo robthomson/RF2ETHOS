@@ -154,5 +154,5 @@ return {
     rows = rows,
     cols = cols,
     postLoad = postLoad,
-	openPage = openPage
+    openPage = openPage
 }

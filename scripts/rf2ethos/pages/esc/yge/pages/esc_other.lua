@@ -6,7 +6,6 @@ local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" ..
 local mspHeaderBytes = ESC.mspHeaderBytes
 local mspSignature = ESC.mspSignature
 
-
 -- update pole count label text
 local function updatePoles(self)
     local f = self.fields[3]
@@ -26,7 +25,6 @@ end
 local foundEsc = false
 local foundEscDone = false
 
-
 labels[#labels + 1] = {t = "ESC"}
 
 fields[#fields + 1] = {t = "P-Gain", min = 1, max = 10, vals = {mspHeaderBytes + 11, mspHeaderBytes + 12}}
@@ -42,23 +40,23 @@ fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {msp
 fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes + 37, mspHeaderBytes + 38}}
 
 function postLoad()
-	rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-	rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
-	
-	--print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-	 if category == 5 or value == 35 then
-		rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
-		return true
-	 end
-	 
-	 return false
+    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        return true
+    end
+
+    return false
 end
 
 return {
@@ -75,11 +73,11 @@ return {
         165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
         19, 2, 0, 20, 0, 22, 0, 0, 0
     },
-	postLoad = postLoad,
-	navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-	onNavMenu = onNavMenu,
-	event = event,
-	pageTitle = "Esc / Yge / Other",
-	headerLine = rf2ethos.escHeaderLineText	
-  
+    postLoad = postLoad,
+    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+    onNavMenu = onNavMenu,
+    event = event,
+    pageTitle = "Esc / Yge / Other",
+    headerLine = rf2ethos.escHeaderLineText
+
 }

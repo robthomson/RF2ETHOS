@@ -12,8 +12,8 @@ function ui.progessDisplay(title, message)
     rf2ethos.dialogs.progressDisplay = true
     rf2ethos.dialogs.progressWatchDog = os.clock()
     rf2ethos.dialogs.progress = form.openProgressDialog(title, message)
-	rf2ethos.dialogs.progressDisplay = true	
-	rf2ethos.dialogs.progressCounter = 0
+    rf2ethos.dialogs.progressDisplay = true
+    rf2ethos.dialogs.progressCounter = 0
     if rf2ethos.dialogs.progress ~= nil then
         rf2ethos.dialogs.progress:value(0)
         rf2ethos.dialogs.progress:closeAllowed(false)
@@ -26,8 +26,6 @@ function ui.progessNolinkDisplay()
     rf2ethos.dialogs.noLink:closeAllowed(false)
     rf2ethos.dialogs.noLink:value(0)
 end
-
-
 
 function ui.progessDisplaySave()
     rf2ethos.dialogs.saveDisplay = true
@@ -78,36 +76,24 @@ function ui.progessDisplaySaveValue(value, message)
 end
 
 function ui.progessDisplayClose()
-	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.progress:close()
-	end	
+    if rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:close() end
 end
 
 function ui.progessDisplayCloseAllowed(status)
-	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.progress:closeAllowed(status)
-	end	
+    if rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:closeAllowed(status) end
 end
 
 function ui.progessDisplayMessage(message)
-	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.progress:message(message)
-	end	
+    if rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:message(message) end
 end
 
 function ui.progessDisplaySaveClose()
-	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.save:close()
-	end
+    if rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.save:close() end
 end
 
 function ui.progessDisplaySaveCloseAllowed(status)
-	if rf2ethos.dialogs.progress ~= nil then
-		rf2ethos.dialogs.progress:closeAllowed(status)
-	end	
+    if rf2ethos.dialogs.progress ~= nil then rf2ethos.dialogs.progress:closeAllowed(status) end
 end
-
-
 
 function ui.progessNolinkDisplayClose()
     rf2ethos.dialogs.noLink:close()
@@ -133,9 +119,7 @@ function ui.progessDisplayNoLinkValue(value, message)
 
 end
 
-
 function ui.openMainMenu()
-
 
     local MainMenu = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages.lua"))()
 
@@ -147,13 +131,11 @@ function ui.openMainMenu()
     rf2ethos.lastScript = nil
     rf2ethos.lastPage = nil
 
-	rf2ethos.protocol.mspIntervalOveride = nil
-
+    rf2ethos.protocol.mspIntervalOveride = nil
 
     rf2ethos.triggers.isReady = false
     rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
     rf2ethos.triggers.disableRssiTimeout = false
-
 
     -- size of buttons
     rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
@@ -196,13 +178,9 @@ function ui.openMainMenu()
     local panel
 
     form.clear()
-	
-	if rf2ethos.gfx_buttons["mainmenu"] == nil then
-		rf2ethos.gfx_buttons["mainmenu"] = {}
-	end
-	if rf2ethos.menuLastSelected["mainmenu"] == nil then	
-		rf2ethos.menuLastSelected["mainmenu"] = 1
-	end	
+
+    if rf2ethos.gfx_buttons["mainmenu"] == nil then rf2ethos.gfx_buttons["mainmenu"] = {} end
+    if rf2ethos.menuLastSelected["mainmenu"] == nil then rf2ethos.menuLastSelected["mainmenu"] = 1 end
 
     for idx, value in ipairs(MainMenu.sections) do
 
@@ -223,7 +201,9 @@ function ui.openMainMenu()
                 if lc >= 0 then x = (buttonW + padding) * lc end
 
                 if rf2ethos.config.iconsizeParam ~= 0 then
-                    if rf2ethos.gfx_buttons["mainmenu"][pidx] == nil then rf2ethos.gfx_buttons["mainmenu"][pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/menu/" .. pvalue.image) end
+                    if rf2ethos.gfx_buttons["mainmenu"][pidx] == nil then
+                        rf2ethos.gfx_buttons["mainmenu"][pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/menu/" .. pvalue.image)
+                    end
                 else
                     rf2ethos.gfx_buttons["mainmenu"][pidx] = nil
                 end
@@ -252,7 +232,6 @@ function ui.openMainMenu()
     end
 end
 
-
 function ui.progressDisplay()
 
     if rf2ethos.dialogs.progressDisplay == true then return true end
@@ -263,9 +242,6 @@ function ui.progressDisplay()
 
     return false
 end
-
-
-
 
 function ui.getLabel(id, page)
     for i, v in ipairs(page) do if id ~= nil then if v.label == id then return v end end end
@@ -300,8 +276,8 @@ function ui.fieldChoice(f, i)
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
-        if f.postEdit then f.postEdit(rf2ethos.Page,value) end
-        if f.onChange then f.onChange(rf2ethos.Page,value) end
+        if f.postEdit then f.postEdit(rf2ethos.Page, value) end
+        if f.onChange then f.onChange(rf2ethos.Page, value) end
         f.value = rf2ethos.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
@@ -551,79 +527,77 @@ function ui.fieldHeader(title)
     rf2ethos.ui.navigationButtons(w - 5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
-function ui.openPage(idx, title, script,extra1,extra2,extra3,extra5,extra5)
+function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
 
     rf2ethos.uiState = rf2ethos.uiStatus.pages
     rf2ethos.triggers.isReady = false
     rf2ethos.formFields = {}
     rf2ethos.formLines = {}
-	
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
-	
-	if rf2ethos.Page.openPage then
-		rf2ethos.Page.openPage(idx,title,script,extra1,extra2,extra3,extra5,extra5)	
-	else
 
-		rf2ethos.lastIdx = idx
-		rf2ethos.lastTitle = title
-		rf2ethos.lastScript = script
+    if rf2ethos.Page.openPage then
+        rf2ethos.Page.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
+    else
 
-		local fieldAR = {}
+        rf2ethos.lastIdx = idx
+        rf2ethos.lastTitle = title
+        rf2ethos.lastScript = script
 
-		rf2ethos.uiState = rf2ethos.uiStatus.pages
-		rf2ethos.triggers.isReady = false
+        local fieldAR = {}
 
-		longPage = false
+        rf2ethos.uiState = rf2ethos.uiStatus.pages
+        rf2ethos.triggers.isReady = false
 
-		form.clear()
+        longPage = false
 
-		rf2ethos.lastPage = script
+        form.clear()
 
-		if rf2ethos.Page.pageTitle ~= nil then
-			rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
-		else
-			rf2ethos.ui.fieldHeader(title)
-		end
+        rf2ethos.lastPage = script
 
-		if rf2ethos.Page.headerLine ~= nil then
-			local headerLine = form.addLine("")
-			local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
-		end
+        if rf2ethos.Page.pageTitle ~= nil then
+            rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
+        else
+            rf2ethos.ui.fieldHeader(title)
+        end
 
-		formLineCnt = 0
+        if rf2ethos.Page.headerLine ~= nil then
+            local headerLine = form.addLine("")
+            local headerLineText =
+                form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
+        end
 
-		for i = 1, #rf2ethos.Page.fields do
-			local f = rf2ethos.Page.fields[i]
-			local l = rf2ethos.Page.labels
-			local pageValue = f
-			local pageIdx = i
-			local currentField = i
+        formLineCnt = 0
 
-			rf2ethos.ui.fieldLabel(f, i, l)
+        for i = 1, #rf2ethos.Page.fields do
+            local f = rf2ethos.Page.fields[i]
+            local l = rf2ethos.Page.labels
+            local pageValue = f
+            local pageIdx = i
+            local currentField = i
 
-			if f.hidden ~= true then
+            rf2ethos.ui.fieldLabel(f, i, l)
 
-				if f.type == 0 then
-					rf2ethos.ui.fieldStaticText(f, i)
-				elseif f.table or f.type == 1 then
-					rf2ethos.ui.fieldChoice(f, i)
-				elseif f.type == 2 then
-					rf2ethos.ui.fieldNumber(f, i)
-				elseif f.type == 3 then
-					rf2ethos.ui.fieldText(f, i)
-				else
-					rf2ethos.ui.fieldNumber(f, i)
-				end
+            if f.hidden ~= true then
 
-			end
-		end
-	end
+                if f.type == 0 then
+                    rf2ethos.ui.fieldStaticText(f, i)
+                elseif f.table or f.type == 1 then
+                    rf2ethos.ui.fieldChoice(f, i)
+                elseif f.type == 2 then
+                    rf2ethos.ui.fieldNumber(f, i)
+                elseif f.type == 3 then
+                    rf2ethos.ui.fieldText(f, i)
+                else
+                    rf2ethos.ui.fieldNumber(f, i)
+                end
+
+            end
+        end
+    end
 
 end
-
-
 
 function ui.navigationButtons(x, y, w, h)
 
@@ -763,7 +737,6 @@ end
 function ui.openPagehelp(helpdata, section)
     local txtData
     local qr
-
 
     if section == "rates" then
         txtData = helpdata[section]["table"][rf2ethos.RateTable]

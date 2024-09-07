@@ -1,4 +1,3 @@
-
 local pages = {}
 
 pages[#pages + 1] = {title = "SCORPION", folder = "scorp", image = "scorpion.png"}
@@ -6,11 +5,9 @@ pages[#pages + 1] = {title = "HOBBYWING 5", folder = "hw5", image = "hobbywing.p
 pages[#pages + 1] = {title = "YGE", folder = "yge", image = "yge.png"}
 pages[#pages + 1] = {title = "FLYROTOR", folder = "flrtr", image = "flrtr.png", disabled = true}
 
-
-
 local function openPage(pidx, title, script)
 
-	rf2ethos.protocol.mspIntervalOveride = nil
+    rf2ethos.protocol.mspIntervalOveride = nil
 
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then return end
 
@@ -24,7 +21,6 @@ local function openPage(pidx, title, script)
     rf2ethos.lastScript = script
 
     ESC = {}
-
 
     -- size of buttons
     rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
@@ -56,7 +52,6 @@ local function openPage(pidx, title, script)
         press = function()
             rf2ethos.lastIdx = nil
             rf2ethos.lastPage = nil
-
 
             if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
 
@@ -100,12 +95,8 @@ local function openPage(pidx, title, script)
     local lc = 0
     local bx = 0
 
-	if rf2ethos.gfx_buttons["escmain"] == nil then
-		rf2ethos.gfx_buttons["escmain"] = {}
-	end
-	if rf2ethos.menuLastSelected["escmain"] == nil then	
-		rf2ethos.menuLastSelected["escmain"] = 1
-	end	
+    if rf2ethos.gfx_buttons["escmain"] == nil then rf2ethos.gfx_buttons["escmain"] = {} end
+    if rf2ethos.menuLastSelected["escmain"] == nil then rf2ethos.menuLastSelected["escmain"] = 1 end
 
     for pidx, pvalue in ipairs(ESCMenu.pages) do
 
@@ -132,13 +123,13 @@ local function openPage(pidx, title, script)
             press = function()
                 rf2ethos.menuLastSelected["escmain"] = pidx
                 rf2ethos.ui.progessDisplay()
-				rf2ethos.ui.openPage(pidx, pvalue.folder, "esc_tool.lua")
+                rf2ethos.ui.openPage(pidx, pvalue.folder, "esc_tool.lua")
             end
         })
 
         if pvalue.disabled == true then rf2ethos.formFields[pidx]:enable(false) end
 
-		if rf2ethos.menuLastSelected["escmain"] == pidx then rf2ethos.formFields[pidx]:focus() end
+        if rf2ethos.menuLastSelected["escmain"] == pidx then rf2ethos.formFields[pidx]:focus() end
 
         lc = lc + 1
 
@@ -146,14 +137,11 @@ local function openPage(pidx, title, script)
 
     end
 
-	rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.triggers.closeProgressLoader = true
 
-	return
+    return
 end
 
 rf2ethos.uiState = rf2ethos.uiStatus.pages
 
-return {title = "ESC", 
-		pages = pages,
-		openPage = openPage
-		}
+return {title = "ESC", pages = pages, openPage = openPage}
