@@ -211,7 +211,11 @@ local function openPage(pidx, title, script)
 
 		if rf2ethos.menuLastSelected["esctool"] == pidx then rf2ethos.formFields[pidx]:focus() end
 
-        rf2ethos.formFields[pidx]:enable(false)
+		if rf2ethos.triggers.escToolEnableButtons == true then 
+			rf2ethos.formFields[pidx]:enable(true)
+		else
+			rf2ethos.formFields[pidx]:enable(false)
+		end
 
         lc = lc + 1
 
@@ -219,6 +223,7 @@ local function openPage(pidx, title, script)
 
     end
 
+	rf2ethos.triggers.escToolEnableButtons = false
 	getESCDetails()
 
    
@@ -281,13 +286,14 @@ local function wakeup()
 				getESCDetails()
 			
 				powercycleLoaderRateLimit = now
-				powercycleLoaderCounter = powercycleLoaderCounter + 10
+				powercycleLoaderCounter = powercycleLoaderCounter + 5
 				powercycleLoader:value(powercycleLoaderCounter)
 				
 				if powercycleLoaderCounter >= 100 then
 						powercycleLoader:close()
 						modelText = form.addStaticText(modelLine, modelTextPos, "UNKNOWN")
 						showPowerCycleLoaderInProgress = false
+						rf2ethos.triggers.disableRssiTimeout = false
 						showPowerCycleLoader = false
 						rf2ethos.audio.playTimeout = true
 						showPowerCycleLoaderFinished = true
@@ -303,6 +309,7 @@ local function wakeup()
 		if showPowerCycleLoaderInProgress == false then
 			showPowerCycleLoaderInProgress = true
 			rf2ethos.audio.playEscPowerCycle = true
+			rf2ethos.triggers.disableRssiTimeout = true
 			powercycleLoader  = form.openProgressDialog("Searching...", "Please power cycle the speed controller...")
 			powercycleLoader:value(0)
 			powercycleLoader:closeAllowed(false)

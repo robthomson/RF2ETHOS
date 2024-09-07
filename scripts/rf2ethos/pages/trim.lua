@@ -145,7 +145,6 @@ local function wakeup(self)
 
         if rf2ethos.tailMode == 0 then
             currentYawTrim = rf2ethos.Page.fields[4].value
-			print( currentYawTrim)
             local now = os.clock()
             local settleTime = 0.85
             if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
