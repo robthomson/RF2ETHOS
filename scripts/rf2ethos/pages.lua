@@ -29,6 +29,7 @@ sections[#sections + 1] = {title = "Tools", section = 5}
 pages[#pages + 1] = {title = "Copy profiles", section = 5, script = "copy_profiles.lua", image = "copy.png"}
 pages[#pages + 1] = {title = "Profile", section = 5, script = "select_profile.lua", image = "select_profile.png"}
 pages[#pages + 1] = {title = "Status", section = 5, script = "status.lua", image = "status.png"}
+pages[#pages + 1] = {title = "Msp speed", section = 5, script = "msp_speed.lua", image = "msp_speed.png"}
 
 sections[#sections + 1] = {title = "Setup", section = 6}
 pages[#pages + 1] = {title = "Preferences", section = 6, script = "preferences.lua", image = "settings.png"}
