@@ -135,7 +135,10 @@ end
 function rf2ethos.getRSSI()
     if rf2ethos.runningInSimulator == true or rf2ethos.config.skipRssiSensorCheck == true then return 100 end
 
-    if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() then return rf2ethos.rssiSensor:value() end
+    if rf2ethos.rssiSensor ~= nil then
+        local value = rf2ethos.rssiSensor:value()
+        return value
+    end
     return 0
 end
 
