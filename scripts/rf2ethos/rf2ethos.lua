@@ -1050,24 +1050,11 @@ end
 
 function rf2ethos.create()
 
+    -- get sensor for msp comms
     rf2ethos.sensor = sport.getSensor({primId = 0x32})
-    rf2ethos.rssiSensor = system.getSource("RSSI")
-    if not rf2ethos.rssiSensor then
-        rf2ethos.rssiSensor = system.getSource("RSSI 2.4G")
-        if not rf2ethos.rssiSensor then
-            rf2ethos.rssiSensor = system.getSource("RSSI 900M")
-            if not rf2ethos.rssiSensor then
-                rf2ethos.rssiSensor = system.getSource("Rx RSSI1")
-                if not rf2ethos.rssiSensor then
-                    rf2ethos.rssiSensor = system.getSource("Rx RSSI2")
-                    if not rf2ethos.rssiSensor then
-                        rf2ethos.rssiSensor = system.getSource("RSSI Int")
-                        if not rf2ethos.rssiSensor then rf2ethos.rssiSensor = system.getSource("RSSI Ext") end
-                    end
-                end
-            end
-        end
-    end
+
+    -- get sensor we call for checking link up
+    rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
 
     -- load msp timeout
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")

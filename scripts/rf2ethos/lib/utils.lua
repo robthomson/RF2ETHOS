@@ -1,5 +1,14 @@
 local utils = {}
 
+function utils.getRssiSensor()
+    local rssiSensor
+    local rssiNames = {"RSSI", "RSSI 2.4G", "RSSI 900M", "Rx RSSI1", "Rx RSSI2", "RSSI Int", "RSSI Ext"}
+    for i, name in ipairs(rssiNames) do
+        rssiSensor = system.getSource(name)
+        if rssiSensor then return rssiSensor end
+    end
+end
+
 function utils.stringInArray(array, s)
     for i, value in ipairs(array) do if value == s then return true end end
     return false
