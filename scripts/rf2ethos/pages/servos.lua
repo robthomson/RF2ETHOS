@@ -15,8 +15,7 @@ else
     servoTable = {"ELEVATOR", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
 end
 
-fields[#fields + 1] = {
-    t = "Servo",
+fields[#fields + 1] = { t = "Servo",
     min = 0,
     max = 100,
     value = 0,
@@ -27,7 +26,7 @@ fields[#fields + 1] = {
         self.servoChanged(rf2ethos.Page, value)
     end
 }
--- fields[#fields + 1] = {t = "Center",help = "servoMid",min = 50,max = 2250,default = 1500,vals = {2, 3},onFocus = function(self) self.servoCenterFocus(self)end}
+
 fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}, disable = false}
 fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
 fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
@@ -152,7 +151,7 @@ local function servoCenterChanged(self)
         return
     end
 
-    local servoIndex = rf2ethos.Page.fields[1].value - 1
+    local servoIndex = rf2ethos.Page.fields[1].value 
     local servoCenter = math.floor(rf2ethos.Page.fields[2].value)
     local servoMin = math.floor(rf2ethos.Page.fields[3].value)
     local servoMax = math.floor(rf2ethos.Page.fields[4].value)
@@ -186,6 +185,8 @@ local function servoCenterChanged(self)
     end
     rf2ethos.utils.log("Setting center to: " .. servoCenter)
     rf2ethos.mspQueue:add(message)
+
+	print(servoIndex)
 
 end
 
