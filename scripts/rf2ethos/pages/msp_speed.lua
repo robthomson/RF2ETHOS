@@ -16,6 +16,14 @@ local testLoaderStepSizeValue = 0
 
 local getMSPCount = 0
 
+local mspSpeedTest = false
+mspSpeedTestStats = {}
+mspSpeedTestStats['count'] = 0
+mspSpeedTestStats['success'] = 0
+mspSpeedTestStats['total'] = 0
+mspSpeedTestStats['retries'] = 0
+mspSpeedTestStats['timeouts'] = 0
+
 
 local function openPage(pidx, title, script)
 
@@ -105,26 +113,26 @@ end
 
 local function updateStats()
 
-    fields['total'] = form.addTextField(line['total'], nil, function() return rf2ethos.mspSpeedTestStats['count'] end, function(value) end)
+    fields['total'] = form.addTextField(line['total'], nil, function() return mspSpeedTestStats['count'] end, function(value) end)
 	fields['total']:enable(false)
 
-    fields['retries'] = form.addTextField(line['retries'], nil, function() return rf2ethos.mspSpeedTestStats['retries'] end, function(value) end)
+    fields['retries'] = form.addTextField(line['retries'], nil, function() return mspSpeedTestStats['retries'] end, function(value) end)
 	fields['retries']:enable(false)
 
-    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return rf2ethos.mspSpeedTestStats['timeouts'] end, function(value) end)
+    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return mspSpeedTestStats['timeouts'] end, function(value) end)
 	fields['timeouts']:enable(false)
 
 	-- sometimes we get an exception where we close the dialog before final query.. and it shift result be 1
 	-- catch this and show correct
-	if (rf2ethos.mspSpeedTestStats['success'] == rf2ethos.mspSpeedTestStats['count'] - 1) and rf2ethos.mspSpeedTestStats['timeouts'] == 0 then
-		fields['success'] = form.addTextField(line['success'], nil, function() return rf2ethos.mspSpeedTestStats['count'] end, function(value) end)
+	if (mspSpeedTestStats['success'] == mspSpeedTestStats['count'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
+		fields['success'] = form.addTextField(line['success'], nil, function() return mspSpeedTestStats['count'] end, function(value) end)
 		fields['success']:enable(false)	
 	else
-		fields['success'] = form.addTextField(line['success'], nil, function() return rf2ethos.mspSpeedTestStats['success'] end, function(value) end)
+		fields['success'] = form.addTextField(line['success'], nil, function() return mspSpeedTestStats['success'] end, function(value) end)
 		fields['success']:enable(false)
 	end
 
-	local avgQueryTime = rf2ethos.utils.round(startTestLength / rf2ethos.mspSpeedTestStats['count'],2) .. "s"
+	local avgQueryTime = rf2ethos.utils.round(startTestLength / mspSpeedTestStats['count'],2) .. "s"
     fields['time'] = form.addTextField(line['time'], nil, function() return avgQueryTime end, function(value) end)
 	fields['time']:enable(false)
 
@@ -232,13 +240,13 @@ local function wakeup()
 			testLoaderDisplay = true
 			testLoaderStepSizeValue = 0
 			getMSPCount = 0
-			rf2ethos.mspSpeedTest = true
+			mspSpeedTest = true
 
-			rf2ethos.mspSpeedTestStats['total'] = 0
-			rf2ethos.mspSpeedTestStats['retries'] = 0
-			rf2ethos.mspSpeedTestStats['success'] = 0
-			rf2ethos.mspSpeedTestStats['timeouts'] = 0				
-			rf2ethos.mspSpeedTestStats['count'] = 0
+			mspSpeedTestStats['total'] = 0
+			mspSpeedTestStats['retries'] = 0
+			mspSpeedTestStats['success'] = 0
+			mspSpeedTestStats['timeouts'] = 0				
+			mspSpeedTestStats['count'] = 0
 			
 			
 		end
@@ -254,7 +262,7 @@ local function wakeup()
 		if (now - startTestLength) > startTestTime then
 			
 			updateStats()
-			rf2ethos.mspSpeedTest = false
+			mspSpeedTest = false
 			startTest = false
 			testLoader:close()
 			testLoaderDisplay = false	
@@ -262,7 +270,7 @@ local function wakeup()
 
 		-- do msp query
 		if rf2ethos.mspQueue:isProcessed() then
-			rf2ethos.mspSpeedTestStats['count'] = rf2ethos.mspSpeedTestStats['count'] + 1
+			mspSpeedTestStats['count'] = mspSpeedTestStats['count'] + 1
 			getMSP()
 		end
 	
@@ -271,6 +279,44 @@ local function wakeup()
 
 end
 
+
+
+function mspSuccess(self)
+		if mspSpeedTest == true then
+				if mspSpeedTestStats['success'] == nil then
+					mspSpeedTestStats['success'] = 0
+				else
+					mspSpeedTestStats['success'] = mspSpeedTestStats['success'] + 1
+				end
+		end	
+end
+
+function mspTimeout(self)
+		if mspSpeedTest == true then
+				if mspSpeedTestStats['timeouts'] == nil then
+					mspSpeedTestStats['timeouts'] = 0
+				else
+					mspSpeedTestStats['timeouts'] = mspSpeedTestStats['timeouts'] + 1
+				end
+		end	
+end
+
+function mspRetry(self)
+	if mspSpeedTest == true then
+		if mspSpeedTestStats['retries'] == nil then
+			mspSpeedTestStats['retries'] = 0
+		else
+			mspSpeedTestStats['retries'] = mspSpeedTestStats['retries'] + (self.retryCount - 1)
+		end
+	end
+end
+
 rf2ethos.uiState = rf2ethos.uiStatus.pages
 
-return {title = "Msp speed", openPage = openPage, wakeup = wakeup, event = event}
+return {title = "Msp speed", 
+		openPage = openPage,
+		mspRetry = mspRetry,
+		mspSuccess = mspSuccess,
+		mspTimeout = mspTimeout,
+		wakeup = wakeup, 
+		event = event}
