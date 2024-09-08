@@ -56,15 +56,15 @@ function MspQueueController:processQueue()
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
 
-            --[[
-			do not do this.  it interupts msp processing
-			if rf2ethos.dialogs.progressDisplay == true and rf2ethos.triggers.isSaving == false and self.retryCount > 1 then
-				rf2ethos.ui.progessDisplayMessage("Loading data from flight controller...[Retry "..self.retryCount - 1 .. "]")
-			end			
-			if rf2ethos.triggers.isSaving == true and self.retryCount > 1 then
-				rf2ethos.ui.progessDisplayMessage("Saving data...[Retry "..self.retryCount - 1 .. "]")
-			end		
-			]] --
+
+			if rf2ethos.mspSpeedTest == true then
+				if rf2ethos.mspSpeedTestStats['retries'] == nil then
+					rf2ethos.mspSpeedTestStats['retries'] = 0
+				else
+					rf2ethos.mspSpeedTestStats['retries'] = rf2ethos.mspSpeedTestStats['retries'] + (self.retryCount - 1)
+				end
+			end
+
 
         end
 
@@ -108,11 +108,29 @@ function MspQueueController:processQueue()
 
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
+		
+		if rf2ethos.mspSpeedTest == true then
+				if rf2ethos.mspSpeedTestStats['success'] == nil then
+					rf2ethos.mspSpeedTestStats['success'] = 0
+				else
+					rf2ethos.mspSpeedTestStats['success'] = rf2ethos.mspSpeedTestStats['success'] + 1
+				end
+		end			
+		
     elseif self.retryCount > self.maxRetries then
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
         if self.currentMessage.errorHandler then self.currentMessage:errorHandler() end
         self.currentMessage = nil
+		
+		if rf2ethos.mspSpeedTest == true then
+				if rf2ethos.mspSpeedTestStats['timeouts'] == nil then
+					rf2ethos.mspSpeedTestStats['timeouts'] = 0
+				else
+					rf2ethos.mspSpeedTestStats['timeouts'] = rf2ethos.mspSpeedTestStats['timeouts'] + 1
+				end
+		end		
+		
     end
 end
 

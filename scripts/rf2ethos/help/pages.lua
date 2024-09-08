@@ -181,4 +181,12 @@ data["select_profile"]["TEXT"] = {
     "If you use use a switch on your radio to change flight or rate modes, this will over-ride this choice as soon as you toggle the switch."
 }
 
+-- SELECT PROFILE
+data["msp_speed"] = {}
+data["msp_speed"]["qrCODE"] = nil
+data["msp_speed"]["TEXT"] = {
+    "This tool attempt to determine the quality of your msp data link by performing as many large Msp queries within 30 seconds as possible.",
+
+}
+
 return {data = data}

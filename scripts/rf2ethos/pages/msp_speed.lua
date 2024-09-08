@@ -5,7 +5,7 @@ local formLoaded = false
 local triggerStart = false
 local startTest = false
 local startTestTime = os.clock()
-local startTestLength = 20
+local startTestLength = 30
 
 local testLoader
 local testLoaderDisplay = false
@@ -14,7 +14,8 @@ local testLoaderUpdateTime = os.clock()
 local testLoaderStepSize = 100 / (startTestLength/2)
 local testLoaderStepSizeValue = 0
 
-rf2ethos.mspSpeedTestStats = {}
+local getMSPCount = 0
+
 
 local function openPage(pidx, title, script)
 
@@ -87,9 +88,13 @@ local function openPage(pidx, title, script)
     fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return "0" end, function(value) end)
 	fields['timeouts']:enable(false)
  
-	line['retries'] = form.addLine("Protocol Retries")
+	line['retries'] = form.addLine("Protocol retries")
     fields['retries'] = form.addTextField(line['retries'], nil, function() return "0" end, function(value) end)
 	fields['retries']:enable(false)
+
+	line['time'] = form.addLine("Average query time")
+    fields['time'] = form.addTextField(line['time'], nil, function() return "0s" end, function(value) end)
+	fields['time']:enable(false)
  
 	line['start'] = form.addLine("")
     fields['start'] = form.addTextButton(line['start'], nil, "TEST", function() triggerStart = true end)
@@ -103,10 +108,30 @@ local function updateStats()
     fields['total'] = form.addTextField(line['total'], nil, function() return rf2ethos.mspSpeedTestStats['count'] end, function(value) end)
 	fields['total']:enable(false)
 
+    fields['retries'] = form.addTextField(line['retries'], nil, function() return rf2ethos.mspSpeedTestStats['retries'] end, function(value) end)
+	fields['retries']:enable(false)
+
+    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return rf2ethos.mspSpeedTestStats['timeouts'] end, function(value) end)
+	fields['timeouts']:enable(false)
+
+	-- sometimes we get an exception where we close the dialog before final query.. and it shift result be 1
+	-- catch this and show correct
+	if (rf2ethos.mspSpeedTestStats['success'] == rf2ethos.mspSpeedTestStats['count'] - 1) and rf2ethos.mspSpeedTestStats['timeouts'] == 0 then
+		fields['success'] = form.addTextField(line['success'], nil, function() return rf2ethos.mspSpeedTestStats['count'] end, function(value) end)
+		fields['success']:enable(false)	
+	else
+		fields['success'] = form.addTextField(line['success'], nil, function() return rf2ethos.mspSpeedTestStats['success'] end, function(value) end)
+		fields['success']:enable(false)
+	end
+
+	local avgQueryTime = rf2ethos.utils.round(startTestLength / rf2ethos.mspSpeedTestStats['count'],2) .. "s"
+    fields['time'] = form.addTextField(line['time'], nil, function() return avgQueryTime end, function(value) end)
+	fields['time']:enable(false)
+
 end
 
 
-local function getMSP()
+local function getMSPPidBandwidth()
     local message = {
         command = 94, -- MSP_STATUS
         processReply = function(self, buf)
@@ -116,6 +141,46 @@ local function getMSP()
     }
     rf2ethos.mspQueue:add(message)
 end
+
+local function getMSPServos()
+    local message = {
+        command = 120, -- MSP_STATUS
+        processReply = function(self, buf)
+				
+        end,
+		simulatorResponse = {
+			4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5,
+			212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+		}
+    }
+    rf2ethos.mspQueue:add(message)
+end
+
+local function getMSPPids()
+    local message = {
+        command = 112, -- MSP_STATUS
+        processReply = function(self, buf)
+				
+        end,
+		simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0},
+    }
+    rf2ethos.mspQueue:add(message)
+end
+
+local function getMSP()
+	-- three diff msp queries. 
+	if getMSPCount == 0 then
+		getMSPPidBandwidth()
+		getMSPCount = 1
+	elseif getMSPCount == 1 then
+		getMSPServos()
+		getMSPCount = 2
+	else 
+		getMSPPids()
+		getMSPCount = 0
+	end		
+end
+
 
 local function wakeup()
 
@@ -165,7 +230,17 @@ local function wakeup()
 			testLoader:value(0)
 			testLoader:closeAllowed(false)
 			testLoaderDisplay = true
+			testLoaderStepSizeValue = 0
+			getMSPCount = 0
+			rf2ethos.mspSpeedTest = true
+
+			rf2ethos.mspSpeedTestStats['total'] = 0
+			rf2ethos.mspSpeedTestStats['retries'] = 0
+			rf2ethos.mspSpeedTestStats['success'] = 0
+			rf2ethos.mspSpeedTestStats['timeouts'] = 0				
 			rf2ethos.mspSpeedTestStats['count'] = 0
+			
+			
 		end
 
 		-- update progress box
@@ -179,7 +254,7 @@ local function wakeup()
 		if (now - startTestLength) > startTestTime then
 			
 			updateStats()
-		
+			rf2ethos.mspSpeedTest = false
 			startTest = false
 			testLoader:close()
 			testLoaderDisplay = false	
