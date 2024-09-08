@@ -14,16 +14,18 @@ local testLoaderUpdateTime = os.clock()
 local testLoaderStepSize = 100 / (startTestLength/2)
 local testLoaderStepSizeValue = 0
 
+local mspQueryStartTime
+local mspQueryTimeCount = 0
 local getMSPCount = 0
 
 local mspSpeedTest = false
 mspSpeedTestStats = {}
-mspSpeedTestStats['count'] = 0
+mspSpeedTestStats['total'] = 0
 mspSpeedTestStats['success'] = 0
 mspSpeedTestStats['total'] = 0
 mspSpeedTestStats['retries'] = 0
 mspSpeedTestStats['timeouts'] = 0
-
+mspSpeedTestStats['checksum'] = 0
 
 local function openPage(pidx, title, script)
 
@@ -31,9 +33,8 @@ local function openPage(pidx, title, script)
     rf2ethos.lastTitle = title
     rf2ethos.lastScript = script
 
- 
-    local windowWidth = rf2ethos.config.lcdWidth
-    local windowHeight = rf2ethos.config.lcdHeight
+    local w, h = rf2ethos.utils.getWindowSize()
+
 
     local y = rf2ethos.radio.linePaddingTop
 
@@ -43,9 +44,9 @@ local function openPage(pidx, title, script)
 
     local buttonW = 100
 	local buttonWs = buttonW  - (buttonW  * 20) / 100
-    local x = windowWidth - buttonWs
+    local x = w - 10
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x -5 - buttonW, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x -5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -58,10 +59,23 @@ local function openPage(pidx, title, script)
     })
     rf2ethos.formNavigationFields['menu']:focus()
 
+    -- ACTION BUTTON
+	rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+		text = "*",
+		icon = nil,
+		options = FONT_S,
+		paint = function()
+		end,
+		press = function()
+				triggerStart = true
+		end
+	})
+
+
     -- HELP BUTTON
 	local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
 	local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-	rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+	rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x  - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
 		text = "?",
 		icon = nil,
 		options = FONT_S,
@@ -76,36 +90,33 @@ local function openPage(pidx, title, script)
 		end
 	})
 
-
-
-
-
-	--line['intro'] = form.addLine("")
-	--form.addStaticText(line['intro'], {x=0,y=rf2ethos.radio.linePaddingTop,w=windowWidth,h=rf2ethos.radio.formRowHeight}, "Please press that start button to commence testing your data link.")
-
-
 	line['total'] = form.addLine("Total queries")
     fields['total'] = form.addTextField(line['total'], nil, function() return "0" end, function(value) end)
 	fields['total']:enable(false)
 	
-	line['success'] = form.addLine("Successfull queries")
+	line['success'] = form.addLine("Successful queries")
     fields['success'] = form.addTextField(line['success'], nil, function() return "0" end, function(value) end)
 	fields['success']:enable(false)
 
-	line['timeouts'] = form.addLine("Timed out queries")
+	line['timeouts'] = form.addLine("Timeouts")
     fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return "0" end, function(value) end)
 	fields['timeouts']:enable(false)
  
-	line['retries'] = form.addLine("Protocol retries")
+	line['retries'] = form.addLine("Retries")
     fields['retries'] = form.addTextField(line['retries'], nil, function() return "0" end, function(value) end)
 	fields['retries']:enable(false)
+
+	line['checksum'] = form.addLine("Checksum errors")
+    fields['checksum'] = form.addTextField(line['checksum'], nil, function() return "0" end, function(value) end)
+	fields['checksum']:enable(false)
 
 	line['time'] = form.addLine("Average query time")
     fields['time'] = form.addTextField(line['time'], nil, function() return "0s" end, function(value) end)
 	fields['time']:enable(false)
+
+
  
-	line['start'] = form.addLine("")
-    fields['start'] = form.addTextButton(line['start'], nil, "TEST", function() triggerStart = true end)
+
 
 
 	formLoaded = true
@@ -113,7 +124,7 @@ end
 
 local function updateStats()
 
-    fields['total'] = form.addTextField(line['total'], nil, function() return mspSpeedTestStats['count'] end, function(value) end)
+    fields['total'] = form.addTextField(line['total'], nil, function() return mspSpeedTestStats['total'] end, function(value) end)
 	fields['total']:enable(false)
 
     fields['retries'] = form.addTextField(line['retries'], nil, function() return mspSpeedTestStats['retries'] end, function(value) end)
@@ -122,17 +133,20 @@ local function updateStats()
     fields['timeouts'] = form.addTextField(line['timeouts'], nil, function() return mspSpeedTestStats['timeouts'] end, function(value) end)
 	fields['timeouts']:enable(false)
 
+    fields['checksum'] = form.addTextField(line['checksum'], nil, function() return mspSpeedTestStats['checksum'] end, function(value) end)
+	fields['checksum']:enable(false)
+
 	-- sometimes we get an exception where we close the dialog before final query.. and it shift result be 1
 	-- catch this and show correct
-	if (mspSpeedTestStats['success'] == mspSpeedTestStats['count'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
-		fields['success'] = form.addTextField(line['success'], nil, function() return mspSpeedTestStats['count'] end, function(value) end)
+	if (mspSpeedTestStats['success'] == mspSpeedTestStats['total'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
+		fields['success'] = form.addTextField(line['success'], nil, function() return mspSpeedTestStats['total'] end, function(value) end)
 		fields['success']:enable(false)	
 	else
 		fields['success'] = form.addTextField(line['success'], nil, function() return mspSpeedTestStats['success'] end, function(value) end)
 		fields['success']:enable(false)
 	end
 
-	local avgQueryTime = rf2ethos.utils.round(startTestLength / mspSpeedTestStats['count'],2) .. "s"
+	local avgQueryTime = rf2ethos.utils.round(mspQueryTimeCount / mspSpeedTestStats['total'],2) .. "s"
     fields['time'] = form.addTextField(line['time'], nil, function() return avgQueryTime end, function(value) end)
 	fields['time']:enable(false)
 
@@ -217,7 +231,7 @@ local function wakeup()
         form.openDialog({
             width = nil,
             title = "Start",
-            message = "Click OK to start testing your rf systems msp performance?",
+            message = "Would you like to start the test?  It will take "..startTestLength.."s to complete.",
             buttons = buttons,
             wakeup = function()
             end,
@@ -246,7 +260,7 @@ local function wakeup()
 			mspSpeedTestStats['retries'] = 0
 			mspSpeedTestStats['success'] = 0
 			mspSpeedTestStats['timeouts'] = 0				
-			mspSpeedTestStats['count'] = 0
+			mspSpeedTestStats['total'] = 0
 			
 			
 		end
@@ -270,7 +284,8 @@ local function wakeup()
 
 		-- do msp query
 		if rf2ethos.mspQueue:isProcessed() then
-			mspSpeedTestStats['count'] = mspSpeedTestStats['count'] + 1
+			mspSpeedTestStats['total'] = mspSpeedTestStats['total'] + 1
+			mspQueryStartTime = os.clock()
 			getMSP()
 		end
 	
@@ -279,36 +294,29 @@ local function wakeup()
 
 end
 
-
-
 function mspSuccess(self)
 		if mspSpeedTest == true then
-				if mspSpeedTestStats['success'] == nil then
-					mspSpeedTestStats['success'] = 0
-				else
-					mspSpeedTestStats['success'] = mspSpeedTestStats['success'] + 1
-				end
+			mspQueryTimeCount = mspQueryTimeCount + os.clock() - mspQueryStartTime
+			mspSpeedTestStats['success'] = mspSpeedTestStats['success'] + 1
 		end	
 end
 
 function mspTimeout(self)
 		if mspSpeedTest == true then
-				if mspSpeedTestStats['timeouts'] == nil then
-					mspSpeedTestStats['timeouts'] = 0
-				else
-					mspSpeedTestStats['timeouts'] = mspSpeedTestStats['timeouts'] + 1
-				end
+			mspSpeedTestStats['timeouts'] = mspSpeedTestStats['timeouts'] + 1
 		end	
 end
 
 function mspRetry(self)
 	if mspSpeedTest == true then
-		if mspSpeedTestStats['retries'] == nil then
-			mspSpeedTestStats['retries'] = 0
-		else
-			mspSpeedTestStats['retries'] = mspSpeedTestStats['retries'] + (self.retryCount - 1)
-		end
+		mspSpeedTestStats['retries'] = mspSpeedTestStats['retries'] + (self.retryCount - 1)
 	end
+end
+
+function mspChecksum(self)
+		if mspSpeedTest == true then
+			mspSpeedTestStats['checksum'] = mspSpeedTestStats['checksum'] + 1
+		end	
 end
 
 rf2ethos.uiState = rf2ethos.uiStatus.pages
@@ -318,5 +326,6 @@ return {title = "Msp speed",
 		mspRetry = mspRetry,
 		mspSuccess = mspSuccess,
 		mspTimeout = mspTimeout,
+		mspChecksum = mspChecksum,
 		wakeup = wakeup, 
 		event = event}

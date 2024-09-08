@@ -487,7 +487,7 @@ function rf2ethos.wakeup(widget)
     -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 then
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 2 then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
     end

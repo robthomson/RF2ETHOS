@@ -43,7 +43,8 @@ return {
                                                    progress dialog will not close.  or use postLoad to trigger this.
      mspRetry = mspRetry,                       -- A hook into msp queue - runs on every msp retry
      mspSuccess = mspSuccess,                   -- A hook into msp success - runs on every msp sucess
-     mspTimeout = mspTimeout,                   -- A hook into msp timeout - runs on every msp timeout                                                  
+     mspTimeout = mspTimeout,                   -- A hook into msp timeout - runs on every msp timeout 
+     mspChecksum = mspChecksum,                 -- A hook called every time a checksum error occurs	 
 }
 
 == 
