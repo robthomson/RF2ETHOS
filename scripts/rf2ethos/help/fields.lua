@@ -10,6 +10,7 @@ return {
     servoScalePos = {t = "Servo positive scaling."},
     servoRate = {t = "Servo PWM rate."},
     servoSpeed = {t = "Servo motion speed in milliseconds."},
+	servoFlags = {t = "0 = Default, 1=Reverse, 2 = Geo Correction, 3 = Reverse + Geo Correction"},
 
     --
     -- mixer.lua
