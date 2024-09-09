@@ -39,8 +39,8 @@ fields[#fields + 1] = {t = "Scale Positive", help = "servoScalePos", min = 100, 
 
 fields[#fields + 1] = {t = "Rate", help = "servoRate", min = 50, max = 5000, default = 333, unit = "Hz", vals = {12, 13}}
 fields[#fields + 1] = {t = "Speed", help = "servoSpeed", min = 0, max = 60000, default = 0, unit = "ms", vals = {14, 15}}
-fields[#fields + 1] = {t = "Flags", help = "servoFlags",min = 0, max = 3, default = 0, vals = {16, 18}}
-
+fields[#fields + 1] = {t = "Flags", help = "servoFlags", disable=true, min = 0, max = 3, default = 0, vals = {16, 18}}
+--fields[#fields + 1] = {t = "Flags", tableIdxInc=-1, table={"NONE","REVERSE","GEOMETRY","REVERSE & GEOMETRY"}, default = 0, vals = {16, 18}}
 
 local function postRead(self)
 
