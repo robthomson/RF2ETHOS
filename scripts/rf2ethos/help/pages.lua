@@ -124,10 +124,15 @@ data["rates_advanced"]["TEXT"] = {
     "Dynamics: Applied regardless of rates type. Typically left on defaults but can be adjusted to smooth heli movements, like with scale helis."
 }
 
--- HARDWARE - SERVO
+-- HARDWARE - SERVO TOOL
 data["servos"] = {}
 data["servos"]["qrCODE"] = "gfx/qr/servos.png"
-data["servos"]["TEXT"] = {
+data["servos"]["TEXT"] = {"Please select the servo you would like to configure from the list below."}
+
+-- HARDWARE - SERVO TOOL
+data["servos_tool"] = {}
+data["servos_tool"]["qrCODE"] = "gfx/qr/servos.png"
+data["servos_tool"]["TEXT"] = {
     "Servo: Select the servo you would like to edit.", "Center: Adjust the center position of the servo.", "Minimum/Maximum: Adjust the end points of the selected servo.",
     "Scale: Adjust the amount the servo moves for a given input.", "Rate: The frequency the servo runs best at - check with manufacturer.",
     "Speed: The speed the servo moves. Generally only used for the cyclic servos to help the swash move evenly. Optional - leave all at 0 if unsure."
@@ -184,9 +189,6 @@ data["select_profile"]["TEXT"] = {
 -- SELECT PROFILE
 data["msp_speed"] = {}
 data["msp_speed"]["qrCODE"] = nil
-data["msp_speed"]["TEXT"] = {
-    "This tool attempt to determine the quality of your msp data link by performing as many large Msp queries within 30 seconds as possible.",
-
-}
+data["msp_speed"]["TEXT"] = {"This tool attempt to determine the quality of your msp data link by performing as many large Msp queries within 30 seconds as possible."}
 
 return {data = data}

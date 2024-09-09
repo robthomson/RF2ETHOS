@@ -56,12 +56,7 @@ function MspQueueController:processQueue()
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
 
-			if rf2ethos.Page ~= nil then
-				if rf2ethos.Page.mspRetry then
-					rf2ethos.Page.mspRetry(self)
-				end
-			end
-
+            if rf2ethos.Page ~= nil then if rf2ethos.Page.mspRetry then rf2ethos.Page.mspRetry(self) end end
 
         end
 
@@ -106,26 +101,16 @@ function MspQueueController:processQueue()
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
 
+        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspSuccess then rf2ethos.Page.mspSuccess() end end
 
-		if rf2ethos.Page ~= nil then
-			if rf2ethos.Page.mspSuccess then
-				rf2ethos.Page.mspSuccess()
-			end
-		end
-		
-		
     elseif self.retryCount > self.maxRetries then
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
         if self.currentMessage.errorHandler then self.currentMessage:errorHandler() end
         self.currentMessage = nil
 
-		if rf2ethos.Page ~= nil then
-			if rf2ethos.Page.mspTimeout then
-				rf2ethos.Page.mspTimeout()
-			end
-		end
-		
+        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspTimeout then rf2ethos.Page.mspTimeout() end end
+
     end
 end
 
