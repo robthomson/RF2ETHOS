@@ -126,11 +126,7 @@ local function mspReceivedReply(payload)
     mspStarted = false
     -- check CRC
     if mspRxCRC ~= payload[idx] and version == 0 then
-		if rf2ethos.Page ~= nil then
-			if rf2ethos.Page.mspChecksum then
-				rf2ethos.Page.mspChecksum(payload)
-			end
-		end	
+        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspChecksum then rf2ethos.Page.mspChecksum(payload) end end
         -- rf2ethos.utils.log("  mspReceivedReply:  payload checksum incorrect, message failed!")
         -- rf2ethos.utils.log("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
         -- rf2ethos.utils.log("    CRC from payload:     0x"..string.format("%X", payload[idx]))
