@@ -118,6 +118,7 @@ local function openPage(pidx, title, script)
             end,
             press = function()
                 rf2ethos.menuLastSelected["servos"] = pidx
+                rf2ethos.currentServoIndex = pidx
                 rf2ethos.ui.progessDisplay()
                 rf2ethos.ui.openPage(pidx, pvalue.title, "servos_tool.lua")
 

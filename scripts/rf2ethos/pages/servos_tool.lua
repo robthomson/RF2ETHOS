@@ -9,6 +9,11 @@ local triggerCenterChange = false
 local currentServoCenter
 local lastSetServoCenter
 local lastServoChangeTime = os.clock()
+local servoIndex = rf2ethos.currentServoIndex - 1
+local isSaving = false
+
+local servoCount
+local configs = {}
 
 if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
     servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT"}
@@ -16,104 +21,50 @@ else
     servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
 end
 
-fields[#fields + 1] = {
-    t = "Servo",
-    min = 0,
-    max = 100,
-    value = rf2ethos.menuLastSelected["servos"] - 1,
-    notableIdxInc = -1,
-    vals = {1},
-    table = servoTable,
-    disable = true,
-    onChange = function(self, value)
-        rf2ethos.Page.servoChanged(rf2ethos.Page, value)
-    end
-}
+fields[1] = {t = "Servo",min = 0,max = 100,value = servoTable[servoIndex+1], type = 3, disable=true}
+fields[2] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500}
+fields[3] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700}
+fields[4] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700}
+fields[5] = {t = "Scale Negative", help = "servoScaleNeg", min = 100, max = 1000, default = 500}
+fields[6] = {t = "Scale Positive", help = "servoScalePos", min = 100, max = 1000, default = 500}
+fields[7] = {t = "Rate", help = "servoRate", min = 50, max = 5000, default = 333, unit = "Hz"}
+fields[8] = {t = "Speed", help = "servoSpeed", min = 0, max = 60000, default = 0, unit = "ms"}
+fields[9] = {t = "Reverse", help = "servoReverse", min = 0, max = 1, default = 0, table = {"NO", "YES"}}
+fields[10] = {t = "Geometry", help = "servoGeometry", min = 0, max = 1, default = 0, table = {"NO", "YES"}}
+--fields[9] = {t = "Flags", tableIdxInc = -1, table = {"NONE", "REVERSE", "GEOMETRY", "REVERSE & GEOMETRY"}, default = 0}
 
-fields[#fields + 1] = {t = "Center", help = "servoMid", min = 50, max = 2250, default = 1500, vals = {2, 3}, disable = false}
-fields[#fields + 1] = {t = "Minimum", help = "servoMin", min = -1000, max = 1000, default = -700, vals = {4, 5}}
-fields[#fields + 1] = {t = "Maximum", help = "servoMax", min = -1000, max = 1000, default = 700, vals = {6, 7}}
-
-fields[#fields + 1] = {t = "Scale Negative", help = "servoScaleNeg", min = 100, max = 1000, default = 500, vals = {8, 9}}
-fields[#fields + 1] = {t = "Scale Positive", help = "servoScalePos", min = 100, max = 1000, default = 500, vals = {10, 11}}
-
-fields[#fields + 1] = {t = "Rate", help = "servoRate", min = 50, max = 5000, default = 333, unit = "Hz", vals = {12, 13}}
-fields[#fields + 1] = {t = "Speed", help = "servoSpeed", min = 0, max = 60000, default = 0, unit = "ms", vals = {14, 15}}
--- fields[#fields + 1] = {t = "Flags", help = "servoFlags", disable=true, min = 0, max = 3, default = 0, vals = {16}}
-fields[#fields + 1] = {t = "Flags", tableIdxInc = -1, table = {"NONE", "REVERSE", "GEOMETRY", "REVERSE & GEOMETRY"}, default = 0, vals = {16, 18}}
-
-local function postRead(self)
-
-    self.servoCount = self.values[1]
-    if rf2ethos.lastServoCount ~= self.servoCount then rf2ethos.lastServoCount = self.servoCount end
-
-    self.servoConfiguration = {}
-    for i = 1, self.servoCount do
-        self.servoConfiguration[i] = {}
-        for j = 1, 16 do self.servoConfiguration[i][j] = self.values[1 + (i - 1) * 16 + j] end
-    end
-    if rf2ethos.lastChangedServo == nil then rf2ethos.lastChangedServo = 1 end
-    self.setValues(self, rf2ethos.lastChangedServo)
-    self.minBytes = 1 + 16
-end
-
-local function postLoad(self)
-
-    -- if rf2ethos.config.ethosRunningVersion >= 1415 then rf2ethos.Page.servoCenterFocusAllOff(self) end
-
-    currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
-    lastSetServoCenter = currentServoCenter
-
-    -- refresh form to show right details
-    rf2ethos.Page.servoChanged(rf2ethos.Page, rf2ethos.menuLastSelected["servos"])
-
-    rf2ethos.triggers.isReady = true
-end
-
-local function setValues(self, servoIndex)
-    self.values = {}
-    self.values[1] = servoIndex
-    for i = 1, 16 do self.values[1 + i] = self.servoConfiguration[servoIndex][i] end
-end
-
-local function servoChanged(self, servoIndex)
-    rf2ethos.lastChangedServo = servoIndex
-    self.setValues(self, rf2ethos.lastChangedServo)
-    rf2ethos.dataBindFields()
-end
 
 local function servoCenterFocusAllOn(self)
 
     rf2ethos.audio.playServoOverideEnable = true
 
-    for i = 0, #self.servoConfiguration do
-        local servoIndex = i
+    for i = 0, #configs do
         local message = {
             command = 193, -- MSP_SET_SERVO_OVERRIDE
-            payload = {servoIndex}
+            payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 0)
         rf2ethos.mspQueue:add(message)
     end
     rf2ethos.triggers.isReady = true
+   rf2ethos.triggers.closeProgressLoader = true   
 end
 
 local function servoCenterFocusAllOff(self)
 
-    for i = 0, #self.servoConfiguration do
-        local servoIndex = i
+    for i = 0, #configs do
         local message = {
             command = 193, -- MSP_SET_SERVO_OVERRIDE
-            payload = {servoIndex}
+            payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 2001)
         rf2ethos.mspQueue:add(message)
     end
     rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.closeProgressLoader = true    
 end
 
 local function servoCenterFocusOff(self)
-    servoIndex = math.floor(rf2ethos.Page.fields[1].value) - 1
     local message = {
         command = 193, -- MSP_SET_SERVO_OVERRIDE
         payload = {servoIndex}
@@ -121,11 +72,10 @@ local function servoCenterFocusOff(self)
     rf2ethos.mspHelper.writeU16(message.payload, 2001)
     rf2ethos.mspQueue:add(message)
     rf2ethos.triggers.isReady = true
-
+    rf2ethos.triggers.closeProgressLoader = true
 end
 
 local function servoCenterFocusOn(self)
-    servoIndex = math.floor(rf2ethos.Page.fields[1].value) - 1
     local message = {
         command = 193, -- MSP_SET_SERVO_OVERRIDE
         payload = {servoIndex}
@@ -133,25 +83,34 @@ local function servoCenterFocusOn(self)
     rf2ethos.mspHelper.writeU16(message.payload, 0)
     rf2ethos.mspQueue:add(message)
     rf2ethos.triggers.isReady = true
-
+    rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.triggers.closeProgressLoader = true    
 end
 
-local function servoCenterChanged(self)
+local function saveServoSettings(self)
 
-    if rf2ethos.Page.fields[1].value == nil then
-        rf2ethos.utils.log("Servo index was nil.. aborting")
-        return
-    end
 
-    local servoIndex = rf2ethos.Page.fields[1].value - 1
-    local servoCenter = math.floor(rf2ethos.Page.fields[2].value)
-    local servoMin = math.floor(rf2ethos.Page.fields[3].value)
-    local servoMax = math.floor(rf2ethos.Page.fields[4].value)
-    local servoScaleNeg = math.floor(rf2ethos.Page.fields[5].value)
-    local servoScalePos = math.floor(rf2ethos.Page.fields[6].value)
-    local servoRate = math.floor(rf2ethos.Page.fields[7].value)
-    local servoSpeed = math.floor(rf2ethos.Page.fields[8].value)
-    local servoFlags = math.floor(rf2ethos.Page.fields[9].value)
+    local servoCenter = math.floor(configs[servoIndex]['mid'])
+    local servoMin = math.floor(configs[servoIndex]['min'])
+    local servoMax = math.floor(configs[servoIndex]['max'])
+    local servoScaleNeg = math.floor(configs[servoIndex]['scaleNeg'])
+    local servoScalePos = math.floor(configs[servoIndex]['scalePos'])
+    local servoRate = math.floor(configs[servoIndex]['rate'])
+    local servoSpeed = math.floor(configs[servoIndex]['speed'])
+    --local servoFlags = math.floor(configs[servoIndex]['flags'])
+    local servoReverse = math.floor(configs[servoIndex]['reverse'])
+    local servoGeometry = math.floor(configs[servoIndex]['geometry'])
+
+    if servoReverse == 0 and servoGeometry == 0 then
+        servoFlags = 0
+    elseif servoReverse == 1 and servoGeometry == 0 then
+        servoFlags = 1
+    elseif servoReverse == 0 and servoGeometry == 1 then
+        servoFlags = 2
+    elseif servoReverse == 1 and servoGeometry == 1 then
+        servoFlags = 3 
+    end   
+
 
     local message = {
         command = 212, -- MSP_SET_SERVO_CONFIGURATION
@@ -175,10 +134,55 @@ local function servoCenterChanged(self)
         if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
     end
-    rf2ethos.utils.log("Setting center to: " .. servoCenter)
     rf2ethos.mspQueue:add(message)
 
 end
+
+
+local function onSaveMenuProgress()
+    rf2ethos.ui.progessDisplay("Saving...", "Saving data...")
+    saveServoSettings()
+    rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.closeProgressLoader = true    
+end
+
+
+
+local function onSaveMenu()
+        local buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+                    rf2ethos.audio.playSaving = true
+                    isSaving = true
+
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+        local theTitle = "Save settings"
+        local theMsg = "Save current page to flight controller"
+
+        form.openDialog({
+            width = nil,
+            title = theTitle,
+            message = theMsg,
+            buttons = buttons,
+            wakeup = function()
+            end,
+            paint = function()
+            end,
+            options = TEXT_LEFT
+        })
+
+        rf2ethos.triggers.triggerSave = false
+end    
+
 
 local function onToolMenu(self)
 
@@ -196,7 +200,7 @@ local function onToolMenu(self)
                     return true
                 end
             }, {
-                label = servoTable[math.floor(rf2ethos.Page.fields[1].value)],
+                label = servoTable[servoIndex+1],
                 action = function()
 
                     -- we cant launch the loader here to se rely on the modules
@@ -281,10 +285,15 @@ end
 
 local function wakeup(self)
 
-    -- filter changes to servo center - essentially preventing queue getting flooded	
+    if isSaving == true then
+        onSaveMenuProgress()
+        isSaving = false
+    end
+
+    -- filter changes to servo center - essentially preventing queue getting flooded    
     if inFocus == true or inOverRide == true then
 
-        currentServoCenter = math.floor(rf2ethos.Page.fields[2].value)
+        currentServoCenter = configs[servoIndex]['mid']
 
         local now = os.clock()
         local settleTime = 0.85
@@ -292,7 +301,7 @@ local function wakeup(self)
             if currentServoCenter ~= lastSetServoCenter then
                 lastSetServoCenter = currentServoCenter
                 lastServoChangeTime = now
-                self.servoCenterChanged(self)
+                self.saveServoSettings(self)
             end
         end
     end
@@ -331,38 +340,221 @@ end
 
 function preSavePayload(payload)
     -- shift index to correct number
-    local servoIndex = math.floor(rf2ethos.Page.fields[1].value) - 1
     payload[1] = servoIndex
     return payload
 end
 
+local function getServoConfigurations(callback, callbackParam)
+    local message = {
+        command = 120, -- MSP_SERVO_CONFIGURATIONS
+        processReply = function(self, buf)
+            servoCount = rf2ethos.mspHelper.readU8(buf)
+            --print("Servo count "..tostring(servoCount))
+            for i = 0, servoCount-1 do
+                local config = {}
+                config.mid = rf2ethos.mspHelper.readU16(buf)
+                config.min = rf2ethos.mspHelper.readS16(buf)
+                config.max = rf2ethos.mspHelper.readS16(buf)
+                config.scaleNeg = rf2ethos.mspHelper.readU16(buf)
+                config.scalePos = rf2ethos.mspHelper.readU16(buf)
+                config.rate = rf2ethos.mspHelper.readU16(buf)
+                config.speed = rf2ethos.mspHelper.readU16(buf)
+                config.flags = rf2ethos.mspHelper.readU16(buf)
+                        
+                configs[i] = config
+                
+            end
+            callback(callbackParam)
+        end,
+        -- 2 servos
+        --simulatorResponse = {
+        --    2,
+        --    220, 5, 68, 253, 188, 2, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0,
+        --    221, 5, 68, 253, 188, 2, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+        --}
+        -- 4 servos
+        simulatorResponse = {
+                4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5,
+                212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+        }        
+    }
+    rf2ethos.mspQueue:add(message)
+end
+
+local function getServoConfigurationsEnd(callbackParam)
+
+
+    if configs[servoIndex]['mid'] ~= nil then
+        local idx = 2
+        local minValue = 50
+        local maxValue = 2250
+        local defaultValue = 1500
+        local suffix = nil
+        local helpTxt = rf2ethos.fieldHelpTxt['servoMid']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['mid'] end, function(value) configs[servoIndex]['mid'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['min'] ~= nil then
+        local idx = 3
+        local minValue = -1000
+        local maxValue = 1000
+        local defaultValue = -700
+        local suffix = nil
+        local helpTxt = rf2ethos.fieldHelpTxt['servoMin']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['min'] end, function(value) configs[servoIndex]['min'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['max'] ~= nil then
+        local idx = 4
+        local minValue = -1000
+        local maxValue = 1000
+        local defaultValue = 700
+        local suffix = nil
+        local helpTxt = rf2ethos.fieldHelpTxt['servoMax']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['max'] end, function(value) configs[servoIndex]['max'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['scaleNeg'] ~= nil then
+        local idx = 5
+        local minValue = 100
+        local maxValue = 1000
+        local defaultValue = 500
+        local suffix = nil
+        local helpTxt = rf2ethos.fieldHelpTxt['servoScaleNeg']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['scaleNeg'] end, function(value) configs[servoIndex]['scaleNeg'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['scalePos'] ~= nil then
+        local idx = 6
+        local minValue = 100
+        local maxValue = 1000
+        local defaultValue = 500
+        local suffix = nil
+        local helpTxt = rf2ethos.fieldHelpTxt['servoScalePos']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['scalePos'] end, function(value) configs[servoIndex]['scalePos'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['rate'] ~= nil then
+        local idx = 7
+        local minValue = 50
+        local maxValue = 5000
+        local defaultValue = 333
+        local suffix = "Hz"
+        local helpTxt = rf2ethos.fieldHelpTxt['servoRate']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['rate'] end, function(value) configs[servoIndex]['rate'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['speed'] ~= nil then
+        local idx = 8
+        local minValue = 0
+        local maxValue = 60000
+        local defaultValue = 0
+        local suffix = "ms"
+        local helpTxt = rf2ethos.fieldHelpTxt['servoSpeed']['t']
+        rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function() return configs[servoIndex]['speed'] end, function(value) configs[servoIndex]['speed'] = value end)
+        if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
+        if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
+        if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+    end
+
+    if configs[servoIndex]['flags'] ~= nil then
+        local idx = 9
+        local minValue = 0
+        local maxValue = 1000
+        local table = {"NO", "YES"}
+        local tableIdxInc = -1        
+        local value
+        if configs[servoIndex]['flags'] == 1 or configs[servoIndex]['flags'] == 3 then
+            configs[servoIndex]['reverse'] = 1
+        else
+            configs[servoIndex]['reverse'] = 0
+        end    
+        rf2ethos.formFields[idx] = form.addChoiceField(rf2ethos.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function() return configs[servoIndex]['reverse'] end, function(value) configs[servoIndex]['reverse'] = value end)
+    end
+
+    if configs[servoIndex]['flags'] ~= nil then
+        local idx = 10
+        local minValue = 0
+        local maxValue = 1000
+        local table = {"NO", "YES"}
+        local tableIdxInc = -1 
+        local value
+        if configs[servoIndex]['flags'] == 2 or configs[servoIndex]['flags'] == 3 then
+            configs[servoIndex]['geometry'] = 1
+        else
+            configs[servoIndex]['geometry'] = 0
+        end    
+        rf2ethos.formFields[idx] = form.addChoiceField(rf2ethos.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function() return configs[servoIndex]['geometry'] end, function(value) configs[servoIndex]['geometry'] = value  end)
+    end
+
+    
+    rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.closeProgressLoader = true
+end
+
+
+
+local function readMSP()
+    getServoConfigurations(getServoConfigurationsEnd)
+end
+
+local function event(widget, category, value, x, y)
+
+    if value == KEY_ENTER_LONG then
+        onSaveMenu()
+        system.killEvents(KEY_ENTER_LONG)
+        return true
+    end
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openPage(pidx, "Servos", "servos.lua")
+        return true
+    end
+    
+   return false
+end
+
 return {
-    read = 120, -- msp_SERVO_CONFIGURATIONS
-    write = 212, -- msp_SET_SERVO_CONFIGURATION
+    read = readMSP, -- MSP_SERVO_CONFIGURATIONS
+    write = nil, -- 212, -- MSP_SET_SERVO_CONFIGURATION -- we handle this separately due to flag mangling
     title = "Servos",
     reboot = false,
     eepromWrite = true,
     minBytes = 33,
     labels = labels,
     fields = fields,
-    simulatorResponse = {
-        4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0, 120, 5,
-        212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
-    },
-    postRead = postRead,
-    postLoad = postLoad,
+    event = event,
     setValues = setValues,
     servoChanged = servoChanged,
-    preSavePayload = preSavePayload,
     servoCenterFocusOn = servoCenterFocusOn,
     servoCenterFocusOff = servoCenterFocusOff,
     servoCenterFocusAllOn = servoCenterFocusAllOn,
     servoCenterFocusAllOff = servoCenterFocusAllOff,
-    servoCenterChanged = servoCenterChanged,
+    saveServoSettings = saveServoSettings,
     onToolMenu = onToolMenu,
     wakeup = wakeup,
+    openPage = openPage,
     onNavMenu = onNavMenu,
-    pageTitle = "SERVOS",
+    onSaveMenu = onSaveMenu,
+    pageTitle = "Servos",
     navButtons = {menu = true, save = true, reload = true, tool = true, help = true}
 
 }
