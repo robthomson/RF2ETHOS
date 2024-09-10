@@ -718,7 +718,18 @@ function rf2ethos.wakeupUI()
     if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then rf2ethos.protocol.saveTimeout = rf2ethos.config.watchdogParam end
     if rf2ethos.dialogs.saveDisplay == true then
         if rf2ethos.dialogs.saveWatchDog ~= nil then
-            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (tonumber(rf2ethos.protocol.saveTimeout)) then rf2ethos.ui.progessDisplaySaveCloseAllowed(true) end
+            if (os.clock() - rf2ethos.dialogs.saveWatchDog) > (tonumber(rf2ethos.protocol.saveTimeout)) or (rf2ethos.dialogs.saveProgressCounter > 100 and rf2ethos.mspQueue:isProcessed()) then
+                rf2ethos.audio.playTimeout = true
+                rf2ethos.ui.progessDisplaySaveMessage("Error.. we timed out")
+                rf2ethos.ui.progessDisplaySaveCloseAllowed(true)
+                rf2ethos.dialogs.save:value(100)
+                rf2ethos.dialogs.saveProgressCounter = 0
+                rf2ethos.dialogs.saveDisplay = false
+                rf2ethos.triggers.isSaving = false
+
+                rf2ethos.Page = rf2ethos.PageTmp
+                rf2ethos.PageTmp = {}
+            end
         end
     end
 
