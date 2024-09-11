@@ -33,6 +33,7 @@ rf2ethos.config = {}
 rf2ethos.config = config
 rf2ethos.config.tailMode = nil
 rf2ethos.config.swashMode = nil
+rf2ethos.config.servoCount = nil
 
 rf2ethos.triggers = {}
 rf2ethos.triggers = triggers
@@ -68,8 +69,11 @@ rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
 rf2ethos.wakeupSchedulerUI = os.clock()
+rf2ethos.wakeupSchedulerUIInit = false
 rf2ethos.wakeupSchedulerForm = os.clock()
+rf2ethos.wakeupSchedulerFormInit = false
 rf2ethos.wakeupSchedulerBgChecks = os.clock()
+rf2ethos.wakeupSchedulerBgChecksInit = false
 rf2ethos.menuLastSelected = {}
 
 rf2ethos.audio = {}
@@ -473,24 +477,27 @@ function rf2ethos.wakeup(widget)
 
     -- keep cpu load down by running UI at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 then
+    if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 or rf2ethos.wakeupSchedulerUIInit == true then
         rf2ethos.wakeupSchedulerUI = now
         rf2ethos.wakeupUI()
+        rf2ethos.wakeupSchedulerUIInit = false
     end
 
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerForm) >= 0.1 then
+    if (now - rf2ethos.wakeupSchedulerForm) >= 0.1 or rf2ethos.wakeupSchedulerFormInit == true then
         rf2ethos.wakeupSchedulerForm = now
         rf2ethos.wakeupForm()
+        rf2ethos.wakeupSchedulerFormInit = false
     end
 
     -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 then
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 or rf2ethos.wakeupSchedulerBgChecksInit == true then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
+        rf2ethos.wakeupSchedulerBgChecksInit = false
     end
 
 end
@@ -518,10 +525,13 @@ function rf2ethos.wakeupBgChecks()
                 command = 42, -- MIXER
                 processReply = function(self, buf)
                     if #buf >= 10 then
+                        buf.offset = 1
+                        rf2ethos.config.tailMode = rf2ethos.mspHelper.readU16(buf)
+                    
                         local tailMode = buf[2]
-                        local swashMode = buf[5]
+                        local swashMode = buf[6]
+                        rf2ethos.config.swashMode = swashMode
                         rf2ethos.config.tailMode = tailMode
-                        rf2ethos.config.swashMode = tailMode
                         rf2ethos.utils.log("Tail mode: " .. rf2ethos.config.tailMode)
                         rf2ethos.utils.log("Swash mode: " .. rf2ethos.config.swashMode)
                     end
@@ -529,11 +539,27 @@ function rf2ethos.wakeupBgChecks()
                 simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
             }
             rf2ethos.mspQueue:add(message)
-            
-            
-            
+                       
     end
-
+    
+    if (rf2ethos.config.servoCount == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+            local message = {
+                command = 120, -- MIXER
+                processReply = function(self, buf)
+                    if #buf >= 2 then
+                        rf2ethos.config.servoCount = rf2ethos.mspHelper.readU8(buf)
+                    end
+                end,
+                simulatorResponse = {
+                    4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
+                    120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+                }
+            }
+            rf2ethos.mspQueue:add(message)
+                       
+    end    
+    
+    
 end
 
 -- WAKEUPFORM.  RUN A FUNCTION CALLED wakeup THAT IS RETURNED WHEN REQUESTING A PAGE

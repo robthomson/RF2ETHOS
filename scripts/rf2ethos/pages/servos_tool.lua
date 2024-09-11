@@ -12,12 +12,10 @@ local lastServoChangeTime = os.clock()
 local servoIndex = rf2ethos.currentServoIndex - 1
 local isSaving = false
 
+local servoTable
 local servoCount
 local configs = {}
 
-
-
-servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL", "SERVO 5", "SERVO 6", "SERVO 7", "SERVO 8", "SERVO 9", "SERVO 10"}
 
 
 local function servoCenterFocusAllOn(self)
@@ -181,7 +179,7 @@ local function onToolMenu(self)
                     return true
                 end
             }, {
-                label = servoTable[servoIndex + 1],
+                label = servoTable[servoIndex + 1]['title'],
                 action = function()
 
                     -- we cant launch the loader here to se rely on the modules
@@ -330,12 +328,15 @@ local function getServoConfigurations(callback, callbackParam)
         command = 120, -- MSP_SERVO_CONFIGURATIONS
         processReply = function(self, buf)
             servoCount = rf2ethos.mspHelper.readU8(buf)
+            
+            -- update master one in case changed
+            rf2ethos.config.servoCount = servoCount
 
             -- print("Servo count "..tostring(servoCount))
             for i = 0, servoCount - 1 do
                 local config = {}
 
-                config.name = servoTable[servoIndex + 1]
+                config.name = servoTable[servoIndex + 1]['title']
                 config.mid = rf2ethos.mspHelper.readU16(buf)
                 config.min = rf2ethos.mspHelper.readS16(buf)
                 config.max = rf2ethos.mspHelper.readS16(buf)
@@ -382,11 +383,21 @@ local function getServoConfigurationsEnd(callbackParam)
     rf2ethos.triggers.closeProgressLoader = true
 end
 
-local function openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
+local function openPage(idx, title, script, extra1)
+
+    if extra1 ~= nil then
+        servoTable = extra1
+        rf2ethos.servoTableLast =  servoTable 
+    else
+        if rf2ethos.servoTableLast ~= nil then
+            servoTable = rf2ethos.servoTableLast
+        end
+    end
+
 
     configs = {}
     configs[servoIndex] = {}
-    configs[servoIndex]['name'] = servoTable[servoIndex + 1]
+    configs[servoIndex]['name'] = servoTable[servoIndex + 1]['title']
     configs[servoIndex]['mid'] = 0
     configs[servoIndex]['min'] = 0
     configs[servoIndex]['max'] = 0

@@ -127,7 +127,10 @@ data["rates_advanced"]["TEXT"] = {
 -- HARDWARE - SERVO TOOL
 data["servos"] = {}
 data["servos"]["qrCODE"] = "gfx/qr/servos.png"
-data["servos"]["TEXT"] = {"Please select the servo you would like to configure from the list below."}
+data["servos"]["TEXT"] = {"Please select the servo you would like to configure from the list below.",
+                          "Primary flight controls that use the rotoflight mixer will display in the section called 'mixer",
+                          "Any other servos that are not controlled by the primary flight mixer will be displayed in the section called 'Other servos'."
+}
 
 -- HARDWARE - SERVO TOOL
 data["servos_tool"] = {}
