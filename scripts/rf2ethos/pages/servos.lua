@@ -4,6 +4,10 @@ local servoTable = {}
 servoTable = {}
 servoTable['sections'] = {}
 
+if rf2ethos.config.servoCount == nil then
+    rf2ethos.config.servoCount = 4
+end
+
 for i = 1, 16 do
     servoTable[i] = {}
     servoTable[i] = {}
