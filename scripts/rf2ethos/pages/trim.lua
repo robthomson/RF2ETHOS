@@ -21,9 +21,9 @@ fields[#fields + 1] = {t = "Pitch trim %", help = "mixerSwashTrim", xlabel = "li
 
 fields[#fields + 1] = {t = "Col. trim %", help = "mixerSwashTrim", xlabel = "line7", xinline = 1, min = -1000, max = 1000, vals = {16, 17}, decimals = 1, scale = 10}
 
-if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} end
+if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} end
 
-if rf2ethos.tailMode == 0 then fields[#fields + 1] = {t = "Yaw. trim %", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10} end
+if rf2ethos.config.tailMode == 0 then fields[#fields + 1] = {t = "Yaw. trim %", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10} end
 
 local function saveData()
 
@@ -72,9 +72,9 @@ end
 
 local function postLoad(self)
 
-    if rf2ethos.tailMode == nil then
+    if rf2ethos.config.tailMode == nil then
         local v = rf2ethos.Page.values[2]
-        rf2ethos.tailMode = math.floor(v)
+        rf2ethos.config.tailMode = math.floor(v)
         rf2ethos.triggers.reload = true
         return
     end
@@ -84,9 +84,9 @@ local function postLoad(self)
     currentPitchTrim = rf2ethos.Page.fields[2].value
     currentCollectiveTrim = rf2ethos.Page.fields[3].value
 
-    if rf2ethos.tailModeActive == 1 or rf2ethos.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.Page.fields[4].value end
+    if rf2ethos.config.tailModeActive == 1 or rf2ethos.config.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.Page.fields[4].value end
 
-    if rf2ethos.tailModeActive == 0 then currentYawTrim = rf2ethos.Page.fields[4].value end
+    if rf2ethos.config.tailModeActive == 0 then currentYawTrim = rf2ethos.Page.fields[4].value end
     rf2ethos.triggers.isReady = true
 end
 
@@ -128,7 +128,7 @@ local function wakeup(self)
             end
         end
 
-        if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
+        if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then
             currentIdleThrottleTrim = rf2ethos.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85
@@ -141,7 +141,7 @@ local function wakeup(self)
             end
         end
 
-        if rf2ethos.tailMode == 0 then
+        if rf2ethos.config.tailMode == 0 then
             currentYawTrim = rf2ethos.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85

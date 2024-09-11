@@ -3,7 +3,8 @@ local pages = {}
 pages[#pages + 1] = {title = "CYCLIC PITCH", image = "cpitch.png", disabled = false}
 pages[#pages + 1] = {title = "CYCLIC LEFT", image = "cleft.png", disabled = false}
 pages[#pages + 1] = {title = "CYCLIC RIGHT", image = "cright.png", disabled = false}
-if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
+
+if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then
     pages[#pages + 1] = {title = "TAIL", image = "tail.png", disabled = true}
 else
     pages[#pages + 1] = {title = "TAIL", image = "tail.png", disabled = false}

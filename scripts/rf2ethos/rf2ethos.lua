@@ -31,6 +31,8 @@ rf2ethos.compile = compile
 
 rf2ethos.config = {}
 rf2ethos.config = config
+rf2ethos.config.tailMode = nil
+rf2ethos.config.swashMode = nil
 
 rf2ethos.triggers = {}
 rf2ethos.triggers = triggers
@@ -60,7 +62,6 @@ rf2ethos.pageState = rf2ethos.pageStatus.display
 rf2ethos.lastLabel = nil
 rf2ethos.NewRateTable = nil
 rf2ethos.RateTable = nil
-rf2ethos.tailMode = nil
 rf2ethos.fieldHelpTxt = nil
 rf2ethos.protocol = {}
 rf2ethos.radio = {}
@@ -160,7 +161,7 @@ function rf2ethos.resetState()
     rf2ethos.dialogs.progressDisplayEsc = false
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false
-    rf2ethos.tailMode = nil
+    rf2ethos.config.tailMode = nil
     rf2ethos.config.apiVersion = nil
     rf2ethos.audio = {}
 
@@ -487,7 +488,7 @@ function rf2ethos.wakeup(widget)
     -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 2 then
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
     end
@@ -512,19 +513,25 @@ function rf2ethos.wakeupBgChecks()
         rf2ethos.mspQueue:add(message)
     end
 
-    if rf2ethos.tailMode == nil and rf2ethos.mspQueue:isProcessed() then
-        local message = {
-            command = 42, -- MIXER
-            processReply = function(self, buf)
-                if #buf >= 10 then
-                    local mode = buf[2]
-                    rf2ethos.tailMode = mode
-                    rf2ethos.utils.log("Tail mode: " .. rf2ethos.tailMode)
-                end
-            end,
-            simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-        }
-        rf2ethos.mspQueue:add(message)
+    if (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+            local message = {
+                command = 42, -- MIXER
+                processReply = function(self, buf)
+                    if #buf >= 10 then
+                        local tailMode = buf[2]
+                        local swashMode = buf[5]
+                        rf2ethos.config.tailMode = tailMode
+                        rf2ethos.config.swashMode = tailMode
+                        rf2ethos.utils.log("Tail mode: " .. rf2ethos.config.tailMode)
+                        rf2ethos.utils.log("Swash mode: " .. rf2ethos.config.swashMode)
+                    end
+                end,
+                simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+            }
+            rf2ethos.mspQueue:add(message)
+            
+            
+            
     end
 
 end
