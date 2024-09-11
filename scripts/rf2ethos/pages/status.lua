@@ -8,10 +8,10 @@ local summary = {}
 local triggerEraseDataFlash = false
 local enableWakeup = false
 
-fields[1] = {t = "Arming Flags", value = "0", type = 2, disable = true}
-fields[2] = {t = "Dataflash Free Space", value = "0", type = 2, disable = true}
-fields[3] = {t = "Real-time load", value = "0", type = 2, disable = true}
-fields[4] = {t = "CPU load", value = "0", type = 2, disable = true}
+fields[1] = {t = "Arming Flags", value = "", type = 0, disable = true}
+fields[2] = {t = "Dataflash Free Space", value = "", type = 0, disable = true}
+fields[3] = {t = "Real-time load", value = "", type = 0, disable = true}
+fields[4] = {t = "CPU load", value = "", type = 0, disable = true}
 
 local function getStatus()
     local message = {
@@ -151,45 +151,31 @@ local function wakeup()
                 getStatus()
                 getDataflashSummary()
 
+                space = "          "
+
                 if status.armingDisableFlags ~= nil then
-                    local value = armingDisableFlagsToString(status.armingDisableFlags)
-                    rf2ethos.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function()
-                        return value
-                    end, function(newValue)
-                        text = value
-                    end)
-                    rf2ethos.formFields[1]:enable(false)
+                   local value = space .. armingDisableFlagsToString(status.armingDisableFlags)
+                   rf2ethos.formFields[1]:value(value)
                 end
 
                 if summary.supported == true then
-                    local value = getFreeDataflashSpace()
-                    rf2ethos.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function()
-                        return value
-                    end, function(newValue)
-                        text = value
-                    end)
-                    rf2ethos.formFields[2]:enable(false)
+                    local value = space .. getFreeDataflashSpace()
+                    rf2ethos.formFields[2]:value(value)
                 end
 
                 if status.realTimeLoad ~= nil then
-                    local value = status.realTimeLoad
-                    rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function()
-                        return value
-                    end, function(value)
-                    end)
-                    rf2ethos.formFields[3]:suffix("%")
-                    rf2ethos.formFields[3]:decimals(1)
-                    rf2ethos.formFields[3]:enable(false)
+                    local value =  math.floor(status.realTimeLoad /10)
+                    rf2ethos.formFields[3]:value(space ..tostring(value) .. "%")
+                    if value >= 60 then
+                        rf2ethos.formFields[4]:color(RED)
+                    end                    
                 end
                 if status.cpuLoad ~= nil then
-                    local value = status.cpuLoad
-                    rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function()
-                        return value
-                    end, function(value)
-                    end)
-                    rf2ethos.formFields[4]:suffix("%")
-                    rf2ethos.formFields[4]:decimals(1)
-                    rf2ethos.formFields[4]:enable(false)
+                    local value = status.cpuLoad/10
+                    rf2ethos.formFields[4]:value(space .. tostring(value) .. "%")
+                    if value >= 60 then
+                        rf2ethos.formFields[4]:color(RED)
+                    end
                 end
 
                 rf2ethos.triggers.closeProgressLoader = true
