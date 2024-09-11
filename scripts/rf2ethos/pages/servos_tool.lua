@@ -15,11 +15,10 @@ local isSaving = false
 local servoCount
 local configs = {}
 
-if rf2ethos.tailMode == 1 or rf2ethos.tailMode == 2 then
-    servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT"}
-else
-    servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL"}
-end
+
+
+servoTable = {"CYCLIC PITCH", "CYCLIC LEFT", "CYCLIC RIGHT", "TAIL", "SERVO 5", "SERVO 6", "SERVO 7", "SERVO 8", "SERVO 9", "SERVO 10"}
+
 
 local function servoCenterFocusAllOn(self)
 
@@ -331,6 +330,7 @@ local function getServoConfigurations(callback, callbackParam)
         command = 120, -- MSP_SERVO_CONFIGURATIONS
         processReply = function(self, buf)
             servoCount = rf2ethos.mspHelper.readU8(buf)
+
             -- print("Servo count "..tostring(servoCount))
             for i = 0, servoCount - 1 do
                 local config = {}
