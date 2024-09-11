@@ -151,7 +151,7 @@ local function wakeup()
                 getStatus()
                 getDataflashSummary()
 
-                space = "          "
+                local space = "          "
 
                 if status.armingDisableFlags ~= nil then
                    local value = space .. armingDisableFlagsToString(status.armingDisableFlags)
