@@ -607,7 +607,6 @@ end
 return {
     title = "Servos",
     reboot = false,
-    eepromWrite = true,
     event = event,
     setValues = setValues,
     servoChanged = servoChanged,
