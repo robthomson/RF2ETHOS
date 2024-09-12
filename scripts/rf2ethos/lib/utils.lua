@@ -1,5 +1,10 @@
 local utils = {}
 
+function utils.ethosVersion()
+       local environment = system.getVersion()
+       return tonumber(environment.major .. environment.minor .. environment.revision)
+end
+
 function utils.getRssiSensor()
     local rssiSensor
     local rssiNames = {"RSSI", "RSSI 2.4G", "RSSI 900M", "Rx RSSI1", "Rx RSSI2", "RSSI Int", "RSSI Ext"}

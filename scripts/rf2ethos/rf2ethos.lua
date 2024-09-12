@@ -472,6 +472,8 @@ end
 -- MAIN WAKEUP FUNCTION. THIS SIMPLY FARMS OUT AT DIFFERING SCHEDULES TO SUB FUNCTIONS
 function rf2ethos.wakeup(widget)
 
+    print(rf2ethos.utils.ethosVersion())
+
     -- every 0.01 to ensure msp timings work
     rf2ethos.mspQueue:processQueue()
 
@@ -1124,7 +1126,7 @@ function rf2ethos.create()
 
     config.apiVersion = nil
     config.environment = system.getVersion()
-    config.ethosRunningVersion = tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision))
+    config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
 
     rf2ethos.config.audioParam = tonumber(rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio"))
 
@@ -1147,7 +1149,7 @@ function rf2ethos.create()
     rf2ethos.ui.openMainMenu()
 
     -- check the current version of ethos to ensure that it is valid.
-    if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then
+    if rf2ethos.config.ethosRunningVersion < config.ethosVersion then
         if rf2ethos.dialogs.badversionDisplay == false then
             rf2ethos.dialogs.badversionDisplay = true
 
