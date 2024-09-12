@@ -117,13 +117,19 @@ local function saveServoSettings(self)
 
     end
     rf2ethos.mspQueue:add(message)
+    
+    -- write change to epprom
+    local mspEepromWrite = {
+    command = 250, 
+    simulatorResponse = {}
+    }
+    rf2ethos.mspQueue:add(mspEepromWrite)
 
 end
 
 local function onSaveMenuProgress()
     rf2ethos.ui.progessDisplay("Saving...", "Saving data...")
     saveServoSettings()
-    rf2ethos.mspQueue:add(mspEepromWrite)
     rf2ethos.triggers.isReady = true
     rf2ethos.triggers.closeProgressLoader = true
 end
