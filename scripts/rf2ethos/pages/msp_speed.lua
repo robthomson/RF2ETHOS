@@ -27,7 +27,9 @@ mspSpeedTestStats['retries'] = 0
 mspSpeedTestStats['timeouts'] = 0
 mspSpeedTestStats['checksum'] = 0
 
+
 local function openPage(pidx, title, script)
+
 
     rf2ethos.lastIdx = pidx
     rf2ethos.lastTitle = title
@@ -88,100 +90,146 @@ local function openPage(pidx, title, script)
         end
     })
 
-    line['total'] = form.addLine("Total queries")
-    fields['total'] = form.addTextField(line['total'], nil, function()
-        return "0"
-    end, function(value)
-    end)
-    fields['total']:enable(false)
 
-    line['success'] = form.addLine("Successful queries")
-    fields['success'] = form.addTextField(line['success'], nil, function()
-        return "0"
-    end, function(value)
-    end)
-    fields['success']:enable(false)
 
-    line['timeouts'] = form.addLine("Timeouts")
-    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
-        return "0"
-    end, function(value)
-    end)
-    fields['timeouts']:enable(false)
+    if rf2ethos.config.ethosRunningVersion < 1516 then
 
-    line['retries'] = form.addLine("Retries")
-    fields['retries'] = form.addTextField(line['retries'], nil, function()
-        return "0"
-    end, function(value)
-    end)
-    fields['retries']:enable(false)
+        line['total'] = form.addLine("Total queries")
+        fields['total'] = form.addTextField(line['total'], nil, function()
+            return "0"
+        end, function(value)
+        end)
+        fields['total']:enable(false)
 
-    line['checksum'] = form.addLine("Checksum errors")
-    fields['checksum'] = form.addTextField(line['checksum'], nil, function()
-        return "0"
-    end, function(value)
-    end)
-    fields['checksum']:enable(false)
+        line['success'] = form.addLine("Successful queries")
+        fields['success'] = form.addTextField(line['success'], nil, function()
+            return "0"
+        end, function(value)
+        end)
+        fields['success']:enable(false)
 
-    line['time'] = form.addLine("Average query time")
-    fields['time'] = form.addTextField(line['time'], nil, function()
-        return "0s"
-    end, function(value)
-    end)
-    fields['time']:enable(false)
+        line['timeouts'] = form.addLine("Timeouts")
+        fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
+            return "0"
+        end, function(value)
+        end)
+        fields['timeouts']:enable(false)
+
+        line['retries'] = form.addLine("Retries")
+        fields['retries'] = form.addTextField(line['retries'], nil, function()
+            return "0"
+        end, function(value)
+        end)
+        fields['retries']:enable(false)
+
+        line['checksum'] = form.addLine("Checksum errors")
+        fields['checksum'] = form.addTextField(line['checksum'], nil, function()
+            return "0"
+        end, function(value)
+        end)
+        fields['checksum']:enable(false)
+
+        line['time'] = form.addLine("Average query time")
+        fields['time'] = form.addTextField(line['time'], nil, function()
+            return "0s"
+        end, function(value)
+        end)
+        fields['time']:enable(false)
+        
+    else
+
+        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 100, h = rf2ethos.radio.navbuttonHeight}
+
+    
+        line['total'] = form.addLine("Total queries")
+        fields['total'] = form.addStaticText(line['total'], posText, "-")
+
+        line['success'] = form.addLine("Successful queries")
+        fields['success'] = form.addStaticText(line['success'], posText, "-")    
+
+        line['timeouts'] = form.addLine("Timeouts")
+        fields['timeouts'] = form.addStaticText(line['timeouts'], posText, "-")      
+
+        line['retries'] = form.addLine("Retries")
+        fields['retries'] = form.addStaticText(line['retries'], posText, "-")         
+
+        line['checksum'] = form.addLine("Checksum errors")
+        fields['checksum'] = form.addStaticText(line['checksum'], posText, "-")    
+
+        line['time'] = form.addLine("Average query time")
+        fields['time'] = form.addStaticText(line['time'], posText, "-")
+    end
 
     formLoaded = true
 end
 
 local function updateStats()
 
-    fields['total'] = form.addTextField(line['total'], nil, function()
-        return mspSpeedTestStats['total']
-    end, function(value)
-    end)
-    fields['total']:enable(false)
 
-    fields['retries'] = form.addTextField(line['retries'], nil, function()
-        return mspSpeedTestStats['retries']
-    end, function(value)
-    end)
-    fields['retries']:enable(false)
-
-    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
-        return mspSpeedTestStats['timeouts']
-    end, function(value)
-    end)
-    fields['timeouts']:enable(false)
-
-    fields['checksum'] = form.addTextField(line['checksum'], nil, function()
-        return mspSpeedTestStats['checksum']
-    end, function(value)
-    end)
-    fields['checksum']:enable(false)
-
-    -- sometimes we get an exception where we close the dialog before final query.. and it shift result be 1
-    -- catch this and show correct
-    if (mspSpeedTestStats['success'] == mspSpeedTestStats['total'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
-        fields['success'] = form.addTextField(line['success'], nil, function()
+    if rf2ethos.config.ethosRunningVersion < 1516 then
+    
+        fields['total'] = form.addTextField(line['total'], nil, function()
             return mspSpeedTestStats['total']
         end, function(value)
         end)
-        fields['success']:enable(false)
-    else
-        fields['success'] = form.addTextField(line['success'], nil, function()
-            return mspSpeedTestStats['success']
+        fields['total']:enable(false)
+
+        fields['retries'] = form.addTextField(line['retries'], nil, function()
+            return mspSpeedTestStats['retries']
         end, function(value)
         end)
-        fields['success']:enable(false)
+        fields['retries']:enable(false)
+
+        fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
+            return mspSpeedTestStats['timeouts']
+        end, function(value)
+        end)
+        fields['timeouts']:enable(false)
+
+        fields['checksum'] = form.addTextField(line['checksum'], nil, function()
+            return mspSpeedTestStats['checksum']
+        end, function(value)
+        end)
+        fields['checksum']:enable(false)
+
+        if (mspSpeedTestStats['success'] == mspSpeedTestStats['total'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
+            fields['success'] = form.addTextField(line['success'], nil, function()
+                return mspSpeedTestStats['total']
+            end, function(value)
+            end)
+            fields['success']:enable(false)
+        else
+            fields['success'] = form.addTextField(line['success'], nil, function()
+                return mspSpeedTestStats['success']
+            end, function(value)
+            end)
+            fields['success']:enable(false)
+        end
+
+        local avgQueryTime = rf2ethos.utils.round(mspQueryTimeCount / mspSpeedTestStats['total'], 2) .. "s"
+        fields['time'] = form.addTextField(line['time'], nil, function()
+            return avgQueryTime
+        end, function(value)
+        end)
+        fields['time']:enable(false)
+    else
+        fields['total']:value(tostring(mspSpeedTestStats['total']))
+
+        fields['retries']:value(tostring(mspSpeedTestStats['retries']))
+
+        fields['timeouts']:value(tostring(mspSpeedTestStats['timeouts']))
+        
+        fields['checksum']:value(tostring(mspSpeedTestStats['checksum']))
+
+        if (mspSpeedTestStats['success'] == mspSpeedTestStats['total'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
+            fields['success']:value(tostring(mspSpeedTestStats['success']))
+        else
+            fields['success']:value(tostring(mspSpeedTestStats['success']))
+        end
+
+        local avgQueryTime = rf2ethos.utils.round(mspQueryTimeCount / mspSpeedTestStats['total'], 2) .. "s"
+        fields['time']:value(tostring(avgQueryTime))    
     end
-
-    local avgQueryTime = rf2ethos.utils.round(mspQueryTimeCount / mspSpeedTestStats['total'], 2) .. "s"
-    fields['time'] = form.addTextField(line['time'], nil, function()
-        return avgQueryTime
-    end, function(value)
-    end)
-    fields['time']:enable(false)
-
 end
 
 local function getMSPPidBandwidth()

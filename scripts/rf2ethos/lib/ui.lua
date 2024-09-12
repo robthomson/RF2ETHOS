@@ -270,7 +270,11 @@ function ui.fieldChoice(f, i)
         end
         formLineCnt = formLineCnt + 1
         rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
-        posField = nil
+        if f.position ~= nil then
+            posField = f.position
+        else
+            posField = nil
+        end 
         postText = nil
     end
 
@@ -313,7 +317,11 @@ function ui.fieldNumber(f, i)
 
         rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
 
-        posField = nil
+        if f.position ~= nil then
+            posField = f.position
+        else
+            posField = nil
+        end 
         postText = nil
     end
 
@@ -338,7 +346,7 @@ function ui.fieldNumber(f, i)
         rf2ethos.saveValue(i)
     end)
 
-    if rf2ethos.config.ethosRunningVersion >= 1415 then
+    if rf2ethos.config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
@@ -392,7 +400,11 @@ function ui.fieldStaticText(f, i)
 
         rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
 
-        posField = nil
+        if f.position ~= nil then
+            posField = f.position
+        else
+            posField = nil
+        end    
         postText = nil
     end
 
@@ -402,7 +414,7 @@ function ui.fieldStaticText(f, i)
 
     rf2ethos.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.getFieldValue(f))
 
-    if rf2ethos.config.ethosRunningVersion >= 1415 then
+    if rf2ethos.config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
@@ -440,7 +452,11 @@ function ui.fieldText(f, i)
 
         rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
 
-        posField = nil
+        if f.position ~= nil then
+            posField = f.position
+        else
+            posField = nil
+        end 
         postText = nil
     end
 
@@ -459,7 +475,7 @@ function ui.fieldText(f, i)
         rf2ethos.saveValue(i)
     end)
 
-    if rf2ethos.config.ethosRunningVersion >= 1415 then
+    if rf2ethos.config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
