@@ -4,11 +4,15 @@ local servoTable = {}
 servoTable = {}
 servoTable['sections'] = {}
 
+local triggerOverRide = false
+local triggerOverRideAll = false
+
+
 
 local function buildServoTable()
 
-    for i = 1, 16 do
-        servoTable[i] = {}
+    for i = 1, rf2ethos.config.servoCount do
+        servoTable[i] = {}   
         servoTable[i] = {}
         servoTable[i]['title'] = "SERVO " .. i
         servoTable[i]['image'] = "servo".. i .. ".png"
@@ -84,6 +88,7 @@ end
 
 
 local function openPage(pidx, title, script)
+
 
     rf2ethos.protocol.mspIntervalOveride = nil
 
@@ -203,9 +208,8 @@ local function openPage(pidx, title, script)
                     press = function()
                         rf2ethos.menuLastSelected["servos"] = pidx
                         rf2ethos.currentServoIndex = pidx
-                        rf2ethos.ui.progessDisplay()
+                        rf2ethos.ui.progessDisplay()               
                         rf2ethos.ui.openPage(pidx, pvalue.title, "servos_tool.lua",servoTable)
-
                     end
                 })
 
@@ -253,17 +257,149 @@ end
 local function event(widget, category, value, x, y)
 
     if category == 5 or value == 35 then
-        rf2ethos.ui.openMainMenu()
+        rf2ethos.Page.onNavMenu(self)
         return true
     end
 
     return false
 end
 
+local function onToolMenu(self)
 
+    local buttons
+    if rf2ethos.config.servoOverride == false then
+        buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+
+                    -- we cant launch the loader here to se rely on the modules
+                    -- wakeup function to do this
+                    triggerOverRide = true
+                    triggerOverRideAll = true
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+    else
+        buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+
+                    -- we cant launch the loader here to se rely on the modules
+                    -- wakup function to do this
+                    triggerOverRide = true
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+    end
+    local message
+    local title
+    if rf2ethos.config.servoOverride == false then
+        title = "Enable servo overide"
+        message = "Servo overide locks the servos to center, allowing you to use the center setting to adjust the servo center. This will result in all values on the selected servo page being saved when adjusting the servo center point."
+    else
+        title = "Disable servo overide"
+        message = "Return control of the servos to the flight controller"
+    end
+
+    form.openDialog({
+        width = nil,
+        title = title,
+        message = message,
+        buttons = buttons,
+        wakeup = function()
+        end,
+        paint = function()
+        end,
+        options = TEXT_LEFT
+    })
+
+end
+
+local function wakeup()
+    if triggerOverRide == true then
+        triggerOverRide = false
+
+        if rf2ethos.config.servoOverride == false then
+            rf2ethos.audio.playServoOverideEnable = true
+            rf2ethos.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
+            rf2ethos.Page.servoCenterFocusAllOn(self)
+            rf2ethos.config.servoOverride = true
+        else
+            rf2ethos.audio.playServoOverideDisable = true
+            rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
+            rf2ethos.Page.servoCenterFocusAllOff(self)
+            rf2ethos.config.servoOverride = false
+        end
+    end
+end
+
+local function servoCenterFocusAllOn(self)
+
+    rf2ethos.audio.playServoOverideEnable = true
+
+    for i = 0, #servoTable do
+        local message = {
+            command = 193, -- MSP_SET_SERVO_OVERRIDE
+            payload = {i}
+        }
+        rf2ethos.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.mspQueue:add(message)
+    end
+    rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.closeProgressLoader = true
+end
+
+local function servoCenterFocusAllOff(self)
+
+    for i = 0, #servoTable do
+        local message = {
+            command = 193, -- MSP_SET_SERVO_OVERRIDE
+            payload = {i}
+        }
+        rf2ethos.mspHelper.writeU16(message.payload, 2001)
+        rf2ethos.mspQueue:add(message)
+    end
+    rf2ethos.triggers.isReady = true
+    rf2ethos.triggers.closeProgressLoader = true
+end
+
+local function onNavMenu(self)
+
+
+    if rf2ethos.config.servoOverride == true or inFocus == true then
+        rf2ethos.audio.playServoOverideDisable = true
+        rf2ethos.config.servoOverride = false
+        inFocus = false
+        rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
+        rf2ethos.Page.servoCenterFocusAllOff(self)
+        rf2ethos.triggers.closeProgressLoader = true
+    end
+    --rf2ethos.ui.progessDisplay()
+    rf2ethos.ui.openMainMenu()
+
+end
 
 return {title = "Servos", 
         event = event, 
         openPage = openPageInit,
-        navButtons = {menu = true, save = false, reload = false, tool = false, help = true}
+        onToolMenu = onToolMenu,
+        onNavMenu = onNavMenu,
+        servoCenterFocusAllOn = servoCenterFocusAllOn,
+        servoCenterFocusAllOff = servoCenterFocusAllOff,        
+        wakeup = wakeup,
+        navButtons = {menu = true, save = false, reload = false, tool = true, help = true}
         }

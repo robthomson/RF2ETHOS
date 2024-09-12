@@ -4,13 +4,13 @@ local fields = {}
 local inFocus = false
 local triggerOverRide = false
 local triggerOverRideAll = false
-local inOverRide = false
 local triggerCenterChange = false
 local currentServoCenter
 local lastSetServoCenter
 local lastServoChangeTime = os.clock()
 local servoIndex = rf2ethos.currentServoIndex - 1
 local isSaving = false
+local enableWakeup = false
 
 local servoTable
 local servoCount
@@ -169,158 +169,41 @@ local function onSaveMenu()
     rf2ethos.triggers.triggerSave = false
 end
 
-local function onToolMenu(self)
-
-    local buttons
-    if inOverRide == false then
-        buttons = {
-            {
-                label = "        ALL        ",
-                action = function()
-
-                    -- we cant launch the loader here to se rely on the modules
-                    -- wakup function to do this
-                    triggerOverRide = true
-                    triggerOverRideAll = true
-                    return true
-                end
-            }, {
-                label = servoTable[servoIndex + 1]['title'],
-                action = function()
-
-                    -- we cant launch the loader here to se rely on the modules
-                    -- wakup function to do this
-                    triggerOverRide = true
-                    triggerOverRideAll = false
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-    else
-        buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-
-                    -- we cant launch the loader here to se rely on the modules
-                    -- wakup function to do this
-                    triggerOverRide = true
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-    end
-    local message
-    local title
-    if inOverRide == false then
-        title = "Enable servo overide"
-        message = "Enable servo overide for either all servos or just this servo.\r\n\r\nThis will result in all values on this page being saved when adjusting the servo center point."
-    else
-        title = "Disable servo overide"
-        message = "Return control of the servos to the flight controller"
-    end
-
-    form.openDialog({
-        width = nil,
-        title = title,
-        message = message,
-        buttons = buttons,
-        wakeup = function()
-        end,
-        paint = function()
-        end,
-        options = TEXT_LEFT
-    })
-
-end
-
 local function onNavMenu(self)
 
-    if inOverRide == true or inFocus == true then
-
-        rf2ethos.audio.playServoOverideDisable = true
-
-        inOverRide = false
-        inFocus = false
-
-        rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-
-        if triggerOverRideAll == true then
-            rf2ethos.Page.servoCenterFocusAllOff(self)
-        else
-            rf2ethos.Page.servoCenterFocusOff(self)
-        end
-        rf2ethos.triggers.closeProgressLoader = true
-    end
-
     rf2ethos.ui.progessDisplay()
-    rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, "servos.lua")
+    rf2ethos.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, "servos.lua",rf2ethos.config.servoOverride)
 
 end
 
 local function wakeup(self)
 
-    if isSaving == true then
-        onSaveMenuProgress()
-        isSaving = false
-    end
+    if enableWakeup == true then
 
-    -- filter changes to servo center - essentially preventing queue getting flooded    
-    if inFocus == true or inOverRide == true then
+        if isSaving == true then
+            onSaveMenuProgress()
+            isSaving = false
+        end
 
-        currentServoCenter = configs[servoIndex]['mid']
+        -- filter changes to servo center - essentially preventing queue getting flooded    
+        if rf2ethos.config.servoOverride == true then
 
-        local now = os.clock()
-        local settleTime = 0.85
-        if ((now - lastServoChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
-            if currentServoCenter ~= lastSetServoCenter then
-                lastSetServoCenter = currentServoCenter
-                lastServoChangeTime = now
-                self.saveServoSettings(self)
+            currentServoCenter = configs[servoIndex]['mid']
+
+            local now = os.clock()
+            local settleTime = 0.85
+            if ((now - lastServoChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+                if currentServoCenter ~= lastSetServoCenter then
+                    lastSetServoCenter = currentServoCenter
+                    lastServoChangeTime = now
+                    self.saveServoSettings(self)
+                end
             end
+
+            
         end
     end
 
-    if triggerOverRide == true then
-        triggerOverRide = false
-
-        if inOverRide == false then
-
-            rf2ethos.audio.playServoOverideEnable = true
-
-            rf2ethos.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
-
-            if triggerOverRideAll == true then
-                rf2ethos.Page.servoCenterFocusAllOn(self)
-            else
-                rf2ethos.Page.servoCenterFocusOn(self)
-            end
-            inOverRide = true
-        else
-
-            rf2ethos.audio.playServoOverideDisable = true
-
-            rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-
-            if triggerOverRideAll == true then
-                rf2ethos.Page.servoCenterFocusAllOff(self)
-            else
-                rf2ethos.Page.servoCenterFocusOff(self)
-            end
-            inOverRide = false
-
-        end
-    end
 end
 
 
@@ -382,6 +265,7 @@ end
 local function getServoConfigurationsEnd(callbackParam)
     rf2ethos.triggers.isReady = true
     rf2ethos.triggers.closeProgressLoader = true
+    enableWakeup = true
 end
 
 local function openPage(idx, title, script, extra1)
@@ -430,13 +314,19 @@ local function openPage(idx, title, script, extra1)
     end
 
     if configs[servoIndex]['mid'] ~= nil then
+    
         local idx = 2
         local minValue = 50
         local maxValue = 2250
         local defaultValue = 1500
         local suffix = nil
         local helpTxt = rf2ethos.fieldHelpTxt['servoMid']['t']
-        rf2ethos.formLines[idx] = form.addLine("Center")
+        local txtOverRide = ""
+        if rf2ethos.config.servoOverride == true then
+            txtOverRide = " (Override Enabled)"
+        end
+        
+        rf2ethos.formLines[idx] = form.addLine("Center" .. txtOverRide)
         rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['mid']
         end, function(value)
@@ -598,7 +488,7 @@ local function event(widget, category, value, x, y)
     end
 
     if category == 5 or value == 35 then
-        rf2ethos.ui.openPage(pidx, "Servos", "servos.lua")
+        rf2ethos.ui.openPage(pidx, "Servos", "servos.lua",rf2ethos.config.servoOverride)
         return true
     end
 
@@ -622,6 +512,6 @@ return {
     onNavMenu = onNavMenu,
     onSaveMenu = onSaveMenu,
     pageTitle = "Servos",
-    navButtons = {menu = true, save = true, reload = true, tool = true, help = true}
+    navButtons = {menu = true, save = true, reload = true, tool = false, help = true}
 
 }

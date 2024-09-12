@@ -34,6 +34,7 @@ rf2ethos.config = config
 rf2ethos.config.tailMode = nil
 rf2ethos.config.swashMode = nil
 rf2ethos.config.servoCount = nil
+rf2ethos.config.servoOverride = false
 
 rf2ethos.triggers = {}
 rf2ethos.triggers = triggers
