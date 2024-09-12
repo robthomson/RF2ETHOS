@@ -557,7 +557,8 @@ function rf2ethos.wakeupBgChecks()
             }
             rf2ethos.mspQueue:add(message)
                        
-    end    
+    end 
+
     
     
 end
@@ -1194,7 +1195,7 @@ function rf2ethos.event(widget, category, value, x, y)
         return 0
     end
 
-    if rf2ethos.Page ~= nil and rf2ethos.uiState == rf2ethos.uiStatus.pages then
+    if rf2ethos.Page ~= nil and (rf2ethos.uiState == rf2ethos.uiStatus.pages or rf2ethos.uiState == rf2ethos.uiStatus.mainMenu) then
         if rf2ethos.Page.event then
             -- run the pages wakeup function if it exists
             return rf2ethos.Page.event(widget, category, value, x, y)

@@ -4,60 +4,59 @@ local servoTable = {}
 servoTable = {}
 servoTable['sections'] = {}
 
--- on off chance msp not picked this up yet - set a default
-if rf2ethos.config.servoCount == nil then
-    rf2ethos.config.servoCount = 4
-end
 
-for i = 1, 16 do
-    servoTable[i] = {}
-    servoTable[i] = {}
-    servoTable[i]['title'] = "SERVO " .. i
-    servoTable[i]['image'] = "servo".. i .. ".png"
-    servoTable[i]['disabled'] = true
-end
+local function buildServoTable()
 
-for i = 1,rf2ethos.config.servoCount do
-    -- enable actual number of servos
-    servoTable[i]['disabled'] = false
-    
+    for i = 1, 16 do
+        servoTable[i] = {}
+        servoTable[i] = {}
+        servoTable[i]['title'] = "SERVO " .. i
+        servoTable[i]['image'] = "servo".. i .. ".png"
+        servoTable[i]['disabled'] = true
+    end
 
-    if rf2ethos.config.swashMode == 0 then
-        -- we do nothing as we cannot determine any servo names
-    elseif rf2ethos.config.swashMode == 1 then
-        -- servo mode is direct - only servo for sure we know name of is tail
-        if rf2ethos.config.tailMode == 0 then
-            servoTable[4]['title'] = "TAIL" 
-            servoTable[4]['image'] = "tail.png"
-            servoTable[4]['section'] = 1
-        end
-    elseif rf2ethos.config.swashMode == 2 or rf2ethos.config.swashMode == 3 or rf2ethos.config.swashMode == 4 then
-        -- servo mode is cppm - 
-        servoTable[1]['title'] = "CYC. PITCH" 
-        servoTable[1]['image'] = "cpitch.png" 
-  
-        servoTable[2]['title'] = "CYC. LEFT" 
-        servoTable[2]['image'] = "cleft.png" 
-    
-        servoTable[3]['title'] = "CYC. RIGHT" 
-        servoTable[3]['image'] = "cright.png" 
-     
-        if rf2ethos.config.tailMode == 0 then
-            servoTable[4]['title'] = "TAIL" 
-            servoTable[4]['image'] = "tail.png"
-        else
-            --servoTable[4]['disabled'] = true
-        end
-    elseif rf2ethos.config.swashMode == 5 or rf2ethos.config.swashMode == 6 then
-        -- servo mode is fpm 90
-        --servoTable[3]['disabled'] = true 
-        if rf2ethos.config.tailMode == 0 then
-            servoTable[4]['title'] = "TAIL" 
-            servoTable[4]['image'] = "tail.png"
-        else
-            --servoTable[4]['disabled'] = true        
-        end
-    end 
+    for i = 1,rf2ethos.config.servoCount do
+        -- enable actual number of servos
+        servoTable[i]['disabled'] = false
+        
+
+        if rf2ethos.config.swashMode == 0 then
+            -- we do nothing as we cannot determine any servo names
+        elseif rf2ethos.config.swashMode == 1 then
+            -- servo mode is direct - only servo for sure we know name of is tail
+            if rf2ethos.config.tailMode == 0 then
+                servoTable[4]['title'] = "TAIL" 
+                servoTable[4]['image'] = "tail.png"
+                servoTable[4]['section'] = 1
+            end
+        elseif rf2ethos.config.swashMode == 2 or rf2ethos.config.swashMode == 3 or rf2ethos.config.swashMode == 4 then
+            -- servo mode is cppm - 
+            servoTable[1]['title'] = "CYC. PITCH" 
+            servoTable[1]['image'] = "cpitch.png" 
+      
+            servoTable[2]['title'] = "CYC. LEFT" 
+            servoTable[2]['image'] = "cleft.png" 
+        
+            servoTable[3]['title'] = "CYC. RIGHT" 
+            servoTable[3]['image'] = "cright.png" 
+         
+            if rf2ethos.config.tailMode == 0 then
+                servoTable[4]['title'] = "TAIL" 
+                servoTable[4]['image'] = "tail.png"
+            else
+                --servoTable[4]['disabled'] = true
+            end
+        elseif rf2ethos.config.swashMode == 5 or rf2ethos.config.swashMode == 6 then
+            -- servo mode is fpm 90
+            --servoTable[3]['disabled'] = true 
+            if rf2ethos.config.tailMode == 0 then
+                servoTable[4]['title'] = "TAIL" 
+                servoTable[4]['image'] = "tail.png"
+            else
+                --servoTable[4]['disabled'] = true        
+            end
+        end 
+    end
 end
 
 local function swashMixerType()
@@ -83,6 +82,7 @@ local function swashMixerType()
     return txt
 end
 
+
 local function openPage(pidx, title, script)
 
     rf2ethos.protocol.mspIntervalOveride = nil
@@ -90,7 +90,7 @@ local function openPage(pidx, title, script)
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then return end
 
     rf2ethos.triggers.isReady = false
-    rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
+    rf2ethos.uiState = rf2ethos.uiStatus.pages
 
     form.clear()
 
@@ -117,11 +117,8 @@ local function openPage(pidx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW - 10
 
-    if rf2ethos.Page.pageTitle ~= nil then
-        rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
-    else
-        rf2ethos.ui.fieldHeader(title)
-    end
+    rf2ethos.ui.fieldHeader("Servos")
+
 
 
     local buttonW
@@ -228,6 +225,45 @@ local function openPage(pidx, title, script)
     return
 end
 
-rf2ethos.uiState = rf2ethos.uiStatus.pages
+local function openPageInit(pidx, title, script)
 
-return {title = "Servos", openPage = openPage,navButtons = {menu = true, save = false, reload = false, tool = false, help = true}}
+    if rf2ethos.config.servoCount ~= nil then
+              buildServoTable()
+            openPage(pidx, title, script)
+    else
+
+            local message = {
+                command = 120, -- MIXER
+                processReply = function(self, buf)
+                    if #buf >= 2 then
+                        rf2ethos.config.servoCount = rf2ethos.mspHelper.readU8(buf)
+                    end
+                    buildServoTable()
+                    openPage(pidx, title, script)
+                end,
+                simulatorResponse = {
+                    4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
+                    120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+                }
+            }
+            rf2ethos.mspQueue:add(message)
+    end        
+end
+
+local function event(widget, category, value, x, y)
+
+    if category == 5 or value == 35 then
+        rf2ethos.ui.openMainMenu()
+        return true
+    end
+
+    return false
+end
+
+
+
+return {title = "Servos", 
+        event = event, 
+        openPage = openPageInit,
+        navButtons = {menu = true, save = false, reload = false, tool = false, help = true}
+        }
