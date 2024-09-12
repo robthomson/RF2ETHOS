@@ -317,11 +317,6 @@ local function wakeup(self)
     end
 end
 
-function preSavePayload(payload)
-    -- shift index to correct number
-    payload[1] = servoIndex
-    return payload
-end
 
 local function getServoConfigurations(callback, callbackParam)
     local message = {
