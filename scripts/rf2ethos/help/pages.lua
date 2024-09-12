@@ -136,7 +136,8 @@ data["servos"]["TEXT"] = {"Please select the servo you would like to configure f
 data["servos_tool"] = {}
 data["servos_tool"]["qrCODE"] = "gfx/qr/servos.png"
 data["servos_tool"]["TEXT"] = {
-    "Servo: Select the servo you would like to edit.", "Center: Adjust the center position of the servo.", "Minimum/Maximum: Adjust the end points of the selected servo.",
+    "Override: [*]  Enable override to allow real time updates of servo center point.",
+    "Center: Adjust the center position of the servo.", "Minimum/Maximum: Adjust the end points of the selected servo.",
     "Scale: Adjust the amount the servo moves for a given input.", "Rate: The frequency the servo runs best at - check with manufacturer.",
     "Speed: The speed the servo moves. Generally only used for the cyclic servos to help the swash move evenly. Optional - leave all at 0 if unsure."
 }

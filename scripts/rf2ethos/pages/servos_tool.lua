@@ -419,25 +419,14 @@ local function openPage(idx, title, script, extra1)
     form.clear()
 
     if rf2ethos.Page.pageTitle ~= nil then
-        rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
+        rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle .. " / " .. rf2ethos.utils.titleCase(configs[servoIndex]['name']))
     else
-        rf2ethos.ui.fieldHeader(title)
-    end
+        rf2ethos.ui.fieldHeader(title .. " / " .. rf2ethos.utils.titleCase(configs[servoIndex]['name']))
+    end    
 
     if rf2ethos.Page.headerLine ~= nil then
         local headerLine = form.addLine("")
         local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
-    end
-
-    if configs[servoIndex] and servoTable[servoIndex + 1] then
-        local idx = 1
-        rf2ethos.formLines[idx] = form.addLine("Servo")
-        rf2ethos.formFields[idx] = form.addTextField(rf2ethos.formLines[idx], nil, function()
-            return configs[servoIndex]['name']
-        end, function(value)
-            configs[servoIndex]['name'] = value
-        end)
-        rf2ethos.formFields[idx]:enable(false)
     end
 
     if configs[servoIndex]['mid'] ~= nil then

@@ -472,8 +472,6 @@ end
 -- MAIN WAKEUP FUNCTION. THIS SIMPLY FARMS OUT AT DIFFERING SCHEDULES TO SUB FUNCTIONS
 function rf2ethos.wakeup(widget)
 
-    print(rf2ethos.utils.ethosVersion())
-
     -- every 0.01 to ensure msp timings work
     rf2ethos.mspQueue:processQueue()
 
