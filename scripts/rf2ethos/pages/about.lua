@@ -26,12 +26,26 @@ else
     simulation = "OFF"
 end
 
-fields[1] = {t = "Version", value = version, type = 3, disable = true}
-fields[2] = {t = "Ethos Version", value = ethosVersion, type = 3, disable = true}
-fields[3] = {t = "MSP Version", value = apiVersion, type = 3, disable = true}
-fields[4] = {t = "Supported MSP Versions", value = supportedMspVersion, type = 3, disable = true}
-fields[5] = {t = "Compilation", value = compilation, type = 3, disable = true}
-fields[6] = {t = "Simulation", value = simulation, type = 3, disable = true}
+local displayType = 3
+local disableType = true
+local displayPos
+if rf2ethos.config.ethosRunningVersion >= 1516 then
+    displayType = 0
+    disableType = false
+    
+    local w, h = rf2ethos.utils.getWindowSize()
+    local buttonW = 100
+    local buttonWs = buttonW - (buttonW * 20) / 100
+    local x = w - 15    
+  
+    displayPos = {x = x - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 300, h = rf2ethos.radio.navbuttonHeight}
+end 
+fields[1] = {t = "Version", value = version, type = displayType, disable = disableType, position = displayPos}
+fields[2] = {t = "Ethos Version", value = ethosVersion, type = displayType, disable = disableType, position = displayPos}
+fields[3] = {t = "MSP Version", value = apiVersion, type = displayType, disable = disableType, position = displayPos}
+fields[4] = {t = "Supported MSP Versions", value = supportedMspVersion, type = displayType, disable = disableType, position = displayPos}
+fields[5] = {t = "Compilation", value = compilation, type = displayType, disable = disableType, position = displayPos}
+fields[6] = {t = "Simulation", value = simulation, type = displayType, disable = disableType, position = displayPos}
 
 function readMSP()
     rf2ethos.triggers.isReady = true
@@ -43,7 +57,7 @@ function onToolMenu()
     local opener =
         "Rotorflight is an Opensource project. Contribution from other like minded people, keen to assist in making this software even better is welcomed and encouraged. You do not have to be a hardcore programmer to help"
     local credits =
-        "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Phil Kaighin, Robert Burrow, Keith Williams, Bertrand Songis, Venbs Zhou... and many more who have spent hours testing and providing feedback!"
+        "Notable contributers to both the rotorflight firmware and this software are:  Petri Mattila, Egon Lubbers, Rob Thomson, Rob Gayle, Phil Kaighin, Robert Burrow, Keith Williams, Bertrand Songis, Venbs Zhou... and many more who have spent hours testing and providing feedback!"
     local license =
         "You may copy, distribute and modify the software as long as you track changes/dates in source files. Any modifications to or software including (via compiler) GPL-licensed code must also be made available under the GPL along with build & install instructions."
 
