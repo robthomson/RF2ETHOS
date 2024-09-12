@@ -27,8 +27,6 @@ mspSpeedTestStats['retries'] = 0
 mspSpeedTestStats['timeouts'] = 0
 mspSpeedTestStats['checksum'] = 0
 
-local space = "          "
-
 local function openPage(pidx, title, script)
 
     rf2ethos.lastIdx = pidx
@@ -89,49 +87,100 @@ local function openPage(pidx, title, script)
             end
         end
     })
-    
 
     line['total'] = form.addLine("Total queries")
-    fields['total'] = form.addStaticText(line['total'], nil, space .. "-")
+    fields['total'] = form.addTextField(line['total'], nil, function()
+        return "0"
+    end, function(value)
+    end)
+    fields['total']:enable(false)
 
     line['success'] = form.addLine("Successful queries")
-    fields['success'] = form.addStaticText(line['success'], nil, space .. "-")    
+    fields['success'] = form.addTextField(line['success'], nil, function()
+        return "0"
+    end, function(value)
+    end)
+    fields['success']:enable(false)
 
     line['timeouts'] = form.addLine("Timeouts")
-    fields['timeouts'] = form.addStaticText(line['timeouts'], nil, space .. "-")      
+    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
+        return "0"
+    end, function(value)
+    end)
+    fields['timeouts']:enable(false)
 
     line['retries'] = form.addLine("Retries")
-    fields['retries'] = form.addStaticText(line['retries'], nil, space .. "-")         
+    fields['retries'] = form.addTextField(line['retries'], nil, function()
+        return "0"
+    end, function(value)
+    end)
+    fields['retries']:enable(false)
 
     line['checksum'] = form.addLine("Checksum errors")
-    fields['checksum'] = form.addStaticText(line['checksum'], nil, space .. "-")    
+    fields['checksum'] = form.addTextField(line['checksum'], nil, function()
+        return "0"
+    end, function(value)
+    end)
+    fields['checksum']:enable(false)
 
     line['time'] = form.addLine("Average query time")
-    fields['time'] = form.addStaticText(line['time'], nil, space .. "-")        
+    fields['time'] = form.addTextField(line['time'], nil, function()
+        return "0s"
+    end, function(value)
+    end)
+    fields['time']:enable(false)
 
     formLoaded = true
 end
 
 local function updateStats()
 
-    fields['total']:value(space .. tostring(mspSpeedTestStats['total']))
+    fields['total'] = form.addTextField(line['total'], nil, function()
+        return mspSpeedTestStats['total']
+    end, function(value)
+    end)
+    fields['total']:enable(false)
 
-    fields['retries']:value(space .. tostring(mspSpeedTestStats['retries']))
+    fields['retries'] = form.addTextField(line['retries'], nil, function()
+        return mspSpeedTestStats['retries']
+    end, function(value)
+    end)
+    fields['retries']:enable(false)
 
-    fields['timeouts']:value(space .. tostring(mspSpeedTestStats['timeouts']))
-    
-    fields['checksum']:value(space .. tostring(mspSpeedTestStats['checksum']))
+    fields['timeouts'] = form.addTextField(line['timeouts'], nil, function()
+        return mspSpeedTestStats['timeouts']
+    end, function(value)
+    end)
+    fields['timeouts']:enable(false)
+
+    fields['checksum'] = form.addTextField(line['checksum'], nil, function()
+        return mspSpeedTestStats['checksum']
+    end, function(value)
+    end)
+    fields['checksum']:enable(false)
 
     -- sometimes we get an exception where we close the dialog before final query.. and it shift result be 1
     -- catch this and show correct
     if (mspSpeedTestStats['success'] == mspSpeedTestStats['total'] - 1) and mspSpeedTestStats['timeouts'] == 0 then
-        fields['success']:value(space .. tostring(mspSpeedTestStats['success']))
+        fields['success'] = form.addTextField(line['success'], nil, function()
+            return mspSpeedTestStats['total']
+        end, function(value)
+        end)
+        fields['success']:enable(false)
     else
-        fields['success']:value(space .. tostring(mspSpeedTestStats['success']))
+        fields['success'] = form.addTextField(line['success'], nil, function()
+            return mspSpeedTestStats['success']
+        end, function(value)
+        end)
+        fields['success']:enable(false)
     end
 
     local avgQueryTime = rf2ethos.utils.round(mspQueryTimeCount / mspSpeedTestStats['total'], 2) .. "s"
-    fields['time']:value(space .. tostring(avgQueryTime))
+    fields['time'] = form.addTextField(line['time'], nil, function()
+        return avgQueryTime
+    end, function(value)
+    end)
+    fields['time']:enable(false)
 
 end
 
