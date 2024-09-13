@@ -526,8 +526,10 @@ function rf2ethos.wakeupBgChecks()
             simulatorResponse = {0, 12, 7}
         }
         rf2ethos.mspQueue:add(message)
-        
-    elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+
+    end
+    
+    if (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 42, -- MIXER
                 processReply = function(self, buf)
@@ -545,7 +547,9 @@ function rf2ethos.wakeupBgChecks()
             }
             rf2ethos.mspQueue:add(message)
                        
-    elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
+    end
+    
+    if (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
