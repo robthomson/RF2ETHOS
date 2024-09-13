@@ -232,18 +232,18 @@ end
 local function openPageInit(pidx, title, script)
 
     if rf2ethos.config.servoCount ~= nil then
-              buildServoTable()
+            buildServoTable()
             openPage(pidx, title, script)
     else
-
             local message = {
-                command = 120, -- MIXER
+                command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
-                    if #buf >= 2 then
-                        rf2ethos.config.servoCount = rf2ethos.mspHelper.readU8(buf)
+                     if #buf >= 10 then
+                            local servoCount = rf2ethos.mspHelper.readU8(buf)
+                            
+                            -- update master one in case changed
+                            rf2ethos.config.servoCount = servoCount
                     end
-                    buildServoTable()
-                    openPage(pidx, title, script)
                 end,
                 simulatorResponse = {
                     4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,

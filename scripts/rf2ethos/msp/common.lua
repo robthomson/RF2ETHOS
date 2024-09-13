@@ -118,7 +118,7 @@ local function mspReceivedReply(payload)
         idx = idx + 1
     end
     if idx > rf2ethos.protocol.maxRxBufferSize then
-        -- rf2ethos.utils.log("  mspReceivedReply:  payload continues into next frame.")
+        rf2ethos.utils.log("  mspReceivedReply:  payload continues into next frame.")
         -- Store the last sequence number so we can start there on the next continuation payload
         mspRemoteSeq = seq
         return false
@@ -127,9 +127,9 @@ local function mspReceivedReply(payload)
     -- check CRC
     if mspRxCRC ~= payload[idx] and version == 0 then
         if rf2ethos.Page ~= nil then if rf2ethos.Page.mspChecksum then rf2ethos.Page.mspChecksum(payload) end end
-        -- rf2ethos.utils.log("  mspReceivedReply:  payload checksum incorrect, message failed!")
-        -- rf2ethos.utils.log("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
-        -- rf2ethos.utils.log("    CRC from payload:     0x"..string.format("%X", payload[idx]))
+         rf2ethos.utils.log("  mspReceivedReply:  payload checksum incorrect, message failed!")
+         rf2ethos.utils.log("    Calculated mspRxCRC:  0x"..string.format("%X", mspRxCRC))
+         rf2ethos.utils.log("    CRC from payload:     0x"..string.format("%X", payload[idx]))
         return nil
     end
     rf2ethos.utils.log("  Got reply for cmd " .. mspRxReq)

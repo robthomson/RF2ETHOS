@@ -502,6 +502,7 @@ function rf2ethos.wakeup(widget)
     end
 
 end
+       
 
 -- BACKGROUND checks
 function rf2ethos.wakeupBgChecks()
@@ -519,16 +520,13 @@ function rf2ethos.wakeupBgChecks()
             simulatorResponse = {0, 12, 7}
         }
         rf2ethos.mspQueue:add(message)
-    end
-
-    if (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+        
+    elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 42, -- MIXER
                 processReply = function(self, buf)
                     if #buf >= 10 then
-                        buf.offset = 1
-                        rf2ethos.config.tailMode = rf2ethos.mspHelper.readU16(buf)
-                    
+
                         local tailMode = buf[2]
                         local swashMode = buf[6]
                         rf2ethos.config.swashMode = swashMode
@@ -541,14 +539,15 @@ function rf2ethos.wakeupBgChecks()
             }
             rf2ethos.mspQueue:add(message)
                        
-    end
-    
-    if (rf2ethos.config.servoCount == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+    elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
-                command = 120, -- MIXER
+                command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
-                    if #buf >= 2 then
-                        rf2ethos.config.servoCount = rf2ethos.mspHelper.readU8(buf)
+                     if #buf >= 10 then
+                            local servoCount = rf2ethos.mspHelper.readU8(buf)
+                            
+                            -- update master one in case changed
+                            rf2ethos.config.servoCount = servoCount
                     end
                 end,
                 simulatorResponse = {
@@ -557,10 +556,9 @@ function rf2ethos.wakeupBgChecks()
                 }
             }
             rf2ethos.mspQueue:add(message)
-                       
     end 
 
-    
+
     
 end
 
