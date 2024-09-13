@@ -504,7 +504,6 @@ function rf2ethos.wakeup(widget)
     if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 or rf2ethos.wakeupSchedulerBgChecksInit == true then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
-        rf2ethos.wakeupSchedulerBgChecksInit = false
     end
 
 end
@@ -527,9 +526,7 @@ function rf2ethos.wakeupBgChecks()
         }
         rf2ethos.mspQueue:add(message)
 
-    end
-    
-    if (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+    elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 42, -- MIXER
                 processReply = function(self, buf)
@@ -547,9 +544,7 @@ function rf2ethos.wakeupBgChecks()
             }
             rf2ethos.mspQueue:add(message)
                        
-    end
-    
-    if (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
+    elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
@@ -566,6 +561,9 @@ function rf2ethos.wakeupBgChecks()
                 }
             }
             rf2ethos.mspQueue:add(message)
+            
+            -- do this at end of last one
+            rf2ethos.wakeupSchedulerBgChecksInit = false
     end 
 
 
