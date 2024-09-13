@@ -142,8 +142,13 @@ function rf2ethos.getRSSI()
     if rf2ethos.runningInSimulator == true or rf2ethos.config.skipRssiSensorCheck == true then return 100 end
 
     if rf2ethos.rssiSensor ~= nil then
-        local value = rf2ethos.rssiSensor:value()
-        return value
+    
+        if rf2ethos.rssiSensor:state() == true then
+            local value = rf2ethos.rssiSensor:value()
+            return value
+        else
+            return 0
+        end
     end
     return 0
 end
@@ -448,6 +453,7 @@ end
 -- UPDATE CURRENT TELEMETRY STATE - RUNS MOST CLOCK CYCLES
 function rf2ethos.updateTelemetryState()
 
+   
     if rf2ethos.runningInSimulator ~= true then
         if not rf2ethos.rssiSensor then
             rf2ethos.triggers.telemetryState = rf2ethos.telemetryStatus.noSensor
