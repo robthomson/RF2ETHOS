@@ -199,10 +199,47 @@ local function wakeup(self)
                     self.saveServoSettings(self)
                 end
             end
-
             
         end
     end
+
+    if triggerOverRide == true then
+        triggerOverRide = false
+
+        if rf2ethos.config.servoOverride == false then
+            rf2ethos.audio.playServoOverideEnable = true
+            rf2ethos.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
+            rf2ethos.Page.servoCenterFocusAllOn(self)
+            rf2ethos.config.servoOverride = true
+            
+            rf2ethos.formFields[3]:enable(false)
+            rf2ethos.formFields[4]:enable(false)
+            rf2ethos.formFields[5]:enable(false)
+            rf2ethos.formFields[6]:enable(false)
+            rf2ethos.formFields[7]:enable(false)
+            rf2ethos.formFields[8]:enable(false)
+            rf2ethos.formFields[9]:enable(false)
+            rf2ethos.formFields[10]:enable(false)
+            rf2ethos.formNavigationFields['save']:enable(false)
+            
+        else
+            rf2ethos.audio.playServoOverideDisable = true
+            rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
+            rf2ethos.Page.servoCenterFocusAllOff(self)
+            rf2ethos.config.servoOverride = false
+            
+            rf2ethos.formFields[3]:enable(true)
+            rf2ethos.formFields[4]:enable(true)
+            rf2ethos.formFields[5]:enable(true)
+            rf2ethos.formFields[6]:enable(true)
+            rf2ethos.formFields[7]:enable(true)
+            rf2ethos.formFields[8]:enable(true)
+            rf2ethos.formFields[9]:enable(true)
+            rf2ethos.formFields[10]:enable(true)    
+            rf2ethos.formNavigationFields['save']:enable(true)
+        end
+    end
+
 
 end
 
@@ -313,6 +350,11 @@ local function openPage(idx, title, script, extra1)
         local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
     end
 
+    if rf2ethos.config.servoOverride == true then
+        rf2ethos.formNavigationFields['save']:enable(false)
+    end
+
+
     if configs[servoIndex]['mid'] ~= nil then
     
         local idx = 2
@@ -321,12 +363,8 @@ local function openPage(idx, title, script, extra1)
         local defaultValue = 1500
         local suffix = nil
         local helpTxt = rf2ethos.fieldHelpTxt['servoMid']['t']
-        local txtOverRide = ""
-        if rf2ethos.config.servoOverride == true then
-            txtOverRide = " (Override Enabled)"
-        end
-        
-        rf2ethos.formLines[idx] = form.addLine("Center" .. txtOverRide)
+
+        rf2ethos.formLines[idx] = form.addLine("Center")
         rf2ethos.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['mid']
         end, function(value)
@@ -353,6 +391,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end
     end
 
     if configs[servoIndex]['max'] ~= nil then
@@ -371,6 +412,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['scaleNeg'] ~= nil then
@@ -389,6 +433,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['scalePos'] ~= nil then
@@ -407,6 +454,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['rate'] ~= nil then
@@ -425,6 +475,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['speed'] ~= nil then
@@ -443,6 +496,9 @@ local function openPage(idx, title, script, extra1)
         if suffix ~= nil then rf2ethos.formFields[idx]:suffix(suffix) end
         if defaultValue ~= nil then rf2ethos.formFields[idx]:default(defaultValue) end
         if helpTxt ~= nil then rf2ethos.formFields[idx]:help(helpTxt) end
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['flags'] ~= nil then
@@ -458,6 +514,9 @@ local function openPage(idx, title, script, extra1)
         end, function(value)
             configs[servoIndex]['reverse'] = value
         end)
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     if configs[servoIndex]['flags'] ~= nil then
@@ -473,6 +532,9 @@ local function openPage(idx, title, script, extra1)
         end, function(value)
             configs[servoIndex]['geometry'] = value
         end)
+        if rf2ethos.config.servoOverride == true then
+            rf2ethos.formFields[idx]:enable(false)
+        end        
     end
 
     getServoConfigurations(getServoConfigurationsEnd)
@@ -495,6 +557,72 @@ local function event(widget, category, value, x, y)
     return false
 end
 
+local function onToolMenu(self)
+
+    local buttons
+    if rf2ethos.config.servoOverride == false then
+        buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+
+                    -- we cant launch the loader here to se rely on the modules
+                    -- wakeup function to do this
+                    triggerOverRide = true
+                    triggerOverRideAll = true
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+    else
+        buttons = {
+            {
+                label = "        OK        ",
+                action = function()
+
+                    -- we cant launch the loader here to se rely on the modules
+                    -- wakup function to do this
+                    triggerOverRide = true
+                    return true
+                end
+            }, {
+                label = "CANCEL",
+                action = function()
+                    return true
+                end
+            }
+        }
+    end
+    local message
+    local title
+    if rf2ethos.config.servoOverride == false then
+        title = "Enable servo overide"
+        message = "Servo overide locks the servos to center, allowing you to use the center setting to adjust the servo center. This will result in all values on the selected servo page being saved when adjusting the servo center point."
+    else
+        title = "Disable servo overide"
+        message = "Return control of the servos to the flight controller"
+    end
+
+    form.openDialog({
+        width = nil,
+        title = title,
+        message = message,
+        buttons = buttons,
+        wakeup = function()
+        end,
+        paint = function()
+        end,
+        options = TEXT_LEFT
+    })
+
+end
+
+
 return {
     title = "Servos",
     reboot = false,
@@ -512,6 +640,6 @@ return {
     onNavMenu = onNavMenu,
     onSaveMenu = onSaveMenu,
     pageTitle = "Servos",
-    navButtons = {menu = true, save = true, reload = true, tool = false, help = true}
+    navButtons = {menu = true, save = true, reload = true, tool = true, help = true}
 
 }
