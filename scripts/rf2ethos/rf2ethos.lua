@@ -34,7 +34,7 @@ rf2ethos.config = config
 rf2ethos.config.tailMode = nil
 rf2ethos.config.swashMode = nil
 rf2ethos.config.servoCount = nil
-rf2ethos.config.servoOverride = false
+rf2ethos.config.servoOverride = nil
 
 rf2ethos.triggers = {}
 rf2ethos.triggers = triggers
@@ -174,6 +174,7 @@ function rf2ethos.resetState()
     rf2ethos.config.tailMode = nil
     rf2ethos.config.apiVersion = nil
     rf2ethos.audio = {}
+    rf2ethos.config.servoOverride = nil
 
 end
 
@@ -501,7 +502,7 @@ function rf2ethos.wakeup(widget)
     -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 1 or rf2ethos.wakeupSchedulerBgChecksInit == true then
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 0.5 or rf2ethos.wakeupSchedulerBgChecksInit == true then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
     end
@@ -562,9 +563,29 @@ function rf2ethos.wakeupBgChecks()
             }
             rf2ethos.mspQueue:add(message)
             
+    elseif (rf2ethos.config.servoOverride == nil) and rf2ethos.mspQueue:isProcessed() then
+            local message = {
+                command = 192, -- MSP_SERVO_OVERIDE
+                processReply = function(self, buf)
+                     if #buf >= 10 then
+                     
+                            for i = 0, rf2ethos.config.servoCount * 2 do
+                                buf.offset = i
+                                local servoOverride = rf2ethos.mspHelper.readU8(buf)
+                                if servoOverride == 0 then
+                                    rf2ethos.utils.log("Servo overide: true")
+                                    rf2ethos.config.servoOverride = true
+                                end
+                            end                     
+                    end
+                end,
+                simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
+            }
+            rf2ethos.mspQueue:add(message)
+            
             -- do this at end of last one
             rf2ethos.wakeupSchedulerBgChecksInit = false
-    end 
+    end    
 
 
     
