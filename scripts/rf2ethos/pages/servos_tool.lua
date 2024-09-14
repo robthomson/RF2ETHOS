@@ -602,7 +602,7 @@ local function onToolMenu(self)
     local title
     if rf2ethos.config.servoOverride == false then
         title = "Enable servo overide"
-        message = "Servo overide locks the servos to center, allowing you to use the center setting to adjust the servo center. This will result in all values on the selected servo page being saved when adjusting the servo center point."
+        message = "Servo overide allows you to 'trim' your servo center point in real time."
     else
         title = "Disable servo overide"
         message = "Return control of the servos to the flight controller"
@@ -621,7 +621,6 @@ local function onToolMenu(self)
     })
 
 end
-
 
 return {
     title = "Servos",

@@ -1248,6 +1248,14 @@ function rf2ethos.event(widget, category, value, x, y)
 end
 
 function rf2ethos.close()
+
+
+    if rf2ethos.Page ~= nil and (rf2ethos.uiState == rf2ethos.uiStatus.pages or rf2ethos.uiState == rf2ethos.uiStatus.mainMenu) then
+        if rf2ethos.Page.close then
+            rf2ethos.Page.close()
+        end
+    end
+    
     if rf2ethos.dialogs.progress then rf2ethos.ui.progessDisplayClose() end
     if rf2ethos.dialogs.save then rf2ethos.ui.progessDisplaySaveClose() end
     if rf2ethos.dialogs.noLink then rf2ethos.ui.progessNolinkDisplayClose() end

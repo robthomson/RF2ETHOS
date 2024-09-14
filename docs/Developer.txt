@@ -45,6 +45,7 @@ return {
      mspSuccess = mspSuccess,                   -- A hook into msp success - runs on every msp sucess
      mspTimeout = mspTimeout,                   -- A hook into msp timeout - runs on every msp timeout 
      mspChecksum = mspChecksum,                 -- A hook called every time a checksum error occurs	 
+     close = close,                             -- A hook to allow a page to 'cleanup' if system is exiting to ethos menu
 }
 
 == 
