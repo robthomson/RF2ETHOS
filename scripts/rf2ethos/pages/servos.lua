@@ -253,6 +253,26 @@ local function openPageInit(pidx, title, script)
                 }
             }
             rf2ethos.mspQueue:add(message)
+            
+            local message = {
+                command = 192, -- MSP_SERVO_OVERIDE
+                processReply = function(self, buf)
+                     if #buf >= 10 then
+                     
+                            for i = 0, rf2ethos.config.servoCount * 2 do
+                                buf.offset = i
+                                local servoOverride = rf2ethos.mspHelper.readU8(buf)
+                                if servoOverride == 0 then
+                                    rf2ethos.utils.log("Servo overide: true")
+                                    rf2ethos.config.servoOverride = true
+                                end
+                            end                     
+                    end
+                end,
+                simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
+            }
+            rf2ethos.mspQueue:add(message)            
+            
     end        
 end
 
