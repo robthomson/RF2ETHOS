@@ -259,7 +259,7 @@ local function openPageInit(pidx, title, script)
                 processReply = function(self, buf)
                      if #buf >= 10 then
                      
-                            for i = 0, rf2ethos.config.servoCount * 2 do
+                            for i = 0, rf2ethos.config.servoCount do
                                 buf.offset = i
                                 local servoOverride = rf2ethos.mspHelper.readU8(buf)
                                 if servoOverride == 0 then
@@ -268,6 +268,9 @@ local function openPageInit(pidx, title, script)
                                 end
                             end                     
                     end
+                    if rf2ethos.config.servoOverride == nil then
+                        rf2ethos.config.servoOverride = false 
+                    end    
                 end,
                 simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
             }

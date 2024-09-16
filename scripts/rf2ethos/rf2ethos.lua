@@ -569,14 +569,17 @@ function rf2ethos.wakeupBgChecks()
                 processReply = function(self, buf)
                      if #buf >= 10 then
                      
-                            for i = 0, rf2ethos.config.servoCount * 2 do
+                            for i = 0, rf2ethos.config.servoCount do
                                 buf.offset = i
                                 local servoOverride = rf2ethos.mspHelper.readU8(buf)
                                 if servoOverride == 0 then
                                     rf2ethos.utils.log("Servo overide: true")
                                     rf2ethos.config.servoOverride = true
                                 end
-                            end                     
+                            end      
+                            if rf2ethos.config.servoOverride == nil then
+                                rf2ethos.config.servoOverride = false 
+                            end      
                     end
                 end,
                 simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
@@ -586,9 +589,7 @@ function rf2ethos.wakeupBgChecks()
             -- do this at end of last one
             rf2ethos.wakeupSchedulerBgChecksInit = false
     end    
-
-
-    
+  
 end
 
 -- WAKEUPFORM.  RUN A FUNCTION CALLED wakeup THAT IS RETURNED WHEN REQUESTING A PAGE
