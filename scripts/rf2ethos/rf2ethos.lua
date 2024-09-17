@@ -1127,11 +1127,12 @@ end
 
 function rf2ethos.create()
 
-    -- get sensor for msp comms
-    rf2ethos.sensor = sport.getSensor({primId = 0x32})
-
     -- get sensor we call for checking link up
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
+
+    -- get sensor for msp comms
+    rf2ethos.sensor = sport.getSensor({primId = 0x32})
+    rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
 
     -- load msp timeout
     rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
