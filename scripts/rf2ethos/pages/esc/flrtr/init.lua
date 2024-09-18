@@ -5,16 +5,26 @@ local mspHeaderBytes = 2
 
 -- required by framework
 local function getEscModel(buffer)
-    return "model"
+    return "FlyRotor"
 end
 
 -- required by framework
 local function getEscVersion(buffer)
+
+    -- buffer is the whole msp payload
+    -- looks like prob have to extract
+    -- DATA[3-10]: Serial number. Example: 7771BED8DE25A9EA 
+
     return "version"
 end
 
 -- required by framework
 local function getEscFirmware(buffer)
+
+    -- buffer is the whole msp payload
+    -- prob have to extract DATA[11-13]: IAP version, major + minor + revision. Example: 01 00 00, means 1.0.0 
+   
+
     return "firmware"
 end
 

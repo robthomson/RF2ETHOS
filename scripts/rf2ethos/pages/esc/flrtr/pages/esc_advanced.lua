@@ -6,18 +6,19 @@ local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" ..
 local mspHeaderBytes = ESC.mspHeaderBytes
 local mspSignature = ESC.mspSignature
 
-fields[#fields + 1] = {t = "ESC mode", vals = {mspHeaderBytes + 23}}
-fields[#fields + 1] = {t = "Lithium batteries", vals = {mspHeaderBytes + 24}}
-fields[#fields + 1] = {t = "Low voltage prot", vals = {mspHeaderBytes + 25}}
-fields[#fields + 1] = {t = "Temp prot", vals = {mspHeaderBytes + 26}}
-fields[#fields + 1] = {t = "BEC output", vals = {mspHeaderBytes + 27}}
-fields[#fields + 1] = {t = "Timing angle", vals = {mspHeaderBytes + 28}}
-fields[#fields + 1] = {t = "Motor direction", vals = {mspHeaderBytes + 29}}
+local fanControl = {"Automatic","Always On"}
+
+
+fields[#fields + 1] = {t = "Throttle min", vals = {mspHeaderBytes + 20, mspHeaderBytes + 19},unit = "us"}
+fields[#fields + 1] = {t = "Throttle max", vals = {mspHeaderBytes + 22, mspHeaderBytes + 21},unit = "us"}
+fields[#fields + 1] = {t = "Low voltage protection", vals = {mspHeaderBytes + 25}, unit = "V"}
+fields[#fields + 1] = {t = "Temperature protection", vals = {mspHeaderBytes + 26},unit="°"}
+fields[#fields + 1] = {t = "Timing angle", vals = {mspHeaderBytes + 28},unit="°"}
 fields[#fields + 1] = {t = "Starting torque", min = 0, max = 15, vals = {mspHeaderBytes + 30}}
 fields[#fields + 1] = {t = "Response speed", min = 1, max = 50, vals = {mspHeaderBytes + 31}}
-fields[#fields + 1] = {t = "Buzzer volume", vals = {mspHeaderBytes + 32}}
+fields[#fields + 1] = {t = "Buzzer volume", min= 0, max = 5, vals = {mspHeaderBytes + 32}}
 fields[#fields + 1] = {t = "Current gain", vals = {mspHeaderBytes + 33}}
-fields[#fields + 1] = {t = "Fan control", vals = {mspHeaderBytes + 34}}
+fields[#fields + 1] = {t = "Fan control", vals = {mspHeaderBytes + 34}, tableIdxInc = -1, table = fanControl}
 
 local foundEsc = false
 local foundEscDone = false

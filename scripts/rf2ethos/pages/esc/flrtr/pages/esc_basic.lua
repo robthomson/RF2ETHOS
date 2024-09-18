@@ -6,11 +6,25 @@ local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" ..
 local mspHeaderBytes = ESC.mspHeaderBytes
 local mspSignature = ESC.mspSignature
 
-fields[#fields + 1] = {t = "ESC type", vals = {mspHeaderBytes + 1}}
-fields[#fields + 1] = {t = "Current spec", vals = {mspHeaderBytes + 3, mspHeaderBytes + 2}}
-fields[#fields + 1] = {t = "Hardware version", vals = {mspHeaderBytes + mspHeaderBytes + 18}}
-fields[#fields + 1] = {t = "Throttle min [us]", vals = {mspHeaderBytes + 20, mspHeaderBytes + 19}}
-fields[#fields + 1] = {t = "Throttle max [us]", vals = {mspHeaderBytes + 22, mspHeaderBytes + 21}}
+local flightMode = {"Helicopter","Fixed Wing"}
+local govMode = {"External Governor","ESC Governor"}
+local becVoltage = {"7.5","7.6","7.7","7.8","7.9",
+                    "8.0","8.1","8.2","8.3","8.4","8.5","8.6","8.7","8.8","8.9",
+                    "9.0","9.1","9.2","9.3","9.4","9.5","9.6","9.7","9.8","9.9",
+                    "10.0","10.1","10.2","10.3","10.4","10.5","10.6","10.7","10.8","10.9",
+                    "11.0","11.1","11.2","11.3","11.4","11.5","11.6","11.7","11.8","11.9",
+                    "12.0"}
+local motorDirection = {"CW","CCW"}
+
+fields[#fields + 1] = {t = "ESC type", tablevals = {mspHeaderBytes + 1}, tableIdxInc = -1, table = flightMode}
+fields[#fields + 1] = {t = "Governor", vals = {mspHeaderBytes + 23}, tableIdxInc = -1, table = govMode}
+fields[#fields + 1] = {t = "Current spec", vals = {mspHeaderBytes + 3, mspHeaderBytes + 2}, unit="A"}
+fields[#fields + 1] = {t = "Cell Count", vals = {mspHeaderBytes + 24}}
+fields[#fields + 1] = {t = "BEC Voltage", vals = {mspHeaderBytes + 27}, tableIdxInc = -1, table = becVoltage, unit = "V"}
+fields[#fields + 1] = {t = "Motor direction", vals = {mspHeaderBytes + 29}, tableIdxInc = -1, table = motorDirection}
+
+--fields[#fields + 1] = {t = "Hardware version", vals = {mspHeaderBytes + mspHeaderBytes + 18}}  -- this val does not look correct.  regardless not in right place
+
 
 function postLoad()
     rf2ethos.triggers.isReady = true

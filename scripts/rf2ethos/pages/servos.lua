@@ -6,7 +6,7 @@ servoTable['sections'] = {}
 
 local triggerOverRide = false
 local triggerOverRideAll = false
-
+local lastServoCountTime = os.clock()
 
 
 local function buildServoTable()
@@ -231,6 +231,35 @@ local function openPage(pidx, title, script)
     return
 end
 
+local function getServoCount(callback, callbackParam)
+    local message = {
+        command = 120, -- MSP_SERVO_CONFIGURATIONS
+        processReply = function(self, buf)
+            local servoCount = rf2ethos.mspHelper.readU8(buf)
+            
+            -- update master one in case changed
+            rf2ethos.config.servoCountNew = servoCount
+
+            if callback then
+                callback(callbackParam)
+            end    
+        end,
+        -- 2 servos
+        -- simulatorResponse = {
+        --    2,
+        --    220, 5, 68, 253, 188, 2, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0,
+        --    221, 5, 68, 253, 188, 2, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+        -- }
+        -- 4 servos
+        simulatorResponse = {
+            4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
+            120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+        }
+    }
+    rf2ethos.mspQueue:add(message)
+end
+
+
 local function openPageInit(pidx, title, script)
 
     if rf2ethos.config.servoCount ~= nil then
@@ -370,6 +399,21 @@ local function wakeup()
             rf2ethos.config.servoOverride = false
         end
     end
+    
+    local now = os.clock()
+    if ((now - lastServoCountTime) >= 2) and rf2ethos.mspQueue:isProcessed() then
+            lastServoCountTime = now
+            
+            getServoCount()
+            
+            if rf2ethos.config.servoCountNew ~= nil then
+                    if rf2ethos.config.servoCountNew ~= rf2ethos.config.servoCount then
+                            rf2ethos.triggers.triggerReloadNoPrompt = true
+                    end
+            end
+            
+    end    
+    
 end
 
 local function servoCenterFocusAllOn(self)
@@ -427,5 +471,5 @@ return {title = "Servos",
         servoCenterFocusAllOn = servoCenterFocusAllOn,
         servoCenterFocusAllOff = servoCenterFocusAllOff,        
         wakeup = wakeup,
-        navButtons = {menu = true, save = false, reload = false, tool = true, help = true}
+        navButtons = {menu = true, save = false, reload = true, tool = true, help = true}
         }
