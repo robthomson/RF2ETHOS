@@ -3,9 +3,19 @@ moduleName = "FLRTR"
 
 local mspHeaderBytes = 2
 
+function getUInt(page, vals)
+    local v = 0
+    for idx = 1, #vals do
+        local raw_val = page[vals[idx] + mspHeaderBytes] or 0
+        raw_val = raw_val * (256 ^ (idx - 1))
+        v = v + raw_val
+    end
+    return v
+end
+
 -- required by framework
 local function getEscModel(buffer)
-    return "FlyRotor"
+    return "Fly Rotor"
 end
 
 -- required by framework
@@ -15,7 +25,8 @@ local function getEscVersion(buffer)
     -- looks like prob have to extract
     -- DATA[3-10]: Serial number. Example: 7771BED8DE25A9EA 
 
-    return "version"
+     --return string.format("%.5f", getUInt(buffer, {mspHeaderBytes + 18}) / 100000)
+     return "7771BED8DE25A9EA"
 end
 
 -- required by framework
@@ -23,9 +34,7 @@ local function getEscFirmware(buffer)
 
     -- buffer is the whole msp payload
     -- prob have to extract DATA[11-13]: IAP version, major + minor + revision. Example: 01 00 00, means 1.0.0 
-   
-
-    return "firmware"
+    return "1.0.0"
 end
 
 return {

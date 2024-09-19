@@ -9,7 +9,7 @@ local mspSignature = ESC.mspSignature
 local foundEsc = false
 local foundEscDone = false
 
-fields[#fields + 1] = {t = "Soft start", min = 5, max = 55, vals = {mspHeaderBytes + 35}}
+
 fields[#fields + 1] = {t = "Gov-P", vals = {mspHeaderBytes + 37, mspHeaderBytes + 36}}
 fields[#fields + 1] = {t = "Gov-I", vals = {mspHeaderBytes + 39, mspHeaderBytes + 38}}
 fields[#fields + 1] = {t = "Gov-D", vals = {mspHeaderBytes + 41, mspHeaderBytes + 40}}
