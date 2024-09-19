@@ -3,14 +3,19 @@ moduleName = "FLRTR"
 
 local mspHeaderBytes = 2
 
+
 function getUInt(page, vals)
     local v = 0
     for idx = 1, #vals do
         local raw_val = page[vals[idx] + mspHeaderBytes] or 0
-        raw_val = raw_val * (256 ^ (idx - 1))
-        v = v + raw_val
+        raw_val = raw_val << ((idx - 1) * 8)
+        v = v | raw_val
     end
     return v
+end
+
+function getPageValue(page, index)
+    return page[mspHeaderBytes + index]
 end
 
 local function getText(buffer, st, en)
@@ -25,19 +30,21 @@ local function getText(buffer, st, en)
 end
 
 -- required by framework
-local function getEscModel(buffer)
+local function getEscModel(self)
 
 
     -- buffer is the whole msp payload
     -- looks like prob have to extract
   
-    return "FLYROTOR " .. string.format(buffer[5]) .. "A"
+   local hw = (getPageValue(self, 18) + 1)..".0/"..getPageValue(self, 12).."."..getPageValue(self, 13).."."..getPageValue(self, 14)
+  
+    return "FLYROTOR " .. string.format(self[5]) .. "A " .. hw .. " "
     
     
 end
 
 -- required by framework
-local function getEscVersion(buffer)
+local function getEscVersion(self)
 
     -- buffer is the whole msp payload
     -- looks like prob have to extract
@@ -45,18 +52,19 @@ local function getEscVersion(buffer)
 
      --return string.format("%.5f", getUInt(buffer, {mspHeaderBytes + 18}) / 100000)
      
-     
-     return "7771BED8DE25A9EA"
+     local sn = string.format("%08X", getUInt(self, { 7, 6, 5, 4 }))..string.format("%08X", getUInt(self, { 11, 10, 9, 8 }))
+     return sn
      
      
 end
 
 -- required by framework
-local function getEscFirmware(buffer)
+local function getEscFirmware(self)
 
-    -- buffer is the whole msp payload
-    -- prob have to extract DATA[11-13]: IAP version, major + minor + revision. Example: 01 00 00, means 1.0.0 
-    return ""
+    local version = getPageValue(self, 15).."."..getPageValue(self, 16).."."..getPageValue(self, 17)
+
+    return version
+
 end
 
 return {
