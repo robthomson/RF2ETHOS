@@ -531,7 +531,7 @@ function rf2ethos.wakeupBgChecks()
             local message = {
                 command = 42, -- MIXER
                 processReply = function(self, buf)
-                    if #buf >= 10 then
+                    if #buf >= 19 then
 
                         local tailMode = buf[2]
                         local swashMode = buf[6]
@@ -549,7 +549,7 @@ function rf2ethos.wakeupBgChecks()
             local message = {
                 command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
-                     if #buf >= 10 then
+                     if #buf >= 20 then
                             local servoCount = rf2ethos.mspHelper.readU8(buf)
                             
                             -- update master one in case changed
@@ -567,7 +567,7 @@ function rf2ethos.wakeupBgChecks()
             local message = {
                 command = 192, -- MSP_SERVO_OVERIDE
                 processReply = function(self, buf)
-                     if #buf >= 10 then
+                     if #buf >= 16 then
                      
                             for i = 0, rf2ethos.config.servoCount do
                                 buf.offset = i

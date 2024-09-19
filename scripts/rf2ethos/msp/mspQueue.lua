@@ -6,7 +6,7 @@ function MspQueueController.new()
     local self = setmetatable({}, MspQueueController)
     self.messageQueue = {}
     self.currentMessage = nil
-    self.lastTimeCommandSent = 0
+    self.lastTimeCommandSent = nil
     self.retryCount = 0
     self.maxRetries = 3
     return self
@@ -47,10 +47,12 @@ function MspQueueController:processQueue()
     end
 
     if not rf2ethos.runningInSimulator then
-        if self.lastTimeCommandSent == 0 or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
+        if not self.lastTimeCommandSent or self.lastTimeCommandSent + 0.5 < os.clock() then
             if self.currentMessage.payload then
+                --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command..": {" .. rf2ethos.utils.joinTableItems(self.currentMessage.payload, ", ") .. "}")
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
             else
+                --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command)
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, {})
             end
             self.lastTimeCommandSent = os.clock()
@@ -74,7 +76,9 @@ function MspQueueController:processQueue()
     end
 
     if cmd then
-
+    
+        self.lastTimeCommandSent = nil
+        
         if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
             local logData = "Requesting:  {" .. tostring(cmd) .. "}"
 
@@ -100,6 +104,7 @@ function MspQueueController:processQueue()
 
         if self.currentMessage.processReply then self.currentMessage:processReply(buf) end
         self.currentMessage = nil
+        collectgarbage()
 
         if rf2ethos.Page ~= nil then if rf2ethos.Page.mspSuccess then rf2ethos.Page.mspSuccess() end end
 
@@ -107,11 +112,18 @@ function MspQueueController:processQueue()
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
         if self.currentMessage.errorHandler then self.currentMessage:errorHandler() end
-        self.currentMessage = nil
+        self:clear()
+        collectgarbage()
 
         if rf2ethos.Page ~= nil then if rf2ethos.Page.mspTimeout then rf2ethos.Page.mspTimeout() end end
 
     end
+end
+
+function MspQueueController:clear()
+    self.messageQueue = {}
+    self.currentMessage = nil
+    mspClearTxBuf()
 end
 
 local function deepCopy(original)
