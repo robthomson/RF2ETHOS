@@ -4,7 +4,7 @@ pages[#pages + 1] = {title = "SCORPION", folder = "scorp", image = "scorpion.png
 pages[#pages + 1] = {title = "HOBBYWING 5", folder = "hw5", image = "hobbywing.png"}
 pages[#pages + 1] = {title = "YGE", folder = "yge", image = "yge.png"}
 pages[#pages + 1] = {title = "FLYROTOR", folder = "flrtr", image = "flrtr.png"}
-pages[#pages + 1] = {title = "ZTW", folder = "flrtr", image = "ztw.png", disabled = true}
+pages[#pages + 1] = {title = "XDFLY", folder = "flrtr", image = "xdfly.png", disabled = true}
 
 local function openPage(pidx, title, script)
 

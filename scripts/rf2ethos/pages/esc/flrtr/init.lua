@@ -1,4 +1,4 @@
-local toolName = "Fly Rotor"
+local toolName = "Flyrotor"
 moduleName = "FLRTR"
 
 local mspHeaderBytes = 2
@@ -13,9 +13,27 @@ function getUInt(page, vals)
     return v
 end
 
+local function getText(buffer, st, en)
+
+    local tt = {}
+    for i = st, en do
+        local v = buffer[i + mspHeaderBytes]
+        if v == 0 then break end
+        table.insert(tt, string.char(v))
+    end
+    return table.concat(tt)
+end
+
 -- required by framework
 local function getEscModel(buffer)
-    return "Fly Rotor"
+
+
+    -- buffer is the whole msp payload
+    -- looks like prob have to extract
+  
+    return "FLYROTOR " .. string.format(buffer[5]) .. "A"
+    
+    
 end
 
 -- required by framework
@@ -26,7 +44,11 @@ local function getEscVersion(buffer)
     -- DATA[3-10]: Serial number. Example: 7771BED8DE25A9EA 
 
      --return string.format("%.5f", getUInt(buffer, {mspHeaderBytes + 18}) / 100000)
+     
+     
      return "7771BED8DE25A9EA"
+     
+     
 end
 
 -- required by framework
@@ -34,7 +56,7 @@ local function getEscFirmware(buffer)
 
     -- buffer is the whole msp payload
     -- prob have to extract DATA[11-13]: IAP version, major + minor + revision. Example: 01 00 00, means 1.0.0 
-    return "1.0.0"
+    return ""
 end
 
 return {

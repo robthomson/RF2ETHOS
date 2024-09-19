@@ -6,11 +6,11 @@ local ESC = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" ..
 local mspHeaderBytes = ESC.mspHeaderBytes
 local mspSignature = ESC.mspSignature
 
-local fanControl = {"Automatic","Always On"}
 
 
-fields[#fields + 1] = {t = "Throttle min", min = 1000, max = 2000, default = 1100, vals = {mspHeaderBytes + 20, mspHeaderBytes + 19},unit = "us"}
-fields[#fields + 1] = {t = "Throttle max", min = 1000, max = 2000, default = 1940,  vals = {mspHeaderBytes + 22, mspHeaderBytes + 21},unit = "us"}
+
+--fields[#fields + 1] = {t = "Throttle min", min = 1000, max = 2000, default = 1100, vals = {mspHeaderBytes + 20, mspHeaderBytes + 19},unit = "us"} -- informational only. cant be saved
+--fields[#fields + 1] = {t = "Throttle max", min = 1000, max = 2000, default = 1940,  vals = {mspHeaderBytes + 22, mspHeaderBytes + 21},unit = "us"} -- informational only. cant be saved
 fields[#fields + 1] = {t = "Low voltage protection", min = 28, max = 38, scale = 10, default = 30, decimals = 1, vals = {mspHeaderBytes + 25}, unit = "V"}
 fields[#fields + 1] = {t = "Temperature protection", min = 50, max = 150, default = 125, vals = {mspHeaderBytes + 26}, unit="°"}
 fields[#fields + 1] = {t = "Timing angle", min = 5, max = 25, default = 15, vals = {mspHeaderBytes + 28},unit="°"}
@@ -18,7 +18,7 @@ fields[#fields + 1] = {t = "Starting torque", min = 0, max = 15, default = 3, va
 fields[#fields + 1] = {t = "Response speed", min = 1, max = 50, default = 15, vals = {mspHeaderBytes + 31}}
 fields[#fields + 1] = {t = "Buzzer volume", min= 0, max = 5, default = 2, vals = {mspHeaderBytes + 32}}
 fields[#fields + 1] = {t = "Current gain", min = 0, max = 40, default = 20, vals = {mspHeaderBytes + 33}}
-fields[#fields + 1] = {t = "Fan control", vals = {mspHeaderBytes + 34}, tableIdxInc = -1, table = fanControl}
+
 
 local foundEsc = false
 local foundEscDone = false
@@ -61,6 +61,6 @@ return {
     navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
     onNavMenu = onNavMenu,
     event = event,
-    pageTitle = "Esc / Fly Rotor / Advanced",
+    pageTitle = "Esc / Flyrotor / Advanced",
     headerLine = rf2ethos.escHeaderLineText
 }
