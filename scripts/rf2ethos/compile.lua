@@ -106,10 +106,12 @@ function compile.loadScript(script)
             os.rename(script .. 'c', cachefile)
         end
         -- print("Loading: " .. cachefile)
+        collectgarbage()
         return loadfile(cachefile)
     else
         if file_exists(cachefile) == true then os.remove(cachefile) end
         -- print("Loading: " .. script)
+        collectgarbage()        
         return loadfile(script)
     end
 
