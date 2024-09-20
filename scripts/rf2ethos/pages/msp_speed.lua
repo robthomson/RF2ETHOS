@@ -378,6 +378,7 @@ local function wakeup()
             if doNextMsp == true then
                 doNextMsp = false
                 getMSP()
+                collectgarbage()
             end    
         end
 
