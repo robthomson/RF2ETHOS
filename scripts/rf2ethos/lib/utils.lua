@@ -192,6 +192,54 @@ function utils.scaleValue(value, f)
     end
 end
 
+
+-- GET FIELD VALUE FOR ETHOS FORMS.  FUNCTION TAKES THE VALUE AND APPLIES RULES BASED
+-- ON THE PARAMETERS ON THE rf2ethos.pages TABLE
+function utils.getFieldValue(f)
+
+    local v
+
+    if f.value == nil then f.value = 0 end
+    if f.t == nil then f.t = "N/A" end
+
+    if f.value ~= nil then
+        if f.decimals ~= nil then
+            v = rf2ethos.utils.round(f.value * rf2ethos.utils.decimalInc(f.decimals))
+        else
+            v = f.value
+        end
+    else
+        v = 0
+    end
+
+    if f.offset ~= nil then
+        v = v + f.offset
+    end
+    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
+
+    return v
+end
+
+-- SAVE FIELD VALUE FOR ETHOS FORMS.  FUNCTION TAKES THE VALUE AND APPLIES RULES BASED
+-- ON THE PARAMETERS ON THE rf2ethos.pages TABLE
+function utils.saveFieldValue(f, value)
+    if value ~= nil then
+        if f.offset ~= nil then
+            value = value - f.offset
+        end    
+        if f.decimals ~= nil then
+            f.value = value / rf2ethos.utils.decimalInc(f.decimals)
+        else
+            f.value = value
+        end
+        if f.postEdit then f.postEdit(rf2ethos.Page) end
+    end
+
+    if f.mult ~= nil then f.value = f.value / f.mult end
+
+    return f.value
+end
+
 function utils.decimalInc(dec)
     local decTable = {10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000, 10000000000, 100000000000}
 

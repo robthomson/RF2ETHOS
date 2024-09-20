@@ -127,11 +127,11 @@ local function openPage(idx, title, script)
                 if rf2ethos.activeRateTable == 0 then
                     value = 0
                 else
-                    value = rf2ethos.getFieldValue(f)
+                    value = rf2ethos.utils.getFieldValue(f)
                 end
                 return value
             end, function(value)
-                f.value = rf2ethos.saveFieldValue(f, value)
+                f.value = rf2ethos.utils.saveFieldValue(f, value)
                 rf2ethos.saveValue(i)
             end)
             if f.default ~= nil then

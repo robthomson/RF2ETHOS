@@ -205,47 +205,6 @@ function rf2ethos.rateSwitchCheck()
     if rf2ethos.config.rateswitchParam ~= nil then rf2ethos.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value() end
 end
 
--- GET FIELD VALUE FOR ETHOS FORMS.  FUNCTION TAKES THE VALUE AND APPLIES RULES BASED
--- ON THE PARAMETERS ON THE rf2ethos.pages TABLE
-function rf2ethos.getFieldValue(f)
-
-    local v
-
-    if f.value == nil then f.value = 0 end
-    if f.t == nil then f.t = "N/A" end
-
-    if f.value ~= nil then
-        if f.decimals ~= nil then
-            v = rf2ethos.utils.round(f.value * rf2ethos.utils.decimalInc(f.decimals))
-        else
-            v = f.value
-        end
-    else
-        v = 0
-    end
-
-    if f.mult ~= nil then v = math.floor(v * f.mult + 0.5) end
-
-    return v
-end
-
--- SAVE FIELD VALUE FOR ETHOS FORMS.  FUNCTION TAKES THE VALUE AND APPLIES RULES BASED
--- ON THE PARAMETERS ON THE rf2ethos.pages TABLE
-function rf2ethos.saveFieldValue(f, value)
-    if value ~= nil then
-        if f.decimals ~= nil then
-            f.value = value / rf2ethos.utils.decimalInc(f.decimals)
-        else
-            f.value = value
-        end
-        if f.postEdit then f.postEdit(rf2ethos.Page) end
-    end
-
-    if f.mult ~= nil then f.value = f.value / f.mult end
-
-    return f.value
-end
-
 -- SAVE FIELD VALUE FOR ETHOS FROM ETHOS FORMS INTO THE ACTUAL FORMAT THAT 
 -- WILL BE TRANSMITTED OVER MSP
 function rf2ethos.saveValue(currentField)

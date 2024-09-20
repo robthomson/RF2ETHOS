@@ -279,14 +279,14 @@ function ui.fieldChoice(f, i)
     end
 
     rf2ethos.formFields[i] = form.addChoiceField(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
-        local value = rf2ethos.getFieldValue(f)
+        local value = rf2ethos.utils.getFieldValue(f)
 
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
         if f.postEdit then f.postEdit(rf2ethos.Page, value) end
         if f.onChange then f.onChange(rf2ethos.Page, value) end
-        f.value = rf2ethos.saveFieldValue(f, value)
+        f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
 
@@ -325,24 +325,38 @@ function ui.fieldNumber(f, i)
         postText = nil
     end
 
+
+
+    if f.offset ~= nil then
+        if f.min ~= nil then
+            f.min = f.min + f.offset
+        end
+        if f.max ~= nil then
+            f.max = f.max + f.offset
+        end    
+    end
+
     minValue = rf2ethos.utils.scaleValue(f.min, f)
     maxValue = rf2ethos.utils.scaleValue(f.max, f)
+    
+
     if f.mult ~= nil then
         minValue = minValue * f.mult
         maxValue = maxValue * f.mult
     end
 
+
     if minValue == nil then minValue = 0 end
     if maxValue == nil then maxValue = 0 end
     rf2ethos.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
-        local value = rf2ethos.getFieldValue(f)
+        local value = rf2ethos.utils.getFieldValue(f)
 
         return value
     end, function(value)
         if f.postEdit then f.postEdit(rf2ethos.Page) end
         if f.onChange then f.onChange(rf2ethos.Page) end
 
-        f.value = rf2ethos.saveFieldValue(f, value)
+        f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
 
@@ -354,8 +368,9 @@ function ui.fieldNumber(f, i)
         end
     end
 
-    if f.default ~= nil then
-        local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
+    if f.default ~= nil then    
+        if f.offset ~= nil then f.default = f.default + f.offset end      
+        local default = f.default * rf2ethos.utils.decimalInc(f.decimals)     
         if f.mult ~= nil then default = default * f.mult end
         rf2ethos.formFields[i]:default(default)
     else
@@ -412,7 +427,7 @@ function ui.fieldStaticText(f, i)
         -- posField = {x = 2000, y = 0, w = 20, h = 20}
     end
 
-    rf2ethos.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.getFieldValue(f))
+    rf2ethos.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.getFieldValue(f))
 
     if rf2ethos.config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
@@ -465,13 +480,13 @@ function ui.fieldText(f, i)
     end
 
     rf2ethos.formFields[i] = form.addTextField(rf2ethos.formLines[formLineCnt], posField, function()
-        local value = rf2ethos.getFieldValue(f)
+        local value = rf2ethos.utils.getFieldValue(f)
         return value
     end, function(value)
         if f.postEdit then f.postEdit(rf2ethos.Page) end
         if f.onChange then f.onChange(rf2ethos.Page) end
 
-        f.value = rf2ethos.saveFieldValue(f, value)
+        f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
 

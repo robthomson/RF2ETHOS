@@ -116,10 +116,10 @@ local function openPage(idx, title, script)
         end
 
         rf2ethos.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
-            local value = rf2ethos.getFieldValue(f)
+            local value = rf2ethos.utils.getFieldValue(f)
             return value
         end, function(value)
-            f.value = rf2ethos.saveFieldValue(f, value)
+            f.value = rf2ethos.utils.saveFieldValue(f, value)
             rf2ethos.saveValue(i)
         end)
         if f.default ~= nil then

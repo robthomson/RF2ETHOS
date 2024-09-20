@@ -85,6 +85,7 @@ The following provides an example summary of the parameters you can use.
 - decimals       => A number value to indicate the number of decimal points used on the form field
 - scale          => A scaling value used when rendering the value to screen
 - mult           => a multiplier used to multiply the value when saving / storing it
+- offset         => add or subtract from the stored value by the amount set in offset
 - unit           => a unit field added to the end of each text field
 - step           => the field can only increment by a certain step value
 - vals           => MSP payload location values used for saving and retrieving the data
