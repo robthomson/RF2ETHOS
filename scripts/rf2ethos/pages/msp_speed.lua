@@ -333,6 +333,7 @@ local function wakeup()
             testLoaderStepSizeValue = 0
             getMSPCount = 0
             mspSpeedTest = true
+            mspQueryTimeCount = 0
 
             mspSpeedTestStats['total'] = 0
             mspSpeedTestStats['retries'] = 0
