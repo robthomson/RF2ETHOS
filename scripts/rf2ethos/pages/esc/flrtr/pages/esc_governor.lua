@@ -9,11 +9,13 @@ local mspSignature = ESC.mspSignature
 local foundEsc = false
 local foundEscDone = false
 
+local govMode = {"External Governor","ESC Governor"}
 
+fields[#fields + 1] = {t = "Governor", vals = {mspHeaderBytes + 23}, tableIdxInc = -1, table = govMode} 
 fields[#fields + 1] = {t = "Gov-P", vals = {mspHeaderBytes + 37, mspHeaderBytes + 36}}
 fields[#fields + 1] = {t = "Gov-I", vals = {mspHeaderBytes + 39, mspHeaderBytes + 38}}
 fields[#fields + 1] = {t = "Gov-D", vals = {mspHeaderBytes + 41, mspHeaderBytes + 40}}
-fields[#fields + 1] = {t = "ERPM max", vals = {mspHeaderBytes + 44, mspHeaderBytes + 43, mspHeaderBytes + 42}}
+fields[#fields + 1] = {t = "Motor ERPM max", vals = {mspHeaderBytes + 44, mspHeaderBytes + 43, mspHeaderBytes + 42}}
 
 function postLoad()
     rf2ethos.triggers.isReady = true

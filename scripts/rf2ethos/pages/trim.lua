@@ -21,9 +21,13 @@ fields[#fields + 1] = {t = "Pitch trim %", help = "mixerSwashTrim", xlabel = "li
 
 fields[#fields + 1] = {t = "Col. trim %", help = "mixerSwashTrim", xlabel = "line7", xinline = 1, min = -1000, max = 1000, vals = {16, 17}, decimals = 1, scale = 10}
 
-if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} end
+if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then 
+    fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} 
+end
 
-if rf2ethos.config.tailMode == 0 then fields[#fields + 1] = {t = "Yaw. trim %", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1, scale = 10} end
+if rf2ethos.config.tailMode == 0 then 
+    fields[#fields + 1] = {t = "Yaw. trim %", help = "mixerTailMotorCenterTrim", inline = 1, min = -1043, max = 1043, vals = {4, 5}, mult=0.0239923224568138, decimals = 1} 
+end
 
 local function saveData()
 

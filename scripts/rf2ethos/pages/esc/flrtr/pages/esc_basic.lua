@@ -10,7 +10,7 @@ local flightMode = {"Helicopter","Fixed Wing"}
 local becVoltage = {"7.5","8.0","8.5","12"}
 local motorDirection = {"CW","CCW"}
 local fanControl = {"Automatic","Always On"}
-local govMode = {"External Governor","ESC Governor"}
+
 
 --fields[#fields + 1] = {t = "ESC type", tablevals = {mspHeaderBytes + 1}, tableIdxInc = -1, table = flightMode} -- informational - maybe put in header
 --fields[#fields + 1] = {t = "Current spec", vals = {mspHeaderBytes + 3, mspHeaderBytes + 2}, unit="A"}  -- informational - maybe put in header?
@@ -19,7 +19,6 @@ fields[#fields + 1] = {t = "BEC Voltage", vals = {mspHeaderBytes + 27}, tableIdx
 fields[#fields + 1] = {t = "Motor direction", vals = {mspHeaderBytes + 29}, tableIdxInc = -1, table = motorDirection}
 fields[#fields + 1] = {t = "Soft start", min = 5, max = 55, vals = {mspHeaderBytes + 35}}
 fields[#fields + 1] = {t = "Fan control", vals = {mspHeaderBytes + 34}, tableIdxInc = -1, table = fanControl}
--- fields[#fields + 1] = {t = "Governor", vals = {mspHeaderBytes + 23}, tableIdxInc = -1, table = govMode} disabled as its not currently possible to set this value 
 
 --fields[#fields + 1] = {t = "Hardware version", vals = {mspHeaderBytes + 18}}  -- this val does not look correct.  regardless not in right place
 
