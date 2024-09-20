@@ -24,7 +24,6 @@ fields[#fields + 1] = {t = "Col. trim %", help = "mixerSwashTrim", xlabel = "lin
 
 -- note.  the same vals are used for center trim motor and yaw trim - but they are multiplied and saved in different ways
 if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then 
-    fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} 
     fields[#fields + 1] = {t = "Center trim for tail motor %", help = "mixerTailMotorCenterTrim", inline = 1, min = -500, max = 500, vals = {4, 5}, decimals = 1,scale = 10}     
 end
 
