@@ -180,18 +180,6 @@ function utils.joinTableItems(table, delimiter)
     return result
 end
 
-function utils.scaleValue(value, f)
-    local v
-    if value ~= nil then
-        v = value * utils.decimalInc(f.decimals)
-        if f.scale ~= nil then v = v / f.scale end
-        v = utils.round(v)
-        return v
-    else
-        return nil
-    end
-end
-
 
 -- GET FIELD VALUE FOR ETHOS FORMS.  FUNCTION TAKES THE VALUE AND APPLIES RULES BASED
 -- ON THE PARAMETERS ON THE rf2ethos.pages TABLE
@@ -238,6 +226,18 @@ function utils.saveFieldValue(f, value)
     if f.mult ~= nil then f.value = f.value / f.mult end
 
     return f.value
+end
+
+function utils.scaleValue(value, f)
+    local v
+    if value ~= nil then
+        v = value * utils.decimalInc(f.decimals)
+        if f.scale ~= nil then v = v / f.scale end
+        v = utils.round(v)
+        return v
+    else
+        return nil
+    end
 end
 
 function utils.decimalInc(dec)
