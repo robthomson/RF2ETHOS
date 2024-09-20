@@ -1,7 +1,7 @@
 local labels = {}
 local fields = {}
 
-fields[#fields + 1] = {t = "Full headspeed", help = "govHeadspeed", min = 0, max = 50000, default = 1000, unit = "rpm", vals = {1, 2}}
+fields[#fields + 1] = {t = "Full headspeed", help = "govHeadspeed", min = 0, max = 50000, default = 1000, unit = "rpm", step = 10, vals = {1, 2}}
 fields[#fields + 1] = {t = "PID master gain", help = "govMasterGain", min = 0, max = 250, default = 40, vals = {3}}
 
 labels[#labels + 1] = {subpage = 1, t = "Gains", label = 1, inline_size = 8.15}
