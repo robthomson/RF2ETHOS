@@ -962,7 +962,7 @@ function rf2ethos.wakeupUI()
         invalidatePages()
     else
         -- detect page data loaded and ready to move onto rendering the page
-        if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page.values)) then
+        if (rf2ethos.triggers.isReady == true and rf2ethos.mspQueue:isProcessed() and (rf2ethos.Page and rf2ethos.Page.values)) then
             rf2ethos.triggers.isReady = false
 
             rf2ethos.triggers.closeProgressLoader = true
