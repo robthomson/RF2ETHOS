@@ -444,7 +444,7 @@ function rf2ethos.wakeup(widget)
 
     -- keep cpu load down by running UI at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerUI) >= 0.05 or rf2ethos.wakeupSchedulerUIInit == true then
+    if (now - rf2ethos.wakeupSchedulerUI) >= 0.02 or rf2ethos.wakeupSchedulerUIInit == true then
         rf2ethos.wakeupSchedulerUI = now
         rf2ethos.wakeupUI()
         rf2ethos.wakeupSchedulerUIInit = false
@@ -452,7 +452,7 @@ function rf2ethos.wakeup(widget)
 
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerForm) >= 0.1 or rf2ethos.wakeupSchedulerFormInit == true then
+    if (now - rf2ethos.wakeupSchedulerForm) >= 0.025 or rf2ethos.wakeupSchedulerFormInit == true then
         rf2ethos.wakeupSchedulerForm = now
         rf2ethos.wakeupForm()
         rf2ethos.wakeupSchedulerFormInit = false
@@ -461,7 +461,7 @@ function rf2ethos.wakeup(widget)
     -- bgchecks
     -- keep cpu load down by running Form at reduced interval
     local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 0.5 or rf2ethos.wakeupSchedulerBgChecksInit == true then
+    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 0.25 or rf2ethos.wakeupSchedulerBgChecksInit == true then
         rf2ethos.wakeupSchedulerBgChecks = now
         rf2ethos.wakeupBgChecks()
     end
