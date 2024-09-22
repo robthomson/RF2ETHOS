@@ -77,6 +77,8 @@ rf2ethos.wakeupSchedulerBgChecks = os.clock()
 rf2ethos.wakeupSchedulerBgChecksInit = false
 rf2ethos.menuLastSelected = {}
 
+rf2ethos.preferences = {}
+
 rf2ethos.audio = {}
 rf2ethos.audio.playDemo = false
 rf2ethos.audio.playConnecting = false
@@ -183,7 +185,7 @@ function rf2ethos.profileSwitchCheck()
 
     -- load and cache the switch on first run
     if rf2ethos.config.profileswitchParamPreference == nil then
-        rf2ethos.config.profileswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/profileswitch")
+        rf2ethos.config.profileswitchParamPreference = rf2ethos.preferences.interface.profileSwitch
         local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
         rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
     end
@@ -196,7 +198,7 @@ function rf2ethos.rateSwitchCheck()
 
     -- load and cache the switch on first run
     if rf2ethos.config.rateswitchParamPreference == nil then
-        rf2ethos.config.rateswitchParamPreference = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/rateswitch")
+        rf2ethos.config.rateswitchParamPreference = rf2ethos.preferences.interface.rateSwitch
         local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
         rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
     end
@@ -1101,12 +1103,6 @@ function rf2ethos.create()
         rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
     end
     
-    -- load msp timeout
-    rf2ethos.config.watchdogParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/watchdog")
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
-        rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
-    end
-
     rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
     rf2ethos.protocol = assert(compile.loadScript(rf2ethos.config.toolDir .. "protocols.lua"))()
     rf2ethos.radio = assert(compile.loadScript(rf2ethos.config.toolDir .. "radios.lua"))().msp
@@ -1115,6 +1111,16 @@ function rf2ethos.create()
     rf2ethos.mspHelper = assert(compile.loadScript(rf2ethos.config.toolDir .. "msp/mspHelper.lua"))()
     assert(compile.loadScript(rf2ethos.config.toolDir .. rf2ethos.protocol.mspTransport))()
     assert(compile.loadScript(rf2ethos.config.toolDir .. "msp/common.lua"))()
+    
+    rf2ethos.ini = assert(compile.loadScript(rf2ethos.config.toolDir .. "lib/lip.lua"))()    
+    rf2ethos.preferences = rf2ethos.ini.load(rf2ethos.config.toolDir .. "/preferences.ini");
+
+    -- load msp timeout
+    rf2ethos.config.watchdogParam = rf2ethos.preferences.advanced.watchdog
+    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
+        rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
+    end
+
 
     rf2ethos.fieldHelpTxt = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/fields.lua"))()
 
@@ -1124,10 +1130,10 @@ function rf2ethos.create()
     config.environment = system.getVersion()
     config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
 
-    rf2ethos.config.audioParam = tonumber(rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/audio"))
+    rf2ethos.config.audioParam = rf2ethos.preferences.interface.audio
 
     if system:getVersion().simulation == false then
-        local simpref = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/demoswitch")
+        local simpref = rf2ethos.preferences.advanced.demoSwitch
         local s = rf2ethos.utils.explode(simpref, ",")
         local simParam = system.getSource({category = s[1], member = s[2]})
         if tonumber(simParam:value()) == 100 then
