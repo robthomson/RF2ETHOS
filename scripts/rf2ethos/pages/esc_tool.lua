@@ -121,7 +121,7 @@ local function openPage(pidx, title, script)
     local numPerRow
 
     -- size of buttons
-    rf2ethos.config.iconsizeParam = rf2ethos.utils.loadPreference(rf2ethos.config.toolDir .. "/preferences/iconsize")
+    rf2ethos.config.iconsizeParam = rf2ethos.preferences.interface.iconSize
 
     if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then
         rf2ethos.config.iconsizeParam = 1

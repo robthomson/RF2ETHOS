@@ -31,23 +31,9 @@ local function baseName()
     return baseName
 end
 
-local function loadPreference(preference)
 
-    file = preference .. ".cfg"
-    local f
-    f = io.open(file, "rb")
-    if f ~= nil then
-        -- file exists
-        local rData
-        c = 0
-        tc = 1
-        rData = io.read(f, "l")
-        io.close(f)
-
-        return rData
-    end
-
-end
+local INI = assert(loadfile(config.toolDir .. "lib/lip.lua"))(config)    
+local preferences = INI.load(config.toolDir .. "/preferences.ini");
 
 -- explode a string
 local function explode(inputstr, sep)
@@ -68,8 +54,8 @@ function compile.loadScript(script)
         readConfig = true
 
         -- read preference
-        pref = tonumber(loadPreference(toolDir .. "/preferences/compilation"))
-        spref = loadPreference(toolDir .. "/preferences/compilationswitch")
+        pref = preferences.advanced.compilation
+        spref = preferences.advanced.compilationSwitch
         s = explode(spref, ",")
         switchParam = system.getSource({category = s[1], member = s[2]})
 
@@ -82,7 +68,7 @@ function compile.loadScript(script)
             if tonumber(switchParam:value()) == 100 then
                 config.useCompiler = false
 
-                local audioParam = tonumber(rf2ethos.utils.loadPreference(toolDir .. "/preferences/audio"))
+                local audioParam = tonumber(preferences.interface.audio)
 
                 if audioParam == 0 or audioParam == 1 then system.playFile(toolDir .. "sounds/compdis.wav") end
 

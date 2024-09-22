@@ -59,57 +59,6 @@ function utils.countCarriageReturns(text)
     return count
 end
 
--- save a value to preferences
-function utils.storePreference(preference, value)
-    -- open preference file
-    file = preference .. ".cfg"
-
-    if value == nil then value = "" end
-
-    if type(value) == "boolean" then
-        if value == true then
-            value = 0
-        else
-            value = 1
-        end
-    end
-
-    if type(value) == "userdata" then value = value:name() end
-
-    -- rf2ethos.utils.log("Write Preference: " .. file .. " [" .. value .. "]")
-
-    file = preference .. ".cfg"
-
-    -- then write current data
-    local f
-    f = io.open(file, 'w')
-    f:write(value)
-    io.close(f)
-
-end
-
--- retrieve a value from preferences
-function utils.loadPreference(preference)
-    -- open preference file
-    file = preference .. ".cfg"
-
-    -- rf2ethos.utils.log("Read Preference:  " .. file)
-
-    local f
-    f = io.open(file, "rb")
-    if f ~= nil then
-        -- file exists
-        local rData
-        c = 0
-        tc = 1
-        rData = io.read(f, "l")
-        io.close(f)
-
-        return rData
-    end
-
-end
-
 function utils.getSection(id, sections)
     for i, v in ipairs(sections) do if id ~= nil then if v.section == id then return v end end end
 end
@@ -120,6 +69,11 @@ function utils.explode(inputstr, sep)
     local t = {}
     for str in string.gmatch(inputstr, "([^" .. sep .. "]+)") do table.insert(t, str) end
     return t
+end
+
+function utils.trim(s)
+    s = tostring(s)
+    return s:match("^%s*(.-)%s*$"):gsub("[\r\n]+$", "")
 end
 
 function utils.round(number, precision)
