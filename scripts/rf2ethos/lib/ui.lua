@@ -109,7 +109,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplayNoLinkValue(value, message)
 
-    if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.dialogs.noLink:value(value)

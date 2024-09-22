@@ -707,10 +707,10 @@ function rf2ethos.wakeupUI()
         if rf2ethos.triggers.telemetryState == 1 then
             rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
         else
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 1
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 2
         end
 
-        if rf2ethos.dialogs.nolinkValueCounter >= 100 and rf2ethos.mspQueue:isProcessed() then
+        if rf2ethos.dialogs.nolinkValueCounter >= 101 then
 
             if rf2ethos.config.apiVersion == nil and rf2ethos.getRSSI() ~= 0 then
                 rf2ethos.ui.progessNolinkDisplayClose()
@@ -895,16 +895,22 @@ function rf2ethos.wakeupUI()
 
             if rf2ethos.triggers.badMspVersionDisplay == false then
                 local message
-                if rf2ethos.config.apiVersion ~= nil then
+                local title
+                if rf2ethos.getRSSI() == 0 then
+                    message = "Unable to establish a link to the flight controller"
+                    title = "No link"
+                elseif rf2ethos.config.apiVersion ~= nil then
                     message = "This version of the Lua scripts \ncan't be used with the selected model (" .. rf2ethos.config.apiVersion .. ")."
+                    tile = "MSP Version Error"
                 else
                     message = "Unable to determine msp version in use."
+                    title = "MSP Error"
                 end
 
                 rf2ethos.triggers.badMspVersionDisplay = true
                 form.openDialog({
                     width = nil,
-                    title = "MSP Error",
+                    title = title,
                     message = message,
                     buttons = buttons,
                     wakeup = function()
