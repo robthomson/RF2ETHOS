@@ -38,7 +38,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplayValue(value, message)
 
-    if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.dialogs.progress:value(value)
@@ -58,7 +58,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplaySaveValue(value, message)
 
-    if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.dialogs.save:value(value)

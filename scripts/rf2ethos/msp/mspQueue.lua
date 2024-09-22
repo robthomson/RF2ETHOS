@@ -43,7 +43,7 @@ function MspQueueController:processQueue()
     if rf2ethos.protocol.mspIntervalOveride ~= nil then
         lastTimeInterval = rf2ethos.protocol.mspIntervalOveride
     else
-        lastTimeInterval = 0.8
+        lastTimeInterval = 1
     end
 
     if not rf2ethos.runningInSimulator then
