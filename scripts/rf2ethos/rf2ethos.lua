@@ -710,12 +710,12 @@ function rf2ethos.wakeupUI()
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
     if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.triggers.disableRssiTimeout == false then
         if rf2ethos.triggers.telemetryState == 1 then
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
         else
             rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 2
         end
 
-        if rf2ethos.dialogs.nolinkValueCounter >= 101 then
+        if rf2ethos.dialogs.nolinkValueCounter >= 101 and rf2ethos.wakeupSchedulerBgChecksInit == false then
 
             if rf2ethos.config.apiVersion == nil and rf2ethos.getRSSI() ~= 0 then
                 rf2ethos.ui.progessNolinkDisplayClose()
