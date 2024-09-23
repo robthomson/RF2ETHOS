@@ -563,7 +563,11 @@ function ui.fieldHeader(title)
     end
     buttonH = rf2ethos.radio.navbuttonHeight
 
-    rf2ethos.formFields['menu'] = form.addLine(title)
+    rf2ethos.formFields['menu'] = form.addLine("")
+    
+
+    rf2ethos.formFields['title'] = form.addStaticText(rf2ethos.formFields['menu'], {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, title)    
+    
     rf2ethos.ui.navigationButtons(w - 5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
 end
 
@@ -607,6 +611,7 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
             local headerLineText =
                 form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
         end
+
 
         formLineCnt = 0
 

@@ -33,6 +33,8 @@ rf2ethos.config = {}
 rf2ethos.config = config
 rf2ethos.config.tailMode = nil
 rf2ethos.config.swashMode = nil
+rf2ethos.config.activeProfile = nil
+rf2ethos.config.activeRateProfile = nil
 rf2ethos.config.servoCount = nil
 rf2ethos.config.servoOverride = nil
 
@@ -505,7 +507,8 @@ function rf2ethos.wakeupBgChecks()
                 simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
             }
             rf2ethos.mspQueue:add(message)
-                       
+    elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
+            rf2ethos.utils.mspGetCurrentProfile()            
     elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
             local message = {
                 command = 120, -- MSP_SERVO_CONFIGURATIONS

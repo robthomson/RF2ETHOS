@@ -1,6 +1,10 @@
 local labels = {}
 local fields = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
+
 -- pid controller settings =
 -- labels[#labels + 1] = { subpage=1,t ="Ground Error Decay", label=1      }
 fields[#fields + 1] = {subpage = 1, t = "Ground Error Decay", help = "profilesErrorDecayGround", min = 0, max = 250, unit = "s", default = 250, vals = {2}, decimals = 1, scale = 10}
@@ -88,6 +92,23 @@ fields[#fields + 1] = {subpage = 5, t = "Gain", help = "profilesHorizonModeGain"
 
 local function postLoad(self)
     rf2ethos.triggers.isReady = true
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true
+end
+
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
 end
 
 return {
@@ -101,5 +122,6 @@ return {
     labels = labels,
     simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
     fields = fields,
-    postLoad = postLoad
+    postLoad = postLoad,
+    wakeup = wakeup
 }

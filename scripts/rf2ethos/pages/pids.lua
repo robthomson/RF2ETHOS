@@ -2,6 +2,9 @@ local fields = {}
 local rows = {}
 local cols = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
 rows = {"Roll", "Pitch", "Yaw"}
 -- cols = {"P", "I", "O", "D", "F", "B"}
 -- cols = {"D", "P", "I", "F", "O", "B"}
@@ -38,6 +41,8 @@ fields[17] = {help = "profilesBoost", row = 3, col = 6, min = 0, max = 1000, def
 
 local function postLoad(self)
     rf2ethos.triggers.isReady = true
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true
 end
 
 local function openPage(idx, title, script)
@@ -141,6 +146,24 @@ local function openPage(idx, title, script)
 
 end
 
+
+
+
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
+end
+
 return {
     read = 112, -- msp_PID_TUNING
     write = 202, -- msp_SET_PID_TUNING
@@ -154,5 +177,6 @@ return {
     rows = rows,
     cols = cols,
     postLoad = postLoad,
-    openPage = openPage
+    openPage = openPage,
+    wakeup = wakeup
 }

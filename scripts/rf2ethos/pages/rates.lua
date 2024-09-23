@@ -1,6 +1,10 @@
 local labels = {}
 local tables = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
+
 tables[0] = rf2ethos.config.toolDir .. "pages/ratetables/none.lua"
 tables[1] = rf2ethos.config.toolDir .. "pages/ratetables/betaflight.lua"
 tables[2] = rf2ethos.config.toolDir .. "pages/ratetables/raceflight.lua"
@@ -31,6 +35,10 @@ local function postLoad(self)
     end
 
     rf2ethos.triggers.isReady = true
+
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true    
+    
 end
 
 local function flagRateChange(self)
@@ -157,6 +165,21 @@ local function openPage(idx, title, script)
 
 end
 
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
+end
+
 return {
     read = 111, -- msp_RC_TUNING
     write = 204, -- msp_SET_RC_TUNING
@@ -173,6 +196,7 @@ return {
     rTableName = mytable.rTableName,
     flagRateChange = flagRateChange,
     postLoad = postLoad,
-    openPage = openPage
+    openPage = openPage,
+    wakeup = wakeup
 
 }

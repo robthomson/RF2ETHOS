@@ -1,6 +1,9 @@
 local labels = {}
 local fields = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
 -- fields[#fields + 1] = { t = "Rescue mode enable",  min = 0, max = 2,     vals = { 1 }, table = { [0] = "Off", "On", "Alt hold" } }
 fields[#fields + 1] = {t = "Rescue mode enable", min = 0, max = 1, default = 0, ftype = "bool", type = "1", vals = {1}, table = {[0] = "Off", "On"}}
 fields[#fields + 1] = {t = "Flip to upright", help = "profilesRescueFlipMode", min = 0, max = 1, default = 0, vals = {2}, table = {[0] = "No flip", "Flip"}}
@@ -32,12 +35,30 @@ fields[#fields + 1] = {t = "Accel", help = "profilesRescueMaxAccel", label = "re
 
 local function postLoad(self)
     rf2ethos.triggers.isReady = true
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true
+end
+
+
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
 end
 
 return {
     read = 146, -- msp_RESCUE_PROFILE
     write = 147, -- msp_SET_RESCUE_PROFILE
-    title = "Profile - Rescue",
+    title = "Rescue",
     reboot = false,
     refreshswitch = true,
     eepromWrite = true,
@@ -45,5 +66,6 @@ return {
     minBytes = 28,
     labels = labels,
     fields = fields,
-    postLoad = postLoad
+    postLoad = postLoad,
+    wakeup = wakeup
 }

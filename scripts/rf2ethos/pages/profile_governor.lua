@@ -1,6 +1,9 @@
 local labels = {}
 local fields = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
 fields[#fields + 1] = {t = "Full headspeed", help = "govHeadspeed", min = 0, max = 50000, default = 1000, unit = "rpm", step = 10, vals = {1, 2}}
 fields[#fields + 1] = {t = "PID master gain", help = "govMasterGain", min = 0, max = 250, default = 40, vals = {3}}
 
@@ -23,12 +26,30 @@ fields[#fields + 1] = {t = "Max throttle", help = "govMaxThrottle", min = 40, ma
 
 local function postLoad(self)
     rf2ethos.triggers.isReady = true
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true
+end
+
+
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
 end
 
 return {
     read = 148, -- msp_GOVERNOR_PROFILE
     write = 149, -- msp_SET_GOVERNOR_PROFILE
-    title = "Profile - Governor",
+    title = "Governor",
     reboot = false,
     refreshswitch = true,
     eepromWrite = true,
@@ -36,5 +57,6 @@ return {
     minBytes = 13,
     labels = labels,
     fields = fields,
-    postLoad = postLoad
+    postLoad = postLoad,
+    wakeup = wakeup
 }

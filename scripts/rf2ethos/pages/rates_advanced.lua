@@ -1,6 +1,9 @@
 local labels = {}
 local fields = {}
 
+local activateWakeup = false
+local currentProfileChecked = false
+
 if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
 
 fields[#fields + 1] = {
@@ -56,6 +59,24 @@ end
 
 local function postLoad(self)
     rf2ethos.triggers.isReady = true
+    rf2ethos.utils.mspGetCurrentProfile()
+    activateWakeup = true
+end
+
+
+local function wakeup()
+
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+        if rf2ethos.config.ethosRunningVersion >= 1516 then
+            -- update active profile
+            -- the check happens in postLoad      
+            if rf2ethos.config.activeProfile ~= nil then
+                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                currentProfileChecked = true
+            end    
+        end    
+    end    
+
 end
 
 local function postRead(self)
@@ -83,5 +104,6 @@ return {
     flagRateChange = flagRateChange,
     postRead = postRead,
     postLoad = postLoad,
-    preSavePayload = preSavePayload
+    preSavePayload = preSavePayload,
+    wakeup = wakeup
 }
