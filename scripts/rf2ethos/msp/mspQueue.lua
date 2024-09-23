@@ -47,7 +47,7 @@ function MspQueueController:processQueue()
     end
 
     if not rf2ethos.runningInSimulator then
-        if not self.lastTimeCommandSent or self.lastTimeCommandSent + 0.5 < os.clock() then
+        if not self.lastTimeCommandSent or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
             if self.currentMessage.payload then
                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command..": {" .. rf2ethos.utils.joinTableItems(self.currentMessage.payload, ", ") .. "}")
                 rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
