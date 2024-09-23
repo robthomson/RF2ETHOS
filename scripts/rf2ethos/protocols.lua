@@ -21,17 +21,6 @@ local supportedProtocols =
         saveTimeout     = 10.0,
         cms             = {},
         pageReqTimeout = 10
-    },
-    ghst =
-    {
-        mspTransport    = "msp/ghst.lua",
-        push            = rf2ethos.ghostTelemetryPush,
-        maxTxBufferSize = 10, 
-        maxRxBufferSize = 6, 
-        maxRetries      = 3,
-        saveTimeout     = 4.0,
-        cms             = {},
-        pageReqTimeout = 10
     }
 }
 
