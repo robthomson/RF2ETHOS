@@ -15,8 +15,8 @@ config.defaultRateTable = 4 -- ACTUAL                               -- default r
 config.supportedMspApiVersion = {"12.06", "12.07"}                  -- supported msp versions
 config.simulateOnTransmitter = false                                -- make the transmitter run as if its running in the SIM (no fbl required)
 config.skipRssiSensorCheck = false                                  -- skip checking for a valid signal when loading connecting to the fbl
-config.bgTaskName = config.toolName .. " [Background Tasks]"        -- background task name for clock syncs etc
-config.bgTaskKey = "rf2bgk"                                         -- key id used for background tasks
+config.clockSyncTaskName = config.toolName .. " [Clock Sync]"        -- background task name for clock syncs etc
+config.clockSyncTaskKey = "rf2bgk"                                         -- key id used for background tasks
 config.elrsTelemTaskName = config.toolName .. " [ELRS Telemetry]"   -- background task name for clock syncs etc
 config.elrsTelemTaskKey = "rf2elrs"                                 -- key id used for background tasks
 -- LuaFormatter on
@@ -28,7 +28,8 @@ local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")
 local compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)
 rf2ethos = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
 
-local rf2elrstelemetry = assert(loadfile(config.toolDir .. "tasks/elrstelemetry.lua"))(config)
+
+
 
 local function wakeup()
     rf2ethos.wakeup()
@@ -52,16 +53,30 @@ local function close()
 end
 
 local function background()
-    return rf2ethos.background()
+    rf2ethos.background()
 end
 
+local rf2elrstelemetry
 local function elrsTelemetry()
+    if rf2elrstelemetry == nil then
+        rf2elrstelemetry = assert(compile.loadScript(config.toolDir .. "tasks/elrstelemetry.lua"))(config,compile)
+    else
         rf2elrstelemetry.run()
+    end    
+end
+
+local clocksync
+local function clockSync()
+    if clocksync == nil then
+        clocksync = assert(compile.loadScript(config.toolDir .. "tasks/clocksync.lua"))(config,compile)
+    else
+        clocksync.run()
+    end    
 end
 
 local function init()
     system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, paint = paint, close = close})
-    system.registerTask({name = config.bgTaskName , key = config.bgTaskKey, wakeup = background})
+    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSync})
     system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetry})    
 end
 

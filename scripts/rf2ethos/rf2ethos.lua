@@ -1104,7 +1104,11 @@ function rf2ethos.wakeupUI()
 
 end
 
-function rf2ethos.initCore()
+
+
+function rf2ethos.create()
+
+
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
 
     -- get sensor for msp comms
@@ -1134,17 +1138,6 @@ function rf2ethos.initCore()
     config.environment = system.getVersion()
     config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
     
-    rf2ethos.initCoreComplete = true
-end
-
-function rf2ethos.create()
-
-    -- load core libs
-    -- this is kept here because they also get called FROM
-    -- background tasks
-    if rf2ethos.initCoreComplete ~= true then
-        rf2ethos.initCore()
-    end    
 
     rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
     rf2ethos.radio = assert(loadfile(rf2ethos.config.toolDir .. "radios.lua"))().msp
@@ -1285,46 +1278,5 @@ function rf2ethos.close()
     return true
 end
 
--- this function is called if you enable the "Background Tasks" script
--- its purpose is to operate 'semi indipendant' with just shared libraties
--- etc running.  You cannot garuantee that the user will enable the bg task
--- so nothing should be put in this that the gui requires to run.  those
--- jobs should sit in the regular wakeup functions.
-function rf2ethos.background()
-
-    -- load core libs - this is kept here because they also get called from main loop
-    if rf2ethos.initCoreComplete ~= true then
-        rf2ethos.initCore()
-    end    
-    
-    -- process msp if gui not running. otherwise ALLOW
-    -- gui to do it. Done like this because its entirely
-    -- possible the bg task functions will not be turned on
-    -- but we need to make sure gui still works.
-    if rf2ethos.guiIsRunning ~= true then
-        rf2ethos.mspQueue:processQueue()
-    end
-
-    -- set the clock on connect/disconnect.
-    if rf2ethos.guiIsRunning ~= true then
-        if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == true then
-            -- set the time
-            if rf2ethos.triggers.timeIsSet == false and rf2ethos.mspQueue:isProcessed() then 
-                rf2ethos.utils.setRtc(rf2ethos.utils.onRtcSet) 
-            end
-        else
-            -- link was lost.  assume need to resync clock
-            rf2ethos.triggers.timeIsSet = false
-        end
-    end
-
-    if rf2ethos.adjfunctions == nil then
-        rf2ethos.adjfunctions = assert(loadfile(config.toolDir .. "tasks/adjfunctions.lua"))(rf2ethos.config)    
-    else
-        rf2ethos.adjfunctions.process()
-    end
-
-
-end
 
 return rf2ethos

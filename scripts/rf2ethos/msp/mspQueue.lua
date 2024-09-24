@@ -108,7 +108,7 @@ function MspQueueController:processQueue()
 
         if rf2ethos.Page ~= nil then if rf2ethos.Page.mspSuccess then rf2ethos.Page.mspSuccess() end end
 
-    elseif self.retryCount > self.maxRetries then
+    elseif (self.retryCount ~= nil and self.maxRetries ~= nil) and self.retryCount > self.maxRetries then
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
         self.messageQueue = {}
         if self.currentMessage.errorHandler then self.currentMessage:errorHandler() end
