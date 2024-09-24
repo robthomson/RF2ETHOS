@@ -1028,62 +1028,62 @@ function rf2ethos.wakeupUI()
     if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
 
         if rf2ethos.audio.playEraseFlash == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/eraseflash.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/eraseflash.wav")
             rf2ethos.audio.playEraseFlash = false
         end
 
         if rf2ethos.audio.playConnected == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/connected.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connected.wav")
             rf2ethos.audio.playConnected = false
         end
 
         if rf2ethos.audio.playConnecting == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/connecting.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connecting.wav")
             rf2ethos.audio.playConnecting = false
         end
 
         if rf2ethos.audio.playDemo == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/demo.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/demo.wav")
             rf2ethos.audio.playDemo = false
         end
 
         if rf2ethos.audio.playTimeout == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/timeout.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/timeout.wav")
             rf2ethos.audio.playTimeout = false
         end
 
         if rf2ethos.audio.playEscPowerCycle == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/powercycleesc.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/powercycleesc.wav")
             rf2ethos.audio.playEscPowerCycle = false
         end
 
         if rf2ethos.audio.playServoOverideEnable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/soverideen.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soverideen.wav")
             rf2ethos.audio.playServoOverideEnable = false
         end
 
         if rf2ethos.audio.playServoOverideDisable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/soveridedis.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soveridedis.wav")
             rf2ethos.audio.playServoOverideDisable = false
         end
 
         if rf2ethos.audio.playMixerOverideEnable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/moverideen.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moverideen.wav")
             rf2ethos.audio.playMixerOverideEnable = false
         end
 
         if rf2ethos.audio.playMixerOverideDisable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/moveridedis.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moveridedis.wav")
             rf2ethos.audio.playMixerOverideDisable = false
         end
 
         if rf2ethos.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/saving.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/saving.wav")
             rf2ethos.audio.playSaving = false
         end
 
         if rf2ethos.audio.playLoading == true and rf2ethos.config.audioParam == 0 then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/loading.wav")
+            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/loading.wav")
             rf2ethos.audio.playLoading = false
         end
 
@@ -1283,12 +1283,17 @@ function rf2ethos.close()
 end
 
 -- this function is called if you enable the "Background Tasks" script
+-- its purpose is to operate 'semi indipendant' with just shared libraties
+-- etc running.  You cannot garuantee that the user will enable the bg task
+-- so nothing should be put in this that the gui requires to run.  those
+-- jobs should sit in the regular wakeup functions.
 function rf2ethos.background()
 
     -- load core libs - this is kept here because they also get called from main loop
     if rf2ethos.initCoreComplete ~= true then
         rf2ethos.initCore()
-    end     
+    end    
+    
     -- process msp if gui not running. otherwise ALLOW
     -- gui to do it. Done like this because its entirely
     -- possible the bg task functions will not be turned on
@@ -1309,6 +1314,9 @@ function rf2ethos.background()
             rf2ethos.triggers.timeIsSet = false
         end
     end
+
+    -- adjfunc management
+
 
 end
 
