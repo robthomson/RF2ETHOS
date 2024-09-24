@@ -93,12 +93,12 @@ function compile.loadScript(script)
         end
         -- print("Loading: " .. cachefile)
         collectgarbage()
-        return loadfile(cachefile)
+        return assert(loadfile(cachefile))
     else
         if file_exists(cachefile) == true then os.remove(cachefile) end
         -- print("Loading: " .. script)
         collectgarbage()        
-        return loadfile(script)
+        return assert(loadfile(script))
     end
 
 end
