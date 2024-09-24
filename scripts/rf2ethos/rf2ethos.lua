@@ -25,6 +25,7 @@ triggers.badMspVersionDisplay = false
 triggers.closeProgressLoader = false
 triggers.mspBusy = false
 triggers.disableRssiTimeout = false
+triggers.timeIsSet = false
 
 rf2ethos = {}
 rf2ethos.compile = compile
@@ -71,6 +72,7 @@ rf2ethos.protocol = {}
 rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
+rf2ethos.guiIsRunning = false
 rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerUIInit = false
 rf2ethos.wakeupSchedulerForm = os.clock()
@@ -101,7 +103,7 @@ rf2ethos.dialogs.progressDisplay = false
 rf2ethos.dialogs.progressWatchDog = nil
 rf2ethos.dialogs.progressCounter = 0
 rf2ethos.dialogs.progressRateLimit = os.clock()
-rf2ethos.dialogs.progressRate = 0.1 -- how many times per second we can change dialog value
+rf2ethos.dialogs.progressRate = 0.2 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.progressESC = false
 rf2ethos.dialogs.progressDisplayEsc = false
@@ -115,13 +117,13 @@ rf2ethos.dialogs.saveDisplay = false
 rf2ethos.dialogs.saveWatchDog = nil
 rf2ethos.dialogs.saveProgressCounter = 0
 rf2ethos.dialogs.saveRateLimit = os.clock()
-rf2ethos.dialogs.saveRate = 0.1 -- how many times per second we can change dialog value
+rf2ethos.dialogs.saveRate = 0.2 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.nolink = false
 rf2ethos.dialogs.nolinkDisplay = false
 rf2ethos.dialogs.nolinkValueCounter = 0
 rf2ethos.dialogs.nolinkRateLimit = os.clock()
-rf2ethos.dialogs.nolinkRate = 0.1 -- how many times per second we can change dialog value
+rf2ethos.dialogs.nolinkRate = 0.2 -- how many times per second we can change dialog value
 
 rf2ethos.dialogs.badversion = false
 rf2ethos.dialogs.badversionDisplay = false
@@ -443,8 +445,12 @@ end
 -- MAIN WAKEUP FUNCTION. THIS SIMPLY FARMS OUT AT DIFFERING SCHEDULES TO SUB FUNCTIONS
 function rf2ethos.wakeup(widget)
 
+    rf2ethos.guiIsRunning = true
+
     -- every 0.01 to ensure msp timings work
-    rf2ethos.mspQueue:processQueue()
+    if rf2ethos.guiIsRunning == true then
+        rf2ethos.mspQueue:processQueue()
+    end
 
     -- keep cpu load down by running UI at reduced interval
     local now = os.clock()
@@ -710,12 +716,12 @@ function rf2ethos.wakeupUI()
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
     if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.triggers.disableRssiTimeout == false then
         if rf2ethos.triggers.telemetryState == 1 then
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
         else
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 2
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
         end
 
-        if rf2ethos.dialogs.nolinkValueCounter >= 101 and rf2ethos.wakeupSchedulerBgChecksInit == false then
+        if rf2ethos.dialogs.nolinkValueCounter >= 101 then
 
             if rf2ethos.config.apiVersion == nil and rf2ethos.getRSSI() ~= 0 then
                 rf2ethos.ui.progessNolinkDisplayClose()
@@ -767,7 +773,7 @@ function rf2ethos.wakeupUI()
         --	then rf2ethos.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
         -- end
 
-        rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 5
+        rf2ethos.dialogs.progressCounter = rf2ethos.dialogs.progressCounter + 2
         rf2ethos.ui.progessDisplayValue(rf2ethos.dialogs.progressCounter)
 
         if (os.clock() - rf2ethos.dialogs.progressWatchDog) > (tonumber(rf2ethos.protocol.pageReqTimeout)) then
@@ -1095,9 +1101,7 @@ function rf2ethos.wakeupUI()
 
 end
 
-function rf2ethos.create()
-
-    -- get sensor we call for checking link up
+function rf2ethos.initCore()
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
 
     -- get sensor for msp comms
@@ -1106,9 +1110,8 @@ function rf2ethos.create()
         rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
     end
     
-    rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
     rf2ethos.protocol = assert(compile.loadScript(rf2ethos.config.toolDir .. "protocols.lua"))()
-    rf2ethos.radio = assert(compile.loadScript(rf2ethos.config.toolDir .. "radios.lua"))().msp
+
     rf2ethos.mspQueue = assert(compile.loadScript(rf2ethos.config.toolDir .. "msp/mspQueue.lua"))()
     rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries
     rf2ethos.mspHelper = assert(compile.loadScript(rf2ethos.config.toolDir .. "msp/mspHelper.lua"))()
@@ -1124,14 +1127,28 @@ function rf2ethos.create()
         rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
     end
 
+    config.apiVersion = nil
+    config.environment = system.getVersion()
+    config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
+    
+    rf2ethos.initCoreComplete = true
+end
+
+function rf2ethos.create()
+
+    -- load core libs
+    -- this is kept here because they also get called FROM
+    -- background tasks
+    if rf2ethos.initCoreComplete ~= true then
+        rf2ethos.initCore()
+    end    
+
+    rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
+    rf2ethos.radio = assert(compile.loadScript(rf2ethos.config.toolDir .. "radios.lua"))().msp
 
     rf2ethos.fieldHelpTxt = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/fields.lua"))()
 
     rf2ethos.uiState = rf2ethos.uiStatus.init
-
-    config.apiVersion = nil
-    config.environment = system.getVersion()
-    config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
 
     rf2ethos.config.audioParam = rf2ethos.preferences.interface.audio
 
@@ -1248,6 +1265,7 @@ end
 
 function rf2ethos.close()
 
+    rf2ethos.guiIsRunning = false
 
     if rf2ethos.Page ~= nil and (rf2ethos.uiState == rf2ethos.uiStatus.pages or rf2ethos.uiState == rf2ethos.uiStatus.mainMenu) then
         if rf2ethos.Page.close then
@@ -1262,6 +1280,36 @@ function rf2ethos.close()
     rf2ethos.resetState()
     system.exit()
     return true
+end
+
+-- this function is called if you enable the "Background Tasks" script
+function rf2ethos.background()
+
+    -- load core libs - this is kept here because they also get called from main loop
+    if rf2ethos.initCoreComplete ~= true then
+        rf2ethos.initCore()
+    end     
+    -- process msp if gui not running. otherwise ALLOW
+    -- gui to do it. Done like this because its entirely
+    -- possible the bg task functions will not be turned on
+    -- but we need to make sure gui still works.
+    if rf2ethos.guiIsRunning ~= true then
+        rf2ethos.mspQueue:processQueue()
+    end
+
+    -- set the clock on connect/disconnect.
+    if rf2ethos.guiIsRunning ~= true then
+        if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == true then
+            -- set the time
+            if rf2ethos.triggers.timeIsSet == false and rf2ethos.mspQueue:isProcessed() then 
+                rf2ethos.utils.setRtc(rf2ethos.utils.onRtcSet) 
+            end
+        else
+            -- link was lost.  assume need to resync clock
+            rf2ethos.triggers.timeIsSet = false
+        end
+    end
+
 end
 
 return rf2ethos
