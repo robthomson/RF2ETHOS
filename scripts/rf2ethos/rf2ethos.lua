@@ -27,6 +27,8 @@ triggers.mspBusy = false
 triggers.disableRssiTimeout = false
 triggers.timeIsSet = false
 
+
+
 rf2ethos = {}
 rf2ethos.compile = compile
 
@@ -80,6 +82,97 @@ rf2ethos.wakeupSchedulerFormInit = false
 rf2ethos.wakeupSchedulerBgChecks = os.clock()
 rf2ethos.wakeupSchedulerBgChecksInit = false
 rf2ethos.menuLastSelected = {}
+rf2ethos.adjFunctionsTable = {
+    -- rates
+    id5 = {name = "Pitch Rate", wavs = {"pitch", "rate"}},
+    id6 = {name = "Roll Rate", wavs = {"roll", "rate"}},
+    id7 = {name = "Yaw Rate", wavs = {"yaw", "rate"}},
+    id8 = {name = "Pitch RC Rate", wavs = {"pitch", "rc", "rate"}},
+    id9 = {name = "Roll RC Rate", wavs = {"roll", "rc", "rate"}},
+    id10 = {name = "Yaw RC Rate", wavs = {"yaw", "rc", "rate"}},
+    id11 = {name = "Pitch RC Expo", wavs = {"pitch", "rc", "expo"}},
+    id12 = {name = "Roll RC Expo", wavs = {"roll", "rc", "expo"}},
+    id13 = {name = "Yaw RC Expo", wavs = {"yaw", "rc", "expo"}},
+
+    -- pids
+    id14 = {name = "Pitch P Gain", wavs = {"pitch", "p", "gain"}},
+    id15 = {name = "Pitch I Gain", wavs = {"pitch", "i", "gain"}},
+    id16 = {name = "Pitch D Gain", wavs = {"pitch", "d", "gain"}},
+    id17 = {name = "Pitch F Gain", wavs = {"pitch", "f", "gain"}},
+    id18 = {name = "Roll P Gain", wavs = {"roll", "p", "gain"}},
+    id19 = {name = "Roll I Gain", wavs = {"roll", "i", "gain"}},
+    id20 = {name = "Roll D Gain", wavs = {"roll", "d", "gain"}},
+    id21 = {name = "Roll F Gain", wavs = {"roll", "f", "gain"}},
+    id22 = {name = "Yaw P Gain", wavs = {"yaw", "p", "gain"}},
+    id23 = {name = "Yaw I Gain", wavs = {"yaw", "i", "gain"}},
+    id24 = {name = "Yaw D Gain", wavs = {"yaw", "d", "gain"}},
+    id25 = {name = "Yaw F Gain", wavs = {"yaw", "f", "gain"}},
+
+    id26 = {name = "Yaw CW Gain", wavs = {"yaw", "cw", "gain"}},
+    id27 = {name = "Yaw CCW Gain", wavs = {"yaw", "ccw", "gain"}},
+    id28 = {name = "Yaw Cyclic FF", wavs = {"yaw", "cyclic", "ff"}},
+    id29 = {name = "Yaw Coll FF", wavs = {"yaw", "collective", "ff"}},
+    id30 = {name = "Yaw Coll Dyn", wavs = {"yaw", "collective", "dyn"}},
+    id31 = {name = "Yaw Coll Decay", wavs = {"yaw", "collective", "decay"}},
+    id32 = {name = "Pitch Coll FF", wavs = {"pitch", "collective", "ff"}},
+
+    -- gyro cutoffs
+    id33 = {name = "Pitch Gyro Cutoff", wavs = {"pitch", "gyro", "cutoff"}},
+    id34 = {name = "Roll Gyro Cutoff", wavs = {"roll", "gyro", "cutoff"}},
+    id35 = {name = "Yaw Gyro Cutoff", wavs = {"yaw", "gyro", "cutoff"}},
+
+    -- dterm cutoffs
+    id36 = {name = "Pitch D-term Cutoff", wavs = {"pitch", "dterm", "cutoff"}},
+    id37 = {name = "Roll D-term Cutoff", wavs = {"roll", "dterm", "cutoff"}},
+    id38 = {name = "Yaw D-term Cutoff", wavs = {"yaw", "dterm", "cutoff"}},
+
+    -- rescue
+    id39 = {name = "Rescue Climb Coll", wavs = {"rescue", "climb", "collective"}},
+    id40 = {name = "Rescue Hover Coll", wavs = {"rescue", "hover", "collective"}},
+    id41 = {name = "Rescue Hover Alt", wavs = {"rescue", "hover", "alt"}},
+    id42 = {name = "Rescue Alt P Gain", wavs = {"rescue", "alt", "p", "gain"}},
+    id43 = {name = "Rescue Alt I Gain", wavs = {"rescue", "alt", "i", "gain"}},
+    id44 = {name = "Rescue Alt D Gain", wavs = {"rescue", "alt", "d", "gain"}},
+
+    -- leveling
+    id45 = {name = "Angle Level Gain", wavs = {"angle", "level", "gain"}},
+    id46 = {name = "Horizon Level Gain", wavs = {"horizon", "level", "gain"}},
+    id47 = {name = "Acro Trainer Gain", wavs = {"acro", "gain"}},
+
+    -- governor
+    id48 = {name = "Governor Gain", wavs = {"gov", "gain"}},
+    id49 = {name = "Governor P Gain", wavs = {"gov", "p", "gain"}},
+    id50 = {name = "Governor I Gain", wavs = {"gov", "i", "gain"}},
+    id51 = {name = "Governor D Gain", wavs = {"gov", "d", "gain"}},
+    id52 = {name = "Governor F Gain", wavs = {"gov", "f", "gain"}},
+    id53 = {name = "Governor TTA Gain", wavs = {"gov", "tta", "gain"}},
+    id54 = {name = "Governor Cyclic FF", wavs = {"gov", "cyclic", "ff"}},
+    id55 = {name = "Governor Coll FF", wavs = {"gov", "collective", "ff"}},
+
+    -- boost gains
+    id56 = {name = "Pitch B Gain", wavs = {"pitch", "b", "gain"}},
+    id57 = {name = "Roll B Gain", wavs = {"roll", "b", "gain"}},
+    id58 = {name = "Yaw B Gain", wavs = {"yaw", "b", "gain"}},
+
+    -- offset gains
+    id59 = {name = "Pitch O Gain", wavs = {"pitch", "o", "gain"}},
+    id60 = {name = "Roll O Gain", wavs = {"roll", "o", "gain"}},
+
+    -- cross-coupling
+    id61 = {name = "Cross Coup Gain", wavs = {"crossc", "gain"}},
+    id62 = {name = "Cross Coup Ratio", wavs = {"crossc", "ratio"}},
+    id63 = {name = "Cross Coup Cutoff", wavs = {"crossc", "cutoff"}}
+}
+rf2ethos.adjValueSrc = nil
+rf2ethos.adjFunctionSrc = nil
+rf2ethos.adjValue = nil
+rf2ethos.adjFunction = nil
+rf2ethos.adjValueOld = nil
+rf2ethos.adjFunctionOld = nil
+rf2ethos.adjTimer = os.clock()
+rf2ethos.adjfuncIdChanged = false
+rf2ethos.adjfuncValueChanged = false
+rf2ethos.adjJustUp = false
 
 rf2ethos.preferences = {}
 
@@ -1315,8 +1408,91 @@ function rf2ethos.background()
         end
     end
 
-    -- adjfunc management
+    -- ADJ Function Management
+    local telemetrySOURCE = system.getSource("Rx RSSI1")
+    if telemetrySOURCE ~= nil then
+        local crsfSOURCE = system.getSource("Vbat")
+        if crsfSOURCE ~= nil then
+            rf2ethos.adjFunctionSrc = system.getSource("AdjF")
+            rf2ethos.adjValueSrc = system.getSource("AdjV")
+        end
+    else    
+        rf2ethos.adjFunctionSrc = system.getSource({category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5110})
+        if rf2ethos.adjFunctionSrc == nil then
+            rf2ethos.adjFunctionSrc = model.createSensor()
+            rf2ethos.adjFunctionSrc:name("ADJ Source")
+            rf2ethos.adjFunctionSrc:appId(0x5110)
+            rf2ethos.adjFunctionSrc:physId(0)
+        end
 
+        rf2ethos.adjValueSrc = system.getSource({category = CATEGORY_TELEMETRY_SENSOR, appId = 0x5111})
+        if rf2ethos.adjValueSrc == nil then
+            rf2ethos.adjValueSrc = model.createSensor()
+            rf2ethos.adjValueSrc:name("Adj Value")
+            rf2ethos.adjValueSrc:appId(0x5111)
+            rf2ethos.adjValueSrc:physId(0)
+        end     
+    end
+    
+    if rf2ethos.adjValueSrc ~= nil and rf2ethos.triggers.timeIsSet == true then
+    
+       rf2ethos.adjValue = rf2ethos.adjValueSrc:value()
+       rf2ethos.adjFunction = rf2ethos.adjFunctionSrc:value()
+       
+       if rf2ethos.adjValue ~= nil then
+            rf2ethos.adjValue = math.floor(rf2ethos.adjValue)
+       end
+       if rf2ethos.adjValue ~= nil then
+            rf2ethos.adjFunction = math.floor(rf2ethos.adjFunction)
+       end
+
+       if rf2ethos.adjFunction ~= rf2ethos.adjFunctionOld then
+          rf2ethos.adjfuncIdChanged = true
+       end
+        if rf2ethos.adjValue ~= rf2ethos.adjValueOld then
+            rf2ethos.adjfuncValueChanged = true
+        end
+
+        if rf2ethos.adjJustUp == true then
+            rf2ethos.adjJustUpCounter = rf2ethos.adjJustUpCounter + 1
+            rf2ethos.adjfuncIdChanged = false
+            rf2ethos.adjfuncValueChanged = false
+
+            if rf2ethos.adjJustUpCounter == 10 then
+                rf2ethos.adjJustUp = false
+            end
+
+        else
+            if rf2ethos.adjFunction ~= 0  then
+                rf2ethos.adjJustUpCounter = 0
+                if (os.clock() - rf2ethos.adjTimer >= 2) then
+                    if rf2ethos.adjfuncIdChanged == true then
+
+                        local tgt = "id" .. tostring(rf2ethos.adjFunction)
+                        local adjfunction = rf2ethos.adjFunctionsTable[tgt]                 
+                        if adjfunction ~= nil then
+                            for wavi, wavv in ipairs(adjfunction.wavs) do
+                                system.playFile(rf2ethos.config.toolDir .. "sounds/adjfunc/" .. wavv .. ".wav")
+                            end
+                        end
+                        rf2ethos.adjfuncIdChanged = false
+                    end
+                    if rf2ethos.adjfuncValueChanged == true or rf2ethos.adjfuncIdChanged == true then
+                        system.playNumber(rf2ethos.adjValue)
+                        
+                        rf2ethos.adjfuncValueChanged = false
+                        rf2ethos.adjTimer = os.clock()
+
+                    end
+                end
+            end   
+        end
+
+        rf2ethos.adjValueOld = rf2ethos.adjValue
+        rf2ethos.adjFunctionOld = rf2ethos.adjFunction
+
+
+    end    
 
 end
 
