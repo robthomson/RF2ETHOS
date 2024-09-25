@@ -19,7 +19,10 @@ config.clockSyncTaskName = config.toolName .. " [Clock Sync]"        -- backgrou
 config.clockSyncTaskKey = "rf2bgk"                                         -- key id used for background tasks
 config.elrsTelemTaskName = config.toolName .. " [ELRS Telemetry]"   -- background task name for clock syncs etc
 config.elrsTelemTaskKey = "rf2elrs"                                 -- key id used for background tasks
+config.adjFunctionTaskName = config.toolName .. " [ADJ Functions]"  -- background task name adjust functions
+config.adjFunctionTaskKey = "rf2adjf"                               -- key id used for adjust functions
 -- LuaFormatter on
+
 
 
 
@@ -28,8 +31,8 @@ local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")
 local compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)
 rf2ethos = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
 
-
-
+local taskTimer = os.clock()
+local modelID = model.id()
 
 local function wakeup()
     rf2ethos.wakeup()
@@ -74,10 +77,20 @@ local function clockSync()
     end    
 end
 
+local adjfunc
+local function adjFunction()
+    if adjfunc == nil then
+        adjfunc = assert(compile.loadScript(config.toolDir .. "tasks/adjfunctions.lua"))(config,compile)
+    else
+        adjfunc.run()
+    end    
+end
+
 local function init()
     system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, paint = paint, close = close})
     system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSync})
     system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetry})    
+    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunction})    
 end
 
 return {init = init}

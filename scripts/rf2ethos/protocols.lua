@@ -1,3 +1,5 @@
+protocols = {}
+
 local supportedProtocols =
 {
     smartPort =
@@ -24,9 +26,11 @@ local supportedProtocols =
     }
 }
 
-local function getProtocol()
-    if system.getSource("Rx RSSI1") ~= nil then return supportedProtocols.crsf end
+function protocols.getProtocol()
+    if system.getSource("Rx RSSI1") ~= nil then 
+            return supportedProtocols.crsf 
+    end
     return supportedProtocols.smartPort
 end
 
-return getProtocol()
+return protocols

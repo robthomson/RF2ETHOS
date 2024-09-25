@@ -1117,7 +1117,8 @@ function rf2ethos.create()
         rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
     end
     
-    rf2ethos.protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
+    local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
+    rf2ethos.protocol = protocol.getProtocol()
 
     rf2ethos.mspQueue = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspQueue.lua"))()
     rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries

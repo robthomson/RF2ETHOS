@@ -5,6 +5,8 @@ local compile = arg[2]
 
 local adjfunc = {}
 
+local initTime = os.clock()
+
 adjfunc.adjFunctionsTable = {
     -- rates
     id5 = {name = "Pitch Rate", wavs = {"pitch", "rate"}},
@@ -98,7 +100,12 @@ adjfunc.adjfuncValueChanged = false
 adjfunc.adjJustUp = false
 
 
-function adjfunc.process()
+function adjfunc.run()
+
+    if (os.clock() - initTime) < 5 then
+        return
+    end
+
     -- ADJ Function Management
     local telemetrySOURCE = system.getSource("Rx RSSI1")
     if telemetrySOURCE ~= nil then
@@ -128,7 +135,7 @@ function adjfunc.process()
         end     
     end
     
-    if adjfunc.adjValueSrc ~= nil and rf2ethos.triggers.timeIsSet == true then
+    if adjfunc.adjValueSrc ~= nil then
     
        adjfunc.adjValue = adjfunc.adjValueSrc:value()
        adjfunc.adjFunction = adjfunc.adjFunctionSrc:value()

@@ -402,8 +402,14 @@ end
 function rf2elrstelemetry.run()
 
     local rssiNames = {"Rx RSSI1", "Rx RSSI2"}
-    for i, name in ipairs(rssiNames) do rssiSensor = system.getSource(name) end
-    if rssiSensor ~= nil and rssiSensor:state() then while not ELRS_PAUSE_TELEMETRY and rf2elrstelemetry.crossfirePop() do end end
+    for i, name in ipairs(rssiNames) do 
+        rssiSensor = system.getSource(name) 
+    end
+    if rssiSensor ~= nil and rssiSensor:state() then 
+        if not CRSF_PAUSE_TELEMETRY and not ELRS_PAUSE_TELEMETRY then
+            rf2elrstelemetry.crossfirePop()
+        end 
+    end
 end
 
 return rf2elrstelemetry
