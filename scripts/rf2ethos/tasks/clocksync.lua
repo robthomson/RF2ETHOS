@@ -14,7 +14,7 @@ clocksync.protocol = {}
 clocksync.rssiSensor = nil
 clocksync.config = config
 clocksync.timeIsSet = false
-
+clocksync.timeIsSetProtocol = nil
 
 
 local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
@@ -45,6 +45,7 @@ end
 
 function clocksync.onRtcSet()
     system.playTone(1600, 500, 0)
+    clocksync.timeIsSetProtocol = rf2ethos.protocol.mspProtocol
     clocksync.timeIsSet = true
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false
@@ -108,7 +109,7 @@ function clocksync.run()
     end
     
     -- run this loop to switch the transport if this expection occurs
-    if clocksync.timeIsSet == false then
+    if clocksync.timeIsSet == false or clocksync.timeIsSetProtocol ~= rf2ethos.protocol.mspProtocol then
         rf2ethos.protocol = protocol.getProtocol()
         -- set active transport table to use
         local transport = rf2ethos.protocolTransports[rf2ethos.protocol.mspProtocol]
