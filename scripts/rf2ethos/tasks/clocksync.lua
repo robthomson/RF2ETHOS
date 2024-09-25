@@ -17,6 +17,8 @@ clocksync.timeIsSet = false
 
 
 
+local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
+
 function clocksync.setRtc(callback, callbackParam)
     local message = {
         command = 246, -- MSP_SET_RTC
@@ -51,25 +53,44 @@ end
 
 function clocksync.run()
 
+
     if system:getVersion().simulation == true then
         return
     end
 
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
-  
+
+
     if clocksync.init == true then
 
+       
         -- get sensor for msp comms
         rf2ethos.sensor = sport.getSensor({primId = 0x32})
-        rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
-
-        local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
+        if rf2ethos.rssiSensor then
+            rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
+        end
+        
+        -- set active protocol to use
         rf2ethos.protocol = protocol.getProtocol()
-        rf2ethos.mspQueue = assert(compile.loadScript(clocksync.config.toolDir .. "msp/mspQueue.lua"))()
+     
+        -- preload all transport methods
+        rf2ethos.protocolTransports = {}
+        for i,v in pairs(protocols.getTransports()) do
+            rf2ethos.protocolTransports[i] = assert(loadfile(rf2ethos.config.toolDir .. v))()
+        end
+     
+        -- set active transport table to use
+        local transport = rf2ethos.protocolTransports[rf2ethos.protocol.mspProtocol]
+        rf2ethos.protocol.mspRead = transport.mspRead
+        rf2ethos.protocol.mspSend = transport.mspSend
+        rf2ethos.protocol.mspWrite = transport.mspWrite
+        rf2ethos.protocol.mspPoll = transport.mspPoll
+        
+        
+        rf2ethos.mspQueue = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspQueue.lua"))()
         rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries
-        rf2ethos.mspHelper = assert(compile.loadScript(clocksync.config.toolDir .. "msp/mspHelper.lua"))()
-        assert(compile.loadScript(clocksync.config.toolDir .. rf2ethos.protocol.mspTransport))()
-        assert(compile.loadScript(clocksync.config.toolDir .. "msp/common.lua"))()
+        rf2ethos.mspHelper = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspHelper.lua"))()
+        assert(loadfile(rf2ethos.config.toolDir .. "msp/common.lua"))()        
 
         clocksync.init = false
     end 
@@ -85,6 +106,18 @@ function clocksync.run()
         ELRS_PAUSE_TELEMETRY = false
         CRSF_PAUSE_TELEMETRY = false        
     end
+    
+    -- run this loop to switch the transport if this expection occurs
+    if clocksync.timeIsSet == false then
+        rf2ethos.protocol = protocol.getProtocol()
+        -- set active transport table to use
+        local transport = rf2ethos.protocolTransports[rf2ethos.protocol.mspProtocol]
+        rf2ethos.protocol.mspRead = transport.mspRead
+        rf2ethos.protocol.mspSend = transport.mspSend
+        rf2ethos.protocol.mspWrite = transport.mspWrite
+        rf2ethos.protocol.mspPoll = transport.mspPoll     
+    end    
+    
 
     -- process my queue
     if rf2ethos.guiIsRunning == false and clocksync.timeIsSet == false then

@@ -71,6 +71,7 @@ rf2ethos.NewRateTable = nil
 rf2ethos.RateTable = nil
 rf2ethos.fieldHelpTxt = nil
 rf2ethos.protocol = {}
+rf2ethos.protocolTransports = {}
 rf2ethos.radio = {}
 rf2ethos.sensor = {}
 rf2ethos.init = nil
@@ -1117,13 +1118,27 @@ function rf2ethos.create()
         rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
     end
     
+    -- set active protocol to use
     local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
     rf2ethos.protocol = protocol.getProtocol()
-
+ 
+    -- preload all transport methods
+    rf2ethos.protocolTransports = {}
+    for i,v in pairs(protocols.getTransports()) do
+        rf2ethos.protocolTransports[i] = assert(loadfile(rf2ethos.config.toolDir .. v))()
+    end
+ 
+    -- set active transport table to use
+    local transport = rf2ethos.protocolTransports[rf2ethos.protocol.mspProtocol]
+    rf2ethos.protocol.mspRead = transport.mspRead
+    rf2ethos.protocol.mspSend = transport.mspSend
+    rf2ethos.protocol.mspWrite = transport.mspWrite
+    rf2ethos.protocol.mspPoll = transport.mspPoll
+    
+    
     rf2ethos.mspQueue = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspQueue.lua"))()
     rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries
     rf2ethos.mspHelper = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspHelper.lua"))()
-    assert(loadfile(rf2ethos.config.toolDir .. rf2ethos.protocol.mspTransport))()
     assert(loadfile(rf2ethos.config.toolDir .. "msp/common.lua"))()
     
     rf2ethos.ini = assert(loadfile(rf2ethos.config.toolDir .. "lib/lip.lua"))()    

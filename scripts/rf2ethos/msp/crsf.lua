@@ -1,3 +1,5 @@
+local transport = {}
+
 -- CRSF Devices
 local CRSF_ADDRESS_BETAFLIGHT = 0xC8
 local CRSF_ADDRESS_RADIO_TRANSMITTER = 0xEA
@@ -9,23 +11,23 @@ local CRSF_FRAMETYPE_MSP_WRITE = 0x7C -- write with 60 byte chunked binary
 
 local crsfMspCmd = 0
 
-rf2ethos.protocol.mspSend = function(payload)
+transport.mspSend = function(payload)
     local payloadOut = {CRSF_ADDRESS_BETAFLIGHT, CRSF_ADDRESS_RADIO_TRANSMITTER}
     for i = 1, #(payload) do payloadOut[i + 2] = payload[i] end
     return crsf.pushFrame(crsfMspCmd, payloadOut)
 end
 
-rf2ethos.protocol.mspRead = function(cmd)
+transport.mspRead = function(cmd)
     crsfMspCmd = CRSF_FRAMETYPE_MSP_REQ
     return mspSendRequest(cmd, {})
 end
 
-rf2ethos.protocol.mspWrite = function(cmd, payload)
+transport.mspWrite = function(cmd, payload)
     crsfMspCmd = CRSF_FRAMETYPE_MSP_WRITE
     return mspSendRequest(cmd, payload)
 end
 
-rf2ethos.protocol.mspPoll = function()
+transport.mspPoll = function()
     while true do
         local cmd, data = crsf.popFrame()
         if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] == CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] == CRSF_ADDRESS_BETAFLIGHT then
@@ -44,3 +46,5 @@ rf2ethos.protocol.mspPoll = function()
         end
     end
 end
+
+return transport

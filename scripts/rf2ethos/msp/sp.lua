@@ -1,3 +1,5 @@
+local transport = {}
+
 local LOCAL_SENSOR_ID = 0x0D
 local SMARTPORT_REMOTE_SENSOR_ID = 0x1B
 local FPORT_REMOTE_SENSOR_ID = 0x00
@@ -6,18 +8,18 @@ local REPLY_FRAME_ID = 0x32
 
 local lastSensorId, lastFrameId, lastDataId, lastValue
 
-rf2ethos.protocol.mspSend = function(payload)
+transport.mspSend = function(payload)
     local dataId = payload[1] + (payload[2] << 8)
     local value = 0
     for i = 3, #payload do value = value + (payload[i] << ((i - 3) * 8)) end
     return rf2ethos.protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
 end
 
-rf2ethos.protocol.mspRead = function(cmd)
+transport.mspRead = function(cmd)
     return mspSendRequest(cmd, {})
 end
 
-rf2ethos.protocol.mspWrite = function(cmd, payload)
+transport.mspWrite = function(cmd, payload)
     return mspSendRequest(cmd, payload)
 end
 
@@ -39,7 +41,7 @@ local function smartPortTelemetryPop()
     end
 end
 
-rf2ethos.protocol.mspPoll = function()
+transport.mspPoll = function()
     while true do
         local sensorId, frameId, dataId, value = smartPortTelemetryPop()
         if (sensorId == SMARTPORT_REMOTE_SENSOR_ID or sensorId == FPORT_REMOTE_SENSOR_ID) and frameId == REPLY_FRAME_ID then
@@ -64,3 +66,5 @@ rf2ethos.protocol.mspPoll = function()
         end
     end
 end
+
+return transport
