@@ -121,7 +121,7 @@ function clocksync.run()
     
 
     -- process my queue
-    if rf2ethos.guiIsRunning == false and clocksync.timeIsSet == false then
+    if rf2ethos.guiIsRunning ~= true and clocksync.timeIsSet == false then
         rf2ethos.mspQueue:processQueue()
     end   
 

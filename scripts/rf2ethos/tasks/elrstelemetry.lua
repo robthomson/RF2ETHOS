@@ -368,6 +368,11 @@ rf2elrstelemetry.telemetryFrameCount = 0
 
 function rf2elrstelemetry.crossfirePop()
 
+    -- quick exit if pause enabled
+    if ELRS_PAUSE_TELEMETRY == true or ELRS_PAUSE_TELEMETRY == true then
+        return
+    end
+
     local command, data = crsf.popFrame()
     if command and data then
 
@@ -406,9 +411,7 @@ function rf2elrstelemetry.run()
         rssiSensor = system.getSource(name) 
     end
     if rssiSensor ~= nil and rssiSensor:state() then 
-        if not CRSF_PAUSE_TELEMETRY and not ELRS_PAUSE_TELEMETRY then
             rf2elrstelemetry.crossfirePop()
-        end 
     end
 end
 
