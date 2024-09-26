@@ -42,6 +42,7 @@ local function openPage(pidx, title, script)
 
     form.clear()
 
+
     local titleline = form.addLine("Msp speed")
 
     local buttonW = 100
@@ -94,6 +95,20 @@ local function openPage(pidx, title, script)
 
     if rf2ethos.config.ethosRunningVersion < 1516 then
 
+        line['rf'] = form.addLine("RF Protocol")
+        fields['rf'] = form.addTextField(line['rf'], nil, function()
+            return string.upper(rf2ethos.protocol.mspProtocol)
+        end, function(value)
+        end)
+        fields['rf']:enable(false)
+
+        line['memory'] = form.addLine("Memory free")
+        fields['memory'] = form.addTextField(line['memory'], nil, function()
+            return rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB'
+        end, function(value)
+        end)
+        fields['memory']:enable(false)
+
         line['total'] = form.addLine("Total queries")
         fields['total'] = form.addTextField(line['total'], nil, function()
             return mspSpeedTestStats['total']
@@ -138,9 +153,14 @@ local function openPage(pidx, title, script)
         
     else
 
-        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 100, h = rf2ethos.radio.navbuttonHeight}
+        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 200, h = rf2ethos.radio.navbuttonHeight}
 
-    
+        line['rf'] = form.addLine("RF protocol")
+        fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.protocol.mspProtocol))
+
+        line['memory'] = form.addLine("Memory free")
+        fields['memory'] = form.addStaticText(line['memory'], posText, rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB')
+
         line['total'] = form.addLine("Total queries")
         fields['total'] = form.addStaticText(line['total'], posText, "-")
 
@@ -158,6 +178,7 @@ local function openPage(pidx, title, script)
 
         line['time'] = form.addLine("Average query time")
         fields['time'] = form.addStaticText(line['time'], posText, "-")
+                
     end
 
     formLoaded = true
@@ -167,6 +188,12 @@ local function updateStats()
 
 
     if rf2ethos.config.ethosRunningVersion < 1516 then
+
+        fields['memory'] = form.addTextField(line['memory'], nil, function()
+            return rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB'
+        end, function(value)
+        end)
+        fields['memory']:enable(false)
 
         fields['total'] = form.addTextField(line['total'], nil, function()
             return mspSpeedTestStats['total']
@@ -215,6 +242,9 @@ local function updateStats()
         
 
     else
+
+        fields['memory']:value(rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB')
+    
         fields['total']:value(tostring(mspSpeedTestStats['total']))
 
         fields['retries']:value(tostring(mspSpeedTestStats['retries']))
@@ -407,4 +437,6 @@ end
 
 rf2ethos.uiState = rf2ethos.uiStatus.pages
 
-return {title = "Msp speed", openPage = openPage, mspRetry = mspRetry, mspSuccess = mspSuccess, mspTimeout = mspTimeout, mspChecksum = mspChecksum, wakeup = wakeup, event = event}
+
+
+return {title = title, openPage = openPage, mspRetry = mspRetry, mspSuccess = mspSuccess, mspTimeout = mspTimeout, mspChecksum = mspChecksum, wakeup = wakeup, event = event}
