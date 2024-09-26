@@ -1,4 +1,4 @@
-local rf2ethos = {}
+--local rf2ethos = {}
 
 local arg = {...}
 
@@ -451,11 +451,6 @@ function rf2ethos.wakeup(widget)
 
     rf2ethos.guiIsRunning = true
 
-    -- every 0.01 to ensure msp timings work
-    if rf2ethos.guiIsRunning == true then
-        rf2ethos.mspQueue:processQueue()
-    end
-
     -- keep cpu load down by running UI at reduced interval
     local now = os.clock()
     if (now - rf2ethos.wakeupSchedulerUI) >= 0.02 or rf2ethos.wakeupSchedulerUIInit == true then
@@ -486,83 +481,86 @@ end
 -- BACKGROUND checks
 function rf2ethos.wakeupBgChecks()
 
-    if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
-        local message = {
-            command = 1, -- MIXER
-            processReply = function(self, buf)
-                if #buf >= 3 then
-                    local version = buf[2] + buf[3] / 100
-                    rf2ethos.config.apiVersion = version
-                    rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
-                end
-            end,
-            simulatorResponse = {0, 12, 7}
-        }
-        rf2ethos.mspQueue:add(message)
+    if rf2ethos.mspQueue ~= nil then
 
-    elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+        if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
             local message = {
-                command = 42, -- MIXER
+                command = 1, -- MIXER
                 processReply = function(self, buf)
-                    if #buf >= 19 then
-
-                        local tailMode = buf[2]
-                        local swashMode = buf[6]
-                        rf2ethos.config.swashMode = swashMode
-                        rf2ethos.config.tailMode = tailMode
-                        rf2ethos.utils.log("Tail mode: " .. rf2ethos.config.tailMode)
-                        rf2ethos.utils.log("Swash mode: " .. rf2ethos.config.swashMode)
+                    if #buf >= 3 then
+                        local version = buf[2] + buf[3] / 100
+                        rf2ethos.config.apiVersion = version
+                        rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
                     end
                 end,
-                simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+                simulatorResponse = {0, 12, 7}
             }
             rf2ethos.mspQueue:add(message)
-    elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
-            rf2ethos.utils.mspGetCurrentProfile()            
-    elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
-            local message = {
-                command = 120, -- MSP_SERVO_CONFIGURATIONS
-                processReply = function(self, buf)
-                     if #buf >= 20 then
-                            local servoCount = rf2ethos.mspHelper.readU8(buf)
-                            
-                            -- update master one in case changed
-                            rf2ethos.config.servoCount = servoCount
-                    end
-                end,
-                simulatorResponse = {
-                    4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
-                    120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+
+        elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
+                local message = {
+                    command = 42, -- MIXER
+                    processReply = function(self, buf)
+                        if #buf >= 19 then
+
+                            local tailMode = buf[2]
+                            local swashMode = buf[6]
+                            rf2ethos.config.swashMode = swashMode
+                            rf2ethos.config.tailMode = tailMode
+                            rf2ethos.utils.log("Tail mode: " .. rf2ethos.config.tailMode)
+                            rf2ethos.utils.log("Swash mode: " .. rf2ethos.config.swashMode)
+                        end
+                    end,
+                    simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
                 }
-            }
-            rf2ethos.mspQueue:add(message)
-            
-    elseif (rf2ethos.config.servoOverride == nil) and rf2ethos.mspQueue:isProcessed() then
-            local message = {
-                command = 192, -- MSP_SERVO_OVERIDE
-                processReply = function(self, buf)
-                     if #buf >= 16 then
-                     
-                            for i = 0, rf2ethos.config.servoCount do
-                                buf.offset = i
-                                local servoOverride = rf2ethos.mspHelper.readU8(buf)
-                                if servoOverride == 0 then
-                                    rf2ethos.utils.log("Servo overide: true")
-                                    rf2ethos.config.servoOverride = true
-                                end
-                            end      
-                            if rf2ethos.config.servoOverride == nil then
-                                rf2ethos.config.servoOverride = false 
-                            end      
-                    end
-                end,
-                simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
-            }
-            rf2ethos.mspQueue:add(message)
-            
-            -- do this at end of last one
-            rf2ethos.wakeupSchedulerBgChecksInit = false
-    end    
+                rf2ethos.mspQueue:add(message)
+        elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
+                rf2ethos.utils.mspGetCurrentProfile()            
+        elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
+                local message = {
+                    command = 120, -- MSP_SERVO_CONFIGURATIONS
+                    processReply = function(self, buf)
+                         if #buf >= 20 then
+                                local servoCount = rf2ethos.mspHelper.readU8(buf)
+                                
+                                -- update master one in case changed
+                                rf2ethos.config.servoCount = servoCount
+                        end
+                    end,
+                    simulatorResponse = {
+                        4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
+                        120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
+                    }
+                }
+                rf2ethos.mspQueue:add(message)
+                
+        elseif (rf2ethos.config.servoOverride == nil) and rf2ethos.mspQueue:isProcessed() then
+                local message = {
+                    command = 192, -- MSP_SERVO_OVERIDE
+                    processReply = function(self, buf)
+                         if #buf >= 16 then
+                         
+                                for i = 0, rf2ethos.config.servoCount do
+                                    buf.offset = i
+                                    local servoOverride = rf2ethos.mspHelper.readU8(buf)
+                                    if servoOverride == 0 then
+                                        rf2ethos.utils.log("Servo overide: true")
+                                        rf2ethos.config.servoOverride = true
+                                    end
+                                end      
+                                if rf2ethos.config.servoOverride == nil then
+                                    rf2ethos.config.servoOverride = false 
+                                end      
+                        end
+                    end,
+                    simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
+                }
+                rf2ethos.mspQueue:add(message)
+                
+                -- do this at end of last one
+                rf2ethos.wakeupSchedulerBgChecksInit = false
+        end    
+    end
   
 end
 
@@ -746,6 +744,7 @@ function rf2ethos.wakeupUI()
                 else
                     if rf2ethos.triggers.badMspVersion ~= true then rf2ethos.audio.playConnected = true end
                 end
+ 
             end
         end
         rf2ethos.ui.progessDisplayNoLinkValue(rf2ethos.dialogs.nolinkValueCounter)
@@ -910,22 +909,20 @@ function rf2ethos.wakeupUI()
 
             if rf2ethos.triggers.badMspVersionDisplay == false then
                 local message
-                local title
-                if rf2ethos.getRSSI() == 0 then
+                if rf2ethos.backgroundMsp ~= true then
+                   message = "Please enable the backround msp task."
+                elseif rf2ethos.getRSSI() == 0 then
                     message = "Unable to establish a link to the flight controller"
-                    title = "No link"
                 elseif rf2ethos.config.apiVersion ~= nil then
                     message = "This version of the Lua scripts \ncan't be used with the selected model (" .. rf2ethos.config.apiVersion .. ")."
-                    tile = "MSP Version Error"
                 else
                     message = "Unable to determine msp version in use."
-                    title = "MSP Error"
                 end
 
                 rf2ethos.triggers.badMspVersionDisplay = true
                 form.openDialog({
                     width = nil,
-                    title = title,
+                    title = "Error",
                     message = message,
                     buttons = buttons,
                     wakeup = function()
@@ -1109,38 +1106,6 @@ end
 
 function rf2ethos.create()
 
-
-    rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
-
-    -- get sensor for msp comms
-    rf2ethos.sensor = sport.getSensor({primId = 0x32})
-    if rf2ethos.rssiSensor then
-        rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
-    end
-    
-    -- set active protocol to use
-    local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
-    rf2ethos.protocol = protocol.getProtocol()
- 
-    -- preload all transport methods
-    rf2ethos.protocolTransports = {}
-    for i,v in pairs(protocols.getTransports()) do
-        rf2ethos.protocolTransports[i] = assert(loadfile(rf2ethos.config.toolDir .. v))()
-    end
- 
-    -- set active transport table to use
-    local transport = rf2ethos.protocolTransports[rf2ethos.protocol.mspProtocol]
-    rf2ethos.protocol.mspRead = transport.mspRead
-    rf2ethos.protocol.mspSend = transport.mspSend
-    rf2ethos.protocol.mspWrite = transport.mspWrite
-    rf2ethos.protocol.mspPoll = transport.mspPoll
-    
-    
-    rf2ethos.mspQueue = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspQueue.lua"))()
-    rf2ethos.mspQueue.maxRetries = rf2ethos.protocol.maxRetries
-    rf2ethos.mspHelper = assert(loadfile(rf2ethos.config.toolDir .. "msp/mspHelper.lua"))()
-    assert(loadfile(rf2ethos.config.toolDir .. "msp/common.lua"))()
-    
     rf2ethos.ini = assert(loadfile(rf2ethos.config.toolDir .. "lib/lip.lua"))()    
     rf2ethos.preferences = rf2ethos.ini.load(rf2ethos.config.toolDir .. "/preferences.ini");   
 
@@ -1149,6 +1114,8 @@ function rf2ethos.create()
     if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
         rf2ethos.config.watchdogParam = math.floor(rf2ethos.protocol.pageReqTimeout + (rf2ethos.protocol.pageReqTimeout * 0.5))
     end
+    
+
 
     config.apiVersion = nil
     config.environment = system.getVersion()

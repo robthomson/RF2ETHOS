@@ -405,14 +405,22 @@ function rf2elrstelemetry.crossfirePop()
 end
 
 function rf2elrstelemetry.run()
-    local rssiNames = {"Rx RSSI1", "Rx RSSI2"}
-    for i, name in ipairs(rssiNames) do
-        rssiSensor = system.getSource(name)
+
+    -- quick kill if background msp not running as we 
+    -- use this to determin protocol type
+    if rf2ethos.backgroundMsp ~= true then
+        return
     end
-    if rssiSensor ~= nil and rssiSensor:state() then
-        local pauseTelemetry = ELRS_PAUSE_TELEMETRY or CRSF_PAUSE_TELEMETRY
-        while not pauseTelemetry and rf2elrstelemetry.crossfirePop() do end
+    
+    -- quick kill if not using crsf as this script
+    -- is only for crsf code
+    if rf2ethos.protocol.mspProtocol ~= "crsf" then
+        return
     end
+
+    local pauseTelemetry = ELRS_PAUSE_TELEMETRY or CRSF_PAUSE_TELEMETRY
+    while not pauseTelemetry and rf2elrstelemetry.crossfirePop() do end
+
 end
 
 return rf2elrstelemetry

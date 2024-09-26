@@ -15,12 +15,17 @@ config.defaultRateTable = 4 -- ACTUAL                               -- default r
 config.supportedMspApiVersion = {"12.06", "12.07"}                  -- supported msp versions
 config.simulateOnTransmitter = false                                -- make the transmitter run as if its running in the SIM (no fbl required)
 config.skipRssiSensorCheck = false                                  -- skip checking for a valid signal when loading connecting to the fbl
-config.clockSyncTaskName = config.toolName .. " [Clock Sync]"        -- background task name for clock syncs etc
-config.clockSyncTaskKey = "rf2bgk"                                         -- key id used for background tasks
+
+-- tasks
+config.mspTaskName = config.toolName .. " [Msp]"              -- background task name for msp services etc
+config.mspTaskKey = "rf2msp"                                  -- key id used for msp services
+config.clockSyncTaskName = config.toolName .. " [Clock Sync]"       -- background task name for clock syncs etc
+config.clockSyncTaskKey = "rf2bgk"                                  -- key id used for background tasks
 config.elrsTelemTaskName = config.toolName .. " [ELRS Telemetry]"   -- background task name for clock syncs etc
 config.elrsTelemTaskKey = "rf2elrs"                                 -- key id used for background tasks
 config.adjFunctionTaskName = config.toolName .. " [ADJ Functions]"  -- background task name adjust functions
 config.adjFunctionTaskKey = "rf2adjf"                               -- key id used for adjust functions
+
 -- LuaFormatter on
 
 
@@ -59,38 +64,50 @@ local function background()
     rf2ethos.background()
 end
 
-local rf2elrstelemetry
-local function elrsTelemetry()
-    if rf2elrstelemetry == nil then
-        rf2elrstelemetry = assert(compile.loadScript(config.toolDir .. "tasks/elrstelemetry.lua"))(config,compile)
+
+local msp
+local function mspTask()
+    if msp == nil then
+        msp = assert(compile.loadScript(config.toolDir .. "tasks/msp.lua"))(config,compile)
     else
-        rf2elrstelemetry.run()
+        msp.run()
     end    
 end
 
-local clocksync
-local function clockSync()
-    if clocksync == nil then
-        clocksync = assert(compile.loadScript(config.toolDir .. "tasks/clocksync.lua"))(config,compile)
+
+local elrsTelemetry
+local function elrsTelemetryTask()
+    if elrsTelemetry == nil then
+        elrsTelemetry = assert(compile.loadScript(config.toolDir .. "tasks/elrstelemetry.lua"))(config,compile)
     else
-        clocksync.run()
+        elrsTelemetry.run()
     end    
 end
 
-local adjfunc
-local function adjFunction()
-    if adjfunc == nil then
-        adjfunc = assert(compile.loadScript(config.toolDir .. "tasks/adjfunctions.lua"))(config,compile)
+local clockSync
+local function clockSyncTask()
+    if clockSync == nil then
+        clockSync = assert(compile.loadScript(config.toolDir .. "tasks/clocksync.lua"))(config,compile)
     else
-        adjfunc.run()
+        clockSync.run()
+    end    
+end
+
+local adjFunction
+local function adjFunctionTask()
+    if adjFunction == nil then
+        adjFunction = assert(compile.loadScript(config.toolDir .. "tasks/adjfunctions.lua"))(config,compile)
+    else
+        adjFunction.run()
     end    
 end
 
 local function init()
     system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, paint = paint, close = close})
-    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSync})
-    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetry})    
-    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunction})    
+    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = mspTask})
+    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSyncTask})
+    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetryTask})    
+    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunctionTask})    
 end
 
 return {init = init}

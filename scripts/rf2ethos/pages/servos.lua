@@ -45,6 +45,11 @@ local function buildServoTable()
             servoTable[3]['image'] = "cright.png" 
          
             if rf2ethos.config.tailMode == 0 then
+                -- this is because when swiching models this may or may not have
+                -- been created.
+                if servoTable[4] == nil then
+                    servoTable[4] = {}
+                end
                 servoTable[4]['title'] = "TAIL" 
                 servoTable[4]['image'] = "tail.png"
             else
