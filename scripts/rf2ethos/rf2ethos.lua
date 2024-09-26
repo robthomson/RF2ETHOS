@@ -32,6 +32,7 @@ triggers.timeIsSet = false
 rf2ethos = {}
 rf2ethos.compile = compile
 
+
 rf2ethos.config = {}
 rf2ethos.config = config
 rf2ethos.config.tailMode = nil
@@ -80,8 +81,6 @@ rf2ethos.wakeupSchedulerUI = os.clock()
 rf2ethos.wakeupSchedulerUIInit = false
 rf2ethos.wakeupSchedulerForm = os.clock()
 rf2ethos.wakeupSchedulerFormInit = false
-rf2ethos.wakeupSchedulerBgChecks = os.clock()
-rf2ethos.wakeupSchedulerBgChecksInit = false
 rf2ethos.menuLastSelected = {}
 rf2ethos.adjfunctions = nil
 
@@ -181,10 +180,10 @@ function rf2ethos.resetState()
     rf2ethos.dialogs.progressDisplayEsc = false
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false
-    rf2ethos.config.tailMode = nil
-    rf2ethos.config.apiVersion = nil
+    --rf2ethos.config.tailMode = nil
+    --rf2ethos.config.apiVersion = nil
     rf2ethos.audio = {}
-    rf2ethos.config.servoOverride = nil
+    --rf2ethos.config.servoOverride = nil
 
 end
 
@@ -467,102 +466,11 @@ function rf2ethos.wakeup(widget)
         rf2ethos.wakeupSchedulerFormInit = false
     end
 
-    -- bgchecks
-    -- keep cpu load down by running Form at reduced interval
-    local now = os.clock()
-    if (now - rf2ethos.wakeupSchedulerBgChecks) >= 0.25 or rf2ethos.wakeupSchedulerBgChecksInit == true then
-        rf2ethos.wakeupSchedulerBgChecks = now
-        rf2ethos.wakeupBgChecks()
-    end
 
 end
        
 
--- BACKGROUND checks
-function rf2ethos.wakeupBgChecks()
 
-    if rf2ethos.mspQueue ~= nil then
-
-        if rf2ethos.config.apiVersion == nil and rf2ethos.mspQueue:isProcessed() then
-            local message = {
-                command = 1, -- MIXER
-                processReply = function(self, buf)
-                    if #buf >= 3 then
-                        local version = buf[2] + buf[3] / 100
-                        rf2ethos.config.apiVersion = version
-                        rf2ethos.utils.log("MSP Version: " .. rf2ethos.config.apiVersion)
-                    end
-                end,
-                simulatorResponse = {0, 12, 7}
-            }
-            rf2ethos.mspQueue:add(message)
-
-        elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and rf2ethos.mspQueue:isProcessed() then
-                local message = {
-                    command = 42, -- MIXER
-                    processReply = function(self, buf)
-                        if #buf >= 19 then
-
-                            local tailMode = buf[2]
-                            local swashMode = buf[6]
-                            rf2ethos.config.swashMode = swashMode
-                            rf2ethos.config.tailMode = tailMode
-                            rf2ethos.utils.log("Tail mode: " .. rf2ethos.config.tailMode)
-                            rf2ethos.utils.log("Swash mode: " .. rf2ethos.config.swashMode)
-                        end
-                    end,
-                    simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-                }
-                rf2ethos.mspQueue:add(message)
-        elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
-                rf2ethos.utils.mspGetCurrentProfile()            
-        elseif (rf2ethos.config.servoCount == nil) and rf2ethos.mspQueue:isProcessed() then
-                local message = {
-                    command = 120, -- MSP_SERVO_CONFIGURATIONS
-                    processReply = function(self, buf)
-                         if #buf >= 20 then
-                                local servoCount = rf2ethos.mspHelper.readU8(buf)
-                                
-                                -- update master one in case changed
-                                rf2ethos.config.servoCount = servoCount
-                        end
-                    end,
-                    simulatorResponse = {
-                        4, 180, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 160, 5, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 1, 0, 14, 6, 12, 254, 244, 1, 244, 1, 244, 1, 144, 0, 0, 0, 0, 0,
-                        120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
-                    }
-                }
-                rf2ethos.mspQueue:add(message)
-                
-        elseif (rf2ethos.config.servoOverride == nil) and rf2ethos.mspQueue:isProcessed() then
-                local message = {
-                    command = 192, -- MSP_SERVO_OVERIDE
-                    processReply = function(self, buf)
-                         if #buf >= 16 then
-                         
-                                for i = 0, rf2ethos.config.servoCount do
-                                    buf.offset = i
-                                    local servoOverride = rf2ethos.mspHelper.readU8(buf)
-                                    if servoOverride == 0 then
-                                        rf2ethos.utils.log("Servo overide: true")
-                                        rf2ethos.config.servoOverride = true
-                                    end
-                                end      
-                                if rf2ethos.config.servoOverride == nil then
-                                    rf2ethos.config.servoOverride = false 
-                                end      
-                        end
-                    end,
-                    simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
-                }
-                rf2ethos.mspQueue:add(message)
-                
-                -- do this at end of last one
-                rf2ethos.wakeupSchedulerBgChecksInit = false
-        end    
-    end
-  
-end
 
 -- WAKEUPFORM.  RUN A FUNCTION CALLED wakeup THAT IS RETURNED WHEN REQUESTING A PAGE
 -- THIS ESSENTIALLY GIVES US A TIMER THAT CAN BE USED BY A PAGE THAT HAS LOADED TO
@@ -718,9 +626,9 @@ function rf2ethos.wakeupUI()
     -- if (rf2ethos.dialogs.nolinkDisplay == true or rf2ethos.triggers.telemetryState == 1) and rf2ethos.dialogs.progressDisplayEsc ~= true then
     if (rf2ethos.dialogs.nolinkDisplay == true) and rf2ethos.triggers.disableRssiTimeout == false then
         if rf2ethos.triggers.telemetryState == 1 then
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 20
         else
-            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 5
+            rf2ethos.dialogs.nolinkValueCounter = rf2ethos.dialogs.nolinkValueCounter + 10
         end
 
         if rf2ethos.dialogs.nolinkValueCounter >= 101 then
@@ -906,6 +814,7 @@ function rf2ethos.wakeupUI()
                     end
                 }
             }
+            
 
             if rf2ethos.triggers.badMspVersionDisplay == false then
                 local message
@@ -1117,7 +1026,7 @@ function rf2ethos.create()
     
 
 
-    config.apiVersion = nil
+    --config.apiVersion = nil
     config.environment = system.getVersion()
     config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
     
