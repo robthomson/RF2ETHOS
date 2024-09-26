@@ -660,7 +660,7 @@ function rf2ethos.wakeupUI()
     if rf2ethos.Page ~= nil and rf2ethos.Page.refreshswitch == true and rf2ethos.uiState == rf2ethos.uiStatus.pages then
 
         -- capture profile switching and of rates pages
-        if rf2ethos.lastPage == "rates.lua" or rf2ethos.lastPage == "rates_advanced.lua" then
+        if rf2ethos.lastPage == "rates.lua" or rf2ethos.lastPage == "rates_advanced.lua" or rf2ethos.lastPage == "select_profile.lua" then
             if rf2ethos.config.rateswitchParam ~= nil then
                 if rf2ethos.config.rateswitchParam:value() ~= rf2ethos.triggers.rateswitchLast then
 
