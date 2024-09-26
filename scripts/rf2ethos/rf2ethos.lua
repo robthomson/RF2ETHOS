@@ -1257,6 +1257,7 @@ function rf2ethos.close()
     if rf2ethos.dialogs.noLink then rf2ethos.ui.progessNolinkDisplayClose() end
     invalidatePages()
     rf2ethos.resetState()
+    collectgarbage()
     system.exit()
     return true
 end

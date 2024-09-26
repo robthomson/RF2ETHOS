@@ -77,6 +77,7 @@ function msp.run()
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
     
     rf2ethos.mspQueue:processQueue()   
+    collectgarbage()
 end
 
 return msp
