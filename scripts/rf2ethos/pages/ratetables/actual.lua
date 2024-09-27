@@ -3,9 +3,9 @@ local rows = {"Roll", "Pitch", "Yaw", "Col"}
 local cols
 
 if rf2ethos.app.radio.text == 2 then
-    cols = {"Cntr. Sens.", "Max Rate", "Expo"}
+        cols = {"Cntr. Sens.", "Max Rate", "Expo"}
 else
-    cols = {"Center Sensitivity", "Max Rate", "Expo"}
+        cols = {"Center Sensitivity", "Max Rate", "Expo"}
 end
 local fields = {}
 

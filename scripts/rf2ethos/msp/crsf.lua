@@ -12,39 +12,39 @@ local CRSF_FRAMETYPE_MSP_WRITE = 0x7C -- write with 60 byte chunked binary
 local crsfMspCmd = 0
 
 transport.mspSend = function(payload)
-    local payloadOut = {CRSF_ADDRESS_BETAFLIGHT, CRSF_ADDRESS_RADIO_TRANSMITTER}
-    for i = 1, #(payload) do payloadOut[i + 2] = payload[i] end
-    return crsf.pushFrame(crsfMspCmd, payloadOut)
+        local payloadOut = {CRSF_ADDRESS_BETAFLIGHT, CRSF_ADDRESS_RADIO_TRANSMITTER}
+        for i = 1, #(payload) do payloadOut[i + 2] = payload[i] end
+        return crsf.pushFrame(crsfMspCmd, payloadOut)
 end
 
 transport.mspRead = function(cmd)
-    crsfMspCmd = CRSF_FRAMETYPE_MSP_REQ
-    return mspSendRequest(cmd, {})
+        crsfMspCmd = CRSF_FRAMETYPE_MSP_REQ
+        return mspSendRequest(cmd, {})
 end
 
 transport.mspWrite = function(cmd, payload)
-    crsfMspCmd = CRSF_FRAMETYPE_MSP_WRITE
-    return mspSendRequest(cmd, payload)
+        crsfMspCmd = CRSF_FRAMETYPE_MSP_WRITE
+        return mspSendRequest(cmd, payload)
 end
 
 transport.mspPoll = function()
-    while true do
-        local cmd, data = crsf.popFrame()
-        if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] == CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] == CRSF_ADDRESS_BETAFLIGHT then
-            --[[
-            --rf2ethos.utils.log("cmd:0x"..string.format("%X", cmd))
-            --rf2ethos.utils.log("  data length: "..string.format("%u", #data))
-            for i=1,#data do
-                --rf2ethos.utils.log("  ["..string.format("%u", i).."]:  0x"..string.format("%X", data[i]))
-            end
+        while true do
+                local cmd, data = crsf.popFrame()
+                if cmd == CRSF_FRAMETYPE_MSP_RESP and data[1] == CRSF_ADDRESS_RADIO_TRANSMITTER and data[2] == CRSF_ADDRESS_BETAFLIGHT then
+                        --[[
+                        --rf2ethos.utils.log("cmd:0x"..string.format("%X", cmd))
+                        --rf2ethos.utils.log("  data length: "..string.format("%u", #data))
+                        for i=1,#data do
+                                --rf2ethos.utils.log("  ["..string.format("%u", i).."]:  0x"..string.format("%X", data[i]))
+                        end
 --]]
-            local mspData = {}
-            for i = 3, #data do mspData[i - 2] = data[i] end
-            return mspData
-        elseif cmd == nil then
-            return nil
+                        local mspData = {}
+                        for i = 3, #data do mspData[i - 2] = data[i] end
+                        return mspData
+                elseif cmd == nil then
+                        return nil
+                end
         end
-    end
 end
 
 return transport

@@ -36,46 +36,46 @@ local foundEsc = false
 local foundEscDone = false
 
 function postLoad()
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.app.triggers.escToolEnableButtons = true
-    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.triggers.escToolEnableButtons = true
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+        -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-    if category == 5 or value == 35 then
-        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
-        return true
-    end
+        if category == 5 or value == 35 then
+                rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+                return true
+        end
 
-    return false
+        return false
 end
 
 return {
-    read = 217, -- msp_ESC_PARAMETERS
-    write = 218, -- msp_SET_ESC_PARAMETERS
-    eepromWrite = true,
-    reboot = false,
-    title = "Advanced Setup",
-    minBytes = mspBytes,
-    labels = labels,
-    fields = fields,
-    escinfo = escinfo,
-    simulatorResponse = {
-        165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
-        19, 2, 0, 20, 0, 22, 0, 0, 0
-    },
-    svTiming = 0,
-    svFlags = 0,
-    postLoad = postLoad,
-    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-    onNavMenu = onNavMenu,
-    event = event,
-    pageTitle = "Esc / Yge / Advanced",
-    headerLine = rf2ethos.escHeaderLineText
+        read = 217, -- msp_ESC_PARAMETERS
+        write = 218, -- msp_SET_ESC_PARAMETERS
+        eepromWrite = true,
+        reboot = false,
+        title = "Advanced Setup",
+        minBytes = mspBytes,
+        labels = labels,
+        fields = fields,
+        escinfo = escinfo,
+        simulatorResponse = {
+                165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
+                19, 2, 0, 20, 0, 22, 0, 0, 0
+        },
+        svTiming = 0,
+        svFlags = 0,
+        postLoad = postLoad,
+        navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+        onNavMenu = onNavMenu,
+        event = event,
+        pageTitle = "Esc / Yge / Advanced",
+        headerLine = rf2ethos.escHeaderLineText
 }

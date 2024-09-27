@@ -15,18 +15,18 @@ fields[#fields + 1] = {t = "TTA precomp", help = "mixerTTAPrecomp", min = 0, max
 fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} 
 
 local function postLoad(self)
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 return {
-    read = 42, -- msp_MIXER_CONFIG
-    write = 43, -- msp_SET_MIXER_CONFIG
-    eepromWrite = true,
-    reboot = false,
-    title = "Mixer",
-    simulatorResponse = {0, 0, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-    minBytes = 19,
-    labels = labels,
-    fields = fields,
-    postLoad = postLoad
+        read = 42, -- msp_MIXER_CONFIG
+        write = 43, -- msp_SET_MIXER_CONFIG
+        eepromWrite = true,
+        reboot = false,
+        title = "Mixer",
+        simulatorResponse = {0, 0, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        minBytes = 19,
+        labels = labels,
+        fields = fields,
+        postLoad = postLoad
 }

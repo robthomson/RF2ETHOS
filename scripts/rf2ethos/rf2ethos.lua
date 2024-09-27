@@ -139,271 +139,274 @@ rf2ethos.config.ethosRunningVersion = nil
 
 -- RETURN THE CURRENT RSSI SENSOR VALUE 
 function app.getRSSI()
-    if system:getVersion().simulation == true or rf2ethos.config.skipRssiSensorCheck == true then return 100 end
+        if system:getVersion().simulation == true or rf2ethos.config.skipRssiSensorCheck == true then return 100 end
 
-    if rf2ethos.rssiSensor ~= nil then
-    
-        if rf2ethos.rssiSensor:state() == true then
-            local value = rf2ethos.rssiSensor:value()
-            return value
-        else
-            return 0
+        if rf2ethos.rssiSensor ~= nil then
+        
+                if rf2ethos.rssiSensor:state() == true then
+                        local value = rf2ethos.rssiSensor:value()
+                        return value
+                else
+                        return 0
+                end
         end
-    end
-    return 0
+        return 0
 end
 
 -- RESET ALL VALUES TO DEFAULTS. FUNCTION IS CALLED WHEN THE CLOSE EVENT RUNS
 function app.resetState()
 
-    config.useCompiler = true
-    rf2ethos.config.useCompiler = true
-    pageLoaded = 100
-    pageTitle = nil
-    pageFile = nil
-    app.triggers.exitAPP = false
-    app.triggers.noRFMsg = false
-    app.dialogs.nolinkDisplay = false
-    app.dialogs.nolinkValueCounter = 0
-    app.triggers.telemetryState = nil
-    app.triggers.badMspVersionDisplay = false
-    app.triggers.badMspVersion = false
-    app.dialogs.progressDisplayEsc = false
-    ELRS_PAUSE_TELEMETRY = false
-    CRSF_PAUSE_TELEMETRY = false
-    --rf2ethos.config.tailMode = nil
-    --rf2ethos.config.apiVersion = nil
-    app.audio = {}
-    --rf2ethos.config.servoOverride = nil
+        config.useCompiler = true
+        rf2ethos.config.useCompiler = true
+        pageLoaded = 100
+        pageTitle = nil
+        pageFile = nil
+        app.triggers.exitAPP = false
+        app.triggers.noRFMsg = false
+        app.dialogs.nolinkDisplay = false
+        app.dialogs.nolinkValueCounter = 0
+        app.triggers.telemetryState = nil
+        app.triggers.badMspVersionDisplay = false
+        app.triggers.badMspVersion = false
+        app.dialogs.progressDisplayEsc = false
+        ELRS_PAUSE_TELEMETRY = false
+        CRSF_PAUSE_TELEMETRY = false
+        --rf2ethos.config.tailMode = nil
+        --rf2ethos.config.apiVersion = nil
+        app.audio = {}
+        --rf2ethos.config.servoOverride = nil
 
 end
 
 -- CHECK IF THE PROFILE SWITCH HAS CHANGED STATE
 function app.profileSwitchCheck()
 
-    -- load and cache the switch on first run
-    if rf2ethos.config.profileswitchParamPreference == nil then
-        rf2ethos.config.profileswitchParamPreference = app.preferences.interface.profileSwitch
-        local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
-        rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
-    -- store the last state
-    if rf2ethos.config.profileswitchParam ~= nil then app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value() end
+        -- load and cache the switch on first run
+        if rf2ethos.config.profileswitchParamPreference == nil then
+                rf2ethos.config.profileswitchParamPreference = app.preferences.interface.profileSwitch
+                local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
+                rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
+        end
+        -- store the last state
+        if rf2ethos.config.profileswitchParam ~= nil then app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value() end
 end
 
 -- CHECK IF THE RATE SWITCH HAS CHANGED STATE
 function app.rateSwitchCheck()
 
-    -- load and cache the switch on first run
-    if rf2ethos.config.rateswitchParamPreference == nil then
-        rf2ethos.config.rateswitchParamPreference = app.preferences.interface.rateSwitch
-        local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
-        rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-    end
+        -- load and cache the switch on first run
+        if rf2ethos.config.rateswitchParamPreference == nil then
+                rf2ethos.config.rateswitchParamPreference = app.preferences.interface.rateSwitch
+                local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
+                rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
+        end
 
-    -- store the last state	
-    if rf2ethos.config.rateswitchParam ~= nil then app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value() end
+        -- store the last state	
+        if rf2ethos.config.rateswitchParam ~= nil then app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value() end
 end
 
 -- SAVE FIELD VALUE FOR ETHOS FROM ETHOS FORMS INTO THE ACTUAL FORMAT THAT 
 -- WILL BE TRANSMITTED OVER MSP
 function app.saveValue(currentField)
 
-    local f = app.Page.fields[currentField]
-    local scale = f.scale or 1
-    local step = f.step or 1
+        local f = app.Page.fields[currentField]
+        local scale = f.scale or 1
+        local step = f.step or 1
 
-    for idx = 1, #f.vals do app.Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) end
-    if f.upd and app.Page.values then f.upd(app.Page) end
+        for idx = 1, #f.vals do app.Page.values[f.vals[idx]] = math.floor(f.value * scale + 0.5) >> ((idx - 1) * 8) end
+        if f.upd and app.Page.values then f.upd(app.Page) end
 end
 
 -- ITERATE OVER THE FIELD DATA AND UPDATE ALL VALUES FOR DISPLAY PURPOSES
 function app.dataBindFields()
-    if app.Page.fields then
-        for i = 1, #app.Page.fields do
+        if app.Page.fields then
+                for i = 1, #app.Page.fields do
 
-            if app.Page.values and #app.Page.values >= app.Page.minBytes then
-                local f = app.Page.fields[i]
-                if f.vals then
-                    f.value = 0
-                    for idx = 1, #f.vals do
-                        local raw_val = app.Page.values[f.vals[idx]] or 0
-                        raw_val = raw_val << ((idx - 1) * 8)
-                        f.value = f.value | raw_val
-                    end
-                    local bits = #f.vals * 8
-                    if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
-                    f.value = f.value / (f.scale or 1)
+                        if app.Page.values and #app.Page.values >= app.Page.minBytes then
+                                local f = app.Page.fields[i]
+                                if f.vals then
+                                        f.value = 0
+                                        for idx = 1, #f.vals do
+                                                local raw_val = app.Page.values[f.vals[idx]] or 0
+                                                raw_val = raw_val << ((idx - 1) * 8)
+                                                f.value = f.value | raw_val
+                                        end
+                                        local bits = #f.vals * 8
+                                        if f.min and f.min < 0 and (f.value & (1 << (bits - 1)) ~= 0) then f.value = f.value - (2 ^ bits) end
+                                        f.value = f.value / (f.scale or 1)
+                                end
+                        end
                 end
-            end
+        else
+                rf2ethos.utils.log("Unable to bind fields as app.Page.fields does not exist")
         end
-    else
-        rf2ethos.utils.log("Unable to bind fields as app.Page.fields does not exist")
-    end
 end
 
 
 -- RETURN CURRENT LCD SIZE
 function app.getWindowSize()
-    return lcd.getWindowSize()
+        return lcd.getWindowSize()
 end
 
 -- INAVALIDATE THE PAGES VARIABLE. TYPICALLY CALLED AFTER WRITING MSP DATA
 local function invalidatePages()
-    app.Page = nil
-    app.pageState = app.pageStatus.display
-    app.saveTS = 0
-    collectgarbage()
+        app.Page = nil
+        app.pageState = app.pageStatus.display
+        app.saveTS = 0
+        collectgarbage()
 end
 
 -- ISSUE AN MSP COMNMAND TO REBOOT THE FBL UNIT
 local function rebootFc()
 
-    app.pageState = app.pageStatus.rebooting
-    rf2ethos.msp.mspQueue:add({
-        command = 68, -- MSP_REBOOT
-        processReply = function(self, buf)
-            invalidatePages()
-        end,
-        simulatorResponse = {}
-    })
+        app.pageState = app.pageStatus.rebooting
+        rf2ethos.msp.mspQueue:add({
+                command = 68, -- MSP_REBOOT
+                processReply = function(self, buf)
+                        invalidatePages()
+                end,
+                simulatorResponse = {}
+        })
 end
 
 -- ISSUE AN MSP COMMAND TO TELL THE FBL TO WRITE THE DATA TO EPPROM
 local mspEepromWrite = {
-    command = 250, -- MSP_EEPROM_WRITE, fails when armed
-    processReply = function(self, buf)
-        if app.Page.reboot then
-            rebootFc()
-        else
-            invalidatePages()
-        end
-        app.triggers.closeSave = true
-    end,
-    simulatorResponse = {}
+        command = 250, -- MSP_EEPROM_WRITE, fails when armed
+        processReply = function(self, buf)
+                if app.Page.reboot then
+                        rebootFc()
+                else
+                        invalidatePages()
+                end
+                app.triggers.closeSave = true
+        end,
+        simulatorResponse = {}
 }
 
 -- SAVE ALL SETTINGS 
 function app.settingsSaved()
 
-    -- check if this page requires writing to eeprom to save (most do)
-    if app.Page and app.Page.eepromWrite then
-        -- don't write again if we're already responding to earlier page.write()s
-        if app.pageState ~= app.pageStatus.eepromWrite then
-            app.pageState = app.pageStatus.eepromWrite
-            rf2ethos.msp.mspQueue:add(mspEepromWrite)
-        end
-    elseif app.pageState ~= app.pageStatus.eepromWrite then
-        -- If we're not already trying to write to eeprom from a previous save, then we're done.
-        invalidatePages()
-        app.triggers.closeSave = true
+        -- check if this page requires writing to eeprom to save (most do)
+        if app.Page and app.Page.eepromWrite then
+                -- don't write again if we're already responding to earlier page.write()s
+                if app.pageState ~= app.pageStatus.eepromWrite then
+                        app.pageState = app.pageStatus.eepromWrite
+                        rf2ethos.msp.mspQueue:add(mspEepromWrite)
+                end
+        elseif app.pageState ~= app.pageStatus.eepromWrite then
+                -- If we're not already trying to write to eeprom from a previous save, then we're done.
+                invalidatePages()
+                app.triggers.closeSave = true
 
-    end
+        end
 end
 
 -- WRAPPER FUNCTION USED TO TRIGGER SAVE SETTINGS
 local mspSaveSettings = {
-    processReply = function(self, buf)
-        app.settingsSaved()
-    end
+        processReply = function(self, buf)
+                app.settingsSaved()
+        end
 }
 
 -- WRAPPER FUNCTION USED TO TRIGGER LOAD SETTINGS
 local mspLoadSettings = {
-    processReply = function(self, buf)
-        
-        if app.Page.minBytes == nil then app.Page.minBytes = 0 end
-        rf2ethos.utils.log("app.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. app.Page.minBytes)
-        if app.Page ~= nil then
-            app.Page.values = buf
-            if app.Page.postRead then app.Page.postRead(app.Page) end
-            app.dataBindFields()
-            if app.Page.postLoad then app.Page.postLoad(app.Page) end
-            rf2ethos.utils.log("app.triggers.isReady")
-        else
-            rf2ethos.utils.log("app.triggers.isReady app.Page is nil?")
-        end
+        processReply = function(self, buf)
+                
+                if app.Page.minBytes == nil then app.Page.minBytes = 0 end
+                rf2ethos.utils.log("app.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. app.Page.minBytes)
+                if app.Page ~= nil then
+                        app.Page.values = buf
+                        if app.Page.postRead then app.Page.postRead(app.Page) end
+                        app.dataBindFields()
+                        if app.Page.postLoad then app.Page.postLoad(app.Page) end
+                        if form then
+                                form.invalidate()
+                        end
+                        rf2ethos.utils.log("app.triggers.isReady")
+                else
+                        rf2ethos.utils.log("app.triggers.isReady app.Page is nil?")
+                end
 
-    end
+        end
 }
 
 -- READ AN MSP PAGE
 function app.readPage()
-    if type(app.Page.read) == "function" then
-        app.Page.read(app.Page)
-    else
-        mspLoadSettings.command = app.Page.read
-        mspLoadSettings.simulatorResponse = app.Page.simulatorResponse
-        rf2ethos.msp.mspQueue:add(mspLoadSettings)
-    end
+        if type(app.Page.read) == "function" then
+                app.Page.read(app.Page)
+        else
+                mspLoadSettings.command = app.Page.read
+                mspLoadSettings.simulatorResponse = app.Page.simulatorResponse
+                rf2ethos.msp.mspQueue:add(mspLoadSettings)
+        end
 end
 
 -- SAVE ALL SETTINGS 
 local function saveSettings()
 
-    if app.pageState ~= app.pageStatus.saving then
-        app.pageState = app.pageStatus.saving
-        app.saveTS = os.clock()
+        if app.pageState ~= app.pageStatus.saving then
+                app.pageState = app.pageStatus.saving
+                app.saveTS = os.clock()
 
-        if app.Page.values then
-            local payload = app.Page.values
+                if app.Page.values then
+                        local payload = app.Page.values
 
-            if app.Page.preSave then payload = app.Page.preSave(app.Page) end
-            if app.Page.preSavePayload then payload = app.Page.preSavePayload(payload) end
+                        if app.Page.preSave then payload = app.Page.preSave(app.Page) end
+                        if app.Page.preSavePayload then payload = app.Page.preSavePayload(payload) end
 
-            if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
+                        if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
 
-                local logData = "Saving:        {" .. rf2ethos.utils.joinTableItems(payload, ", ") .. "}"
+                                local logData = "Saving:                {" .. rf2ethos.utils.joinTableItems(payload, ", ") .. "}"
 
-                rf2ethos.utils.log(logData)
+                                rf2ethos.utils.log(logData)
 
-                if rf2ethos.config.mspTxRxDebug == true then print(logData) end
+                                if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
-            end
+                        end
 
-            mspSaveSettings.command = app.Page.write
-            mspSaveSettings.payload = payload
-            mspSaveSettings.simulatorResponse = {}
-            rf2ethos.msp.mspQueue:add(mspSaveSettings)
-            rf2ethos.msp.mspQueue.errorHandler = function()
-                print("Save failed")
-                app.triggers.saveFailed = true
-            end
-        elseif type(app.Page.write) == "function" then
-            app.Page.write(app.Page)
+                        mspSaveSettings.command = app.Page.write
+                        mspSaveSettings.payload = payload
+                        mspSaveSettings.simulatorResponse = {}
+                        rf2ethos.msp.mspQueue:add(mspSaveSettings)
+                        rf2ethos.msp.mspQueue.errorHandler = function()
+                                print("Save failed")
+                                app.triggers.saveFailed = true
+                        end
+                elseif type(app.Page.write) == "function" then
+                        app.Page.write(app.Page)
+                end
+
         end
-
-    end
 end
 
 -- REQUEST A PAGE OVER MSP. THIS RUNS ON MOST CLOCK CYCLES WHEN DATA IS BEING REQUESTED
 local function requestPage()
    
-    if not app.Page.reqTS or app.Page.reqTS + rf2ethos.msp.protocol.pageReqTimeout <= os.clock() then
+        if not app.Page.reqTS or app.Page.reqTS + rf2ethos.msp.protocol.pageReqTimeout <= os.clock() then
 
-    
-        app.Page.reqTS = os.clock()
-        if app.Page.read then 
-            app.readPage() 
+        
+                app.Page.reqTS = os.clock()
+                if app.Page.read then 
+                        app.readPage() 
+                end
         end
-    end
 end
 
 -- UPDATE CURRENT TELEMETRY STATE - RUNS MOST CLOCK CYCLES
 function app.updateTelemetryState()
 
    
-    if system:getVersion().simulation ~= true then
-        if not rf2ethos.rssiSensor then
-            app.triggers.telemetryState = app.telemetryStatus.noSensor
-        elseif app.getRSSI() == 0 then
-            app.triggers.telemetryState = app.telemetryStatus.noTelemetry
+        if system:getVersion().simulation ~= true then
+                if not rf2ethos.rssiSensor then
+                        app.triggers.telemetryState = app.telemetryStatus.noSensor
+                elseif app.getRSSI() == 0 then
+                        app.triggers.telemetryState = app.telemetryStatus.noTelemetry
+                else
+                        app.triggers.telemetryState = app.telemetryStatus.ok
+                end
         else
-            app.triggers.telemetryState = app.telemetryStatus.ok
+                app.triggers.telemetryState = app.telemetryStatus.ok
         end
-    else
-        app.triggers.telemetryState = app.telemetryStatus.ok
-    end
 
 end
 
@@ -411,34 +414,34 @@ end
 -- NOTE. this function will only be called if lcd.refesh is triggered. it is not a wakeup function
 function app.paint()
 
-    -- run the modules paint function if it exists
-    if app.Page ~= nil then if app.Page.paint then app.Page.paint(app.Page) end end
+        -- run the modules paint function if it exists
+        if app.Page ~= nil then if app.Page.paint then app.Page.paint(app.Page) end end
 end
 
 -- MAIN WAKEUP FUNCTION. THIS SIMPLY FARMS OUT AT DIFFERING SCHEDULES TO SUB FUNCTIONS
 function app.wakeup(widget)
 
-    app.guiIsRunning = true
+        app.guiIsRunning = true
 
-    -- keep cpu load down by running UI at reduced interval
-    local now = os.clock()
-    if (now - app.wakeupSchedulerUI) >= 0.02 or app.wakeupSchedulerUIInit == true then
-        app.wakeupSchedulerUI = now
-        app.wakeupUI()
-        app.wakeupSchedulerUIInit = false
-    end
+        -- keep cpu load down by running UI at reduced interval
+        local now = os.clock()
+        if (now - app.wakeupSchedulerUI) >= 0.02 or app.wakeupSchedulerUIInit == true then
+                app.wakeupSchedulerUI = now
+                app.wakeupUI()
+                app.wakeupSchedulerUIInit = false
+        end
 
-    -- keep cpu load down by running Form at reduced interval
-    local now = os.clock()
-    if (now - app.wakeupSchedulerForm) >= 0.025 or app.wakeupSchedulerFormInit == true then
-        app.wakeupSchedulerForm = now
-        app.wakeupForm()
-        app.wakeupSchedulerFormInit = false
-    end
+        -- keep cpu load down by running Form at reduced interval
+        local now = os.clock()
+        if (now - app.wakeupSchedulerForm) >= 0.025 or app.wakeupSchedulerFormInit == true then
+                app.wakeupSchedulerForm = now
+                app.wakeupForm()
+                app.wakeupSchedulerFormInit = false
+        end
 
 
 end
-       
+           
 
 
 
@@ -446,536 +449,538 @@ end
 -- THIS ESSENTIALLY GIVES US A TIMER THAT CAN BE USED BY A PAGE THAT HAS LOADED TO
 -- HANDLE BACKGROUND PROCESSING
 function app.wakeupForm()
-    if app.Page ~= nil and app.uiState == app.uiStatus.pages then
-        if app.Page.wakeup then
-            -- run the pages wakeup function if it exists
-            app.Page.wakeup(app.Page)
+        if app.Page ~= nil and app.uiState == app.uiStatus.pages then
+                if app.Page.wakeup then
+                        -- run the pages wakeup function if it exists
+                        app.Page.wakeup(app.Page)
+                end
         end
-    end
 end
 
 -- WAKUP UI.  UI RUNS AT LOWER INTERVAL, TO SAVE CPU POWER.
 -- THE GUTS OF ETHOS FORMS IS HANDLED WITHIN THIS FUNCTION
 function app.wakeupUI()
 
-    -- exit app called : quick abort
-    -- as we dont need to run the rest of the stuff
-    if app.triggers.exitAPP == true then
-        app.triggers.exitAPP = false
-        form.invalidate()
-        system.exit()
-        return
-    end
-
-    -- close progress loader.  this essentially just accelerates 
-    -- the close of the progress bar once the data is loaded.
-    -- so if not yet at 100%.. it says.. move there quickly
-    if app.triggers.closeProgressLoader == true then
-        if app.dialogs.progressCounter <= 100 then
-            app.dialogs.progressCounter = app.dialogs.progressCounter + 10
-            if app.dialogs.progress ~= nil then app.ui.progessDisplayValue(app.dialogs.progressCounter) end
+        -- exit app called : quick abort
+        -- as we dont need to run the rest of the stuff
+        if app.triggers.exitAPP == true then
+                app.triggers.exitAPP = false
+                form.invalidate()
+                system.exit()
+                return
         end
 
-        if app.dialogs.progressCounter >= 101 then
-            app.dialogs.progressWatchDog = nil
-            app.dialogs.progressDisplay = false
-            if app.dialogs.progress ~= nil then app.ui.progessDisplayClose() end
-            app.dialogs.progressCounter = 0
-            app.triggers.closeProgressLoader = false
-        end
-    end
-
-    -- close save loader.  this essentially just accelerates 
-    -- the close of the progress bar once the data is loaded.
-    -- so if not yet at 100%.. it says.. move there quickly
-    if app.triggers.closeSave == true then
-        app.triggers.isSaving = false
-
-        if rf2ethos.msp.mspQueue:isProcessed() then
-            if (app.dialogs.saveProgressCounter > 40 and app.dialogs.saveProgressCounter <= 80) then
-                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 10
-            else
-                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 5
-            end
-        end
-
-        if app.dialogs.save ~= nil then app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter) end
-
-        if app.dialogs.saveProgressCounter >= 100 and rf2ethos.msp.mspQueue:isProcessed() then
-            app.triggers.closeSave = false
-            app.dialogs.saveProgressCounter = 0
-            app.dialogs.saveDisplay = false
-            app.dialogs.saveWatchDog = nil
-            if app.dialogs.save ~= nil then
-                app.ui.progessDisplaySaveClose()
-
-                if rf2ethos.config.reloadOnSave == true then app.triggers.triggerReloadNoPrompt = true end
-
-            end
-        end
-    end
-
-    -- close progress loader when in sim.  
-    -- the simulator cannot save - so we fake the whole process
-    if app.triggers.closeSaveFake == true then
-        app.triggers.isSaving = false
-
-        app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 10
-
-        if app.dialogs.save ~= nil then app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter) end
-
-        if app.dialogs.saveProgressCounter >= 100 then
-            app.triggers.closeSaveFake = false
-            app.dialogs.saveProgressCounter = 0
-            app.dialogs.saveDisplay = false
-            app.dialogs.saveWatchDog = nil
-            app.ui.progessDisplaySaveClose()
-        end
-    end
-
-    -- profile switching - trigger a reload if needs be when the switch is toggled
-
-    if app.Page ~= nil and app.Page.refreshswitch == true and app.uiState == app.uiStatus.pages then
-
-        -- capture profile switching and of rates pages
-        if app.lastPage == "rates.lua" or app.lastPage == "rates_advanced.lua" or app.lastPage == "select_profile.lua" then
-            if rf2ethos.config.rateswitchParam ~= nil then
-                if rf2ethos.config.rateswitchParam:value() ~= app.triggers.rateswitchLast then
-
-                    if app.ui.progressDisplay() then
-                        -- switch has been toggled mid flow - this is bad.. clean upd
-                        form.clear()
-                        app.triggers.triggerReloadNoPrompt = true
-
-                    else
-                        -- trigger RELOAD
-                        app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
-                        app.triggers.triggerReloadNoPrompt = true
-                        return true
-                    end
-
+        -- close progress loader.  this essentially just accelerates 
+        -- the close of the progress bar once the data is loaded.
+        -- so if not yet at 100%.. it says.. move there quickly
+        if app.triggers.closeProgressLoader == true then
+                if app.dialogs.progressCounter <= 100 then
+                        app.dialogs.progressCounter = app.dialogs.progressCounter + 10
+                        if app.dialogs.progress ~= nil then app.ui.progessDisplayValue(app.dialogs.progressCounter) end
                 end
-            end
-            -- capture switching of all profile pages - excluding rates	
-        else
-            if rf2ethos.config.profileswitchParam ~= nil then
 
-                if rf2ethos.config.profileswitchParam:value() ~= app.triggers.profileswitchLast then
-
-                    if app.ui.progressDisplay() then
-                        -- switch has been toggled mid flow - this is bad.. clean upd
-                        form.clear()
-                        app.triggers.triggerReloadNoPrompt = true
-                    else
-                        -- trigger RELOAD
-                        app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
-                        app.triggers.triggerReloadNoPrompt = true
-                        return true
-
-                    end
-
+                if app.dialogs.progressCounter >= 101 then
+                        app.dialogs.progressWatchDog = nil
+                        app.dialogs.progressDisplay = false
+                        if app.dialogs.progress ~= nil then app.ui.progessDisplayClose() end
+                        app.dialogs.progressCounter = 0
+                        app.triggers.closeProgressLoader = false
                 end
-            end
-        end
-    end
-
-    -- if we do not have a telemetry link then we need to show a connecting dialog box.
-    -- this runs at all times except when we are displaying the esc search box.  we then
-    -- supress this one and display a different one as timeouts and process is different
-    if app.triggers.telemetryState ~= 1 and app.triggers.disableRssiTimeout == false then
-
-        if app.dialogs.progress then app.ui.progessDisplayClose() end
-        if app.dialogs.save then app.ui.progessDisplaySaveClose() end
-
-        if app.dialogs.nolinkDisplay == false then app.ui.progessNolinkDisplay() end
-    end
-
-    -- this is directly related to the loop above.  if the progress box is visible we then wait for a telemetry link
-    -- to be established - and associated msp version checks to finish. all the while incremeting the loader
-    -- until we time out.
-    -- if (app.dialogs.nolinkDisplay == true or app.triggers.telemetryState == 1) and app.dialogs.progressDisplayEsc ~= true then
-    if (app.dialogs.nolinkDisplay == true) and app.triggers.disableRssiTimeout == false then
-        if app.triggers.telemetryState == 1 then
-            app.dialogs.nolinkValueCounter = app.dialogs.nolinkValueCounter + 20
-        else
-            app.dialogs.nolinkValueCounter = app.dialogs.nolinkValueCounter + 10
         end
 
-        if app.dialogs.nolinkValueCounter >= 101 then
-            if rf2ethos.config.apiVersion == nil and app.getRSSI() ~= 0 then
-                app.ui.progessNolinkDisplayClose()
-                app.dialogs.nolinkValueCounter = 0
-                app.dialogs.nolinkDisplay = false
-            else
-                app.ui.progessNolinkDisplayClose()
-                app.dialogs.nolinkValueCounter = 0
-                app.dialogs.nolinkDisplay = false
-
-                if system:getVersion().simulation ~= true then
-                    if app.triggers.telemetryState ~= 1 then
-                        app.audio.playTimeout = true
-                        app.triggers.exitAPP = true
-                    else
-                        if app.triggers.badMspVersion ~= true then app.audio.playConnected = true end
-                    end
-                else
-                    if app.triggers.badMspVersion ~= true then app.audio.playConnected = true end
-                end
- 
-            end
-        end
-        app.ui.progessDisplayNoLinkValue(app.dialogs.nolinkValueCounter)
-    end
-
-    -- a watchdog to enable the close button when saving data if we exheed the save timout
-    if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then app.protocol.saveTimeout = rf2ethos.config.watchdogParam end
-    if app.dialogs.saveDisplay == true then
-        if app.dialogs.saveWatchDog ~= nil then
-            if (os.clock() - app.dialogs.saveWatchDog) > (tonumber(app.protocol.saveTimeout)) or (app.dialogs.saveProgressCounter > 100 and rf2ethos.msp.mspQueue:isProcessed()) then
-                app.audio.playTimeout = true
-                app.ui.progessDisplaySaveMessage("Error.. we timed out")
-                app.ui.progessDisplaySaveCloseAllowed(true)
-                app.dialogs.save:value(100)
-                app.dialogs.saveProgressCounter = 0
-                app.dialogs.saveDisplay = false
+        -- close save loader.  this essentially just accelerates 
+        -- the close of the progress bar once the data is loaded.
+        -- so if not yet at 100%.. it says.. move there quickly
+        if app.triggers.closeSave == true then
                 app.triggers.isSaving = false
 
-                app.Page = app.PageTmp
-                app.PageTmp = {}
-            end
-        end
-    end
+                if rf2ethos.msp.mspQueue:isProcessed() then
+                        if (app.dialogs.saveProgressCounter > 40 and app.dialogs.saveProgressCounter <= 80) then
+                                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 10
+                        else
+                                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 5
+                        end
+                end
 
-    -- a watchdog to enable the close button on a progress box dialog when loading data from the fbl
-    if app.dialogs.progressDisplay == true and app.dialogs.progressWatchDog ~= nil then
+                if app.dialogs.save ~= nil then app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter) end
 
-        -- if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 
-        --	then app.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
-        -- end
+                if app.dialogs.saveProgressCounter >= 100 and rf2ethos.msp.mspQueue:isProcessed() then
+                        app.triggers.closeSave = false
+                        app.dialogs.saveProgressCounter = 0
+                        app.dialogs.saveDisplay = false
+                        app.dialogs.saveWatchDog = nil
+                        if app.dialogs.save ~= nil then
+                                app.ui.progessDisplaySaveClose()
 
-        app.dialogs.progressCounter = app.dialogs.progressCounter + 2
-        app.ui.progessDisplayValue(app.dialogs.progressCounter)
-        
-        
-        if (os.clock() - app.dialogs.progressWatchDog) > (tonumber(rf2ethos.msp.protocol.pageReqTimeout)) then
+                                if rf2ethos.config.reloadOnSave == true then app.triggers.triggerReloadNoPrompt = true end
 
-            app.audio.playTimeout = true
-
-            if app.dialogs.progress ~= nil then
-                app.ui.progessDisplayMessage("Error.. we timed out")
-                app.ui.progessDisplayCloseAllowed(true)
-            end
-
-            -- switch back to original page values
-            app.Page = app.PageTmp
-            app.PageTmp = {}
-            app.dialogs.progressCounter = 0
-            app.dialogs.progressDisplay = false
+                        end
+                end
         end
 
-    end
+        -- close progress loader when in sim.  
+        -- the simulator cannot save - so we fake the whole process
+        if app.triggers.closeSaveFake == true then
+                app.triggers.isSaving = false
 
-    -- a save was triggered - popup a box asking to save the data
-    if app.triggers.triggerSave == true then
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
+                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 10
 
-                    app.audio.playSaving = true
+                if app.dialogs.save ~= nil then app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter) end
 
-                    -- we have to fake a save dialog in sim as its not actually possible 
-                    -- to save in sim!
-                    if system:getVersion().simulation ~= true then
-                        app.PageTmp = {}
-                        app.PageTmp = app.Page
-                        app.triggers.isSaving = true
-                        app.triggers.triggerSave = false
-                        saveSettings()
-                    else
-                        -- when in sim we fake a save as not possible to really do
-                        -- this involves tricking the progress dialog into thinking
-                        app.triggers.isSavingFake = true
-                        app.triggers.triggerSave = false
-                    end
-                    return true
+                if app.dialogs.saveProgressCounter >= 100 then
+                        app.triggers.closeSaveFake = false
+                        app.dialogs.saveProgressCounter = 0
+                        app.dialogs.saveDisplay = false
+                        app.dialogs.saveWatchDog = nil
+                        app.ui.progessDisplaySaveClose()
                 end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    app.triggers.triggerSave = false
-                    return true
-                end
-            }
-        }
-        local theTitle = "Save settings"
-        local theMsg = "Save current page to flight controller"
-
-        form.openDialog({
-            width = nil,
-            title = theTitle,
-            message = theMsg,
-            buttons = buttons,
-            wakeup = function()
-            end,
-            paint = function()
-            end,
-            options = TEXT_LEFT
-        })
-
-        app.triggers.triggerSave = false
-    end
-
-    -- a reload that is pretty much instant with no prompt to ask them
-    if app.triggers.triggerReloadNoPrompt == true then
-        app.triggers.triggerReloadNoPrompt = false
-        app.triggers.reload = true
-    end
-
-    -- a reload was triggered - popup a box asking for the reload to be done
-    if app.triggers.triggerReload == true then
-        local buttons = {
-            {
-                label = "        OK        ",
-                action = function()
-                    -- trigger RELOAD
-                    app.triggers.reload = true
-                    return true
-                end
-            }, {
-                label = "CANCEL",
-                action = function()
-                    return true
-                end
-            }
-        }
-        form.openDialog({
-            width = nil,
-            title = "Reload",
-            message = "Reload data from flight controller",
-            buttons = buttons,
-            wakeup = function()
-            end,
-            paint = function()
-            end,
-            options = TEXT_LEFT
-        })
-
-        app.triggers.triggerReload = false
-    end
-
-    -- show an error if msp version is bad
-    if app.uiState == app.uiStatus.mainMenu and app.dialogs.nolinkDisplay == false then
-
-        local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
-        if not rf2ethos.utils.stringInArray(rf2ethos.config.supportedMspApiVersion, apiVersionAsString) then
-            app.triggers.badMspVersion = true
-        else
-            app.triggers.badMspVersion = false
         end
 
-        if app.triggers.badMspVersion == true then
-            local buttons = {
-                {
-                    label = "   OK   ",
-                    action = function()
-                        app.triggers.exitAPP = true
-                        return true
-                    end
-                }
-            }
-            
+        -- profile switching - trigger a reload if needs be when the switch is toggled
 
-            if app.triggers.badMspVersionDisplay == false then
-                local message
-                if rf2ethos.backgroundMsp ~= true then
-                   message = "Please enable the backround msp task."
-                elseif app.getRSSI() == 0 then
-                    message = "Unable to establish a link to the flight controller"
-                elseif rf2ethos.config.apiVersion ~= nil then
-                    message = "This version of the Lua scripts \ncan't be used with the selected model (" .. rf2ethos.config.apiVersion .. ")."
+        if app.Page ~= nil and app.Page.refreshswitch == true and app.uiState == app.uiStatus.pages then
+
+                -- capture profile switching and of rates pages
+                if app.lastPage == "rates.lua" or app.lastPage == "rates_advanced.lua" or app.lastPage == "select_profile.lua" then
+                        if rf2ethos.config.rateswitchParam ~= nil then
+                                if rf2ethos.config.rateswitchParam:value() ~= app.triggers.rateswitchLast then
+
+                                        if app.ui.progressDisplay() then
+                                                -- switch has been toggled mid flow - this is bad.. clean upd
+                                                form.clear()
+                                                app.triggers.triggerReloadNoPrompt = true
+
+                                        else
+                                                -- trigger RELOAD
+                                                app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
+                                                app.triggers.triggerReloadNoPrompt = true
+                                                return true
+                                        end
+
+                                end
+                        end
+                        -- capture switching of all profile pages - excluding rates	
                 else
-                    message = "Unable to determine msp version in use."
+                        if rf2ethos.config.profileswitchParam ~= nil then
+
+                                if rf2ethos.config.profileswitchParam:value() ~= app.triggers.profileswitchLast then
+
+                                        if app.ui.progressDisplay() then
+                                                -- switch has been toggled mid flow - this is bad.. clean upd
+                                                form.clear()
+                                                app.triggers.triggerReloadNoPrompt = true
+                                        else
+                                                -- trigger RELOAD
+                                                app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
+                                                app.triggers.triggerReloadNoPrompt = true
+                                                return true
+
+                                        end
+
+                                end
+                        end
+                end
+        end
+
+        -- if we do not have a telemetry link then we need to show a connecting dialog box.
+        -- this runs at all times except when we are displaying the esc search box.  we then
+        -- supress this one and display a different one as timeouts and process is different
+        if app.triggers.telemetryState ~= 1 and app.triggers.disableRssiTimeout == false then
+
+                if app.dialogs.progress then app.ui.progessDisplayClose() end
+                if app.dialogs.save then app.ui.progessDisplaySaveClose() end
+
+                if app.dialogs.nolinkDisplay == false then app.ui.progessNolinkDisplay() end
+        end
+
+        -- this is directly related to the loop above.  if the progress box is visible we then wait for a telemetry link
+        -- to be established - and associated msp version checks to finish. all the while incremeting the loader
+        -- until we time out.
+        -- if (app.dialogs.nolinkDisplay == true or app.triggers.telemetryState == 1) and app.dialogs.progressDisplayEsc ~= true then
+        if (app.dialogs.nolinkDisplay == true) and app.triggers.disableRssiTimeout == false then
+                if app.triggers.telemetryState == 1 then
+                        app.dialogs.nolinkValueCounter = app.dialogs.nolinkValueCounter + 20
+                else
+                        app.dialogs.nolinkValueCounter = app.dialogs.nolinkValueCounter + 10
                 end
 
-                app.triggers.badMspVersionDisplay = true
-                form.openDialog({
-                    width = nil,
-                    title = "Error",
-                    message = message,
-                    buttons = buttons,
-                    wakeup = function()
-                    end,
-                    paint = function()
-                    end,
-                    options = TEXT_LEFT
-                })
-            end
+                if app.dialogs.nolinkValueCounter >= 101 then
+                        if rf2ethos.config.apiVersion == nil and app.getRSSI() ~= 0 then
+                                app.ui.progessNolinkDisplayClose()
+                                app.dialogs.nolinkValueCounter = 0
+                                app.dialogs.nolinkDisplay = false
+                        else
+                                app.ui.progessNolinkDisplayClose()
+                                app.dialogs.nolinkValueCounter = 0
+                                app.dialogs.nolinkDisplay = false
 
-            return
+                                if system:getVersion().simulation ~= true then
+                                        if app.triggers.telemetryState ~= 1 then
+                                                app.audio.playTimeout = true
+                                                app.triggers.exitAPP = true
+                                        else
+                                                if app.triggers.badMspVersion ~= true then app.audio.playConnected = true end
+                                        end
+                                else
+                                        if app.triggers.badMspVersion ~= true then app.audio.playConnected = true end
+                                end
+ 
+                        end
+                end
+                app.ui.progessDisplayNoLinkValue(app.dialogs.nolinkValueCounter)
         end
-    end
 
-    -- a save was triggered - lets display a progress box
-    if app.triggers.isSaving then
-        app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 5
-        if app.pageState >= app.pageStatus.saving then
-            if app.dialogs.saveDisplay == false then
-                app.triggers.saveFailed = false
-                app.dialogs.saveProgressCounter = 0
-                app.ui.progessDisplaySave()
-                rf2ethos.msp.mspQueue.retryCount = 0
-            end
-            if app.pageState == app.pageStatus.saving then
-                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Saving data...")
-            elseif app.pageState == app.pageStatus.eepromWrite then
-                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Saving data...")
-            elseif app.pageState == app.pageStatus.rebooting then
-                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Rebooting...")
-            end
+        -- a watchdog to enable the close button when saving data if we exheed the save timout
+        if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then app.protocol.saveTimeout = rf2ethos.config.watchdogParam end
+        if app.dialogs.saveDisplay == true then
+                if app.dialogs.saveWatchDog ~= nil then
+                        if (os.clock() - app.dialogs.saveWatchDog) > (tonumber(app.protocol.saveTimeout)) or (app.dialogs.saveProgressCounter > 100 and rf2ethos.msp.mspQueue:isProcessed()) then
+                                app.audio.playTimeout = true
+                                app.ui.progessDisplaySaveMessage("Error.. we timed out")
+                                app.ui.progessDisplaySaveCloseAllowed(true)
+                                app.dialogs.save:value(100)
+                                app.dialogs.saveProgressCounter = 0
+                                app.dialogs.saveDisplay = false
+                                app.triggers.isSaving = false
+
+                                app.Page = app.PageTmp
+                                app.PageTmp = {}
+                        end
+                end
+        end
+
+        -- a watchdog to enable the close button on a progress box dialog when loading data from the fbl
+        if app.dialogs.progressDisplay == true and app.dialogs.progressWatchDog ~= nil then
+
+                -- if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 
+                --	then app.protocol.pageReqTimeout = rf2ethos.config.watchdogParam 
+                -- end
+
+                app.dialogs.progressCounter = app.dialogs.progressCounter + 2
+                app.ui.progessDisplayValue(app.dialogs.progressCounter)
+                
+                
+                if (os.clock() - app.dialogs.progressWatchDog) > (tonumber(rf2ethos.msp.protocol.pageReqTimeout)) then
+
+                        app.audio.playTimeout = true
+
+                        if app.dialogs.progress ~= nil then
+                                app.ui.progessDisplayMessage("Error.. we timed out")
+                                app.ui.progessDisplayCloseAllowed(true)
+                        end
+
+                        -- switch back to original page values
+                        app.Page = app.PageTmp
+                        app.PageTmp = {}
+                        app.dialogs.progressCounter = 0
+                        app.dialogs.progressDisplay = false
+                end
+
+        end
+
+        -- a save was triggered - popup a box asking to save the data
+        if app.triggers.triggerSave == true then
+                local buttons = {
+                        {
+                                label = "                OK                ",
+                                action = function()
+
+                                        app.audio.playSaving = true
+
+                                        -- we have to fake a save dialog in sim as its not actually possible 
+                                        -- to save in sim!
+                                        if system:getVersion().simulation ~= true then
+                                                app.PageTmp = {}
+                                                app.PageTmp = app.Page
+                                                app.triggers.isSaving = true
+                                                app.triggers.triggerSave = false
+                                                saveSettings()
+                                        else
+                                                -- when in sim we fake a save as not possible to really do
+                                                -- this involves tricking the progress dialog into thinking
+                                                app.triggers.isSavingFake = true
+                                                app.triggers.triggerSave = false
+                                        end
+                                        return true
+                                end
+                        }, {
+                                label = "CANCEL",
+                                action = function()
+                                        app.triggers.triggerSave = false
+                                        return true
+                                end
+                        }
+                }
+                local theTitle = "Save settings"
+                local theMsg = "Save current page to flight controller"
+
+                form.openDialog({
+                        width = nil,
+                        title = theTitle,
+                        message = theMsg,
+                        buttons = buttons,
+                        wakeup = function()
+                        end,
+                        paint = function()
+                        end,
+                        options = TEXT_LEFT
+                })
+
+                app.triggers.triggerSave = false
+        end
+
+        -- a reload that is pretty much instant with no prompt to ask them
+        if app.triggers.triggerReloadNoPrompt == true then
+                app.triggers.triggerReloadNoPrompt = false
+                app.triggers.reload = true
+        end
+
+        -- a reload was triggered - popup a box asking for the reload to be done
+        if app.triggers.triggerReload == true then
+                local buttons = {
+                        {
+                                label = "                OK                ",
+                                action = function()
+                                        -- trigger RELOAD
+                                        app.triggers.reload = true
+                                        return true
+                                end
+                        }, {
+                                label = "CANCEL",
+                                action = function()
+                                        return true
+                                end
+                        }
+                }
+                form.openDialog({
+                        width = nil,
+                        title = "Reload",
+                        message = "Reload data from flight controller",
+                        buttons = buttons,
+                        wakeup = function()
+                        end,
+                        paint = function()
+                        end,
+                        options = TEXT_LEFT
+                })
+
+                app.triggers.triggerReload = false
+        end
+
+        -- show an error if msp version is bad
+        if app.uiState == app.uiStatus.mainMenu and app.dialogs.nolinkDisplay == false then
+
+                local apiVersionAsString = tostring(rf2ethos.config.apiVersion)
+                if not rf2ethos.utils.stringInArray(rf2ethos.config.supportedMspApiVersion, apiVersionAsString) then
+                        app.triggers.badMspVersion = true
+                else
+                        app.triggers.badMspVersion = false
+                end
+
+                if app.triggers.badMspVersion == true then
+                        local buttons = {
+                                {
+                                        label = "   OK   ",
+                                        action = function()
+                                                app.triggers.exitAPP = true
+                                                return true
+                                        end
+                                }
+                        }
+                        
+
+                        if app.triggers.badMspVersionDisplay == false then
+                                local message
+                                if rf2ethos.backgroundMsp ~= true then
+                                   message = "Please enable the backround msp task."
+                                elseif app.getRSSI() == 0 then
+                                        message = "Unable to establish a link to the flight controller"
+                                elseif rf2ethos.config.apiVersion ~= nil then
+                                        message = "This version of the Lua scripts \ncan't be used with the selected model (" .. rf2ethos.config.apiVersion .. ")."
+                                else
+                                        message = "Unable to determine msp version in use."
+                                end
+
+                                app.triggers.badMspVersionDisplay = true
+                                form.openDialog({
+                                        width = nil,
+                                        title = "Error",
+                                        message = message,
+                                        buttons = buttons,
+                                        wakeup = function()
+                                        end,
+                                        paint = function()
+                                        end,
+                                        options = TEXT_LEFT
+                                })
+                        end
+
+                        return
+                end
+        end
+
+        -- a save was triggered - lets display a progress box
+        if app.triggers.isSaving then
+                app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 5
+                if app.pageState >= app.pageStatus.saving then
+                        if app.dialogs.saveDisplay == false then
+                                app.triggers.saveFailed = false
+                                app.dialogs.saveProgressCounter = 0
+                                app.ui.progessDisplaySave()
+                                rf2ethos.msp.mspQueue.retryCount = 0
+                        end
+                        if app.pageState == app.pageStatus.saving then
+                                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Saving data...")
+                        elseif app.pageState == app.pageStatus.eepromWrite then
+                                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Saving data...")
+                        elseif app.pageState == app.pageStatus.rebooting then
+                                app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Rebooting...")
+                        end
+
+                else
+                        app.triggers.isSaving = false
+                        app.dialogs.saveDisplay = false
+                        app.dialogs.saveWatchDog = nil
+                end
+        elseif app.triggers.isSavingFake == true then
+
+                if app.dialogs.saveDisplay == false then
+                        app.triggers.saveFailed = false
+                        app.dialogs.saveProgressCounter = 0
+                        app.ui.progessDisplaySave()
+                        rf2ethos.msp.mspQueue.retryCount = 0
+                        app.triggers.closeSaveFake = true
+                        app.triggers.isSavingFake = false
+                end
+        end
+
+        -- check we have telemetry
+        app.updateTelemetryState()
+
+        -- if we are on the home page - then ensure pages are invalidated
+        if app.uiState == app.uiStatus.mainMenu then
+                invalidatePages()
+        else
+                -- detect page data loaded and ready to move onto rendering the page
+                if (app.triggers.isReady == true and rf2ethos.msp.mspQueue:isProcessed() and (app.Page and app.Page.values)) then
+                        app.triggers.isReady = false
+
+                        app.triggers.closeProgressLoader = true
+
+                end
+        end
+
+        -- if we are viewing a page with form data then we need to run some stuff USED
+        -- by the msp processing
+        if app.uiState == app.uiStatus.pages then
+
+                -- rebind fields if needed
+                if app.pageState == app.pageStatus.saving then if (app.saveTS + app.protocol.saveTimeout) < os.clock() then app.dataBindFields() end end
+
+                -- intercept and populate app.Page if its empty
+                -- this simply catches scenarious where we save the page AND
+                -- other parts of the script fail for the few ms where the app.Page
+                -- var is not populated
+                if not app.Page and app.PageTmp then app.Page = app.PageTmp end
+
+                -- we have a page waiting to be retrieved - trigger a request page
+                if app.Page ~= nil then if not (app.Page.values or app.triggers.isReady) and app.pageState == app.pageStatus.display then requestPage() end end
+
+        end
+
+        -- capture a reload request and load respective Page
+        -- this needs to be done a little better as there is no need FOR
+        -- all the menu case checks - we should just be able to do as a task
+        -- when viewing the page
+        if app.triggers.reload == true then
+                app.ui.progessDisplay()
+                app.triggers.reload = false
+
+                --app.ui.openPage(app.lastIdx, app.lastTitle, app.lastScript)
+                app.ui.openPageRefresh(app.lastIdx, app.lastTitle, app.lastScript)
+                
+
+        end
+
+        -- check if rate or profile switches have been toggled
+        app.profileSwitchCheck()
+        app.rateSwitchCheck()
+
+        -- play audio
+        -- alerts 
+        if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
+
+                if app.audio.playEraseFlash == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/eraseflash.wav")
+                        app.audio.playEraseFlash = false
+                end
+
+                if app.audio.playConnected == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connected.wav")
+                        app.audio.playConnected = false
+                end
+
+                if app.audio.playConnecting == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connecting.wav")
+                        app.audio.playConnecting = false
+                end
+
+                if app.audio.playDemo == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/demo.wav")
+                        app.audio.playDemo = false
+                end
+
+                if app.audio.playTimeout == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/timeout.wav")
+                        app.audio.playTimeout = false
+                end
+
+                if app.audio.playEscPowerCycle == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/powercycleesc.wav")
+                        app.audio.playEscPowerCycle = false
+                end
+
+                if app.audio.playServoOverideEnable == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soverideen.wav")
+                        app.audio.playServoOverideEnable = false
+                end
+
+                if app.audio.playServoOverideDisable == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soveridedis.wav")
+                        app.audio.playServoOverideDisable = false
+                end
+
+                if app.audio.playMixerOverideEnable == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moverideen.wav")
+                        app.audio.playMixerOverideEnable = false
+                end
+
+                if app.audio.playMixerOverideDisable == true then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moveridedis.wav")
+                        app.audio.playMixerOverideDisable = false
+                end
+
+                if app.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/saving.wav")
+                        app.audio.playSaving = false
+                end
+
+                if app.audio.playLoading == true and rf2ethos.config.audioParam == 0 then
+                        system.playFile(rf2ethos.config.toolDir .. "sounds/ui/loading.wav")
+                        app.audio.playLoading = false
+                end
 
         else
-            app.triggers.isSaving = false
-            app.dialogs.saveDisplay = false
-            app.dialogs.saveWatchDog = nil
+                app.audio.playLoading = false
+                app.audio.playSaving = false
+                app.audio.playTimeout = false
+                app.audio.playDemo = false
+                app.audio.playConnecting = false
+                app.audio.playConnected = false
+                app.audio.playEscPowerCycle = false
+                app.audio.playServoOverideDisable = false
+                app.audio.playServoOverideEnable = false
         end
-    elseif app.triggers.isSavingFake == true then
-
-        if app.dialogs.saveDisplay == false then
-            app.triggers.saveFailed = false
-            app.dialogs.saveProgressCounter = 0
-            app.ui.progessDisplaySave()
-            rf2ethos.msp.mspQueue.retryCount = 0
-            app.triggers.closeSaveFake = true
-            app.triggers.isSavingFake = false
-        end
-    end
-
-    -- check we have telemetry
-    app.updateTelemetryState()
-
-    -- if we are on the home page - then ensure pages are invalidated
-    if app.uiState == app.uiStatus.mainMenu then
-        invalidatePages()
-    else
-        -- detect page data loaded and ready to move onto rendering the page
-        if (app.triggers.isReady == true and rf2ethos.msp.mspQueue:isProcessed() and (app.Page and app.Page.values)) then
-            app.triggers.isReady = false
-
-            app.triggers.closeProgressLoader = true
-
-        end
-    end
-
-    -- if we are viewing a page with form data then we need to run some stuff USED
-    -- by the msp processing
-    if app.uiState == app.uiStatus.pages then
-
-        -- rebind fields if needed
-        if app.pageState == app.pageStatus.saving then if (app.saveTS + app.protocol.saveTimeout) < os.clock() then app.dataBindFields() end end
-
-        -- intercept and populate app.Page if its empty
-        -- this simply catches scenarious where we save the page AND
-        -- other parts of the script fail for the few ms where the app.Page
-        -- var is not populated
-        if not app.Page and app.PageTmp then app.Page = app.PageTmp end
-
-        -- we have a page waiting to be retrieved - trigger a request page
-        if app.Page ~= nil then if not (app.Page.values or app.triggers.isReady) and app.pageState == app.pageStatus.display then requestPage() end end
-
-    end
-
-    -- capture a reload request and load respective Page
-    -- this needs to be done a little better as there is no need FOR
-    -- all the menu case checks - we should just be able to do as a task
-    -- when viewing the page
-    if app.triggers.reload == true then
-        app.ui.progessDisplay()
-        app.triggers.reload = false
-
-        app.ui.openPage(app.lastIdx, app.lastTitle, app.lastScript)
-
-    end
-
-    -- check if rate or profile switches have been toggled
-    app.profileSwitchCheck()
-    app.rateSwitchCheck()
-
-    -- play audio
-    -- alerts 
-    if rf2ethos.config.audioParam == 0 or rf2ethos.config.audioParam == 1 then
-
-        if app.audio.playEraseFlash == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/eraseflash.wav")
-            app.audio.playEraseFlash = false
-        end
-
-        if app.audio.playConnected == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connected.wav")
-            app.audio.playConnected = false
-        end
-
-        if app.audio.playConnecting == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/connecting.wav")
-            app.audio.playConnecting = false
-        end
-
-        if app.audio.playDemo == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/demo.wav")
-            app.audio.playDemo = false
-        end
-
-        if app.audio.playTimeout == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/timeout.wav")
-            app.audio.playTimeout = false
-        end
-
-        if app.audio.playEscPowerCycle == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/powercycleesc.wav")
-            app.audio.playEscPowerCycle = false
-        end
-
-        if app.audio.playServoOverideEnable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soverideen.wav")
-            app.audio.playServoOverideEnable = false
-        end
-
-        if app.audio.playServoOverideDisable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/soveridedis.wav")
-            app.audio.playServoOverideDisable = false
-        end
-
-        if app.audio.playMixerOverideEnable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moverideen.wav")
-            app.audio.playMixerOverideEnable = false
-        end
-
-        if app.audio.playMixerOverideDisable == true then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/moveridedis.wav")
-            app.audio.playMixerOverideDisable = false
-        end
-
-        if app.audio.playSaving == true and rf2ethos.config.audioParam == 0 then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/saving.wav")
-            app.audio.playSaving = false
-        end
-
-        if app.audio.playLoading == true and rf2ethos.config.audioParam == 0 then
-            system.playFile(rf2ethos.config.toolDir .. "sounds/ui/loading.wav")
-            app.audio.playLoading = false
-        end
-
-    else
-        app.audio.playLoading = false
-        app.audio.playSaving = false
-        app.audio.playTimeout = false
-        app.audio.playDemo = false
-        app.audio.playConnecting = false
-        app.audio.playConnected = false
-        app.audio.playEscPowerCycle = false
-        app.audio.playServoOverideDisable = false
-        app.audio.playServoOverideEnable = false
-    end
 
 end
 
@@ -983,160 +988,160 @@ end
 
 function app.create()
 
-    app.ini = assert(loadfile(rf2ethos.config.toolDir .. "lib/lip.lua"))()    
-    app.preferences = app.ini.load(rf2ethos.config.toolDir .. "/preferences.ini");   
+        app.ini = assert(loadfile(rf2ethos.config.toolDir .. "lib/lip.lua"))()        
+        app.preferences = app.ini.load(rf2ethos.config.toolDir .. "/preferences.ini");   
 
-    -- load msp timeout
-    rf2ethos.config.watchdogParam = app.preferences.advanced.watchdog
-    if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
-        rf2ethos.config.watchdogParam = math.floor(app.protocol.pageReqTimeout + (app.protocol.pageReqTimeout * 0.5))
-    end
-    
-
-
-    --config.apiVersion = nil
-    config.environment = system.getVersion()
-    config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
-    
-
-    rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
-    app.radio = assert(loadfile(rf2ethos.config.toolDir .. "radios.lua"))().msp
-
-    app.fieldHelpTxt = assert(loadfile(rf2ethos.config.toolDir .. "help/fields.lua"))()
-
-    app.uiState = app.uiStatus.init
-
-    rf2ethos.config.audioParam = app.preferences.interface.audio
-
-    if system:getVersion().simulation == false then
-        local simpref = app.preferences.advanced.demoSwitch
-        local s = rf2ethos.utils.explode(simpref, ",")
-        local simParam = system.getSource({category = s[1], member = s[2]})
-        if tonumber(simParam:value()) == 100 then
-            config.simulateOnTransmitter = true
-            app.runningInSimulator = true
-            print("RF2ETHOS: Running in Demo Mode")
-            app.audio.playDemo = true
-        else
-            config.simulateOnTransmitter = false
-            app.runningInSimulator = false
-            app.audio.playDemo = false
+        -- load msp timeout
+        rf2ethos.config.watchdogParam = app.preferences.advanced.watchdog
+        if rf2ethos.config.watchdogParam == nil or rf2ethos.config.watchdogParam == "" then
+                rf2ethos.config.watchdogParam = math.floor(app.protocol.pageReqTimeout + (app.protocol.pageReqTimeout * 0.5))
         end
-    end
+        
 
-    app.ui.openMainMenu()
 
-    -- check the current version of ethos to ensure that it is valid.
-    if rf2ethos.config.ethosRunningVersion < config.ethosVersion then
-        if app.dialogs.badversionDisplay == false then
-            app.dialogs.badversionDisplay = true
+        --config.apiVersion = nil
+        config.environment = system.getVersion()
+        config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
+        
 
-            local buttons = {
-                {
-                    label = "EXIT",
-                    action = function()
-                        app.triggers.exitAPP = true
-                        return true
-                    end
-                }
-            }
+        rf2ethos.config.lcdWidth, rf2ethos.config.lcdHeight = rf2ethos.utils.getWindowSize()
+        app.radio = assert(loadfile(rf2ethos.config.toolDir .. "radios.lua"))().msp
 
-            if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
-                form.openDialog("Warning", config.ethosVersionString, buttons, 1)
-            else
-                form.openDialog({
-                    width = rf2ethos.config.lcdWidth,
-                    title = "Warning",
-                    message = config.ethosVersionString,
-                    buttons = buttons,
-                    wakeup = function()
-                    end,
-                    paint = function()
-                    end,
-                    options = TEXT_LEFT
-                })
-            end
+        app.fieldHelpTxt = assert(loadfile(rf2ethos.config.toolDir .. "help/fields.lua"))()
 
+        app.uiState = app.uiStatus.init
+
+        rf2ethos.config.audioParam = app.preferences.interface.audio
+
+        if system:getVersion().simulation == false then
+                local simpref = app.preferences.advanced.demoSwitch
+                local s = rf2ethos.utils.explode(simpref, ",")
+                local simParam = system.getSource({category = s[1], member = s[2]})
+                if tonumber(simParam:value()) == 100 then
+                        config.simulateOnTransmitter = true
+                        app.runningInSimulator = true
+                        print("RF2ETHOS: Running in Demo Mode")
+                        app.audio.playDemo = true
+                else
+                        config.simulateOnTransmitter = false
+                        app.runningInSimulator = false
+                        app.audio.playDemo = false
+                end
         end
-    end
+
+        app.ui.openMainMenu()
+
+        -- check the current version of ethos to ensure that it is valid.
+        if rf2ethos.config.ethosRunningVersion < config.ethosVersion then
+                if app.dialogs.badversionDisplay == false then
+                        app.dialogs.badversionDisplay = true
+
+                        local buttons = {
+                                {
+                                        label = "EXIT",
+                                        action = function()
+                                                app.triggers.exitAPP = true
+                                                return true
+                                        end
+                                }
+                        }
+
+                        if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
+                                form.openDialog("Warning", config.ethosVersionString, buttons, 1)
+                        else
+                                form.openDialog({
+                                        width = rf2ethos.config.lcdWidth,
+                                        title = "Warning",
+                                        message = config.ethosVersionString,
+                                        buttons = buttons,
+                                        wakeup = function()
+                                        end,
+                                        paint = function()
+                                        end,
+                                        options = TEXT_LEFT
+                                })
+                        end
+
+                end
+        end
 
 end
 
 -- EVENT:  Called for button presses, scroll events, touch events, etc.
 function app.event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+        -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-    if value == EVT_VIRTUAL_PREV_LONG then
-        print("Forcing exit")
-        invalidatePages()
-        system.exit()
-        return 0
-    end
-
-    if app.Page ~= nil and (app.uiState == app.uiStatus.pages or app.uiState == app.uiStatus.mainMenu) then
-        if app.Page.event then
-            -- run the pages wakeup function if it exists
-            return app.Page.event(widget, category, value, x, y)
-        end
-    end
-
-    if app.uiState == app.uiStatus.pages then
-
-        if category == 5 or value == 35 then
-            if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
-            if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
-            if app.Page.onNavMenu then app.Page.onNavMenu(app.Page) end
-            app.ui.openMainMenu()
-            return true
-        end
-        if value == 35 then
-            if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
-            if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
-            if app.Page.onNavMenu then app.Page.onNavMenu(app.Page) end
-            app.ui.openMainMenu()
-            return true
-        end
-        if value == KEY_ENTER_LONG then
-            if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
-            if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
-            app.triggers.triggerSave = true
-            system.killEvents(KEY_ENTER_BREAK)
-            return true
+        if value == EVT_VIRTUAL_PREV_LONG then
+                print("Forcing exit")
+                invalidatePages()
+                system.exit()
+                return 0
         end
 
-    end
-
-    if app.uiState == app.uiStatus.MainMenu then
-        if value == KEY_ENTER_LONG then
-            if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
-            if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
-            system.killEvents(KEY_ENTER_BREAK)
-            return true
+        if app.Page ~= nil and (app.uiState == app.uiStatus.pages or app.uiState == app.uiStatus.mainMenu) then
+                if app.Page.event then
+                        -- run the pages wakeup function if it exists
+                        return app.Page.event(widget, category, value, x, y)
+                end
         end
-    end
 
-    return false
+        if app.uiState == app.uiStatus.pages then
+
+                if category == 5 or value == 35 then
+                        if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
+                        if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
+                        if app.Page.onNavMenu then app.Page.onNavMenu(app.Page) end
+                        app.ui.openMainMenu()
+                        return true
+                end
+                if value == 35 then
+                        if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
+                        if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
+                        if app.Page.onNavMenu then app.Page.onNavMenu(app.Page) end
+                        app.ui.openMainMenu()
+                        return true
+                end
+                if value == KEY_ENTER_LONG then
+                        if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
+                        if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
+                        app.triggers.triggerSave = true
+                        system.killEvents(KEY_ENTER_BREAK)
+                        return true
+                end
+
+        end
+
+        if app.uiState == app.uiStatus.MainMenu then
+                if value == KEY_ENTER_LONG then
+                        if app.dialogs.progressDisplay == true then app.ui.progessDisplayClose() end
+                        if app.dialogs.saveDisplay == true then app.ui.progessDisplaySaveClose() end
+                        system.killEvents(KEY_ENTER_BREAK)
+                        return true
+                end
+        end
+
+        return false
 end
 
 function app.close()
 
-    app.guiIsRunning = false
+        app.guiIsRunning = false
 
-    if app.Page ~= nil and (app.uiState == app.uiStatus.pages or app.uiState == app.uiStatus.mainMenu) then
-        if app.Page.close then
-            app.Page.close()
+        if app.Page ~= nil and (app.uiState == app.uiStatus.pages or app.uiState == app.uiStatus.mainMenu) then
+                if app.Page.close then
+                        app.Page.close()
+                end
         end
-    end
-    
-    if app.dialogs.progress then app.ui.progessDisplayClose() end
-    if app.dialogs.save then app.ui.progessDisplaySaveClose() end
-    if app.dialogs.noLink then app.ui.progessNolinkDisplayClose() end
-    invalidatePages()
-    app.resetState()
-    collectgarbage()
-    system.exit()
-    return true
+        
+        if app.dialogs.progress then app.ui.progessDisplayClose() end
+        if app.dialogs.save then app.ui.progessDisplaySaveClose() end
+        if app.dialogs.noLink then app.ui.progessNolinkDisplayClose() end
+        invalidatePages()
+        app.resetState()
+        collectgarbage()
+        system.exit()
+        return true
 end
 
 

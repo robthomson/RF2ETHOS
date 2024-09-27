@@ -28,44 +28,44 @@ labels[#labels + 1] = {t = "", label = "brake2", inline_size = 40.6}
 fields[#fields + 1] = {t = "Brake Force %", inline = 1, label = "brake2", min = 0, max = 100, vals = {mspHeaderBytes + 75}}
 
 function postLoad()
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.app.triggers.escToolEnableButtons = true
-    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.triggers.escToolEnableButtons = true
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+        -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-    if category == 5 or value == 35 then
-        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
-        return true
-    end
+        if category == 5 or value == 35 then
+                rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+                return true
+        end
 
-    return false
+        return false
 end
 
 return {
-    read = 217, -- msp_ESC_PARAMETERS
-    write = 218, -- msp_SET_ESC_PARAMETERS
-    eepromWrite = true,
-    reboot = false,
-    title = "Other Settings",
-    minBytes = mspBytes,
-    labels = labels,
-    fields = fields,
-    escinfo = escinfo,
-    simulatorResponse = {
-        253, 0, 32, 32, 32, 80, 76, 45, 48, 52, 46, 49, 46, 48, 50, 32, 32, 32, 72, 87, 49, 49, 48, 54, 95, 86, 49, 48, 48, 52, 53, 54, 78, 66, 80, 108, 97, 116, 105, 110, 117, 109, 95, 86, 53, 32,
-        32, 32, 32, 32, 80, 108, 97, 116, 105, 110, 117, 109, 32, 86, 53, 32, 32, 32, 32, 0, 0, 0, 3, 0, 11, 6, 5, 25, 1, 0, 0, 24, 0, 0, 2
-    },
-    postLoad = postLoad,
-    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-    onNavMenu = onNavMenu,
-    event = event,
-    pageTitle = "Esc / Hobbywing 5 / Other",
-    headerLine = rf2ethos.escHeaderLineText
+        read = 217, -- msp_ESC_PARAMETERS
+        write = 218, -- msp_SET_ESC_PARAMETERS
+        eepromWrite = true,
+        reboot = false,
+        title = "Other Settings",
+        minBytes = mspBytes,
+        labels = labels,
+        fields = fields,
+        escinfo = escinfo,
+        simulatorResponse = {
+                253, 0, 32, 32, 32, 80, 76, 45, 48, 52, 46, 49, 46, 48, 50, 32, 32, 32, 72, 87, 49, 49, 48, 54, 95, 86, 49, 48, 48, 52, 53, 54, 78, 66, 80, 108, 97, 116, 105, 110, 117, 109, 95, 86, 53, 32,
+                32, 32, 32, 32, 80, 108, 97, 116, 105, 110, 117, 109, 32, 86, 53, 32, 32, 32, 32, 0, 0, 0, 3, 0, 11, 6, 5, 25, 1, 0, 0, 24, 0, 0, 2
+        },
+        postLoad = postLoad,
+        navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+        onNavMenu = onNavMenu,
+        event = event,
+        pageTitle = "Esc / Hobbywing 5 / Other",
+        headerLine = rf2ethos.escHeaderLineText
 }

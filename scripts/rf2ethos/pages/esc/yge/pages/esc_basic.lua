@@ -28,14 +28,14 @@ fields[#fields + 1] = {t = "Cutoff Handling", inline = 1, label = "limits1", min
 
 labels[#labels + 1] = {t = "", label = "limits2", inline_size = 40.6}
 fields[#fields + 1] = {
-    t = "Cutoff Cell Voltage",
-    inline = 1,
-    label = "limits2",
-    min = 0,
-    max = #cuttoffVoltage,
-    vals = {mspHeaderBytes + 19, mspHeaderBytes + 20},
-    tableIdxInc = -1,
-    table = cuttoffVoltage
+        t = "Cutoff Cell Voltage",
+        inline = 1,
+        label = "limits2",
+        min = 0,
+        max = #cuttoffVoltage,
+        vals = {mspHeaderBytes + 19, mspHeaderBytes + 20},
+        tableIdxInc = -1,
+        table = cuttoffVoltage
 }
 
 -- need to work current limit out - disable for now
@@ -43,48 +43,48 @@ fields[#fields + 1] = {
 -- fields[#fields + 1] = {t = "Current Limit", units = "A", inline = 1, label = "limits3", min = 1, max = 65500, decimals = 2, vals = {mspHeaderBytes+55, mspHeaderBytes+56}}
 
 function postLoad()
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.app.triggers.escToolEnableButtons = true
-    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.triggers.escToolEnableButtons = true
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+        -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-    if category == 5 or value == 35 then
-        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
-        return true
-    end
+        if category == 5 or value == 35 then
+                rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+                return true
+        end
 
-    return false
+        return false
 end
 
 local foundEsc = false
 local foundEscDone = false
 return {
-    read = 217, -- msp_ESC_PARAMETERS
-    write = 218, -- msp_SET_ESC_PARAMETERS
-    eepromWrite = false,
-    reboot = false,
-    title = "Basic Setup",
-    minBytes = mspBytes,
-    labels = labels,
-    fields = fields,
-    escinfo = escinfo,
-    simulatorResponse = {
-        165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
-        19, 2, 0, 20, 0, 22, 0, 0, 0
-    },
-    svFlags = 0,
-    postLoad = postLoad,
-    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-    onNavMenu = onNavMenu,
-    event = event,
-    pageTitle = "Esc / Yge / Basic",
-    headerLine = rf2ethos.escHeaderLineText
+        read = 217, -- msp_ESC_PARAMETERS
+        write = 218, -- msp_SET_ESC_PARAMETERS
+        eepromWrite = false,
+        reboot = false,
+        title = "Basic Setup",
+        minBytes = mspBytes,
+        labels = labels,
+        fields = fields,
+        escinfo = escinfo,
+        simulatorResponse = {
+                165, 0, 32, 0, 3, 0, 55, 0, 0, 0, 0, 0, 4, 0, 3, 0, 1, 0, 1, 0, 2, 0, 3, 0, 80, 3, 131, 148, 1, 0, 30, 170, 0, 0, 3, 0, 86, 4, 22, 3, 163, 15, 1, 0, 2, 0, 2, 0, 20, 0, 20, 0, 0, 0, 0, 0, 2,
+                19, 2, 0, 20, 0, 22, 0, 0, 0
+        },
+        svFlags = 0,
+        postLoad = postLoad,
+        navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+        onNavMenu = onNavMenu,
+        event = event,
+        pageTitle = "Esc / Yge / Basic",
+        headerLine = rf2ethos.escHeaderLineText
 }
 

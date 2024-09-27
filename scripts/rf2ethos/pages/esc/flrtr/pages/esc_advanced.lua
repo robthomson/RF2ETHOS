@@ -24,43 +24,43 @@ local foundEsc = false
 local foundEscDone = false
 
 function postLoad()
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.app.triggers.escToolEnableButtons = true
-    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.triggers.escToolEnableButtons = true
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
 
-    -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
+        -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
-    if category == 5 or value == 35 then
-        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
-        return true
-    end
+        if category == 5 or value == 35 then
+                rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
+                return true
+        end
 
-    return false
+        return false
 end
 
 return {
-    read = 217, -- msp_ESC_PARAMETERS
-    write = 218, -- msp_SET_ESC_PARAMETERS
-    eepromWrite = true,
-    reboot = false,
-    title = "Advanced Setup",
-    minBytes = mspBytes,
-    labels = labels,
-    fields = fields,
-    escinfo = escinfo,
-    simulatorResponse = {115, 0, 0, 0, 150, 231, 79, 190, 216, 78, 29, 169, 244, 1, 0, 0, 1, 0, 2, 0, 4, 76, 7, 148, 0, 6, 30, 125, 0, 15, 0, 3, 15, 1, 20, 0, 10, 0, 0, 0, 0, 0, 0, 2, 73, 240},
-    svTiming = 0,
-    svFlags = 0,
-    postLoad = postLoad,
-    navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
-    onNavMenu = onNavMenu,
-    event = event,
-    pageTitle = "Esc / Flyrotor / Advanced",
-    headerLine = rf2ethos.escHeaderLineText
+        read = 217, -- msp_ESC_PARAMETERS
+        write = 218, -- msp_SET_ESC_PARAMETERS
+        eepromWrite = true,
+        reboot = false,
+        title = "Advanced Setup",
+        minBytes = mspBytes,
+        labels = labels,
+        fields = fields,
+        escinfo = escinfo,
+        simulatorResponse = {115, 0, 0, 0, 150, 231, 79, 190, 216, 78, 29, 169, 244, 1, 0, 0, 1, 0, 2, 0, 4, 76, 7, 148, 0, 6, 30, 125, 0, 15, 0, 3, 15, 1, 20, 0, 10, 0, 0, 0, 0, 0, 0, 2, 73, 240},
+        svTiming = 0,
+        svFlags = 0,
+        postLoad = postLoad,
+        navButtons = {menu = true, save = true, reload = true, tool = false, help = false},
+        onNavMenu = onNavMenu,
+        event = event,
+        pageTitle = "Esc / Flyrotor / Advanced",
+        headerLine = rf2ethos.escHeaderLineText
 }

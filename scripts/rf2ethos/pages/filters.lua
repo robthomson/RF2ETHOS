@@ -38,18 +38,18 @@ fields[#fields + 1] = {t = "Min", help = "gyroDynamicNotchMinHz", label = "line1
 fields[#fields + 1] = {t = "Max", help = "gyroDynamicNotchMaxHz", label = "line12", inline = 1, min = 100, max = 500, default = 245, unit = "Hz", vals = {24, 25}}
 
 local function postLoad(self)
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 return {
-    read = 92, -- msp_FILTER_CONFIG
-    write = 93, -- msp_SET_FILTER_CONFIG
-    eepromWrite = true,
-    reboot = true,
-    title = "Filters",
-    minBytes = 25,
-    simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
-    labels = labels,
-    fields = fields,
-    postLoad = postLoad
+        read = 92, -- msp_FILTER_CONFIG
+        write = 93, -- msp_SET_FILTER_CONFIG
+        eepromWrite = true,
+        reboot = true,
+        title = "Filters",
+        minBytes = 25,
+        simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
+        labels = labels,
+        fields = fields,
+        postLoad = postLoad
 }

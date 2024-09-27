@@ -25,18 +25,18 @@ fields[#fields + 1] = {t = "TTA bandwidth", help = "govTTABandwidth", min = 0, m
 fields[#fields + 1] = {t = "Precomp bandwidth", help = "govTTAPrecomp", min = 0, max = 250, unit = "Hz", default = 10, vals = {24}}
 
 local function postLoad(self)
-    rf2ethos.app.triggers.isReady = true
+        rf2ethos.app.triggers.isReady = true
 end
 
 return {
-    read = 142, -- msp_GOVERNOR_CONFIG
-    write = 143, -- msp_SET_GOVERNOR_CONFIG
-    title = "Governor",
-    reboot = true,
-    simulatorResponse = {3, 100, 0, 100, 0, 20, 0, 20, 0, 30, 0, 10, 0, 0, 0, 0, 0, 50, 0, 10, 5, 10, 0, 10},
-    eepromWrite = true,
-    minBytes = 24,
-    labels = labels,
-    fields = fields,
-    postLoad = postLoad
+        read = 142, -- msp_GOVERNOR_CONFIG
+        write = 143, -- msp_SET_GOVERNOR_CONFIG
+        title = "Governor",
+        reboot = true,
+        simulatorResponse = {3, 100, 0, 100, 0, 20, 0, 20, 0, 30, 0, 10, 0, 0, 0, 0, 0, 50, 0, 10, 5, 10, 0, 10},
+        eepromWrite = true,
+        minBytes = 24,
+        labels = labels,
+        fields = fields,
+        postLoad = postLoad
 }
