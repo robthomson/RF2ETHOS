@@ -41,8 +41,8 @@ function MspQueueController:processQueue()
 
         local lastTimeInterval
 
-        if rf2ethos.msp.protocol.mspIntervalOveride ~= nil then
-                lastTimeInterval = rf2ethos.msp.protocol.mspIntervalOveride
+        if rf2ethos.bg.protocol.mspIntervalOveride ~= nil then
+                lastTimeInterval = rf2ethos.bg.protocol.mspIntervalOveride
         else
                 lastTimeInterval = 1
         end
@@ -51,10 +51,10 @@ function MspQueueController:processQueue()
                 if not self.lastTimeCommandSent or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
                         if self.currentMessage.payload then
                                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command..": {" .. rf2ethos.utils.joinTableItems(self.currentMessage.payload, ", ") .. "}")
-                                rf2ethos.msp.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
+                                rf2ethos.bg.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
                         else
                                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command)
-                                rf2ethos.msp.protocol.mspWrite(self.currentMessage.command, {})
+                                rf2ethos.bg.protocol.mspWrite(self.currentMessage.command, {})
                         end
                         self.lastTimeCommandSent = os.clock()
                         self.retryCount = self.retryCount + 1

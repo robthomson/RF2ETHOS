@@ -139,7 +139,7 @@ function ui.openMainMenu()
         rf2ethos.app.lastScript = nil
         rf2ethos.lastPage = nil
 
-        --rf2ethos.msp.protocol.mspIntervalOveride = nil
+        --rf2ethos.bg.protocol.mspIntervalOveride = nil
 
         rf2ethos.app.triggers.isReady = false
         rf2ethos.app.uiState = rf2ethos.app.uiStatus.mainMenu

@@ -414,7 +414,7 @@ function rf2elrstelemetry.wakeup()
         
         -- quick kill if not using crsf as this script
         -- is only for crsf code
-        if rf2ethos.msp.protocol.mspProtocol ~= "crsf" then
+        if rf2ethos.bg.protocol.mspProtocol ~= "crsf" then
                 return
         end
 

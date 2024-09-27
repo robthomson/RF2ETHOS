@@ -1,7 +1,7 @@
 local toolName = "Hobbywing 5"
 local mspHeaderBytes = 2
 
---rf2ethos.msp.protocol.mspIntervalOveride = 0.8
+--rf2ethos.bg.protocol.mspIntervalOveride = 0.8
 
 local function getText(buffer, st, en)
 

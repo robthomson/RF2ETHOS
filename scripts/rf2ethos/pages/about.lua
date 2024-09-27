@@ -43,7 +43,7 @@ end
 fields[1] = {t = "Version", value = version, type = displayType, disable = disableType, position = displayPos}
 fields[2] = {t = "Ethos Version", value = ethosVersion, type = displayType, disable = disableType, position = displayPos}
 fields[3] = {t = "MSP Version", value = apiVersion, type = displayType, disable = disableType, position = displayPos}
-fields[4] = {t = "MSP Transport", value = string.upper(rf2ethos.msp.protocol.mspProtocol), type = displayType, disable = disableType, position = displayPos}
+fields[4] = {t = "MSP Transport", value = string.upper(rf2ethos.bg.protocol.mspProtocol), type = displayType, disable = disableType, position = displayPos}
 fields[5] = {t = "Supported MSP Versions", value = supportedMspVersion, type = displayType, disable = disableType, position = displayPos}
 fields[6] = {t = "Compilation", value = compilation, type = displayType, disable = disableType, position = displayPos}
 fields[7] = {t = "Simulation", value = simulation, type = displayType, disable = disableType, position = displayPos}

@@ -32,27 +32,27 @@ local function getStatus()
         local message = {
                 command = 101, -- MSP_STATUS
                 processReply = function(self, buf)
-                        -- status.pidCycleTime = rf2ethos.msp.mspHelper.readU16(buf)
-                        -- status.gyroCycleTime = rf2ethos.msp.mspHelper.readU16(buf)
+                        -- status.pidCycleTime = rf2ethos.bg.mspHelper.readU16(buf)
+                        -- status.gyroCycleTime = rf2ethos.bg.mspHelper.readU16(buf)
                         buf.offset = 12
-                        status.realTimeLoad = rf2ethos.msp.mspHelper.readU16(buf)
+                        status.realTimeLoad = rf2ethos.bg.mspHelper.readU16(buf)
                         -- print("Real-time load: "..tostring(status.realTimeLoad))
-                        status.cpuLoad = rf2ethos.msp.mspHelper.readU16(buf)
+                        status.cpuLoad = rf2ethos.bg.mspHelper.readU16(buf)
                         -- print("CPU load: "..tostring(status.cpuLoad))
                         buf.offset = 18
-                        status.armingDisableFlags = rf2ethos.msp.mspHelper.readU32(buf)
+                        status.armingDisableFlags = rf2ethos.bg.mspHelper.readU32(buf)
                         buf.offset = 24
-                        status.profile = rf2ethos.msp.mspHelper.readU8(buf)
+                        status.profile = rf2ethos.bg.mspHelper.readU8(buf)
                         -- print("Profile: "..tostring(status.profile))
                         buf.offset = 26
-                        status.rateProfile = rf2ethos.msp.mspHelper.readU8(buf)
+                        status.rateProfile = rf2ethos.bg.mspHelper.readU8(buf)
                         -- print("Rate Profile: "..tostring(status.rateProfile))
 
                 end,
                 simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1}
         }
 
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function getDataflashSummary()
@@ -60,17 +60,17 @@ local function getDataflashSummary()
                 command = 70, -- MSP_DATAFLASH_SUMMARY
                 processReply = function(self, buf)
                         -- rf2ethos.print("buf length: "..#buf)
-                        local flags = rf2ethos.msp.mspHelper.readU8(buf)
+                        local flags = rf2ethos.bg.mspHelper.readU8(buf)
                         summary.ready = (flags & 1) ~= 0
                         summary.supported = (flags & 2) ~= 0
-                        summary.sectors = rf2ethos.msp.mspHelper.readU32(buf)
-                        summary.totalSize = rf2ethos.msp.mspHelper.readU32(buf)
-                        summary.usedSize = rf2ethos.msp.mspHelper.readU32(buf)
+                        summary.sectors = rf2ethos.bg.mspHelper.readU32(buf)
+                        summary.totalSize = rf2ethos.bg.mspHelper.readU32(buf)
+                        summary.usedSize = rf2ethos.bg.mspHelper.readU32(buf)
 
                 end,
                 simulatorResponse = {3, 1, 0, 0, 0, 0, 4, 0, 0, 0, 3, 0, 0}
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function eraseDataflash()
@@ -81,7 +81,7 @@ local function eraseDataflash()
                 end,
                 simulatorResponse = {}
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function postLoad(self)
@@ -161,7 +161,7 @@ local function wakeup()
                 if (now - wakeupScheduler) >= 2 then
                         wakeupScheduler = now
                         firstRun = false
-                        if rf2ethos.msp.mspQueue:isProcessed() then
+                        if rf2ethos.bg.mspQueue:isProcessed() then
 
                                 getStatus()
                                 getDataflashSummary()

@@ -44,28 +44,28 @@ function mspProcessTxQ()
                 payload[1] = payload[1] + MSP_STARTFLAG
         end
         local i = 2
-        while (i <= rf2ethos.msp.protocol.maxTxBufferSize) and mspTxIdx <= #mspTxBuf do
+        while (i <= rf2ethos.bg.protocol.maxTxBufferSize) and mspTxIdx <= #mspTxBuf do
                 payload[i] = mspTxBuf[mspTxIdx]
                 mspTxIdx = mspTxIdx + 1
                 mspTxCRC = mspTxCRC ~ payload[i]
                 i = i + 1
         end
-        if i <= rf2ethos.msp.protocol.maxTxBufferSize then
+        if i <= rf2ethos.bg.protocol.maxTxBufferSize then
                 payload[i] = mspTxCRC
                 i = i + 1
                 -- zero fill
-                while i <= rf2ethos.msp.protocol.maxTxBufferSize do
+                while i <= rf2ethos.bg.protocol.maxTxBufferSize do
                         payload[i] = 0
                         i = i + 1
                 end
 
-                rf2ethos.msp.protocol.mspSend(payload)
+                rf2ethos.bg.protocol.mspSend(payload)
                 mspTxBuf = {}
                 mspTxIdx = 1
                 mspTxCRC = 0
                 return false
         end
-        rf2ethos.msp.protocol.mspSend(payload)
+        rf2ethos.bg.protocol.mspSend(payload)
         return true
 end
 
@@ -112,12 +112,12 @@ local function mspReceivedReply(payload)
                 mspStarted = false
                 return nil
         end
-        while (idx <= rf2ethos.msp.protocol.maxRxBufferSize) and (#mspRxBuf < mspRxSize) do
+        while (idx <= rf2ethos.bg.protocol.maxRxBufferSize) and (#mspRxBuf < mspRxSize) do
                 mspRxBuf[#mspRxBuf + 1] = payload[idx]
                 mspRxCRC = mspRxCRC ~ payload[idx]
                 idx = idx + 1
         end
-        if idx > rf2ethos.msp.protocol.maxRxBufferSize then
+        if idx > rf2ethos.bg.protocol.maxRxBufferSize then
                 rf2ethos.utils.log("  mspReceivedReply:  payload continues into next frame.")
                 -- Store the last sequence number so we can start there on the next continuation payload
                 mspRemoteSeq = seq
@@ -139,7 +139,7 @@ end
 function mspPollReply()
         local startTime = os.clock()
         while (os.clock() - startTime < 0.05) do
-                local mspData = rf2ethos.msp.protocol.mspPoll()
+                local mspData = rf2ethos.bg.protocol.mspPoll()
                 if mspData ~= nil and mspReceivedReply(mspData) then
                         mspLastReq = 0
                         return mspRxReq, mspRxBuf, mspRxError

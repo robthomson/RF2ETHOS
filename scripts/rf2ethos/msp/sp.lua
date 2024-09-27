@@ -20,13 +20,13 @@ function transport.sportTelemetryPush(sensorId, frameId, dataId, value)
         -- @param value         value
         -- @retval boolean  data queued in output buffer or not.
         -- @retval nil          incorrect telemetry protocol.  (added in 2.3.4)
-        return rf2ethos.msp.sensor:pushFrame({physId = sensorId, primId = frameId, appId = dataId, value = value})
+        return rf2ethos.bg.sensor:pushFrame({physId = sensorId, primId = frameId, appId = dataId, value = value})
 end
 
 -- GRAB THE SPORT TELEMETRY FRAME
 function transport.sportTelemetryPop()
         -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
-        local frame = rf2ethos.msp.sensor:popFrame()
+        local frame = rf2ethos.bg.sensor:popFrame()
         if frame == nil then return nil, nil, nil, nil end
         -- physId = physical / remote sensor Id (aka sensorId)
         --   0x00 for FPORT, 0x1B for SmartPort

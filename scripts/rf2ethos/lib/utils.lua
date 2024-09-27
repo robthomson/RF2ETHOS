@@ -11,9 +11,9 @@ function utils.mspGetCurrentProfile()
                         if #buf >= 30 then
                 
                                 buf.offset = 24
-                                local activeProfile = rf2ethos.msp.mspHelper.readU8(buf)
+                                local activeProfile = rf2ethos.bg.mspHelper.readU8(buf)
                                 buf.offset = 26
-                                local activeRate = rf2ethos.msp.mspHelper.readU8(buf)                                                          
+                                local activeRate = rf2ethos.bg.mspHelper.readU8(buf)                                                          
                         
                                                           
                                 rf2ethos.config.activeProfile = activeProfile + 1
@@ -24,7 +24,7 @@ function utils.mspGetCurrentProfile()
                 simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
 
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 function utils.ethosVersion()

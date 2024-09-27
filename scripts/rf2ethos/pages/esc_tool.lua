@@ -20,7 +20,7 @@ local versionField
 local firmwareField
 
 local findTimeoutClock = os.clock()
-local findTimeout = math.floor(rf2ethos.msp.protocol.pageReqTimeout * 0.5)
+local findTimeout = math.floor(rf2ethos.bg.protocol.pageReqTimeout * 0.5)
 
 local modelLine
 local modelText
@@ -45,7 +45,7 @@ local function getESCDetails()
                 simulatorResponse = simulatorResponse
         }
 
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function openPage(pidx, title, script)

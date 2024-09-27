@@ -260,7 +260,7 @@ end
 local function rebootFc()
 
         app.pageState = app.pageStatus.rebooting
-        rf2ethos.msp.mspQueue:add({
+        rf2ethos.bg.mspQueue:add({
                 command = 68, -- MSP_REBOOT
                 processReply = function(self, buf)
                         invalidatePages()
@@ -291,7 +291,7 @@ function app.settingsSaved()
                 -- don't write again if we're already responding to earlier page.write()s
                 if app.pageState ~= app.pageStatus.eepromWrite then
                         app.pageState = app.pageStatus.eepromWrite
-                        rf2ethos.msp.mspQueue:add(mspEepromWrite)
+                        rf2ethos.bg.mspQueue:add(mspEepromWrite)
                 end
         elseif app.pageState ~= app.pageStatus.eepromWrite then
                 -- If we're not already trying to write to eeprom from a previous save, then we're done.
@@ -337,7 +337,7 @@ function app.readPage()
         else
                 mspLoadSettings.command = app.Page.read
                 mspLoadSettings.simulatorResponse = app.Page.simulatorResponse
-                rf2ethos.msp.mspQueue:add(mspLoadSettings)
+                rf2ethos.bg.mspQueue:add(mspLoadSettings)
         end
 end
 
@@ -367,8 +367,8 @@ local function saveSettings()
                         mspSaveSettings.command = app.Page.write
                         mspSaveSettings.payload = payload
                         mspSaveSettings.simulatorResponse = {}
-                        rf2ethos.msp.mspQueue:add(mspSaveSettings)
-                        rf2ethos.msp.mspQueue.errorHandler = function()
+                        rf2ethos.bg.mspQueue:add(mspSaveSettings)
+                        rf2ethos.bg.mspQueue.errorHandler = function()
                                 print("Save failed")
                                 app.triggers.saveFailed = true
                         end
@@ -382,7 +382,7 @@ end
 -- REQUEST A PAGE OVER MSP. THIS RUNS ON MOST CLOCK CYCLES WHEN DATA IS BEING REQUESTED
 local function requestPage()
    
-        if not app.Page.reqTS or app.Page.reqTS + rf2ethos.msp.protocol.pageReqTimeout <= os.clock() then
+        if not app.Page.reqTS or app.Page.reqTS + rf2ethos.bg.protocol.pageReqTimeout <= os.clock() then
 
         
                 app.Page.reqTS = os.clock()
@@ -494,7 +494,7 @@ function app.wakeupUI()
         if app.triggers.closeSave == true then
                 app.triggers.isSaving = false
 
-                if rf2ethos.msp.mspQueue:isProcessed() then
+                if rf2ethos.bg.mspQueue:isProcessed() then
                         if (app.dialogs.saveProgressCounter > 40 and app.dialogs.saveProgressCounter <= 80) then
                                 app.dialogs.saveProgressCounter = app.dialogs.saveProgressCounter + 10
                         else
@@ -504,7 +504,7 @@ function app.wakeupUI()
 
                 if app.dialogs.save ~= nil then app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter) end
 
-                if app.dialogs.saveProgressCounter >= 100 and rf2ethos.msp.mspQueue:isProcessed() then
+                if app.dialogs.saveProgressCounter >= 100 and rf2ethos.bg.mspQueue:isProcessed() then
                         app.triggers.closeSave = false
                         app.dialogs.saveProgressCounter = 0
                         app.dialogs.saveDisplay = false
@@ -634,7 +634,7 @@ function app.wakeupUI()
         if rf2ethos.config.watchdogParam ~= nil and rf2ethos.config.watchdogParam ~= 1 then app.protocol.saveTimeout = rf2ethos.config.watchdogParam end
         if app.dialogs.saveDisplay == true then
                 if app.dialogs.saveWatchDog ~= nil then
-                        if (os.clock() - app.dialogs.saveWatchDog) > (tonumber(app.protocol.saveTimeout)) or (app.dialogs.saveProgressCounter > 100 and rf2ethos.msp.mspQueue:isProcessed()) then
+                        if (os.clock() - app.dialogs.saveWatchDog) > (tonumber(app.protocol.saveTimeout)) or (app.dialogs.saveProgressCounter > 100 and rf2ethos.bg.mspQueue:isProcessed()) then
                                 app.audio.playTimeout = true
                                 app.ui.progessDisplaySaveMessage("Error.. we timed out")
                                 app.ui.progessDisplaySaveCloseAllowed(true)
@@ -660,7 +660,7 @@ function app.wakeupUI()
                 app.ui.progessDisplayValue(app.dialogs.progressCounter)
                 
                 
-                if (os.clock() - app.dialogs.progressWatchDog) > (tonumber(rf2ethos.msp.protocol.pageReqTimeout)) then
+                if (os.clock() - app.dialogs.progressWatchDog) > (tonumber(rf2ethos.bg.protocol.pageReqTimeout)) then
 
                         app.audio.playTimeout = true
 
@@ -792,7 +792,7 @@ function app.wakeupUI()
                         if app.triggers.badMspVersionDisplay == false then
                                 local message
                                 if rf2ethos.backgroundMsp ~= true then
-                                   message = "Please enable the backround msp task."
+                                   message = "Please enable the backround task."
                                 elseif app.getRSSI() == 0 then
                                         message = "Unable to establish a link to the flight controller"
                                 elseif rf2ethos.config.apiVersion ~= nil then
@@ -827,7 +827,7 @@ function app.wakeupUI()
                                 app.triggers.saveFailed = false
                                 app.dialogs.saveProgressCounter = 0
                                 app.ui.progessDisplaySave()
-                                rf2ethos.msp.mspQueue.retryCount = 0
+                                rf2ethos.bg.mspQueue.retryCount = 0
                         end
                         if app.pageState == app.pageStatus.saving then
                                 app.ui.progessDisplaySaveValue(app.dialogs.saveProgressCounter, "Saving data...")
@@ -848,7 +848,7 @@ function app.wakeupUI()
                         app.triggers.saveFailed = false
                         app.dialogs.saveProgressCounter = 0
                         app.ui.progessDisplaySave()
-                        rf2ethos.msp.mspQueue.retryCount = 0
+                        rf2ethos.bg.mspQueue.retryCount = 0
                         app.triggers.closeSaveFake = true
                         app.triggers.isSavingFake = false
                 end
@@ -862,7 +862,7 @@ function app.wakeupUI()
                 invalidatePages()
         else
                 -- detect page data loaded and ready to move onto rendering the page
-                if (app.triggers.isReady == true and rf2ethos.msp.mspQueue:isProcessed() and (app.Page and app.Page.values)) then
+                if (app.triggers.isReady == true and rf2ethos.bg.mspQueue:isProcessed() and (app.Page and app.Page.values)) then
                         app.triggers.isReady = false
 
                         app.triggers.closeProgressLoader = true

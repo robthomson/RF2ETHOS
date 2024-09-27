@@ -7,7 +7,7 @@ local function calibrate(callback, callbackParam)
                 end,
                 simulatorResponse = {}
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 return {calibrate = calibrate}

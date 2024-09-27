@@ -8,7 +8,7 @@ pages[#pages + 1] = {title = "XDFLY", folder = "flrtr", image = "xdfly.png", dis
 
 local function openPage(pidx, title, script)
 
-        rf2ethos.msp.protocol.mspIntervalOveride = nil
+        rf2ethos.bg.protocol.mspIntervalOveride = nil
 
         if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then return end
 

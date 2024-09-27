@@ -35,10 +35,10 @@ local function saveData()
 
         local payload = rf2ethos.app.Page.values
         local message = {command = 43, payload = payload}
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 
         local message = {command = 250, payload = {}}
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 
 end
 
@@ -52,8 +52,8 @@ local function mixerOn(self)
                         command = 191, -- MSP_SET_SERVO_OVERRIDE
                         payload = {i}
                 }
-                rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
-                rf2ethos.msp.mspQueue:add(message)
+                rf2ethos.bg.mspHelper.writeU16(message.payload, 0)
+                rf2ethos.bg.mspQueue:add(message)
 
         end
 
@@ -69,8 +69,8 @@ local function mixerOff(self)
                         command = 191, -- MSP_SET_SERVO_OVERRIDE
                         payload = {i}
                 }
-                rf2ethos.msp.mspHelper.writeU16(message.payload, 2501)
-                rf2ethos.msp.mspQueue:add(message)
+                rf2ethos.bg.mspHelper.writeU16(message.payload, 2501)
+                rf2ethos.bg.mspQueue:add(message)
         end
 
         rf2ethos.app.triggers.isReady = true
@@ -104,7 +104,7 @@ local function wakeup(self)
                 currentRollTrim = rf2ethos.app.Page.fields[1].value
                 local now = os.clock()
                 local settleTime = 0.85
-                if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
+                if ((now - lastChangeTime) >= settleTime) and rf2ethos.bg.mspQueue:isProcessed() then
                         if currentRollTrim ~= currentRollTrimLast then
                                 currentRollTrimLast = currentRollTrim
                                 lastChangeTime = now
@@ -115,7 +115,7 @@ local function wakeup(self)
                 currentPitchTrim = rf2ethos.app.Page.fields[2].value
                 local now = os.clock()
                 local settleTime = 0.85
-                if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
+                if ((now - lastChangeTime) >= settleTime) and rf2ethos.bg.mspQueue:isProcessed() then
                         if currentPitchTrim ~= currentPitchTrimLast then
                                 currentPitchTrimLast = currentPitchTrim
                                 lastChangeTime = now
@@ -126,7 +126,7 @@ local function wakeup(self)
                 currentCollectiveTrim = rf2ethos.app.Page.fields[3].value
                 local now = os.clock()
                 local settleTime = 0.85
-                if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
+                if ((now - lastChangeTime) >= settleTime) and rf2ethos.bg.mspQueue:isProcessed() then
                         if currentCollectiveTrim ~= currentCollectiveTrimLast then
                                 currentCollectiveTrimLast = currentCollectiveTrim
                                 lastChangeTime = now
@@ -138,7 +138,7 @@ local function wakeup(self)
                         currentIdleThrottleTrim = rf2ethos.app.Page.fields[4].value
                         local now = os.clock()
                         local settleTime = 0.85
-                        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
+                        if ((now - lastChangeTime) >= settleTime) and rf2ethos.bg.mspQueue:isProcessed() then
                                 if currentIdleThrottleTrim ~= currentIdleThrottleTrimLast then
                                         currentIdleThrottleTrimLast = currentIdleThrottleTrim
                                         lastChangeTime = now
@@ -151,7 +151,7 @@ local function wakeup(self)
                         currentYawTrim = rf2ethos.app.Page.fields[4].value
                         local now = os.clock()
                         local settleTime = 0.85
-                        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
+                        if ((now - lastChangeTime) >= settleTime) and rf2ethos.bg.mspQueue:isProcessed() then
                                 if currentYawTrim ~= currentYawTrimLast then
                                         currentYawTrimLast = currentYawTrim
                                         lastChangeTime = now

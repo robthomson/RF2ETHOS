@@ -6,26 +6,26 @@ local config = arg[1]
 local compile = arg[2]
 
 -- declare vars
-local msp = {}
+local bg = {}
 
-msp.init = true
-msp.activeProtocol = nil
+bg.init = true
+bg.activeProtocol = nil
 
 rf2ethos.backgroundMsp = false
 
-msp.wakeupBgChecksInit = true
+bg.wakeupBgChecksInit = true
 
 rssiCheckScheduler = os.clock()
 
 local protocol = assert(compile.loadScript(config.toolDir .. "msp/protocols.lua"))()
 
 -- BACKGROUND checks
-function msp.wakeupBgChecks()
+function bg.wakeupBgChecks()
 
-        if msp.mspQueue ~= nil and msp.mspQueue:isProcessed()then
+        if bg.mspQueue ~= nil and bg.mspQueue:isProcessed()then
 
 
-                if rf2ethos.config.apiVersion == nil and msp.mspQueue:isProcessed() then
+                if rf2ethos.config.apiVersion == nil and bg.mspQueue:isProcessed() then
 
                         local message = {
                                 command = 1, -- MIXER
@@ -38,9 +38,9 @@ function msp.wakeupBgChecks()
                                 end,
                                 simulatorResponse = {0, 12, 7}
                         }
-                        msp.mspQueue:add(message)
+                        bg.mspQueue:add(message)
 
-                elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and msp.mspQueue:isProcessed() then
+                elseif (rf2ethos.config.tailMode == nil or rf2ethos.config.swashMode == nil) and bg.mspQueue:isProcessed() then
                                 local message = {
                                         command = 42, -- MIXER
                                         processReply = function(self, buf)
@@ -56,7 +56,7 @@ function msp.wakeupBgChecks()
                                         end,
                                         simulatorResponse = {0, 1, 0, 0, 0, 2, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
                                 }
-                                msp.mspQueue:add(message)
+                                bg.mspQueue:add(message)
                 elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
                                 local message = {
                                         command = 101, -- MSP_SERVO_CONFIGURATIONS
@@ -65,9 +65,9 @@ function msp.wakeupBgChecks()
                                                 if #buf >= 30 then
                                         
                                                         buf.offset = 24
-                                                        local activeProfile = msp.mspHelper.readU8(buf)
+                                                        local activeProfile = bg.mspHelper.readU8(buf)
                                                         buf.offset = 26
-                                                        local activeRate = msp.mspHelper.readU8(buf)                                                          
+                                                        local activeRate = bg.mspHelper.readU8(buf)                                                          
                                                 
                                                                                   
                                                         rf2ethos.config.activeProfile = activeProfile + 1
@@ -78,13 +78,13 @@ function msp.wakeupBgChecks()
                                         simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
 
                                 }
-                                msp.mspQueue:add(message)                  
-                elseif (rf2ethos.config.servoCount == nil) and msp.mspQueue:isProcessed() then
+                                bg.mspQueue:add(message)                  
+                elseif (rf2ethos.config.servoCount == nil) and bg.mspQueue:isProcessed() then
                                 local message = {
                                         command = 120, -- MSP_SERVO_CONFIGURATIONS
                                         processReply = function(self, buf)
                                                  if #buf >= 20 then
-                                                                local servoCount = msp.mspHelper.readU8(buf)
+                                                                local servoCount = bg.mspHelper.readU8(buf)
                                                                 
                                                                 -- update master one in case changed
                                                                 rf2ethos.config.servoCount = servoCount
@@ -95,9 +95,9 @@ function msp.wakeupBgChecks()
                                                 120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
                                         }
                                 }
-                                msp.mspQueue:add(message)
+                                bg.mspQueue:add(message)
                                 
-                elseif (rf2ethos.config.servoOverride == nil) and msp.mspQueue:isProcessed() then
+                elseif (rf2ethos.config.servoOverride == nil) and bg.mspQueue:isProcessed() then
                                 local message = {
                                         command = 192, -- MSP_SERVO_OVERIDE
                                         processReply = function(self, buf)
@@ -105,7 +105,7 @@ function msp.wakeupBgChecks()
                                                  
                                                                 for i = 0, rf2ethos.config.servoCount do
                                                                         buf.offset = i
-                                                                        local servoOverride = msp.mspHelper.readU8(buf)
+                                                                        local servoOverride = bg.mspHelper.readU8(buf)
                                                                         if servoOverride == 0 then
                                                                                 rf2ethos.utils.log("Servo overide: true")
                                                                                 rf2ethos.config.servoOverride = true
@@ -118,96 +118,96 @@ function msp.wakeupBgChecks()
                                         end,
                                         simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
                                 }
-                                msp.mspQueue:add(message)
+                                bg.mspQueue:add(message)
                                 
                                 -- do this at end of last one
-                                msp.wakeupBgChecksInit = false
+                                bg.wakeupBgChecksInit = false
                 end        
         end
 
   
 end
 
-function msp.resetState()
+function bg.resetState()
         rf2ethos.config.servoOverride = nil
         rf2ethos.config.servoCount = nil
         rf2ethos.config.tailMode = nil
         rf2ethos.config.apiVersion = nil
 end
 
-function msp.wakeup()
+function bg.wakeup()
 
         -- check what protocol is in use
         local telemetrySOURCE = system.getSource("Rx RSSI1")
         if telemetrySOURCE ~= nil then
-           msp.activeProtocol = "crsf"
+           bg.activeProtocol = "crsf"
         else
-           msp.activeProtocol = "smartPort"
+           bg.activeProtocol = "smartPort"
         end
         
         -- tasks dont have a create function
         -- so we handle this here with a loop that
         -- runs only once
-        if msp.init == true then
+        if bg.init == true then
 
                 -- get sensor for msp comms
-                msp.sensor = sport.getSensor({primId = 0x32})
-                msp.mspQueue = mspQueue
+                bg.sensor = sport.getSensor({primId = 0x32})
+                bg.mspQueue = mspQueue
                 if rf2ethos.rssiSensor then
                         rf2ethos.sensor:module(rf2ethos.rssiSensor:module())
                 end
                 
                 -- set active protocol to use
-                msp.protocol = protocol.getProtocol()
+                bg.protocol = protocol.getProtocol()
          
                 -- preload all transport methods
-                msp.protocolTransports = {}
+                bg.protocolTransports = {}
                 for i,v in pairs(protocol.getTransports()) do
-                        msp.protocolTransports[i] = assert(compile.loadScript(config.toolDir .. v))()
+                        bg.protocolTransports[i] = assert(compile.loadScript(config.toolDir .. v))()
                 end
          
                 -- set active transport table to use
-                local transport = msp.protocolTransports[msp.protocol.mspProtocol]
-                msp.protocol.mspRead = transport.mspRead
-                msp.protocol.mspSend = transport.mspSend
-                msp.protocol.mspWrite = transport.mspWrite
-                msp.protocol.mspPoll = transport.mspPoll
+                local transport = bg.protocolTransports[bg.protocol.mspProtocol]
+                bg.protocol.mspRead = transport.mspRead
+                bg.protocol.mspSend = transport.mspSend
+                bg.protocol.mspWrite = transport.mspWrite
+                bg.protocol.mspPoll = transport.mspPoll
                 
                 
-                msp.mspQueue = assert(compile.loadScript(config.toolDir .. "msp/mspQueue.lua"))()
-                msp.mspQueue.maxRetries = msp.protocol.maxRetries
-                msp.mspHelper = assert(compile.loadScript(config.toolDir .. "msp/mspHelper.lua"))()
+                bg.mspQueue = assert(compile.loadScript(config.toolDir .. "msp/mspQueue.lua"))()
+                bg.mspQueue.maxRetries = bg.protocol.maxRetries
+                bg.mspHelper = assert(compile.loadScript(config.toolDir .. "msp/mspHelper.lua"))()
                 assert(compile.loadScript(config.toolDir .. "msp/common.lua"))()                
 
-                msp.init = false
+                bg.init = false
         end 
  
 
-        if msp.activeProtocol ~= msp.protocol.mspProtocol then
-                rf2ethos.utils.log("Switching protocol: " .. msp.activeProtocol)
+        if bg.activeProtocol ~= bg.protocol.mspProtocol then
+                rf2ethos.utils.log("Switching protocol: " .. bg.activeProtocol)
                 
-                msp.protocol = protocol.getProtocol()
+                bg.protocol = protocol.getProtocol()
                 
                 -- set active transport table to use
-                local transport = msp.protocolTransports[msp.protocol.mspProtocol]
-                msp.protocol.mspRead = transport.mspRead
-                msp.protocol.mspSend = transport.mspSend
-                msp.protocol.mspWrite = transport.mspWrite
-                msp.protocol.mspPoll = transport.mspPoll  
+                local transport = bg.protocolTransports[bg.protocol.mspProtocol]
+                bg.protocol.mspRead = transport.mspRead
+                bg.protocol.mspSend = transport.mspSend
+                bg.protocol.mspWrite = transport.mspWrite
+                bg.protocol.mspPoll = transport.mspPoll  
 
-                msp.resetState()                
-                msp.wakeupBgChecksInit = true         
+                bg.resetState()                
+                bg.wakeupBgChecksInit = true         
         end  
         
         if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == false then
-                msp.resetState()
-                msp.wakeupBgChecksInit = true 
+                bg.resetState()
+                bg.wakeupBgChecksInit = true 
         end
  
         -- this should be before bgchecks
         -- doing this is heavy - lets run it every few seconds only
         local now = os.clock()
-        if (now - rssiCheckScheduler) >= 5 or msp.init == true then
+        if (now - rssiCheckScheduler) >= 5 or bg.init == true then
                         rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
                         rssiCheckScheduler = now
         end
@@ -223,14 +223,14 @@ function msp.wakeup()
                 state = false
         end
         if state == true then           
-                msp.mspQueue:processQueue()  
-                if msp.wakeupBgChecksInit == true then
-                        msp.wakeupBgChecks()
+                bg.mspQueue:processQueue()  
+                if bg.wakeupBgChecksInit == true then
+                        bg.wakeupBgChecks()
                 end                
         else
-                msp.mspQueue:clear()
+                bg.mspQueue:clear()
         end        
         rf2ethos.backgroundMsp = true 
 end
 
-return msp
+return bg

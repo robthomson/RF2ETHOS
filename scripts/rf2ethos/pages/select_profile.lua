@@ -32,7 +32,7 @@ local function setPidProfile(profileIndex)
                 end,
                 simulatorResponse = {}
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function setRateProfile(profileIndex)
@@ -45,7 +45,7 @@ local function setRateProfile(profileIndex)
                 end,
                 simulatorResponse = {}
         }
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 local function onSaveMenu()

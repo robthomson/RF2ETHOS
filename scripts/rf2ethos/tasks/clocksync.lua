@@ -31,19 +31,19 @@ function clocksync.setRtc(callback, callbackParam)
         local now = os.time()
         -- format: seconds after the epoch / milliseconds
         for i = 1, 4 do
-                rf2ethos.msp.mspHelper.writeU8(message.payload, now & 0xFF)
+                rf2ethos.bg.mspHelper.writeU8(message.payload, now & 0xFF)
                 now = now >> 8
         end
         -- we don't have milliseconds
 
-        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.bg.mspHelper.writeU16(message.payload, 0)
 
-        rf2ethos.msp.mspQueue:add(message)
+        rf2ethos.bg.mspQueue:add(message)
 end
 
 function clocksync.onRtcSet()
         system.playTone(1600, 500, 0)
-        clocksync.timeIsSetProtocol = rf2ethos.msp.protocol.mspProtocol
+        clocksync.timeIsSetProtocol = rf2ethos.bg.protocol.mspProtocol
         clocksync.timeIsSet = true
         ELRS_PAUSE_TELEMETRY = false
         CRSF_PAUSE_TELEMETRY = false
@@ -67,7 +67,7 @@ function clocksync.wakeup()
 
         if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == true then
                 -- set the time
-                if clocksync.timeIsSet == false and rf2ethos.msp.mspQueue:isProcessed() then 
+                if clocksync.timeIsSet == false and rf2ethos.bg.mspQueue:isProcessed() then 
                         clocksync.setRtc(clocksync.onRtcSet) 
                 end
         else
