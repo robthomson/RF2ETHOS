@@ -414,7 +414,7 @@ function rf2elrstelemetry.run()
     
     -- quick kill if not using crsf as this script
     -- is only for crsf code
-    if rf2ethos.protocol.mspProtocol ~= "crsf" then
+    if rf2ethos.msp.protocol.mspProtocol ~= "crsf" then
         return
     end
 

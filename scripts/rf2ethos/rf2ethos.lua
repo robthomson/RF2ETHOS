@@ -259,19 +259,7 @@ function app.sportTelemetryPop()
     return frame:physId(), frame:primId(), frame:appId(), frame:value()
 end
 
--- PUSH THE TELEMETRY FRAME
-function app.sportTelemetryPush(sensorId, frameId, dataId, value)
-    -- OpenTX:
-    -- When called without parameters, it will only return the status of the output buffer without sending anything.
-    --   Equivalent in Ethos may be:   sensor:idle() ???
-    -- @param sensorId  physical sensor ID
-    -- @param frameId   frame ID
-    -- @param dataId    data ID
-    -- @param value     value
-    -- @retval boolean  data queued in output buffer or not.
-    -- @retval nil      incorrect telemetry protocol.  (added in 2.3.4)
-    return app.sensor:pushFrame({physId = sensorId, primId = frameId, appId = dataId, value = value})
-end
+
 
 -- RETURN CURRENT LCD SIZE
 function app.getWindowSize()

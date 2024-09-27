@@ -8,11 +8,42 @@ local REPLY_FRAME_ID = 0x32
 
 local lastSensorId, lastFrameId, lastDataId, lastValue
 
+
+-- PUSH THE TELEMETRY FRAME
+function transport.sportTelemetryPush(sensorId, frameId, dataId, value)
+    -- OpenTX:
+    -- When called without parameters, it will only return the status of the output buffer without sending anything.
+    --   Equivalent in Ethos may be:   sensor:idle() ???
+    -- @param sensorId  physical sensor ID
+    -- @param frameId   frame ID
+    -- @param dataId    data ID
+    -- @param value     value
+    -- @retval boolean  data queued in output buffer or not.
+    -- @retval nil      incorrect telemetry protocol.  (added in 2.3.4)
+    return rf2ethos.msp.sensor:pushFrame({physId = sensorId, primId = frameId, appId = dataId, value = value})
+end
+
+-- GRAB THE SPORT TELEMETRY FRAME
+function transport.sportTelemetryPop()
+    -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
+    local frame = rf2ethos.msp.sensor:popFrame()
+    if frame == nil then return nil, nil, nil, nil end
+    -- physId = physical / remote sensor Id (aka sensorId)
+    --   0x00 for FPORT, 0x1B for SmartPort
+    -- primId = frame ID  (should be 0x32 for reply frames)
+    -- appId = data Id
+    return frame:physId(), frame:primId(), frame:appId(), frame:value()
+end
+
+
+
 transport.mspSend = function(payload)
     local dataId = payload[1] + (payload[2] << 8)
     local value = 0
     for i = 3, #payload do value = value + (payload[i] << ((i - 3) * 8)) end
-    return rf2ethos.protocol.push(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
+    
+
+    return transport.sportTelemetryPush(LOCAL_SENSOR_ID, REQUEST_FRAME_ID, dataId, value)
 end
 
 transport.mspRead = function(cmd)
@@ -26,7 +57,7 @@ end
 -- Discards duplicate data from lua input buffer
 local function smartPortTelemetryPop()
     while true do
-        local sensorId, frameId, dataId, value = rf2ethos.sportTelemetryPop()
+        local sensorId, frameId, dataId, value = transport.sportTelemetryPop()
         if not sensorId then
             return nil
         elseif (lastSensorId == sensorId) and (lastFrameId == frameId) and (lastDataId == dataId) and (lastValue == value) then

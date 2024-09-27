@@ -97,7 +97,7 @@ local function openPage(pidx, title, script)
 
         line['rf'] = form.addLine("RF Protocol")
         fields['rf'] = form.addTextField(line['rf'], nil, function()
-            return string.upper(rf2ethos.protocol.mspProtocol)
+            return string.upper(rf2ethos.msp.protocol.mspProtocol)
         end, function(value)
         end)
         fields['rf']:enable(false)
@@ -156,7 +156,7 @@ local function openPage(pidx, title, script)
         local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = 200, h = rf2ethos.app.radio.navbuttonHeight}
 
         line['rf'] = form.addLine("RF protocol")
-        fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.protocol.mspProtocol))
+        fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.msp.protocol.mspProtocol))
 
         line['memory'] = form.addLine("Memory free")
         fields['memory'] = form.addStaticText(line['memory'], posText, rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB')

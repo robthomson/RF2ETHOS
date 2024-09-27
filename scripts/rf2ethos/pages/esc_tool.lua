@@ -20,7 +20,7 @@ local versionField
 local firmwareField
 
 local findTimeoutClock = os.clock()
-local findTimeout = math.floor(rf2ethos.protocol.pageReqTimeout * 0.5)
+local findTimeout = math.floor(rf2ethos.msp.protocol.pageReqTimeout * 0.5)
 
 local modelLine
 local modelText

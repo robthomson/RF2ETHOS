@@ -45,7 +45,7 @@ end
 
 function clocksync.onRtcSet()
     system.playTone(1600, 500, 0)
-    clocksync.timeIsSetProtocol = rf2ethos.protocol.mspProtocol
+    clocksync.timeIsSetProtocol = rf2ethos.msp.protocol.mspProtocol
     clocksync.timeIsSet = true
     ELRS_PAUSE_TELEMETRY = false
     CRSF_PAUSE_TELEMETRY = false

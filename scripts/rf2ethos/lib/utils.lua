@@ -411,31 +411,5 @@ function utils.convertPageValueTable(tbl, inc)
     return thetable
 end
 
--- this is used in multiple places - just gives easy way
--- to grab activeProfile or activeRateProfile in tmp var
--- you MUST set it to nil after you get it!
-function utils.mspGetCurrentProfile()
-    local message = {
-        command = 101, -- MSP_SERVO_CONFIGURATIONS
-        processReply = function(self, buf)
-        
-            if #buf >= 30 then
-        
-                buf.offset = 24
-                local activeProfile = rf2ethos.mspHelper.readU8(buf)
-                buf.offset = 26
-                local activeRate = rf2ethos.mspHelper.readU8(buf)                              
-            
-                              
-                rf2ethos.config.activeProfile = activeProfile + 1
-                rf2ethos.config.activeRateProfile = activeRate + 1
-
-            end 
-        end,
-        simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
-
-    }
-    rf2ethos.mspQueue:add(message)
-end
 
 return utils
