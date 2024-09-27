@@ -42,7 +42,7 @@ end
 
 local function wakeup()
 
-    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.msp.mspQueue:isProcessed()then       
         if rf2ethos.config.ethosRunningVersion >= 1516 then
             -- update active profile
             -- the check happens in postLoad      

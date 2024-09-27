@@ -20,7 +20,7 @@ local configs = {}
 
 local function servoCenterFocusAllOn(self)
 
-    rf2ethos.audio.playServoOverideEnable = true
+    rf2ethos.app.audio.playServoOverideEnable = true
 
     for i = 0, #configs do
         local message = {
@@ -28,7 +28,7 @@ local function servoCenterFocusAllOn(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 0)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -42,7 +42,7 @@ local function servoCenterFocusAllOff(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 2001)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -54,7 +54,7 @@ local function servoCenterFocusOff(self)
         payload = {servoIndex}
     }
     rf2ethos.mspHelper.writeU16(message.payload, 2001)
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
 end
@@ -65,7 +65,7 @@ local function servoCenterFocusOn(self)
         payload = {servoIndex}
     }
     rf2ethos.mspHelper.writeU16(message.payload, 0)
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -116,14 +116,14 @@ local function saveServoSettings(self)
         if rf2ethos.config.mspTxRxDebug == true then print(logData) end
 
     end
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
     
     -- write change to epprom
     local mspEepromWrite = {
     command = 250, 
     simulatorResponse = {}
     }
-    rf2ethos.mspQueue:add(mspEepromWrite)
+    rf2ethos.msp.mspQueue:add(mspEepromWrite)
 
 end
 
@@ -139,7 +139,7 @@ local function onSaveMenu()
         {
             label = "        OK        ",
             action = function()
-                rf2ethos.audio.playSaving = true
+                rf2ethos.app.audio.playSaving = true
                 isSaving = true
 
                 return true
@@ -192,7 +192,7 @@ local function wakeup(self)
 
             local now = os.clock()
             local settleTime = 0.85
-            if ((now - lastServoChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if ((now - lastServoChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
                 if currentServoCenter ~= lastSetServoCenter then
                     lastSetServoCenter = currentServoCenter
                     lastServoChangeTime = now
@@ -207,7 +207,7 @@ local function wakeup(self)
         triggerOverRide = false
 
         if rf2ethos.config.servoOverride == false then
-            rf2ethos.audio.playServoOverideEnable = true
+            rf2ethos.app.audio.playServoOverideEnable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
             rf2ethos.app.Page.servoCenterFocusAllOn(self)
             rf2ethos.config.servoOverride = true
@@ -223,7 +223,7 @@ local function wakeup(self)
             rf2ethos.app.formNavigationFields['save']:enable(false)
             
         else
-            rf2ethos.audio.playServoOverideDisable = true
+            rf2ethos.app.audio.playServoOverideDisable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
             rf2ethos.app.Page.servoCenterFocusAllOff(self)
             rf2ethos.config.servoOverride = false
@@ -296,7 +296,7 @@ local function getServoConfigurations(callback, callbackParam)
             120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
         }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getServoConfigurationsEnd(callbackParam)

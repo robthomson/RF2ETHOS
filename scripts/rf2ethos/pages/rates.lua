@@ -140,7 +140,7 @@ local function openPage(idx, title, script)
                 return value
             end, function(value)
                 f.value = rf2ethos.utils.saveFieldValue(f, value)
-                rf2ethos.saveValue(i)
+                rf2ethos.app.saveValue(i)
             end)
             if f.default ~= nil then
                 local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
@@ -167,7 +167,7 @@ end
 
 local function wakeup()
 
-    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.msp.mspQueue:isProcessed()then       
         if rf2ethos.config.ethosRunningVersion >= 1516 then
             -- update active profile
             -- the check happens in postLoad      

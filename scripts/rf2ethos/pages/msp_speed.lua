@@ -272,7 +272,7 @@ local function getMSPPidBandwidth()
         end,
         simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSPServos()
@@ -286,7 +286,7 @@ local function getMSPServos()
             120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
         }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSPPids()
@@ -297,7 +297,7 @@ local function getMSPPids()
         end,
         simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSP()
@@ -401,7 +401,7 @@ local function wakeup()
         end
 
         -- do msp query
-        if rf2ethos.mspQueue:isProcessed() then
+        if rf2ethos.msp.mspQueue:isProcessed() then
             mspSpeedTestStats['total'] = mspSpeedTestStats['total'] + 1
             mspQueryStartTime = os.clock()
             

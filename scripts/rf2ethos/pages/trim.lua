@@ -35,16 +35,16 @@ local function saveData()
 
     local payload = rf2ethos.app.Page.values
     local message = {command = 43, payload = payload}
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 
     local message = {command = 250, payload = {}}
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 
 end
 
 local function mixerOn(self)
 
-    rf2ethos.audio.playMixerOverideEnable = true
+    rf2ethos.app.audio.playMixerOverideEnable = true
 
     for i = 1, 4 do
 
@@ -53,7 +53,7 @@ local function mixerOn(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 0)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
 
     end
 
@@ -62,7 +62,7 @@ end
 
 local function mixerOff(self)
 
-    rf2ethos.audio.playMixerOverideDisable = true
+    rf2ethos.app.audio.playMixerOverideDisable = true
 
     for i = 1, 4 do
         local message = {
@@ -70,7 +70,7 @@ local function mixerOff(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 2501)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
     end
 
     rf2ethos.app.triggers.isReady = true
@@ -104,7 +104,7 @@ local function wakeup(self)
         currentRollTrim = rf2ethos.app.Page.fields[1].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentRollTrim ~= currentRollTrimLast then
                 currentRollTrimLast = currentRollTrim
                 lastChangeTime = now
@@ -115,7 +115,7 @@ local function wakeup(self)
         currentPitchTrim = rf2ethos.app.Page.fields[2].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentPitchTrim ~= currentPitchTrimLast then
                 currentPitchTrimLast = currentPitchTrim
                 lastChangeTime = now
@@ -126,7 +126,7 @@ local function wakeup(self)
         currentCollectiveTrim = rf2ethos.app.Page.fields[3].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentCollectiveTrim ~= currentCollectiveTrimLast then
                 currentCollectiveTrimLast = currentCollectiveTrim
                 lastChangeTime = now
@@ -138,7 +138,7 @@ local function wakeup(self)
             currentIdleThrottleTrim = rf2ethos.app.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85
-            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
                 if currentIdleThrottleTrim ~= currentIdleThrottleTrimLast then
                     currentIdleThrottleTrimLast = currentIdleThrottleTrim
                     lastChangeTime = now
@@ -151,7 +151,7 @@ local function wakeup(self)
             currentYawTrim = rf2ethos.app.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85
-            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
                 if currentYawTrim ~= currentYawTrimLast then
                     currentYawTrimLast = currentYawTrim
                     lastChangeTime = now
@@ -167,7 +167,7 @@ local function wakeup(self)
 
         if inOverRide == false then
 
-            rf2ethos.audio.playMixerOverideEnable = true
+            rf2ethos.app.audio.playMixerOverideEnable = true
 
             rf2ethos.app.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
 
@@ -175,7 +175,7 @@ local function wakeup(self)
             inOverRide = true
         else
 
-            rf2ethos.audio.playMixerOverideDisable = true
+            rf2ethos.app.audio.playMixerOverideDisable = true
 
             rf2ethos.app.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
 
@@ -232,7 +232,7 @@ end
 local function onNavMenu(self)
 
     if inOverRide == true or inFocus == true then
-        rf2ethos.audio.playMixerOverideDisable = true
+        rf2ethos.app.audio.playMixerOverideDisable = true
 
         inOverRide = false
         inFocus = false

@@ -261,7 +261,7 @@ local function getServoCount(callback, callbackParam)
             120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
         }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 
@@ -286,7 +286,7 @@ local function openPageInit(pidx, title, script)
                     120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
                 }
             }
-            rf2ethos.mspQueue:add(message)
+            rf2ethos.msp.mspQueue:add(message)
             
             local message = {
                 command = 192, -- MSP_SERVO_OVERIDE
@@ -308,7 +308,7 @@ local function openPageInit(pidx, title, script)
                 end,
                 simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
             }
-            rf2ethos.mspQueue:add(message)            
+            rf2ethos.msp.mspQueue:add(message)            
             
     end        
 end
@@ -393,12 +393,12 @@ local function wakeup()
         triggerOverRide = false
 
         if rf2ethos.config.servoOverride == false then
-            rf2ethos.audio.playServoOverideEnable = true
+            rf2ethos.app.audio.playServoOverideEnable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
             rf2ethos.app.Page.servoCenterFocusAllOn(self)
             rf2ethos.config.servoOverride = true
         else
-            rf2ethos.audio.playServoOverideDisable = true
+            rf2ethos.app.audio.playServoOverideDisable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
             rf2ethos.app.Page.servoCenterFocusAllOff(self)
             rf2ethos.config.servoOverride = false
@@ -406,7 +406,7 @@ local function wakeup()
     end
     
     local now = os.clock()
-    if ((now - lastServoCountTime) >= 2) and rf2ethos.mspQueue:isProcessed() then
+    if ((now - lastServoCountTime) >= 2) and rf2ethos.msp.mspQueue:isProcessed() then
             lastServoCountTime = now
             
             getServoCount()
@@ -423,7 +423,7 @@ end
 
 local function servoCenterFocusAllOn(self)
 
-    rf2ethos.audio.playServoOverideEnable = true
+    rf2ethos.app.audio.playServoOverideEnable = true
 
     for i = 0, #servoTable do
         local message = {
@@ -431,7 +431,7 @@ local function servoCenterFocusAllOn(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 0)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -445,7 +445,7 @@ local function servoCenterFocusAllOff(self)
             payload = {i}
         }
         rf2ethos.mspHelper.writeU16(message.payload, 2001)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -455,7 +455,7 @@ local function onNavMenu(self)
 
 
     if rf2ethos.config.servoOverride == true or inFocus == true then
-        rf2ethos.audio.playServoOverideDisable = true
+        rf2ethos.app.audio.playServoOverideDisable = true
         rf2ethos.config.servoOverride = false
         inFocus = false
         rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")

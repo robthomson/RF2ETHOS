@@ -45,7 +45,7 @@ local function getESCDetails()
         simulatorResponse = simulatorResponse
     }
 
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function openPage(pidx, title, script)
@@ -267,7 +267,7 @@ local function wakeup()
                 showPowerCycleLoaderInProgress = false
                 rf2ethos.app.triggers.disableRssiTimeout = false
                 showPowerCycleLoader = false
-                rf2ethos.audio.playTimeout = true
+                rf2ethos.app.audio.playTimeout = true
                 showPowerCycleLoaderFinished = true
                 rf2ethos.app.triggers.isReady = false
             end
@@ -279,7 +279,7 @@ local function wakeup()
     if showPowerCycleLoader == true then
         if showPowerCycleLoaderInProgress == false then
             showPowerCycleLoaderInProgress = true
-            rf2ethos.audio.playEscPowerCycle = true
+            rf2ethos.app.audio.playEscPowerCycle = true
             rf2ethos.app.triggers.disableRssiTimeout = true
             powercycleLoader = form.openProgressDialog("Searching...", "Please power cycle the speed controller...")
             powercycleLoader:value(0)

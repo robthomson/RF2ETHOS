@@ -52,7 +52,7 @@ local function getStatus()
         simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1}
     }
 
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getDataflashSummary()
@@ -70,7 +70,7 @@ local function getDataflashSummary()
         end,
         simulatorResponse = {3, 1, 0, 0, 0, 0, 4, 0, 0, 0, 3, 0, 0}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function eraseDataflash()
@@ -81,7 +81,7 @@ local function eraseDataflash()
         end,
         simulatorResponse = {}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function postLoad(self)
@@ -148,7 +148,7 @@ local function wakeup()
     if enableWakeup == false then return end
 
     if triggerEraseDataFlash == true then
-        rf2ethos.audio.playEraseFlash = true
+        rf2ethos.app.audio.playEraseFlash = true
         triggerEraseDataFlash = false
 
         rf2ethos.app.ui.progessDisplay("Erasing...", "Erasing dataflash.")
@@ -161,7 +161,7 @@ local function wakeup()
         if (now - wakeupScheduler) >= 2 then
             wakeupScheduler = now
             firstRun = false
-            if rf2ethos.mspQueue:isProcessed() then
+            if rf2ethos.msp.mspQueue:isProcessed() then
 
                 getStatus()
                 getDataflashSummary()

@@ -384,7 +384,6 @@ local function requestPage()
     
         app.Page.reqTS = os.clock()
         if app.Page.read then 
-            print("read")
             app.readPage() 
         end
     end

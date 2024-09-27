@@ -296,7 +296,7 @@ function ui.fieldChoice(f, i)
         if f.postEdit then f.postEdit(rf2ethos.app.Page, value) end
         if f.onChange then f.onChange(rf2ethos.app.Page, value) end
         f.value = rf2ethos.utils.saveFieldValue(f, value)
-        rf2ethos.saveValue(i)
+        rf2ethos.app.saveValue(i)
     end)
 
     if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
@@ -366,7 +366,7 @@ function ui.fieldNumber(f, i)
         if f.onChange then f.onChange(rf2ethos.app.Page) end
 
         f.value = rf2ethos.utils.saveFieldValue(f, value)
-        rf2ethos.saveValue(i)
+        rf2ethos.app.saveValue(i)
     end)
 
     if config.ethosRunningVersion >= 1514 then
@@ -496,7 +496,7 @@ function ui.fieldText(f, i)
         if f.onChange then f.onChange(rf2ethos.app.Page) end
 
         f.value = rf2ethos.utils.saveFieldValue(f, value)
-        rf2ethos.saveValue(i)
+        rf2ethos.app.saveValue(i)
     end)
 
     if config.ethosRunningVersion >= 1514 then
