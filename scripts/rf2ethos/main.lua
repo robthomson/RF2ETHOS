@@ -29,41 +29,13 @@ config.adjFunctionTaskKey = "rf2adjf"                               -- key id us
 -- LuaFormatter on
 
 
-
+rf2ethos = {}
 
 local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")
 
 local compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)
-rf2ethos = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
-
-local taskTimer = os.clock()
-local modelID = model.id()
-
-local function wakeup()
-    rf2ethos.wakeup()
-end
-
-local function paint()
-    rf2ethos.paint()
-end
-
-local function event(widget, category, value, x, y)
-    return rf2ethos.event(widget, category, value, x, y)
-end
-
-local function create()
-    rf2ethos.compile.initialise()
-    return rf2ethos.create()
-end
-
-local function close()
-    return rf2ethos.close()
-end
-
-local function background()
-    rf2ethos.background()
-end
-
+rf2ethos.app = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
+rf2ethos.utils = assert(compile.loadScript(config.toolDir .. "lib/utils.lua"))()
 
 local msp
 local function mspTask()
@@ -103,11 +75,11 @@ local function adjFunctionTask()
 end
 
 local function init()
-    system.registerSystemTool({event = event, name = config.toolName, icon = icon, create = create, wakeup = wakeup, paint = paint, close = close})
-    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = mspTask})
-    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSyncTask})
-    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetryTask})    
-    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunctionTask})    
+    system.registerSystemTool({event = rf2ethos.app.event, name = config.toolName, icon = icon, create = rf2ethos.app.create, wakeup = rf2ethos.app.wakeup, paint = rf2ethos.app.paint, close = rf2ethos.app.close})
+--    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = mspTask})
+--    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSyncTask})
+--    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetryTask})    
+--    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunctionTask})    
 end
 
 return {init = init}
