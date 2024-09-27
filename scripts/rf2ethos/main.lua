@@ -15,6 +15,7 @@ config.defaultRateTable = 4 -- ACTUAL                               -- default r
 config.supportedMspApiVersion = {"12.06", "12.07"}                  -- supported msp versions
 config.simulateOnTransmitter = false                                -- make the transmitter run as if its running in the SIM (no fbl required)
 config.skipRssiSensorCheck = false                                  -- skip checking for a valid signal when loading connecting to the fbl
+config.icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")        -- icon
 
 -- tasks
 config.mspTaskName = config.toolName .. " [Msp]"              -- background task name for msp services etc
@@ -28,14 +29,12 @@ config.adjFunctionTaskKey = "rf2adjf"                               -- key id us
 
 -- LuaFormatter on
 
-
 rf2ethos = {}
 
-local icon = lcd.loadMask(config.toolDir .. "gfx/icon.png")
 
 local compile = assert(loadfile(config.toolDir .. "compile.lua"))(config)
 rf2ethos.app = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
-rf2ethos.utils = assert(compile.loadScript(config.toolDir .. "lib/utils.lua"))()
+rf2ethos.utils = assert(compile.loadScript(config.toolDir .. "lib/utils.lua"))(config, compile)
 
 local msp
 local function mspTask()
@@ -75,7 +74,7 @@ local function adjFunctionTask()
 end
 
 local function init()
-    system.registerSystemTool({event = rf2ethos.app.event, name = config.toolName, icon = icon, create = rf2ethos.app.create, wakeup = rf2ethos.app.wakeup, paint = rf2ethos.app.paint, close = rf2ethos.app.close})
+    system.registerSystemTool({event = rf2ethos.app.event, name = config.toolName, icon = config.icon, create = rf2ethos.app.create, wakeup = rf2ethos.app.wakeup, paint = rf2ethos.app.paint, close = rf2ethos.app.close})
 --    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = mspTask})
 --    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSyncTask})
 --    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetryTask})    

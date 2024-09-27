@@ -45,7 +45,7 @@ app.triggers = triggers
 
 
 app.ui = {}
-app.ui = assert(loadfile(config.toolDir .. "lib/ui.lua"))()
+app.ui = assert(loadfile(config.toolDir .. "lib/ui.lua"))(config, compile)
 
 app.formFields = {}
 app.formNavigationFields = {}
@@ -189,7 +189,7 @@ function app.profileSwitchCheck()
     -- load and cache the switch on first run
     if app.config.profileswitchParamPreference == nil then
         app.config.profileswitchParamPreference = app.preferences.interface.profileSwitch
-        local s = app.utils.explode(app.config.profileswitchParamPreference, ",")
+        local s = rf2ethos.utils.explode(app.config.profileswitchParamPreference, ",")
         app.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
     end
     -- store the last state
@@ -202,7 +202,7 @@ function app.rateSwitchCheck()
     -- load and cache the switch on first run
     if app.config.rateswitchParamPreference == nil then
         app.config.rateswitchParamPreference = app.preferences.interface.rateSwitch
-        local s = app.utils.explode(app.config.rateswitchParamPreference, ",")
+        local s = rf2ethos.utils.explode(app.config.rateswitchParamPreference, ",")
         app.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
     end
 
@@ -243,7 +243,7 @@ function app.dataBindFields()
             end
         end
     else
-        app.utils.log("Unable to bind fields as app.Page.fields does not exist")
+        rf2ethos.utils.log("Unable to bind fields as app.Page.fields does not exist")
     end
 end
 
@@ -343,15 +343,15 @@ local mspLoadSettings = {
     processReply = function(self, buf)
 
         if app.Page.minBytes == nil then app.Page.minBytes = 0 end
-        app.utils.log("app.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. app.Page.minBytes)
+        rf2ethos.utils.log("app.Page is processing reply for cmd " .. tostring(self.command) .. " len buf: " .. #buf .. " expected: " .. app.Page.minBytes)
         if app.Page ~= nil then
             app.Page.values = buf
             if app.Page.postRead then app.Page.postRead(app.Page) end
             app.dataBindFields()
             if app.Page.postLoad then app.Page.postLoad(app.Page) end
-            app.utils.log("app.triggers.isReady")
+            rf2ethos.utils.log("app.triggers.isReady")
         else
-            app.utils.log("app.triggers.isReady app.Page is nil?")
+            rf2ethos.utils.log("app.triggers.isReady app.Page is nil?")
         end
 
     end
@@ -383,9 +383,9 @@ local function saveSettings()
 
             if app.config.mspTxRxDebug == true or app.config.logEnable == true then
 
-                local logData = "Saving:        {" .. app.utils.joinTableItems(payload, ", ") .. "}"
+                local logData = "Saving:        {" .. rf2ethos.utils.joinTableItems(payload, ", ") .. "}"
 
-                app.utils.log(logData)
+                rf2ethos.utils.log(logData)
 
                 if app.config.mspTxRxDebug == true then print(logData) end
 
@@ -794,7 +794,7 @@ function app.wakeupUI()
     if app.uiState == app.uiStatus.mainMenu and app.dialogs.nolinkDisplay == false then
 
         local apiVersionAsString = tostring(app.config.apiVersion)
-        if not app.utils.stringInArray(app.config.supportedMspApiVersion, apiVersionAsString) then
+        if not rf2ethos.utils.stringInArray(app.config.supportedMspApiVersion, apiVersionAsString) then
             app.triggers.badMspVersion = true
         else
             app.triggers.badMspVersion = false
@@ -1024,10 +1024,10 @@ function app.create()
 
     --config.apiVersion = nil
     config.environment = system.getVersion()
-    config.ethosRunningVersion = app.utils.ethosVersion()
+    config.ethosRunningVersion = rf2ethos.utils.ethosVersion()
     
 
-    app.config.lcdWidth, app.config.lcdHeight = app.utils.getWindowSize()
+    app.config.lcdWidth, app.config.lcdHeight = rf2ethos.utils.getWindowSize()
     app.radio = assert(loadfile(app.config.toolDir .. "radios.lua"))().msp
 
     app.fieldHelpTxt = assert(loadfile(app.config.toolDir .. "help/fields.lua"))()
@@ -1038,7 +1038,7 @@ function app.create()
 
     if system:getVersion().simulation == false then
         local simpref = app.preferences.advanced.demoSwitch
-        local s = app.utils.explode(simpref, ",")
+        local s = rf2ethos.utils.explode(simpref, ",")
         local simParam = system.getSource({category = s[1], member = s[2]})
         if tonumber(simParam:value()) == 100 then
             config.simulateOnTransmitter = true
@@ -1069,7 +1069,7 @@ function app.create()
                 }
             }
 
-            if tonumber(app.utils.makeNumber(app.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
+            if tonumber(rf2ethos.utils.makeNumber(app.config.environment.major .. config.environment.minor .. config.environment.revision)) < 1590 then
                 form.openDialog("Warning", config.ethosVersionString, buttons, 1)
             else
                 form.openDialog({
