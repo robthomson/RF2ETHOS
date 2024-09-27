@@ -27,7 +27,7 @@ local function servoCenterFocusAllOn(self)
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
         rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
@@ -41,7 +41,7 @@ local function servoCenterFocusAllOff(self)
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 2001)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 2001)
         rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
@@ -53,7 +53,7 @@ local function servoCenterFocusOff(self)
         command = 193, -- MSP_SET_SERVO_OVERRIDE
         payload = {servoIndex}
     }
-    rf2ethos.mspHelper.writeU16(message.payload, 2001)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, 2001)
     rf2ethos.msp.mspQueue:add(message)
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -64,7 +64,7 @@ local function servoCenterFocusOn(self)
         command = 193, -- MSP_SET_SERVO_OVERRIDE
         payload = {servoIndex}
     }
-    rf2ethos.mspHelper.writeU16(message.payload, 0)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
     rf2ethos.msp.mspQueue:add(message)
     rf2ethos.app.triggers.isReady = true
     rf2ethos.app.triggers.closeProgressLoader = true
@@ -98,15 +98,15 @@ local function saveServoSettings(self)
         command = 212, -- MSP_SET_SERVO_CONFIGURATION
         payload = {}
     }
-    rf2ethos.mspHelper.writeU8(message.payload, servoIndex)
-    rf2ethos.mspHelper.writeU16(message.payload, servoCenter)
-    rf2ethos.mspHelper.writeU16(message.payload, servoMin)
-    rf2ethos.mspHelper.writeU16(message.payload, servoMax)
-    rf2ethos.mspHelper.writeU16(message.payload, servoScaleNeg)
-    rf2ethos.mspHelper.writeU16(message.payload, servoScalePos)
-    rf2ethos.mspHelper.writeU16(message.payload, servoRate)
-    rf2ethos.mspHelper.writeU16(message.payload, servoSpeed)
-    rf2ethos.mspHelper.writeU16(message.payload, servoFlags)
+    rf2ethos.msp.mspHelper.writeU8(message.payload, servoIndex)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoCenter)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoMin)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoMax)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoScaleNeg)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoScalePos)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoRate)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoSpeed)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, servoFlags)
 
     if rf2ethos.config.mspTxRxDebug == true or rf2ethos.config.logEnable == true then
         local logData = "{" .. rf2ethos.utils.joinTableItems(message.payload, ", ") .. "}"
@@ -248,7 +248,7 @@ local function getServoConfigurations(callback, callbackParam)
     local message = {
         command = 120, -- MSP_SERVO_CONFIGURATIONS
         processReply = function(self, buf)
-            servoCount = rf2ethos.mspHelper.readU8(buf)
+            servoCount = rf2ethos.msp.mspHelper.readU8(buf)
             
             -- update master one in case changed
             rf2ethos.config.servoCount = servoCount
@@ -258,14 +258,14 @@ local function getServoConfigurations(callback, callbackParam)
                 local config = {}
 
                 config.name = servoTable[servoIndex + 1]['title']
-                config.mid = rf2ethos.mspHelper.readU16(buf)
-                config.min = rf2ethos.mspHelper.readS16(buf)
-                config.max = rf2ethos.mspHelper.readS16(buf)
-                config.scaleNeg = rf2ethos.mspHelper.readU16(buf)
-                config.scalePos = rf2ethos.mspHelper.readU16(buf)
-                config.rate = rf2ethos.mspHelper.readU16(buf)
-                config.speed = rf2ethos.mspHelper.readU16(buf)
-                config.flags = rf2ethos.mspHelper.readU16(buf)
+                config.mid = rf2ethos.msp.mspHelper.readU16(buf)
+                config.min = rf2ethos.msp.mspHelper.readS16(buf)
+                config.max = rf2ethos.msp.mspHelper.readS16(buf)
+                config.scaleNeg = rf2ethos.msp.mspHelper.readU16(buf)
+                config.scalePos = rf2ethos.msp.mspHelper.readU16(buf)
+                config.rate = rf2ethos.msp.mspHelper.readU16(buf)
+                config.speed = rf2ethos.msp.mspHelper.readU16(buf)
+                config.flags = rf2ethos.msp.mspHelper.readU16(buf)
 
                 if config.flags == 1 or config.flags == 3 then
                     config.reverse = 1

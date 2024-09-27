@@ -52,7 +52,7 @@ local function mixerOn(self)
             command = 191, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
         rf2ethos.msp.mspQueue:add(message)
 
     end
@@ -69,7 +69,7 @@ local function mixerOff(self)
             command = 191, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 2501)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 2501)
         rf2ethos.msp.mspQueue:add(message)
     end
 

@@ -240,7 +240,7 @@ local function getServoCount(callback, callbackParam)
     local message = {
         command = 120, -- MSP_SERVO_CONFIGURATIONS
         processReply = function(self, buf)
-            local servoCount = rf2ethos.mspHelper.readU8(buf)
+            local servoCount = rf2ethos.msp.mspHelper.readU8(buf)
             
             -- update master one in case changed
             rf2ethos.config.servoCountNew = servoCount
@@ -275,7 +275,7 @@ local function openPageInit(pidx, title, script)
                 command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
                      if #buf >= 10 then
-                            local servoCount = rf2ethos.mspHelper.readU8(buf)
+                            local servoCount = rf2ethos.msp.mspHelper.readU8(buf)
                             
                             -- update master one in case changed
                             rf2ethos.config.servoCount = servoCount
@@ -295,7 +295,7 @@ local function openPageInit(pidx, title, script)
                      
                             for i = 0, rf2ethos.config.servoCount do
                                 buf.offset = i
-                                local servoOverride = rf2ethos.mspHelper.readU8(buf)
+                                local servoOverride = rf2ethos.msp.mspHelper.readU8(buf)
                                 if servoOverride == 0 then
                                     rf2ethos.utils.log("Servo overide: true")
                                     rf2ethos.config.servoOverride = true
@@ -430,7 +430,7 @@ local function servoCenterFocusAllOn(self)
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
         rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
@@ -444,7 +444,7 @@ local function servoCenterFocusAllOff(self)
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 2001)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 2001)
         rf2ethos.msp.mspQueue:add(message)
     end
     rf2ethos.app.triggers.isReady = true
