@@ -895,8 +895,6 @@ function app.wakeupUI()
 
         app.ui.openPage(app.lastIdx, app.lastTitle, app.lastScript)
 
-        app.profileSwitchCheck()
-        app.rateSwitchCheck()
     end
 
     -- check if rate or profile switches have been toggled
