@@ -17,8 +17,6 @@ clocksync.timeIsSet = false
 clocksync.timeIsSetProtocol = nil
 
 
-local protocol = assert(loadfile(rf2ethos.config.toolDir .. "protocols.lua"))()
-
 function clocksync.setRtc(callback, callbackParam)
     local message = {
         command = 246, -- MSP_SET_RTC
@@ -33,14 +31,14 @@ function clocksync.setRtc(callback, callbackParam)
     local now = os.time()
     -- format: seconds after the epoch / milliseconds
     for i = 1, 4 do
-        rf2ethos.mspHelper.writeU8(message.payload, now & 0xFF)
+        rf2ethos.msp.mspHelper.writeU8(message.payload, now & 0xFF)
         now = now >> 8
     end
     -- we don't have milliseconds
 
-    rf2ethos.mspHelper.writeU16(message.payload, 0)
+    rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
 
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 function clocksync.onRtcSet()
@@ -52,7 +50,7 @@ function clocksync.onRtcSet()
     collectgarbage()
 end
 
-function clocksync.run()
+function clocksync.wakeup()
 
 
     if system:getVersion().simulation == true then
@@ -69,7 +67,7 @@ function clocksync.run()
 
     if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == true then
         -- set the time
-        if clocksync.timeIsSet == false and rf2ethos.mspQueue:isProcessed() then 
+        if clocksync.timeIsSet == false and rf2ethos.msp.mspQueue:isProcessed() then 
             clocksync.setRtc(clocksync.onRtcSet) 
         end
     else

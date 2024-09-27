@@ -404,7 +404,7 @@ function rf2elrstelemetry.crossfirePop()
     return false
 end
 
-function rf2elrstelemetry.run()
+function rf2elrstelemetry.wakeup()
 
     -- quick kill if background msp not running as we 
     -- use this to determin protocol type

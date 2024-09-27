@@ -2,6 +2,7 @@
 local MspQueueController = {}
 MspQueueController.__index = MspQueueController
 
+
 function MspQueueController.new()
     local self = setmetatable({}, MspQueueController)
     self.messageQueue = {}

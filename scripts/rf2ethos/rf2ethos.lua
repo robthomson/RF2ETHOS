@@ -247,17 +247,6 @@ function app.dataBindFields()
     end
 end
 
--- GRAB THE SPORT TELEMETRY FRAME
-function app.sportTelemetryPop()
-    -- Pops a received SPORT packet from the queue. Please note that only packets using a data ID within 0x5000 to 0x50FF (frame ID == 0x10), as well as packets with a frame ID equal 0x32 (regardless of the data ID) will be passed to the LUA telemetry receive queue.
-    local frame = app.sensor:popFrame()
-    if frame == nil then return nil, nil, nil, nil end
-    -- physId = physical / remote sensor Id (aka sensorId)
-    --   0x00 for FPORT, 0x1B for SmartPort
-    -- primId = frame ID  (should be 0x32 for reply frames)
-    -- appId = data Id
-    return frame:physId(), frame:primId(), frame:appId(), frame:value()
-end
 
 
 

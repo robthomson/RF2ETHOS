@@ -5,9 +5,9 @@ local config = {}
 config.toolName = "RF2ETHOS"                                        -- name of the tool
 config.toolDir = "/scripts/rf2ethos/"                               -- base path the script is installed into
 config.Version = "2.1.5"                                            -- version number of this software release
-config.logEnable = false                                            -- will log to: /scripts/rf2ethos/rf2ethos.log
-config.logEnableScreen = false                                      -- if config.logEnable is true then also print to screen
-config.mspTxRxDebug = false                                         -- simple print of full msp payload that is sent and received
+config.logEnable = true                                            -- will log to: /scripts/rf2ethos/rf2ethos.log
+config.logEnableScreen = true                                      -- if config.logEnable is true then also print to screen
+config.mspTxRxDebug = true                                         -- simple print of full msp payload that is sent and received
 config.reloadOnSave = false                                         -- trigger a reload on save
 config.ethosVersion = 1514                                          -- min version of ethos supported by this script
 config.ethosVersionString = "ETHOS < V1.5.14"                       -- string to print if ethos version error occurs
@@ -35,43 +35,19 @@ rf2ethos = {}
 rf2ethos.config = config
 rf2ethos.app = assert(compile.loadScript(config.toolDir .. "rf2ethos.lua"))(config, compile)
 rf2ethos.utils = assert(compile.loadScript(config.toolDir .. "lib/utils.lua"))(config, compile)
-rf2ethos.msp = assert(compile.loadScript(config.toolDir .. "tasks/msp.lua"))(config,compile)
- 
+rf2ethos.msp = assert(compile.loadScript(config.toolDir .. "msp/msp.lua"))(config,compile)
 
-
-local elrsTelemetry
-local function elrsTelemetryTask()
-    if elrsTelemetry == nil then
-        elrsTelemetry = assert(compile.loadScript(config.toolDir .. "tasks/elrstelemetry.lua"))(config,compile)
-    else
-        elrsTelemetry.run()
-    end    
-end
-
-local clockSync
-local function clockSyncTask()
-    if clockSync == nil then
-        clockSync = assert(compile.loadScript(config.toolDir .. "tasks/clocksync.lua"))(config,compile)
-    else
-        clockSync.run()
-    end    
-end
-
-local adjFunction
-local function adjFunctionTask()
-    if adjFunction == nil then
-        adjFunction = assert(compile.loadScript(config.toolDir .. "tasks/adjfunctions.lua"))(config,compile)
-    else
-        adjFunction.run()
-    end    
-end
+rf2ethos.tasks = {}
+rf2ethos.tasks.clocksync = assert(compile.loadScript(config.toolDir .. "tasks/clocksync.lua"))(config,compile)
+rf2ethos.elrstelemetry = assert(compile.loadScript(config.toolDir .. "tasks/elrstelemetry.lua"))(config,compile)
+rf2ethos.adjfunctions = assert(compile.loadScript(config.toolDir .. "tasks/adjfunctions.lua"))(config,compile)
 
 local function init()
     system.registerSystemTool({event = rf2ethos.app.event, name = config.toolName, icon = config.icon, create = rf2ethos.app.create, wakeup = rf2ethos.app.wakeup, paint = rf2ethos.app.paint, close = rf2ethos.app.close})
-    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = rf2ethos.msp.run})
---    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = clockSyncTask})
---    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = elrsTelemetryTask})    
---    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = adjFunctionTask})    
+    system.registerTask({name = config.mspTaskName, key = config.mspTaskKey, wakeup = rf2ethos.msp.wakeup})
+    system.registerTask({name = config.clockSyncTaskName , key = config.clockSyncTaskKey, wakeup = rf2ethos.tasks.clocksync.wakeup})
+    system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = rf2ethos.elrstelemetry.wakeup})    
+    system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = rf2ethos.adjfunctions.wakeup})    
 end
 
 return {init = init}

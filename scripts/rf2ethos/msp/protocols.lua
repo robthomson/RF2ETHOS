@@ -2,7 +2,7 @@ local arg = {...}
 local config = arg[1]
 local compile = arg[2]
 
-protocols = {}
+protocol = {}
 
 local supportedProtocols =
 {
@@ -32,7 +32,7 @@ local supportedProtocols =
 }
 
 
-function protocols.getProtocol()
+function protocol.getProtocol()
     if system.getSource("Rx RSSI1") ~= nil then 
             return supportedProtocols.crsf 
     end
@@ -40,7 +40,7 @@ function protocols.getProtocol()
 end
 
 
-function protocols.getTransports()
+function protocol.getTransports()
     local transport = {}
     for i,v in pairs(supportedProtocols) do
         transport[i] = v.mspTransport
@@ -49,4 +49,4 @@ function protocols.getTransports()
 end
 
 
-return protocols
+return protocol

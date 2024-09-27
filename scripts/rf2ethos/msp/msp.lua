@@ -7,19 +7,19 @@ local compile = arg[2]
 
 -- declare vars
 local msp = {}
+
 msp.init = true
 msp.activeProtocol = nil
 
 rf2ethos.backgroundMsp = false
 
 msp.wakeupBgChecksInit = true
-msp.protocol = assert(compile.loadScript(config.toolDir .. "protocols.lua"))()
 
+local protocol = assert(compile.loadScript(config.toolDir .. "msp/protocols.lua"))()
 
 -- BACKGROUND checks
 function msp.wakeupBgChecks()
 
-   
     if msp.mspQueue ~= nil and msp.mspQueue:isProcessed()then
 
 
@@ -133,7 +133,7 @@ function msp.resetState()
     rf2ethos.config.apiVersion = nil
 end
 
-function msp.run()
+function msp.wakeup()
 
     -- check what protocol is in use
     local telemetrySOURCE = system.getSource("Rx RSSI1")
@@ -148,7 +148,6 @@ function msp.run()
     -- runs only once
     if msp.init == true then
 
-       
         -- get sensor for msp comms
         msp.sensor = sport.getSensor({primId = 0x32})
         msp.mspQueue = mspQueue
@@ -157,11 +156,11 @@ function msp.run()
         end
         
         -- set active protocol to use
-        msp.protocol = msp.protocol.getProtocol()
+        msp.protocol = protocol.getProtocol()
      
         -- preload all transport methods
         msp.protocolTransports = {}
-        for i,v in pairs(protocols.getTransports()) do
+        for i,v in pairs(protocol.getTransports()) do
             msp.protocolTransports[i] = assert(compile.loadScript(config.toolDir .. v))()
         end
      
@@ -184,7 +183,9 @@ function msp.run()
 
     if msp.activeProtocol ~= msp.protocol.mspProtocol then
         rf2ethos.utils.log("Switching protocol: " .. msp.activeProtocol)
+        
         msp.protocol = protocol.getProtocol()
+        
         -- set active transport table to use
         local transport = msp.protocolTransports[msp.protocol.mspProtocol]
         msp.protocol.mspRead = transport.mspRead
@@ -201,17 +202,21 @@ function msp.run()
         msp.wakeupBgChecksInit = true 
     end
  
-    -- bgchecks
-    -- keep cpu load down by running Form at reduced interval
-
-    if msp.wakeupBgChecksInit == true then
-        msp.wakeupBgChecks()
-    end
- 
-    rf2ethos.backgroundMsp = true
+    -- this should be before bgchecks
     rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
+
+    -- run the bg checks
     
-    msp.mspQueue:processQueue()   
+    local state = rf2ethos.rssiSensor:state()
+    if state == true then
+        rf2ethos.backgroundMsp = true        
+        msp.mspQueue:processQueue()  
+        if msp.wakeupBgChecksInit == true then
+            msp.wakeupBgChecks()
+        end        
+    else
+        msp.mspQueue:clear()
+    end    
     collectgarbage()
 end
 
