@@ -15,6 +15,8 @@ rf2ethos.backgroundMsp = false
 
 msp.wakeupBgChecksInit = true
 
+rssiCheckScheduler = os.clock()
+
 local protocol = assert(compile.loadScript(config.toolDir .. "msp/protocols.lua"))()
 
 -- BACKGROUND checks
@@ -203,7 +205,12 @@ function msp.wakeup()
     end
  
     -- this should be before bgchecks
-    rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
+    -- doing this is heavy - lets run it every few seconds only
+    local now = os.clock()
+    if (now - rssiCheckScheduler) >= 5 or msp.init == true then
+            rf2ethos.rssiSensor = rf2ethos.utils.getRssiSensor()
+            rssiCheckScheduler = now
+    end
 
     -- run the bg checks
     
@@ -223,7 +230,6 @@ function msp.wakeup()
     else
         msp.mspQueue:clear()
     end    
-    collectgarbage()
     rf2ethos.backgroundMsp = true 
 end
 

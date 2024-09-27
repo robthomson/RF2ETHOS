@@ -81,7 +81,6 @@ end
 
 function ui.progessDisplayClose()
     if rf2ethos.app.dialogs.progress ~= nil then rf2ethos.app.dialogs.progress:close() end
-    collectgarbage()
 end
 
 function ui.progessDisplayCloseAllowed(status)
@@ -94,7 +93,6 @@ end
 
 function ui.progessDisplaySaveClose()
     if rf2ethos.app.dialogs.progress ~= nil then rf2ethos.app.dialogs.save:close() end
-    collectgarbage()
 end
 
 function ui.progessDisplaySaveMessage(message)
@@ -107,7 +105,6 @@ end
 
 function ui.progessNolinkDisplayClose()
     rf2ethos.app.dialogs.noLink:close()
-    collectgarbage()
 end
 
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
@@ -242,7 +239,6 @@ function ui.openMainMenu()
 
     end
     
-    collectgarbage()
 end
 
 function ui.progressDisplay()
@@ -583,7 +579,7 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
     rf2ethos.formLines = {}
 
     rf2ethos.app.Page = assert(compile.loadScript(config.toolDir .. "pages/" .. script))()
-    collectgarbage()
+
 
     if rf2ethos.app.Page.openPage then
         rf2ethos.app.Page.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
@@ -645,7 +641,7 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
             end
         end
     end
-    collectgarbage()
+
 end
 
 function ui.navigationButtons(x, y, w, h)

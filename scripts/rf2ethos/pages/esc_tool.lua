@@ -239,9 +239,9 @@ local function wakeup()
     end
 
     if showPowerCycleLoaderFinished == false and foundESCupdateTag == false and showPowerCycleLoader == false and
-        ((findTimeoutClock <= os.clock() - findTimeout) or rf2ethos.dialogs.progressCounter >= 101) then
+        ((findTimeoutClock <= os.clock() - findTimeout) or rf2ethos.app.dialogs.progressCounter >= 101) then
         rf2ethos.app.ui.progessDisplayClose()
-        rf2ethos.dialogs.progressDisplay = false
+        rf2ethos.app.dialogs.progressDisplay = false
         rf2ethos.app.triggers.isReady = true
 
         if ESC.powerCycle ~= true then modelText = form.addStaticText(modelLine, modelTextPos, "UNKNOWN") end
