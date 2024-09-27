@@ -38,7 +38,7 @@ local function openPage(pidx, title, script)
 
     local w, h = rf2ethos.utils.getWindowSize()
 
-    local y = rf2ethos.radio.linePaddingTop
+    local y = rf2ethos.app.radio.linePaddingTop
 
     form.clear()
 
@@ -49,21 +49,21 @@ local function openPage(pidx, title, script)
     local buttonWs = buttonW - (buttonW * 20) / 100
     local x = w - 10
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            rf2ethos.ui.openMainMenu()
+            rf2ethos.app.ui.openMainMenu()
 
         end
     })
     rf2ethos.formNavigationFields['menu']:focus()
 
     -- ACTION BUTTON
-    rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "*",
         icon = nil,
         options = FONT_S,
@@ -77,7 +77,7 @@ local function openPage(pidx, title, script)
     -- HELP BUTTON
     local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
     local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-    rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "?",
         icon = nil,
         options = FONT_S,
@@ -87,7 +87,7 @@ local function openPage(pidx, title, script)
             if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
                 rf2ethos.Page.onHelpMenu(rf2ethos.Page)
             else
-                rf2ethos.ui.openPagehelp(help.data, section)
+                rf2ethos.app.ui.openPagehelp(help.data, section)
             end
         end
     })
@@ -153,7 +153,7 @@ local function openPage(pidx, title, script)
         
     else
 
-        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 200, h = rf2ethos.radio.navbuttonHeight}
+        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = 200, h = rf2ethos.app.radio.navbuttonHeight}
 
         line['rf'] = form.addLine("RF protocol")
         fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.protocol.mspProtocol))
@@ -319,7 +319,7 @@ end
 local function wakeup()
 
     if formLoaded == true then
-        rf2ethos.triggers.closeProgressLoader = true
+        rf2ethos.app.triggers.closeProgressLoader = true
         formLoaded = false
     end
 
@@ -435,7 +435,7 @@ function mspChecksum(self)
     if mspSpeedTest == true then mspSpeedTestStats['checksum'] = mspSpeedTestStats['checksum'] + 1 end
 end
 
-rf2ethos.uiState = rf2ethos.uiStatus.pages
+rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
 
 

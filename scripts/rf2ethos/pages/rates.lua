@@ -29,12 +29,12 @@ local function postLoad(self)
     if rf2ethos.activeRateTable ~= nil then
         if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
             rf2ethos.RateTable = rf2ethos.activeRateTable
-            rf2ethos.triggers.reload = true
+            rf2ethos.app.triggers.reload = true
             return
         end
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 
     rf2ethos.utils.mspGetCurrentProfile()
     activateWakeup = true    
@@ -42,7 +42,7 @@ local function postLoad(self)
 end
 
 local function flagRateChange(self)
-    rf2ethos.triggers.resetRates = true
+    rf2ethos.app.triggers.resetRates = true
 end
 
 local function openPage(idx, title, script)
@@ -55,13 +55,13 @@ local function openPage(idx, title, script)
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
     longPage = false
 
     form.clear()
 
-    rf2ethos.ui.fieldHeader(title)
+    rf2ethos.app.ui.fieldHeader(title)
 
     local numCols = #rf2ethos.Page.cols
 
@@ -69,8 +69,8 @@ local function openPage(idx, title, script)
     local screenWidth, screenHeight = rf2ethos.getWindowSize()
 
     local padding = 10
-    local paddingTop = rf2ethos.radio.linePaddingTop
-    local h = rf2ethos.radio.navbuttonHeight
+    local paddingTop = rf2ethos.app.radio.linePaddingTop
+    local h = rf2ethos.app.radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 10
     local positions = {}
@@ -130,7 +130,7 @@ local function openPage(idx, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            rf2ethos.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
+            rf2ethos.app.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
                 local value
                 if rf2ethos.activeRateTable == 0 then
                     value = 0
@@ -146,20 +146,20 @@ local function openPage(idx, title, script)
                 local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                 if f.mult ~= nil then default = math.floor(default * f.mult) end
                 if f.scale ~= nil then default = math.floor(default / f.scale) end
-                rf2ethos.formFields[i]:default(default)
+                rf2ethos.app.formFields[i]:default(default)
             else
-                rf2ethos.formFields[i]:default(0)
+                rf2ethos.app.formFields[i]:default(0)
             end
-            if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-            if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-            if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
+            if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
+            if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
+            if f.step ~= nil then rf2ethos.app.formFields[i]:step(f.step) end
             if f.help ~= nil then
                 if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                     local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                    rf2ethos.formFields[i]:help(helpTxt)
+                    rf2ethos.app.formFields[i]:help(helpTxt)
                 end
             end
-            if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+            if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
         end
     end
 
@@ -172,7 +172,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    

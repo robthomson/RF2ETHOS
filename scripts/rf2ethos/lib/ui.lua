@@ -42,7 +42,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplayValue(value, message)
 
-    --if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.app.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.app.dialogs.progress:value(value)
@@ -62,7 +62,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplaySaveValue(value, message)
 
-    --if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.app.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.app.dialogs.save:value(value)
@@ -113,7 +113,7 @@ end
 -- we wrap a simple rate limiter into this to prevent cpu overload when handling msp
 function ui.progessDisplayNoLinkValue(value, message)
 
-    --if rf2ethos.triggers.mspBusy == true then return end
+    --if rf2ethos.app.triggers.mspBusy == true then return end
 
     if value >= 100 then
         rf2ethos.app.dialogs.noLink:value(value)
@@ -144,12 +144,12 @@ function ui.openMainMenu()
 
     --rf2ethos.protocol.mspIntervalOveride = nil
 
-    rf2ethos.triggers.isReady = false
-    rf2ethos.uiState = rf2ethos.uiStatus.mainMenu
-    rf2ethos.triggers.disableRssiTimeout = false
+    rf2ethos.app.triggers.isReady = false
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.mainMenu
+    rf2ethos.app.triggers.disableRssiTimeout = false
 
     -- size of buttons
-    config.iconsizeParam = rf2ethos.preferences.interface.iconSize
+    config.iconsizeParam = rf2ethos.app.preferences.interface.iconSize
     if config.iconsizeParam == nil or config.iconsizeParam == "" then
         config.iconsizeParam = 1
     else
@@ -163,26 +163,26 @@ function ui.openMainMenu()
 
     -- TEXT ICONS
     if config.iconsizeParam == 0 then
-        padding = rf2ethos.radio.buttonPaddingSmall
-        buttonW = (config.lcdWidth - padding) / rf2ethos.radio.buttonsPerRow - padding
-        buttonH = rf2ethos.radio.navbuttonHeight
-        numPerRow = rf2ethos.radio.buttonsPerRow
+        padding = rf2ethos.app.radio.buttonPaddingSmall
+        buttonW = (config.lcdWidth - padding) / rf2ethos.app.radio.buttonsPerRow - padding
+        buttonH = rf2ethos.app.radio.navbuttonHeight
+        numPerRow = rf2ethos.app.radio.buttonsPerRow
     end
     -- SMALL ICONS
     if config.iconsizeParam == 1 then
 
-        padding = rf2ethos.radio.buttonPaddingSmall
-        buttonW = rf2ethos.radio.buttonWidthSmall
-        buttonH = rf2ethos.radio.buttonHeightSmall
-        numPerRow = rf2ethos.radio.buttonsPerRowSmall
+        padding = rf2ethos.app.radio.buttonPaddingSmall
+        buttonW = rf2ethos.app.radio.buttonWidthSmall
+        buttonH = rf2ethos.app.radio.buttonHeightSmall
+        numPerRow = rf2ethos.app.radio.buttonsPerRowSmall
     end
     -- LARGE ICONS
     if config.iconsizeParam == 2 then
 
-        padding = rf2ethos.radio.buttonPadding
-        buttonW = rf2ethos.radio.buttonWidth
-        buttonH = rf2ethos.radio.buttonHeight
-        numPerRow = rf2ethos.radio.buttonsPerRow
+        padding = rf2ethos.app.radio.buttonPadding
+        buttonW = rf2ethos.app.radio.buttonWidth
+        buttonH = rf2ethos.app.radio.buttonHeight
+        numPerRow = rf2ethos.app.radio.buttonsPerRow
     end
 
     local sc
@@ -190,8 +190,8 @@ function ui.openMainMenu()
 
     form.clear()
 
-    if rf2ethos.gfx_buttons["mainmenu"] == nil then rf2ethos.gfx_buttons["mainmenu"] = {} end
-    if rf2ethos.menuLastSelected["mainmenu"] == nil then rf2ethos.menuLastSelected["mainmenu"] = 1 end
+    if rf2ethos.app.gfx_buttons["mainmenu"] == nil then rf2ethos.app.gfx_buttons["mainmenu"] = {} end
+    if rf2ethos.app.menuLastSelected["mainmenu"] == nil then rf2ethos.app.menuLastSelected["mainmenu"] = 1 end
 
     for idx, value in ipairs(MainMenu.sections) do
 
@@ -204,35 +204,35 @@ function ui.openMainMenu()
             if pvalue.section == value.section then
 
                 if lc == 0 then
-                    if config.iconsizeParam == 0 then y = form.height() + rf2ethos.radio.buttonPaddingSmall end
-                    if config.iconsizeParam == 1 then y = form.height() + rf2ethos.radio.buttonPaddingSmall end
-                    if config.iconsizeParam == 2 then y = form.height() + rf2ethos.radio.buttonPadding end
+                    if config.iconsizeParam == 0 then y = form.height() + rf2ethos.app.radio.buttonPaddingSmall end
+                    if config.iconsizeParam == 1 then y = form.height() + rf2ethos.app.radio.buttonPaddingSmall end
+                    if config.iconsizeParam == 2 then y = form.height() + rf2ethos.app.radio.buttonPadding end
                 end
 
                 if lc >= 0 then x = (buttonW + padding) * lc end
 
                 if config.iconsizeParam ~= 0 then
-                    if rf2ethos.gfx_buttons["mainmenu"][pidx] == nil then
-                        rf2ethos.gfx_buttons["mainmenu"][pidx] = lcd.loadMask(config.toolDir .. "gfx/menu/" .. pvalue.image)
+                    if rf2ethos.app.gfx_buttons["mainmenu"][pidx] == nil then
+                        rf2ethos.app.gfx_buttons["mainmenu"][pidx] = lcd.loadMask(config.toolDir .. "gfx/menu/" .. pvalue.image)
                     end
                 else
-                    rf2ethos.gfx_buttons["mainmenu"][pidx] = nil
+                    rf2ethos.app.gfx_buttons["mainmenu"][pidx] = nil
                 end
 
-                rf2ethos.formFields[pidx] = form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
+                rf2ethos.app.formFields[pidx] = form.addButton(line, {x = x, y = y, w = buttonW, h = buttonH}, {
                     text = pvalue.title,
-                    icon = rf2ethos.gfx_buttons["mainmenu"][pidx],
+                    icon = rf2ethos.app.gfx_buttons["mainmenu"][pidx],
                     options = FONT_S,
                     paint = function()
                     end,
                     press = function()
-                        rf2ethos.menuLastSelected["mainmenu"] = pidx
-                        rf2ethos.ui.progessDisplay()
-                        rf2ethos.ui.openPage(pidx, pvalue.title, pvalue.script)
+                        rf2ethos.app.menuLastSelected["mainmenu"] = pidx
+                        rf2ethos.app.ui.progessDisplay()
+                        rf2ethos.app.ui.openPage(pidx, pvalue.title, pvalue.script)
                     end
                 })
 
-                if rf2ethos.menuLastSelected["mainmenu"] == pidx then rf2ethos.formFields[pidx]:focus() end
+                if rf2ethos.app.menuLastSelected["mainmenu"] == pidx then rf2ethos.app.formFields[pidx]:focus() end
 
                 lc = lc + 1
 
@@ -264,7 +264,7 @@ function ui.fieldChoice(f, i)
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
 
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
         posText = p.posText
@@ -287,7 +287,7 @@ function ui.fieldChoice(f, i)
         postText = nil
     end
 
-    rf2ethos.formFields[i] = form.addChoiceField(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
+    rf2ethos.app.formFields[i] = form.addChoiceField(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
         local value = rf2ethos.utils.getFieldValue(f)
 
         return value
@@ -299,13 +299,13 @@ function ui.fieldChoice(f, i)
         rf2ethos.saveValue(i)
     end)
 
-    if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+    if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
 end
 
 function ui.fieldNumber(f, i)
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
         posText = p.posText
@@ -313,7 +313,7 @@ function ui.fieldNumber(f, i)
 
         field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
     else
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         if f.t ~= nil then
 
@@ -357,7 +357,7 @@ function ui.fieldNumber(f, i)
 
     if minValue == nil then minValue = 0 end
     if maxValue == nil then maxValue = 0 end
-    rf2ethos.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
+    rf2ethos.app.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
         local value = rf2ethos.utils.getFieldValue(f)
 
         return value
@@ -371,7 +371,7 @@ function ui.fieldNumber(f, i)
 
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
-            rf2ethos.formFields[i]:onFocus(function()
+            rf2ethos.app.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
             end)
         end
@@ -381,20 +381,20 @@ function ui.fieldNumber(f, i)
         if f.offset ~= nil then f.default = f.default + f.offset end      
         local default = f.default * rf2ethos.utils.decimalInc(f.decimals)     
         if f.mult ~= nil then default = default * f.mult end
-        rf2ethos.formFields[i]:default(default)
+        rf2ethos.app.formFields[i]:default(default)
     else
-        rf2ethos.formFields[i]:default(0)
+        rf2ethos.app.formFields[i]:default(0)
     end
 
-    if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-    if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-    if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
-    if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+    if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
+    if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
+    if f.step ~= nil then rf2ethos.app.formFields[i]:step(f.step) end
+    if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
 
     if f.help ~= nil then
         if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
             local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-            rf2ethos.formFields[i]:help(helpTxt)
+            rf2ethos.app.formFields[i]:help(helpTxt)
         end
     end
 
@@ -403,7 +403,7 @@ end
 function ui.fieldStaticText(f, i)
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
         posText = p.posText
@@ -411,7 +411,7 @@ function ui.fieldStaticText(f, i)
 
         field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
     else
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         if f.t ~= nil then
 
@@ -436,26 +436,26 @@ function ui.fieldStaticText(f, i)
         -- posField = {x = 2000, y = 0, w = 20, h = 20}
     end
 
-    rf2ethos.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.getFieldValue(f))
+    rf2ethos.app.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.getFieldValue(f))
 
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
-            rf2ethos.formFields[i]:onFocus(function()
+            rf2ethos.app.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
             end)
         end
     end
 
-    if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-    if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-    if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
+    if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
+    if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
+    if f.step ~= nil then rf2ethos.app.formFields[i]:step(f.step) end
 
 end
 
 function ui.fieldText(f, i)
 
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
         posText = p.posText
@@ -463,7 +463,7 @@ function ui.fieldText(f, i)
 
         field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
     else
-        if rf2ethos.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
+        if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
         if f.t ~= nil then
 
@@ -488,7 +488,7 @@ function ui.fieldText(f, i)
         -- posField = {x = 2000, y = 0, w = 20, h = 20}
     end
 
-    rf2ethos.formFields[i] = form.addTextField(rf2ethos.formLines[formLineCnt], posField, function()
+    rf2ethos.app.formFields[i] = form.addTextField(rf2ethos.formLines[formLineCnt], posField, function()
         local value = rf2ethos.utils.getFieldValue(f)
         return value
     end, function(value)
@@ -501,18 +501,18 @@ function ui.fieldText(f, i)
 
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
-            rf2ethos.formFields[i]:onFocus(function()
+            rf2ethos.app.formFields[i]:onFocus(function()
                 f.onFocus(rf2ethos.Page)
             end)
         end
     end
 
-    if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+    if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
 
     if f.help ~= nil then
         if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
             local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-            rf2ethos.formFields[i]:help(helpTxt)
+            rf2ethos.app.formFields[i]:help(helpTxt)
         end
     end
 
@@ -527,7 +527,7 @@ function ui.fieldLabel(f, i, l)
     end
 
     if f.label ~= nil then
-        local label = rf2ethos.ui.getLabel(f.label, l)
+        local label = rf2ethos.app.ui.getLabel(f.label, l)
 
         local labelValue = label.t
         local labelID = label.label
@@ -558,28 +558,28 @@ function ui.fieldHeader(title)
     -- column starts at 59.4% of w
     padding = 5
     colStart = math.floor(((w) * 59.4) / 100)
-    if rf2ethos.radio.navButtonOffset ~= nil then colStart = colStart - rf2ethos.radio.navButtonOffset end
+    if rf2ethos.app.radio.navButtonOffset ~= nil then colStart = colStart - rf2ethos.app.radio.navButtonOffset end
 
-    if rf2ethos.radio.buttonWidth == nil then
+    if rf2ethos.app.radio.buttonWidth == nil then
         buttonW = (w - colStart) / 3 - padding
     else
-        buttonW = rf2ethos.radio.menuButtonWidth
+        buttonW = rf2ethos.app.radio.menuButtonWidth
     end
-    buttonH = rf2ethos.radio.navbuttonHeight
+    buttonH = rf2ethos.app.radio.navbuttonHeight
 
-    rf2ethos.formFields['menu'] = form.addLine("")
+    rf2ethos.app.formFields['menu'] = form.addLine("")
     
 
-    rf2ethos.formFields['title'] = form.addStaticText(rf2ethos.formFields['menu'], {x = 0, y = rf2ethos.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, title)    
+    rf2ethos.app.formFields['title'] = form.addStaticText(rf2ethos.app.formFields['menu'], {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, title)    
     
-    rf2ethos.ui.navigationButtons(w - 5, rf2ethos.radio.linePaddingTop, buttonW, buttonH)
+    rf2ethos.app.ui.navigationButtons(w - 5, rf2ethos.app.radio.linePaddingTop, buttonW, buttonH)
 end
 
 function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
-    rf2ethos.formFields = {}
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
+    rf2ethos.app.triggers.isReady = false
+    rf2ethos.app.formFields = {}
     rf2ethos.formLines = {}
 
     rf2ethos.Page = assert(compile.loadScript(config.toolDir .. "pages/" .. script))()
@@ -595,8 +595,8 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
 
         local fieldAR = {}
 
-        rf2ethos.uiState = rf2ethos.uiStatus.pages
-        rf2ethos.triggers.isReady = false
+        rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
+        rf2ethos.app.triggers.isReady = false
 
         longPage = false
 
@@ -605,15 +605,15 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
         rf2ethos.lastPage = script
 
         if rf2ethos.Page.pageTitle ~= nil then
-            rf2ethos.ui.fieldHeader(rf2ethos.Page.pageTitle)
+            rf2ethos.app.ui.fieldHeader(rf2ethos.Page.pageTitle)
         else
-            rf2ethos.ui.fieldHeader(title)
+            rf2ethos.app.ui.fieldHeader(title)
         end
 
         if rf2ethos.Page.headerLine ~= nil then
             local headerLine = form.addLine("")
             local headerLineText =
-                form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
+                form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
         end
 
 
@@ -626,20 +626,20 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
             local pageIdx = i
             local currentField = i
 
-            rf2ethos.ui.fieldLabel(f, i, l)
+            rf2ethos.app.ui.fieldLabel(f, i, l)
 
             if f.hidden ~= true then
 
                 if f.type == 0 then
-                    rf2ethos.ui.fieldStaticText(f, i)
+                    rf2ethos.app.ui.fieldStaticText(f, i)
                 elseif f.table or f.type == 1 then
-                    rf2ethos.ui.fieldChoice(f, i)
+                    rf2ethos.app.ui.fieldChoice(f, i)
                 elseif f.type == 2 then
-                    rf2ethos.ui.fieldNumber(f, i)
+                    rf2ethos.app.ui.fieldNumber(f, i)
                 elseif f.type == 3 then
-                    rf2ethos.ui.fieldText(f, i)
+                    rf2ethos.app.ui.fieldText(f, i)
                 else
-                    rf2ethos.ui.fieldNumber(f, i)
+                    rf2ethos.app.ui.fieldNumber(f, i)
                 end
 
             end
@@ -698,7 +698,7 @@ function ui.navigationButtons(x, y, w, h)
                 if rf2ethos.Page and rf2ethos.Page.onNavMenu then
                     rf2ethos.Page.onNavMenu(rf2ethos.Page)
                 else
-                    rf2ethos.ui.openMainMenu()
+                    rf2ethos.app.ui.openMainMenu()
                 end
             end
         })
@@ -718,7 +718,7 @@ function ui.navigationButtons(x, y, w, h)
                 if rf2ethos.Page and rf2ethos.Page.onSaveMenu then
                     rf2ethos.Page.onSaveMenu(rf2ethos.Page)
                 else
-                    rf2ethos.triggers.triggerSave = true
+                    rf2ethos.app.triggers.triggerSave = true
                 end
             end
         })
@@ -738,7 +738,7 @@ function ui.navigationButtons(x, y, w, h)
                 if rf2ethos.Page and rf2ethos.Page.onReloadMenu then
                     rf2ethos.Page.onReloadMenu(rf2ethos.Page)
                 else
-                    rf2ethos.triggers.triggerReload = true
+                    rf2ethos.app.triggers.triggerReload = true
                 end
                 return true
             end
@@ -775,7 +775,7 @@ function ui.navigationButtons(x, y, w, h)
                 if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
                     rf2ethos.Page.onHelpMenu(rf2ethos.Page)
                 else
-                    rf2ethos.ui.openPagehelp(help.data, section)
+                    rf2ethos.app.ui.openPagehelp(help.data, section)
                 end
             end
         })
@@ -801,9 +801,9 @@ function ui.openPagehelp(helpdata, section)
     local message = ""
 
     -- find point that qr starts
-    local qw = rf2ethos.radio.helpQrCodeSize
-    local qh = rf2ethos.radio.helpQrCodeSize + rf2ethos.radio.buttonPadding
-    local qx = (config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2) - rf2ethos.radio.buttonPadding
+    local qw = rf2ethos.app.radio.helpQrCodeSize
+    local qh = rf2ethos.app.radio.helpQrCodeSize + rf2ethos.app.radio.buttonPadding
+    local qx = (config.lcdWidth - qw - rf2ethos.app.radio.buttonPadding / 2) - rf2ethos.app.radio.buttonPadding
 
     -- wrap text because of image on right
     for k, v in ipairs(txtData) do
@@ -842,12 +842,12 @@ function ui.openPagehelp(helpdata, section)
             local h = config.lcdHeight
             local left = w * 0.75
 
-            local qw = rf2ethos.radio.helpQrCodeSize
-            local qh = rf2ethos.radio.helpQrCodeSize
+            local qw = rf2ethos.app.radio.helpQrCodeSize
+            local qh = rf2ethos.app.radio.helpQrCodeSize
 
             if qr ~= nil then
-                local qy = rf2ethos.radio.buttonPadding
-                local qx = config.lcdWidth - qw - rf2ethos.radio.buttonPadding / 2
+                local qy = rf2ethos.app.radio.buttonPadding
+                local qx = config.lcdWidth - qw - rf2ethos.app.radio.buttonPadding / 2
                 lcd.drawBitmap(qx, qy, bitmap, qw, qh)
             end
 

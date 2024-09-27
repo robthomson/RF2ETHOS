@@ -24,12 +24,12 @@ function MspQueueController:processQueue()
     if self:isProcessed() then
         ELRS_PAUSE_TELEMETRY = false
         CRSF_PAUSE_TELEMETRY = false
-        rf2ethos.triggers.mspBusy = false
+        rf2ethos.app.triggers.mspBusy = false
         return
     end
     ELRS_PAUSE_TELEMETRY = true
     CRSF_PAUSE_TELEMETRY = true
-    rf2ethos.triggers.mspBusy = true
+    rf2ethos.app.triggers.mspBusy = true
 
     if not self.currentMessage then
         self.currentMessage = popFirstElement(self.messageQueue)

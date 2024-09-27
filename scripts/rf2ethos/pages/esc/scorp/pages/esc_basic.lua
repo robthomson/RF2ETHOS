@@ -29,12 +29,12 @@ fields[#fields + 1] = {t = "BEC Voltage", min = 0, max = #becVoltage, vals = {ms
 -- fields[#fields + 1] = {t = "Telemetry Protocol", min = 0, max = #teleProtocol, vals = {mspHeaderBytes + 39, mspHeaderBytes + 40}, tableIdxInc = -1,table = teleProtocol}
 
 function postLoad()
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.triggers.escToolEnableButtons = true
-    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.app.triggers.escToolEnableButtons = true
+    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
@@ -42,7 +42,7 @@ local function event(widget, category, value, x, y)
     -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if category == 5 or value == 35 then
-        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
         return true
     end
 

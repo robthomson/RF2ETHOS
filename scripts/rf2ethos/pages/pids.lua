@@ -40,15 +40,15 @@ fields[16] = {help = "profilesBoost", row = 2, col = 6, min = 0, max = 1000, def
 fields[17] = {help = "profilesBoost", row = 3, col = 6, min = 0, max = 1000, default = 0, vals = {29, 30}}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
     rf2ethos.utils.mspGetCurrentProfile()
     activateWakeup = true
 end
 
 local function openPage(idx, title, script)
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
-    rf2ethos.triggers.isReady = false
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
+    rf2ethos.app.triggers.isReady = false
 
     rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
@@ -58,13 +58,13 @@ local function openPage(idx, title, script)
     rf2ethos.lastScript = script
     rf2ethos.lastPage = script
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
     longPage = false
 
     form.clear()
 
-    rf2ethos.ui.fieldHeader(title)
+    rf2ethos.app.ui.fieldHeader(title)
     local numCols
     if rf2ethos.Page.cols ~= nil then
         numCols = #rf2ethos.Page.cols
@@ -73,8 +73,8 @@ local function openPage(idx, title, script)
     end
     local screenWidth = rf2ethos.config.lcdWidth - 10
     local padding = 10
-    local paddingTop = rf2ethos.radio.linePaddingTop
-    local h = rf2ethos.radio.navbuttonHeight
+    local paddingTop = rf2ethos.app.radio.linePaddingTop
+    local h = rf2ethos.app.radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 20
     local positions = {}
@@ -120,7 +120,7 @@ local function openPage(idx, title, script)
             maxValue = maxValue * f.mult
         end
 
-        rf2ethos.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
+        rf2ethos.app.formFields[i] = form.addNumberField(pidRows[f.row], pos, minValue, maxValue, function()
             local value = rf2ethos.utils.getFieldValue(f)
             return value
         end, function(value)
@@ -130,16 +130,16 @@ local function openPage(idx, title, script)
         if f.default ~= nil then
             local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
             if f.mult ~= nil then default = default * f.mult end
-            rf2ethos.formFields[i]:default(default)
+            rf2ethos.app.formFields[i]:default(default)
         else
-            rf2ethos.formFields[i]:default(0)
+            rf2ethos.app.formFields[i]:default(0)
         end
-        if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-        if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
+        if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
+        if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
         if f.help ~= nil then
             if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
                 local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                rf2ethos.formFields[i]:help(helpTxt)
+                rf2ethos.app.formFields[i]:help(helpTxt)
             end
         end
     end
@@ -156,7 +156,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeProfile)
                 currentProfileChecked = true
             end    
         end    

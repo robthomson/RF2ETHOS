@@ -57,7 +57,7 @@ local function mixerOn(self)
 
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function mixerOff(self)
@@ -73,7 +73,7 @@ local function mixerOff(self)
         rf2ethos.mspQueue:add(message)
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function postLoad(self)
@@ -81,7 +81,7 @@ local function postLoad(self)
     if rf2ethos.config.tailMode == nil then
         local v = rf2ethos.Page.values[2]
         rf2ethos.config.tailMode = math.floor(v)
-        rf2ethos.triggers.reload = true
+        rf2ethos.app.triggers.reload = true
         return
     end
 
@@ -93,7 +93,7 @@ local function postLoad(self)
     if rf2ethos.config.tailModeActive == 1 or rf2ethos.config.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.Page.fields[4].value end
 
     if rf2ethos.config.tailModeActive == 0 then currentYawTrim = rf2ethos.Page.fields[4].value end
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function wakeup(self)
@@ -169,7 +169,7 @@ local function wakeup(self)
 
             rf2ethos.audio.playMixerOverideEnable = true
 
-            rf2ethos.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
+            rf2ethos.app.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
 
             rf2ethos.Page.mixerOn(self)
             inOverRide = true
@@ -177,7 +177,7 @@ local function wakeup(self)
 
             rf2ethos.audio.playMixerOverideDisable = true
 
-            rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+            rf2ethos.app.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
 
             rf2ethos.Page.mixerOff(self)
             inOverRide = false
@@ -237,13 +237,13 @@ local function onNavMenu(self)
         inOverRide = false
         inFocus = false
 
-        rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+        rf2ethos.app.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
 
         mixerOff(self)
-        rf2ethos.triggers.closeProgressLoader = true
+        rf2ethos.app.triggers.closeProgressLoader = true
     end
 
-    rf2ethos.ui.openMainMenu()
+    rf2ethos.app.ui.openMainMenu()
 
 end
 

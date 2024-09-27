@@ -48,8 +48,8 @@ local function defaultRates(x)
 end
 
 local function preSavePayload(payload)
-    if rf2ethos.triggers.resetRates == true then
-        rf2ethos.triggers.resetRates = false
+    if rf2ethos.app.triggers.resetRates == true then
+        rf2ethos.app.triggers.resetRates = false
         rf2ethos.NewRateTable = rf2ethos.Page.values[1]
         payload = defaultRates(rf2ethos.NewRateTable)
     end
@@ -58,7 +58,7 @@ local function preSavePayload(payload)
 end
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
     rf2ethos.utils.mspGetCurrentProfile()
     activateWakeup = true
 end
@@ -71,7 +71,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    
@@ -84,7 +84,7 @@ local function postRead(self)
 end
 
 local function flagRateChange(self)
-    rf2ethos.triggers.resetRates = true
+    rf2ethos.app.triggers.resetRates = true
 end
 
 return {

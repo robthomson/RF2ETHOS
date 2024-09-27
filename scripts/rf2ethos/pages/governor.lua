@@ -25,7 +25,7 @@ fields[#fields + 1] = {t = "TTA bandwidth", help = "govTTABandwidth", min = 0, m
 fields[#fields + 1] = {t = "Precomp bandwidth", help = "govTTAPrecomp", min = 0, max = 250, unit = "Hz", default = 10, vals = {24}}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 return {

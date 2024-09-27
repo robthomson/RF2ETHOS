@@ -15,7 +15,7 @@ fields[#fields + 1] = {t = "TTA precomp", help = "mixerTTAPrecomp", min = 0, max
 fields[#fields + 1] = {t = "Tail Idle Thr%", help = "mixerTailMotorIdle", min = 0, max = 250, vals = {3}, decimals = 1, scale = 10, unit = "%"} 
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 return {

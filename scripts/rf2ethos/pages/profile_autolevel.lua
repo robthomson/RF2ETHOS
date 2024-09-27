@@ -17,7 +17,7 @@ labels[#labels + 1] = {t = "Horizon mode", inline_size = 13.6, label = 13}
 fields[#fields + 1] = {t = "Gain", help = "profilesHorizonModeGain", inline = 2, label = 13, min = 0, max = 200, default = 40, vals = {31}}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
     rf2ethos.utils.mspGetCurrentProfile()
     activateWakeup = true
 end
@@ -29,7 +29,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    
