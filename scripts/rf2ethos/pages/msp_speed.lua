@@ -32,13 +32,13 @@ mspSpeedTestStats['checksum'] = 0
 local function openPage(pidx, title, script)
 
 
-    rf2ethos.lastIdx = pidx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = pidx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     local w, h = rf2ethos.utils.getWindowSize()
 
-    local y = rf2ethos.radio.linePaddingTop
+    local y = rf2ethos.app.radio.linePaddingTop
 
     form.clear()
 
@@ -49,21 +49,21 @@ local function openPage(pidx, title, script)
     local buttonWs = buttonW - (buttonW * 20) / 100
     local x = w - 10
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonW, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            rf2ethos.ui.openMainMenu()
+            rf2ethos.app.ui.openMainMenu()
 
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
     -- ACTION BUTTON
-    rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "*",
         icon = nil,
         options = FONT_S,
@@ -76,18 +76,18 @@ local function openPage(pidx, title, script)
 
     -- HELP BUTTON
     local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
-    local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-    rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.radio.linePaddingTop, w = buttonWs, h = rf2ethos.radio.navbuttonHeight}, {
+    local section = string.gsub(rf2ethos.app.lastScript, ".lua", "") -- remove .lua
+    rf2ethos.app.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "?",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
-                rf2ethos.Page.onHelpMenu(rf2ethos.Page)
+            if rf2ethos.app.Page and rf2ethos.app.Page.onHelpMenu then
+                rf2ethos.app.Page.onHelpMenu(rf2ethos.app.Page)
             else
-                rf2ethos.ui.openPagehelp(help.data, section)
+                rf2ethos.app.ui.openPagehelp(help.data, section)
             end
         end
     })
@@ -97,7 +97,7 @@ local function openPage(pidx, title, script)
 
         line['rf'] = form.addLine("RF Protocol")
         fields['rf'] = form.addTextField(line['rf'], nil, function()
-            return string.upper(rf2ethos.protocol.mspProtocol)
+            return string.upper(rf2ethos.msp.protocol.mspProtocol)
         end, function(value)
         end)
         fields['rf']:enable(false)
@@ -153,10 +153,10 @@ local function openPage(pidx, title, script)
         
     else
 
-        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 200, h = rf2ethos.radio.navbuttonHeight}
+        local posText = {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = 200, h = rf2ethos.app.radio.navbuttonHeight}
 
         line['rf'] = form.addLine("RF protocol")
-        fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.protocol.mspProtocol))
+        fields['rf'] = form.addStaticText(line['rf'], posText, string.upper(rf2ethos.msp.protocol.mspProtocol))
 
         line['memory'] = form.addLine("Memory free")
         fields['memory'] = form.addStaticText(line['memory'], posText, rf2ethos.utils.round(system.getMemoryUsage().luaRamAvailable / 1000,2) .. 'kB')
@@ -272,7 +272,7 @@ local function getMSPPidBandwidth()
         end,
         simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSPServos()
@@ -286,7 +286,7 @@ local function getMSPServos()
             120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
         }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSPPids()
@@ -297,7 +297,7 @@ local function getMSPPids()
         end,
         simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getMSP()
@@ -319,7 +319,7 @@ end
 local function wakeup()
 
     if formLoaded == true then
-        rf2ethos.triggers.closeProgressLoader = true
+        rf2ethos.app.triggers.closeProgressLoader = true
         formLoaded = false
     end
 
@@ -401,7 +401,7 @@ local function wakeup()
         end
 
         -- do msp query
-        if rf2ethos.mspQueue:isProcessed() then
+        if rf2ethos.msp.mspQueue:isProcessed() then
             mspSpeedTestStats['total'] = mspSpeedTestStats['total'] + 1
             mspQueryStartTime = os.clock()
             
@@ -435,7 +435,7 @@ function mspChecksum(self)
     if mspSpeedTest == true then mspSpeedTestStats['checksum'] = mspSpeedTestStats['checksum'] + 1 end
 end
 
-rf2ethos.uiState = rf2ethos.uiStatus.pages
+rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
 
 

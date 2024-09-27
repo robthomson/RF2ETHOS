@@ -100,7 +100,7 @@ adjfunc.adjfuncValueChanged = false
 adjfunc.adjJustUp = false
 
 
-function adjfunc.run()
+function adjfunc.wakeup()
 
     if (os.clock() - initTime) < 5 then
         return

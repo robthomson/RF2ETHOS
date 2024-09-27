@@ -38,7 +38,7 @@ fields[#fields + 1] = {t = "Min", help = "gyroDynamicNotchMinHz", label = "line1
 fields[#fields + 1] = {t = "Max", help = "gyroDynamicNotchMaxHz", label = "line12", inline = 1, min = 100, max = 500, default = 245, unit = "Hz", vals = {24, 25}}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 return {

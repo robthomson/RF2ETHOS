@@ -97,21 +97,21 @@ end
 local function openPage(pidx, title, script)
 
 
-    rf2ethos.protocol.mspIntervalOveride = nil
+    rf2ethos.msp.protocol.mspIntervalOveride = nil
 
     if tonumber(rf2ethos.utils.makeNumber(rf2ethos.config.environment.major .. rf2ethos.config.environment.minor .. rf2ethos.config.environment.revision)) < rf2ethos.config.ethosVersion then return end
 
-    rf2ethos.triggers.isReady = false
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.app.triggers.isReady = false
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
     form.clear()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     -- size of buttons
-    rf2ethos.config.iconsizeParam = rf2ethos.preferences.interface.iconSize
+    rf2ethos.config.iconsizeParam = rf2ethos.app.preferences.interface.iconSize
     if rf2ethos.config.iconsizeParam == nil or rf2ethos.config.iconsizeParam == "" then
         rf2ethos.config.iconsizeParam = 1
     else
@@ -121,7 +121,7 @@ local function openPage(pidx, title, script)
     local w, h = rf2ethos.utils.getWindowSize()
     local windowWidth = w
     local windowHeight = h
-    local padding = rf2ethos.radio.buttonPadding
+    local padding = rf2ethos.app.radio.buttonPadding
 
     local sc
     local panel
@@ -129,7 +129,7 @@ local function openPage(pidx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW - 10
 
-    rf2ethos.ui.fieldHeader("Servos")
+    rf2ethos.app.ui.fieldHeader("Servos")
 
 
 
@@ -141,37 +141,37 @@ local function openPage(pidx, title, script)
     -- TEXT ICONS
     -- TEXT ICONS
     if rf2ethos.config.iconsizeParam == 0 then
-        padding = rf2ethos.radio.buttonPaddingSmall
-        buttonW = (rf2ethos.config.lcdWidth - padding) / rf2ethos.radio.buttonsPerRow - padding
-        buttonH = rf2ethos.radio.navbuttonHeight
-        numPerRow = rf2ethos.radio.buttonsPerRow
+        padding = rf2ethos.app.radio.buttonPaddingSmall
+        buttonW = (rf2ethos.config.lcdWidth - padding) / rf2ethos.app.radio.buttonsPerRow - padding
+        buttonH = rf2ethos.app.radio.navbuttonHeight
+        numPerRow = rf2ethos.app.radio.buttonsPerRow
     end
     -- SMALL ICONS
     if rf2ethos.config.iconsizeParam == 1 then
 
-        padding = rf2ethos.radio.buttonPaddingSmall
-        buttonW = rf2ethos.radio.buttonWidthSmall
-        buttonH = rf2ethos.radio.buttonHeightSmall
-        numPerRow = rf2ethos.radio.buttonsPerRowSmall
+        padding = rf2ethos.app.radio.buttonPaddingSmall
+        buttonW = rf2ethos.app.radio.buttonWidthSmall
+        buttonH = rf2ethos.app.radio.buttonHeightSmall
+        numPerRow = rf2ethos.app.radio.buttonsPerRowSmall
     end
     -- LARGE ICONS
     if rf2ethos.config.iconsizeParam == 2 then
 
-        padding = rf2ethos.radio.buttonPadding
-        buttonW = rf2ethos.radio.buttonWidth
-        buttonH = rf2ethos.radio.buttonHeight
-        numPerRow = rf2ethos.radio.buttonsPerRow
+        padding = rf2ethos.app.radio.buttonPadding
+        buttonW = rf2ethos.app.radio.buttonWidth
+        buttonH = rf2ethos.app.radio.buttonHeight
+        numPerRow = rf2ethos.app.radio.buttonsPerRow
     end
 
     local lc = 0
     local bx = 0
 
 
-    if rf2ethos.gfx_buttons["servos"] == nil then rf2ethos.gfx_buttons["servos"] = {} end
-    if rf2ethos.menuLastSelected["servos"] == nil then rf2ethos.menuLastSelected["servos"] = 1 end
+    if rf2ethos.app.gfx_buttons["servos"] == nil then rf2ethos.app.gfx_buttons["servos"] = {} end
+    if rf2ethos.app.menuLastSelected["servos"] == nil then rf2ethos.app.menuLastSelected["servos"] = 1 end
 
-    if rf2ethos.gfx_buttons["servos"] == nil then rf2ethos.gfx_buttons["servos"] = {} end
-    if rf2ethos.menuLastSelected["servos"] == nil then rf2ethos.menuLastSelected["servos"] = 1 end
+    if rf2ethos.app.gfx_buttons["servos"] == nil then rf2ethos.app.gfx_buttons["servos"] = {} end
+    if rf2ethos.app.menuLastSelected["servos"] == nil then rf2ethos.app.menuLastSelected["servos"] = 1 end
 
     for pidx, pvalue in ipairs(servoTable) do
 
@@ -179,50 +179,50 @@ local function openPage(pidx, title, script)
         
                 if pvalue.section == "swash" and lc == 0 then
                     local headerLine = form.addLine("")
-                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, headerLineText())
+                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, headerLineText())
                 end
 
                 if pvalue.section == "tail" then
                     local headerLine = form.addLine("")
-                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, "TAIL")
+                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, "TAIL")
                 end        
 
                 if pvalue.section == "other" then
                     local headerLine = form.addLine("")
-                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.radio.navbuttonHeight}, "TAIL")
+                    local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, "TAIL")
                 end 
         
                 if lc == 0 then
-                    if rf2ethos.config.iconsizeParam == 0 then y = form.height() + rf2ethos.radio.buttonPaddingSmall end
-                    if rf2ethos.config.iconsizeParam == 1 then y = form.height() + rf2ethos.radio.buttonPaddingSmall end
-                    if rf2ethos.config.iconsizeParam == 2 then y = form.height() + rf2ethos.radio.buttonPadding end
+                    if rf2ethos.config.iconsizeParam == 0 then y = form.height() + rf2ethos.app.radio.buttonPaddingSmall end
+                    if rf2ethos.config.iconsizeParam == 1 then y = form.height() + rf2ethos.app.radio.buttonPaddingSmall end
+                    if rf2ethos.config.iconsizeParam == 2 then y = form.height() + rf2ethos.app.radio.buttonPadding end
                 end
 
                 if lc >= 0 then bx = (buttonW + padding) * lc end
 
                 if rf2ethos.config.iconsizeParam ~= 0 then
-                    if rf2ethos.gfx_buttons["servos"][pidx] == nil then rf2ethos.gfx_buttons["servos"][pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/servos/" .. pvalue.image) end
+                    if rf2ethos.app.gfx_buttons["servos"][pidx] == nil then rf2ethos.app.gfx_buttons["servos"][pidx] = lcd.loadMask(rf2ethos.config.toolDir .. "gfx/servos/" .. pvalue.image) end
                 else
-                    rf2ethos.gfx_buttons["servos"][pidx] = nil
+                    rf2ethos.app.gfx_buttons["servos"][pidx] = nil
                 end
 
-                rf2ethos.formFields[pidx] = form.addButton(nil, {x = bx, y = y, w = buttonW, h = buttonH}, {
+                rf2ethos.app.formFields[pidx] = form.addButton(nil, {x = bx, y = y, w = buttonW, h = buttonH}, {
                     text = pvalue.title,
-                    icon = rf2ethos.gfx_buttons["servos"][pidx],
+                    icon = rf2ethos.app.gfx_buttons["servos"][pidx],
                     options = FONT_S,
                     paint = function()
                     end,
                     press = function()
-                        rf2ethos.menuLastSelected["servos"] = pidx
+                        rf2ethos.app.menuLastSelected["servos"] = pidx
                         rf2ethos.currentServoIndex = pidx
-                        rf2ethos.ui.progessDisplay()               
-                        rf2ethos.ui.openPage(pidx, pvalue.title, "servos_tool.lua",servoTable)
+                        rf2ethos.app.ui.progessDisplay()               
+                        rf2ethos.app.ui.openPage(pidx, pvalue.title, "servos_tool.lua",servoTable)
                     end
                 })
 
-                if pvalue.disabled == true then rf2ethos.formFields[pidx]:enable(false) end
+                if pvalue.disabled == true then rf2ethos.app.formFields[pidx]:enable(false) end
 
-                if rf2ethos.menuLastSelected["servos"] == pidx then rf2ethos.formFields[pidx]:focus() end
+                if rf2ethos.app.menuLastSelected["servos"] == pidx then rf2ethos.app.formFields[pidx]:focus() end
 
                 lc = lc + 1
 
@@ -231,7 +231,7 @@ local function openPage(pidx, title, script)
     end
 
 
-    rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.app.triggers.closeProgressLoader = true
 
     return
 end
@@ -240,7 +240,7 @@ local function getServoCount(callback, callbackParam)
     local message = {
         command = 120, -- MSP_SERVO_CONFIGURATIONS
         processReply = function(self, buf)
-            local servoCount = rf2ethos.mspHelper.readU8(buf)
+            local servoCount = rf2ethos.msp.mspHelper.readU8(buf)
             
             -- update master one in case changed
             rf2ethos.config.servoCountNew = servoCount
@@ -261,7 +261,7 @@ local function getServoCount(callback, callbackParam)
             120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
         }
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 
@@ -275,7 +275,7 @@ local function openPageInit(pidx, title, script)
                 command = 120, -- MSP_SERVO_CONFIGURATIONS
                 processReply = function(self, buf)
                      if #buf >= 10 then
-                            local servoCount = rf2ethos.mspHelper.readU8(buf)
+                            local servoCount = rf2ethos.msp.mspHelper.readU8(buf)
                             
                             -- update master one in case changed
                             rf2ethos.config.servoCount = servoCount
@@ -286,7 +286,7 @@ local function openPageInit(pidx, title, script)
                     120, 5, 212, 254, 44, 1, 244, 1, 244, 1, 77, 1, 0, 0, 0, 0
                 }
             }
-            rf2ethos.mspQueue:add(message)
+            rf2ethos.msp.mspQueue:add(message)
             
             local message = {
                 command = 192, -- MSP_SERVO_OVERIDE
@@ -295,7 +295,7 @@ local function openPageInit(pidx, title, script)
                      
                             for i = 0, rf2ethos.config.servoCount do
                                 buf.offset = i
-                                local servoOverride = rf2ethos.mspHelper.readU8(buf)
+                                local servoOverride = rf2ethos.msp.mspHelper.readU8(buf)
                                 if servoOverride == 0 then
                                     rf2ethos.utils.log("Servo overide: true")
                                     rf2ethos.config.servoOverride = true
@@ -308,7 +308,7 @@ local function openPageInit(pidx, title, script)
                 end,
                 simulatorResponse = {209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7, 209, 7}
             }
-            rf2ethos.mspQueue:add(message)            
+            rf2ethos.msp.mspQueue:add(message)            
             
     end        
 end
@@ -316,7 +316,7 @@ end
 local function event(widget, category, value, x, y)
 
     if category == 5 or value == 35 then
-        rf2ethos.Page.onNavMenu(self)
+        rf2ethos.app.Page.onNavMenu(self)
         return true
     end
 
@@ -393,27 +393,27 @@ local function wakeup()
         triggerOverRide = false
 
         if rf2ethos.config.servoOverride == false then
-            rf2ethos.audio.playServoOverideEnable = true
-            rf2ethos.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOn(self)
+            rf2ethos.app.audio.playServoOverideEnable = true
+            rf2ethos.app.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
+            rf2ethos.app.Page.servoCenterFocusAllOn(self)
             rf2ethos.config.servoOverride = true
         else
-            rf2ethos.audio.playServoOverideDisable = true
-            rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOff(self)
+            rf2ethos.app.audio.playServoOverideDisable = true
+            rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
+            rf2ethos.app.Page.servoCenterFocusAllOff(self)
             rf2ethos.config.servoOverride = false
         end
     end
     
     local now = os.clock()
-    if ((now - lastServoCountTime) >= 2) and rf2ethos.mspQueue:isProcessed() then
+    if ((now - lastServoCountTime) >= 2) and rf2ethos.msp.mspQueue:isProcessed() then
             lastServoCountTime = now
             
             getServoCount()
             
             if rf2ethos.config.servoCountNew ~= nil then
                     if rf2ethos.config.servoCountNew ~= rf2ethos.config.servoCount then
-                            rf2ethos.triggers.triggerReloadNoPrompt = true
+                            rf2ethos.app.triggers.triggerReloadNoPrompt = true
                     end
             end
             
@@ -423,18 +423,18 @@ end
 
 local function servoCenterFocusAllOn(self)
 
-    rf2ethos.audio.playServoOverideEnable = true
+    rf2ethos.app.audio.playServoOverideEnable = true
 
     for i = 0, #servoTable do
         local message = {
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 0)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.msp.mspQueue:add(message)
     end
-    rf2ethos.triggers.isReady = true
-    rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.app.triggers.isReady = true
+    rf2ethos.app.triggers.closeProgressLoader = true
 end
 
 local function servoCenterFocusAllOff(self)
@@ -444,26 +444,26 @@ local function servoCenterFocusAllOff(self)
             command = 193, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 2001)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 2001)
+        rf2ethos.msp.mspQueue:add(message)
     end
-    rf2ethos.triggers.isReady = true
-    rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.app.triggers.isReady = true
+    rf2ethos.app.triggers.closeProgressLoader = true
 end
 
 local function onNavMenu(self)
 
 
     if rf2ethos.config.servoOverride == true or inFocus == true then
-        rf2ethos.audio.playServoOverideDisable = true
+        rf2ethos.app.audio.playServoOverideDisable = true
         rf2ethos.config.servoOverride = false
         inFocus = false
-        rf2ethos.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-        rf2ethos.Page.servoCenterFocusAllOff(self)
-        rf2ethos.triggers.closeProgressLoader = true
+        rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
+        rf2ethos.app.Page.servoCenterFocusAllOff(self)
+        rf2ethos.app.triggers.closeProgressLoader = true
     end
-    --rf2ethos.ui.progessDisplay()
-    rf2ethos.ui.openMainMenu()
+    --rf2ethos.app.ui.progessDisplay()
+    rf2ethos.app.ui.openMainMenu()
 
 end
 

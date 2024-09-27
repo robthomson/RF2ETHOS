@@ -43,12 +43,12 @@ fields[#fields + 1] = {
 -- fields[#fields + 1] = {t = "Current Limit", units = "A", inline = 1, label = "limits3", min = 1, max = 65500, decimals = 2, vals = {mspHeaderBytes+55, mspHeaderBytes+56}}
 
 function postLoad()
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.triggers.escToolEnableButtons = true
-    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.app.triggers.escToolEnableButtons = true
+    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
@@ -56,7 +56,7 @@ local function event(widget, category, value, x, y)
     -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if category == 5 or value == 35 then
-        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
         return true
     end
 

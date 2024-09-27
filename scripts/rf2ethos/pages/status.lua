@@ -20,7 +20,7 @@ if rf2ethos.config.ethosRunningVersion >= 1516 then
     local buttonWs = buttonW - (buttonW * 20) / 100
     local x = w - 15    
   
-    displayPos = {x = x - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 100, h = rf2ethos.radio.navbuttonHeight}
+    displayPos = {x = x - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = 100, h = rf2ethos.app.radio.navbuttonHeight}
 end 
 
 fields[1] = {t = "Arming Flags", value = "", type = displayType, disable = disableType, position = displayPos}
@@ -32,27 +32,27 @@ local function getStatus()
     local message = {
         command = 101, -- MSP_STATUS
         processReply = function(self, buf)
-            -- status.pidCycleTime = rf2ethos.mspHelper.readU16(buf)
-            -- status.gyroCycleTime = rf2ethos.mspHelper.readU16(buf)
+            -- status.pidCycleTime = rf2ethos.msp.mspHelper.readU16(buf)
+            -- status.gyroCycleTime = rf2ethos.msp.mspHelper.readU16(buf)
             buf.offset = 12
-            status.realTimeLoad = rf2ethos.mspHelper.readU16(buf)
+            status.realTimeLoad = rf2ethos.msp.mspHelper.readU16(buf)
             -- print("Real-time load: "..tostring(status.realTimeLoad))
-            status.cpuLoad = rf2ethos.mspHelper.readU16(buf)
+            status.cpuLoad = rf2ethos.msp.mspHelper.readU16(buf)
             -- print("CPU load: "..tostring(status.cpuLoad))
             buf.offset = 18
-            status.armingDisableFlags = rf2ethos.mspHelper.readU32(buf)
+            status.armingDisableFlags = rf2ethos.msp.mspHelper.readU32(buf)
             buf.offset = 24
-            status.profile = rf2ethos.mspHelper.readU8(buf)
+            status.profile = rf2ethos.msp.mspHelper.readU8(buf)
             -- print("Profile: "..tostring(status.profile))
             buf.offset = 26
-            status.rateProfile = rf2ethos.mspHelper.readU8(buf)
+            status.rateProfile = rf2ethos.msp.mspHelper.readU8(buf)
             -- print("Rate Profile: "..tostring(status.rateProfile))
 
         end,
         simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1}
     }
 
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function getDataflashSummary()
@@ -60,17 +60,17 @@ local function getDataflashSummary()
         command = 70, -- MSP_DATAFLASH_SUMMARY
         processReply = function(self, buf)
             -- rf2ethos.print("buf length: "..#buf)
-            local flags = rf2ethos.mspHelper.readU8(buf)
+            local flags = rf2ethos.msp.mspHelper.readU8(buf)
             summary.ready = (flags & 1) ~= 0
             summary.supported = (flags & 2) ~= 0
-            summary.sectors = rf2ethos.mspHelper.readU32(buf)
-            summary.totalSize = rf2ethos.mspHelper.readU32(buf)
-            summary.usedSize = rf2ethos.mspHelper.readU32(buf)
+            summary.sectors = rf2ethos.msp.mspHelper.readU32(buf)
+            summary.totalSize = rf2ethos.msp.mspHelper.readU32(buf)
+            summary.usedSize = rf2ethos.msp.mspHelper.readU32(buf)
 
         end,
         simulatorResponse = {3, 1, 0, 0, 0, 0, 4, 0, 0, 0, 3, 0, 0}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function eraseDataflash()
@@ -81,7 +81,7 @@ local function eraseDataflash()
         end,
         simulatorResponse = {}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function postLoad(self)
@@ -95,7 +95,7 @@ end
 local function readMSP()
     getStatus()
     getDataflashSummary()
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
     enableWakeup = true
 end
 
@@ -148,12 +148,12 @@ local function wakeup()
     if enableWakeup == false then return end
 
     if triggerEraseDataFlash == true then
-        rf2ethos.audio.playEraseFlash = true
+        rf2ethos.app.audio.playEraseFlash = true
         triggerEraseDataFlash = false
 
-        rf2ethos.ui.progessDisplay("Erasing...", "Erasing dataflash.")
-        rf2ethos.Page.eraseDataflash()
-        rf2ethos.triggers.isReady = true
+        rf2ethos.app.ui.progessDisplay("Erasing...", "Erasing dataflash.")
+        rf2ethos.app.Page.eraseDataflash()
+        rf2ethos.app.triggers.isReady = true
     end
 
     if triggerEraseDataFlash == false then
@@ -161,7 +161,7 @@ local function wakeup()
         if (now - wakeupScheduler) >= 2 then
             wakeupScheduler = now
             firstRun = false
-            if rf2ethos.mspQueue:isProcessed() then
+            if rf2ethos.msp.mspQueue:isProcessed() then
 
                 getStatus()
                 getDataflashSummary()
@@ -169,72 +169,72 @@ local function wakeup()
                 if rf2ethos.config.ethosRunningVersion < 1516 then
                    if status.armingDisableFlags ~= nil then
                         local value = armingDisableFlagsToString(status.armingDisableFlags)
-                        rf2ethos.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function()
+                        rf2ethos.app.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function()
                             return value
                         end, function(newValue)
                             text = value
                         end)
-                        rf2ethos.formFields[1]:enable(false)
+                        rf2ethos.app.formFields[1]:enable(false)
                     end
 
                     if summary.supported == true then
                         local value = getFreeDataflashSpace()
-                        rf2ethos.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function()
+                        rf2ethos.app.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function()
                             return value
                         end, function(newValue)
                             text = value
                         end)
-                        rf2ethos.formFields[2]:enable(false)
+                        rf2ethos.app.formFields[2]:enable(false)
                     end
 
                     if status.realTimeLoad ~= nil then
                         local value = status.realTimeLoad
-                        rf2ethos.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function()
+                        rf2ethos.app.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function()
                             return value
                         end, function(value)
                         end)
-                        rf2ethos.formFields[3]:suffix("%")
-                        rf2ethos.formFields[3]:decimals(1)
-                        rf2ethos.formFields[3]:enable(false)
+                        rf2ethos.app.formFields[3]:suffix("%")
+                        rf2ethos.app.formFields[3]:decimals(1)
+                        rf2ethos.app.formFields[3]:enable(false)
                     end
                     if status.cpuLoad ~= nil then
                         local value = status.cpuLoad
-                        rf2ethos.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function()
+                        rf2ethos.app.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function()
                             return value
                         end, function(value)
                         end)
-                        rf2ethos.formFields[4]:suffix("%")
-                        rf2ethos.formFields[4]:decimals(1)
-                        rf2ethos.formFields[4]:enable(false)
+                        rf2ethos.app.formFields[4]:suffix("%")
+                        rf2ethos.app.formFields[4]:decimals(1)
+                        rf2ethos.app.formFields[4]:enable(false)
                     end                   
                 else
                     if status.armingDisableFlags ~= nil then
                        local value = armingDisableFlagsToString(status.armingDisableFlags)
-                       rf2ethos.formFields[1]:value(value)
+                       rf2ethos.app.formFields[1]:value(value)
                     end
 
                     if summary.supported == true then
                         local value = getFreeDataflashSpace()
-                        rf2ethos.formFields[2]:value(value)
+                        rf2ethos.app.formFields[2]:value(value)
                     end
 
                     if status.realTimeLoad ~= nil then
                         local value =  math.floor(status.realTimeLoad /10)
-                        rf2ethos.formFields[3]:value(tostring(value) .. "%")
+                        rf2ethos.app.formFields[3]:value(tostring(value) .. "%")
                         if value >= 60 then
-                            rf2ethos.formFields[4]:color(RED)
+                            rf2ethos.app.formFields[4]:color(RED)
                         end                    
                     end
                     if status.cpuLoad ~= nil then
                         local value = status.cpuLoad/10
-                        rf2ethos.formFields[4]:value(tostring(value) .. "%")
+                        rf2ethos.app.formFields[4]:value(tostring(value) .. "%")
                         if value >= 60 then
-                            rf2ethos.formFields[4]:color(RED)
+                            rf2ethos.app.formFields[4]:color(RED)
                         end
                     end
                  end   
 
-                rf2ethos.triggers.closeProgressLoader = true
+                rf2ethos.app.triggers.closeProgressLoader = true
             end
         end
     end

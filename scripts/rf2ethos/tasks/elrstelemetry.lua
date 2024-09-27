@@ -404,7 +404,7 @@ function rf2elrstelemetry.crossfirePop()
     return false
 end
 
-function rf2elrstelemetry.run()
+function rf2elrstelemetry.wakeup()
 
     -- quick kill if background msp not running as we 
     -- use this to determin protocol type
@@ -414,7 +414,7 @@ function rf2elrstelemetry.run()
     
     -- quick kill if not using crsf as this script
     -- is only for crsf code
-    if rf2ethos.protocol.mspProtocol ~= "crsf" then
+    if rf2ethos.msp.protocol.mspProtocol ~= "crsf" then
         return
     end
 

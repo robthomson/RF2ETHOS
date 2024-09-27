@@ -23,18 +23,18 @@ fields[13] = {t = "Rates Type", hidden = true, ratetype = 1, min = 0, max = 5, v
 local function postLoad(self)
     -- if the activeRateTable is not what we are displaying
     -- then we need to trigger a reload of the page
-    local v = rf2ethos.Page.values[1]
+    local v = rf2ethos.app.Page.values[1]
     if v ~= nil then rf2ethos.activeRateTable = math.floor(v) end
 
     if rf2ethos.activeRateTable ~= nil then
         if rf2ethos.activeRateTable ~= rf2ethos.RateTable then
             rf2ethos.RateTable = rf2ethos.activeRateTable
-            rf2ethos.triggers.reload = true
+            rf2ethos.app.triggers.reload = true
             return
         end
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 
     rf2ethos.utils.mspGetCurrentProfile()
     activateWakeup = true    
@@ -42,42 +42,42 @@ local function postLoad(self)
 end
 
 local function flagRateChange(self)
-    rf2ethos.triggers.resetRates = true
+    rf2ethos.app.triggers.resetRates = true
 end
 
 local function openPage(idx, title, script)
 
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.app.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
     rf2ethos.lastPage = script
 
-    rf2ethos.uiState = rf2ethos.uiStatus.pages
+    rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
 
     longPage = false
 
     form.clear()
 
-    rf2ethos.ui.fieldHeader(title)
+    rf2ethos.app.ui.fieldHeader(title)
 
-    local numCols = #rf2ethos.Page.cols
+    local numCols = #rf2ethos.app.Page.cols
 
     -- we dont use the global due to scrollers
-    local screenWidth, screenHeight = rf2ethos.getWindowSize()
+    local screenWidth, screenHeight = rf2ethos.app.getWindowSize()
 
     local padding = 10
-    local paddingTop = rf2ethos.radio.linePaddingTop
-    local h = rf2ethos.radio.navbuttonHeight
+    local paddingTop = rf2ethos.app.radio.linePaddingTop
+    local h = rf2ethos.app.radio.navbuttonHeight
     local w = ((screenWidth * 70 / 100) / numCols)
     local paddingRight = 10
     local positions = {}
     local positions_r = {}
     local pos
 
-    line = form.addLine(rf2ethos.Page.rTableName)
+    line = form.addLine(rf2ethos.app.Page.rTableName)
 
     local loc = numCols
     local posX = screenWidth - paddingRight
@@ -85,7 +85,7 @@ local function openPage(idx, title, script)
 
     local c = 1
     while loc > 0 do
-        local colLabel = rf2ethos.Page.cols[loc]
+        local colLabel = rf2ethos.app.Page.cols[loc]
 
         positions[loc] = posX - w
         positions_r[c] = posX - w
@@ -106,11 +106,11 @@ local function openPage(idx, title, script)
 
     -- display each row
     local rateRows = {}
-    for ri, rv in ipairs(rf2ethos.Page.rows) do rateRows[ri] = form.addLine(rv) end
+    for ri, rv in ipairs(rf2ethos.app.Page.rows) do rateRows[ri] = form.addLine(rv) end
 
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
+    for i = 1, #rf2ethos.app.Page.fields do
+        local f = rf2ethos.app.Page.fields[i]
+        local l = rf2ethos.app.Page.labels
         local pageIdx = i
         local currentField = i
 
@@ -130,7 +130,7 @@ local function openPage(idx, title, script)
                 maxValue = maxValue / f.scale
             end
 
-            rf2ethos.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
+            rf2ethos.app.formFields[i] = form.addNumberField(rateRows[f.row], pos, minValue, maxValue, function()
                 local value
                 if rf2ethos.activeRateTable == 0 then
                     value = 0
@@ -140,26 +140,26 @@ local function openPage(idx, title, script)
                 return value
             end, function(value)
                 f.value = rf2ethos.utils.saveFieldValue(f, value)
-                rf2ethos.saveValue(i)
+                rf2ethos.app.saveValue(i)
             end)
             if f.default ~= nil then
                 local default = f.default * rf2ethos.utils.decimalInc(f.decimals)
                 if f.mult ~= nil then default = math.floor(default * f.mult) end
                 if f.scale ~= nil then default = math.floor(default / f.scale) end
-                rf2ethos.formFields[i]:default(default)
+                rf2ethos.app.formFields[i]:default(default)
             else
-                rf2ethos.formFields[i]:default(0)
+                rf2ethos.app.formFields[i]:default(0)
             end
-            if f.decimals ~= nil then rf2ethos.formFields[i]:decimals(f.decimals) end
-            if f.unit ~= nil then rf2ethos.formFields[i]:suffix(f.unit) end
-            if f.step ~= nil then rf2ethos.formFields[i]:step(f.step) end
+            if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
+            if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
+            if f.step ~= nil then rf2ethos.app.formFields[i]:step(f.step) end
             if f.help ~= nil then
-                if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                    local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
-                    rf2ethos.formFields[i]:help(helpTxt)
+                if rf2ethos.app.fieldHelpTxt[f.help]['t'] ~= nil then
+                    local helpTxt = rf2ethos.app.fieldHelpTxt[f.help]['t']
+                    rf2ethos.app.formFields[i]:help(helpTxt)
                 end
             end
-            if f.disable == true then rf2ethos.formFields[i]:enable(false) end
+            if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
         end
     end
 
@@ -167,12 +167,12 @@ end
 
 local function wakeup()
 
-    if activateWakeup == true and currentProfileChecked == false and rf2ethos.mspQueue:isProcessed()then       
+    if activateWakeup == true and currentProfileChecked == false and rf2ethos.msp.mspQueue:isProcessed()then       
         if rf2ethos.config.ethosRunningVersion >= 1516 then
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    

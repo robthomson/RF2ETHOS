@@ -16,7 +16,7 @@ fields[1] = {t = "PID profile", value = "0", vals = {24}, type = 1, table = {"1"
 fields[2] = {t = "Rate Profile", value = "0", vals = {26}, type = 1, table = {"1", "2", "3", "4", "5", "6"}, tableIdxInc = -1}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function postRead(self)
@@ -32,7 +32,7 @@ local function setPidProfile(profileIndex)
         end,
         simulatorResponse = {}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function setRateProfile(profileIndex)
@@ -45,7 +45,7 @@ local function setRateProfile(profileIndex)
         end,
         simulatorResponse = {}
     }
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 end
 
 local function onSaveMenu()
@@ -86,7 +86,7 @@ local function wakeup()
 
     -- display the dialog box
     if triggerSave == true then
-        rf2ethos.ui.progessDisplaySave()
+        rf2ethos.app.ui.progessDisplaySave()
         triggerSaveCounter = true
         triggerMSPWrite = true
         triggerSave = false
@@ -95,19 +95,19 @@ local function wakeup()
     -- step through the values
     if triggerSaveCounter == true then
         saveCounter = saveCounter + 10
-        rf2ethos.ui.progessDisplaySaveValue(saveCounter, message)
+        rf2ethos.app.ui.progessDisplaySaveValue(saveCounter, message)
         if saveCounter >= 100 then
             saveCounter = 0
             triggerSaveCounter = false
-            rf2ethos.ui.progessDisplaySaveClose()
+            rf2ethos.app.ui.progessDisplaySaveClose()
         end
     end
 
     if triggerMSPWrite == true then
         triggerMSPWrite = false
 
-        local profileIndex = rf2ethos.Page.fields[1].value
-        local rateIndex = rf2ethos.Page.fields[2].value
+        local profileIndex = rf2ethos.app.Page.fields[1].value
+        local rateIndex = rf2ethos.app.Page.fields[2].value
         setRateProfile(rateIndex)
         setPidProfile(profileIndex)
     end

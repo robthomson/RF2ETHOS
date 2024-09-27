@@ -1,5 +1,32 @@
 local utils = {}
 
+-- this is used in multiple places - just gives easy way
+-- to grab activeProfile or activeRateProfile in tmp var
+-- you MUST set it to nil after you get it!
+function utils.mspGetCurrentProfile()
+    local message = {
+        command = 101, -- MSP_SERVO_CONFIGURATIONS
+        processReply = function(self, buf)
+        
+            if #buf >= 30 then
+        
+                buf.offset = 24
+                local activeProfile = rf2ethos.msp.mspHelper.readU8(buf)
+                buf.offset = 26
+                local activeRate = rf2ethos.msp.mspHelper.readU8(buf)                              
+            
+                              
+                rf2ethos.config.activeProfile = activeProfile + 1
+                rf2ethos.config.activeRateProfile = activeRate + 1
+
+            end 
+        end,
+        simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
+
+    }
+    rf2ethos.msp.mspQueue:add(message)
+end
+
 function utils.ethosVersion()
        local environment = system.getVersion()
        return tonumber(environment.major .. environment.minor .. environment.revision)
@@ -174,7 +201,7 @@ function utils.saveFieldValue(f, value)
         else
             f.value = value
         end
-        if f.postEdit then f.postEdit(rf2ethos.Page) end
+        if f.postEdit then f.postEdit(rf2ethos.app.Page) end
     end
 
     if f.mult ~= nil then f.value = f.value / f.mult end
@@ -207,7 +234,7 @@ end
 -- set positions of form elements
 function utils.getInlinePositions(f, lPage)
     local tmp_inline_size = utils.getInlineSize(f.label, lPage)
-    local inline_multiplier = rf2ethos.radio.inlinesize_mult
+    local inline_multiplier = rf2ethos.app.radio.inlinesize_mult
 
     local inline_size = tmp_inline_size * inline_multiplier
 
@@ -222,8 +249,8 @@ function utils.getInlinePositions(f, lPage)
 
     local eX
     local eW = fieldW - padding
-    local eH = rf2ethos.radio.navbuttonHeight
-    local eY = rf2ethos.radio.linePaddingTop
+    local eH = rf2ethos.app.radio.navbuttonHeight
+    local eY = rf2ethos.app.radio.linePaddingTop
     local posX
     lcd.font(FONT_STD)
     tsizeW, tsizeH = lcd.getTextSize(f.t)
@@ -411,31 +438,5 @@ function utils.convertPageValueTable(tbl, inc)
     return thetable
 end
 
--- this is used in multiple places - just gives easy way
--- to grab activeProfile or activeRateProfile in tmp var
--- you MUST set it to nil after you get it!
-function utils.mspGetCurrentProfile()
-    local message = {
-        command = 101, -- MSP_SERVO_CONFIGURATIONS
-        processReply = function(self, buf)
-        
-            if #buf >= 30 then
-        
-                buf.offset = 24
-                local activeProfile = rf2ethos.mspHelper.readU8(buf)
-                buf.offset = 26
-                local activeRate = rf2ethos.mspHelper.readU8(buf)                              
-            
-                              
-                rf2ethos.config.activeProfile = activeProfile + 1
-                rf2ethos.config.activeRateProfile = activeRate + 1
-
-            end 
-        end,
-        simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
-
-    }
-    rf2ethos.mspQueue:add(message)
-end
 
 return utils

@@ -6,7 +6,7 @@ fields[#fields + 1] = {t = "Source profile", min = 0, max = 5, vals = {3}, table
 fields[#fields + 1] = {t = "Dest. profile", min = 0, max = 5, vals = {2}, tableIdxInc = -1, table = {"1", "2", "3", "4", "5", "6"}}
 
 local function postLoad(self)
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function postRead(self)

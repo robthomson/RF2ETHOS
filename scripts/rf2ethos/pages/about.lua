@@ -38,19 +38,19 @@ if rf2ethos.config.ethosRunningVersion >= 1516 then
     local buttonWs = buttonW - (buttonW * 20) / 100
     local x = w - 15    
   
-    displayPos = {x = x - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.radio.linePaddingTop, w = 300, h = rf2ethos.radio.navbuttonHeight}
+    displayPos = {x = x - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = 300, h = rf2ethos.app.radio.navbuttonHeight}
 end 
 fields[1] = {t = "Version", value = version, type = displayType, disable = disableType, position = displayPos}
 fields[2] = {t = "Ethos Version", value = ethosVersion, type = displayType, disable = disableType, position = displayPos}
 fields[3] = {t = "MSP Version", value = apiVersion, type = displayType, disable = disableType, position = displayPos}
-fields[4] = {t = "MSP Transport", value = string.upper(rf2ethos.protocol.mspProtocol), type = displayType, disable = disableType, position = displayPos}
+fields[4] = {t = "MSP Transport", value = string.upper(rf2ethos.msp.protocol.mspProtocol), type = displayType, disable = disableType, position = displayPos}
 fields[5] = {t = "Supported MSP Versions", value = supportedMspVersion, type = displayType, disable = disableType, position = displayPos}
 fields[6] = {t = "Compilation", value = compilation, type = displayType, disable = disableType, position = displayPos}
 fields[7] = {t = "Simulation", value = simulation, type = displayType, disable = disableType, position = displayPos}
 
 function readMSP()
-    rf2ethos.triggers.isReady = true
-    rf2ethos.triggers.closeProgressLoader = true
+    rf2ethos.app.triggers.isReady = true
+    rf2ethos.app.triggers.closeProgressLoader = true
 end
 
 function onToolMenu()

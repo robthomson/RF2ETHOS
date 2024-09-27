@@ -2,6 +2,7 @@
 local MspQueueController = {}
 MspQueueController.__index = MspQueueController
 
+
 function MspQueueController.new()
     local self = setmetatable({}, MspQueueController)
     self.messageQueue = {}
@@ -24,12 +25,12 @@ function MspQueueController:processQueue()
     if self:isProcessed() then
         ELRS_PAUSE_TELEMETRY = false
         CRSF_PAUSE_TELEMETRY = false
-        rf2ethos.triggers.mspBusy = false
+        rf2ethos.app.triggers.mspBusy = false
         return
     end
     ELRS_PAUSE_TELEMETRY = true
     CRSF_PAUSE_TELEMETRY = true
-    rf2ethos.triggers.mspBusy = true
+    rf2ethos.app.triggers.mspBusy = true
 
     if not self.currentMessage then
         self.currentMessage = popFirstElement(self.messageQueue)
@@ -40,25 +41,25 @@ function MspQueueController:processQueue()
 
     local lastTimeInterval
 
-    if rf2ethos.protocol.mspIntervalOveride ~= nil then
-        lastTimeInterval = rf2ethos.protocol.mspIntervalOveride
+    if rf2ethos.msp.protocol.mspIntervalOveride ~= nil then
+        lastTimeInterval = rf2ethos.msp.protocol.mspIntervalOveride
     else
         lastTimeInterval = 1
     end
 
-    if not rf2ethos.runningInSimulator then
+    if not system:getVersion().simulation == true then
         if not self.lastTimeCommandSent or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
             if self.currentMessage.payload then
                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command..": {" .. rf2ethos.utils.joinTableItems(self.currentMessage.payload, ", ") .. "}")
-                rf2ethos.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
+                rf2ethos.msp.protocol.mspWrite(self.currentMessage.command, self.currentMessage.payload)
             else
                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command)
-                rf2ethos.protocol.mspWrite(self.currentMessage.command, {})
+                rf2ethos.msp.protocol.mspWrite(self.currentMessage.command, {})
             end
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
 
-            if rf2ethos.Page ~= nil then if rf2ethos.Page.mspRetry then rf2ethos.Page.mspRetry(self) end end
+            if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspRetry then rf2ethos.app.Page.mspRetry(self) end end
 
         end
 
@@ -106,7 +107,7 @@ function MspQueueController:processQueue()
         self.currentMessage = nil
         collectgarbage()
 
-        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspSuccess then rf2ethos.Page.mspSuccess() end end
+        if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspSuccess then rf2ethos.app.Page.mspSuccess() end end
 
     elseif (self.retryCount ~= nil and self.maxRetries ~= nil) and self.retryCount > self.maxRetries then
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
@@ -115,7 +116,7 @@ function MspQueueController:processQueue()
         self:clear()
         collectgarbage()
 
-        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspTimeout then rf2ethos.Page.mspTimeout() end end
+        if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspTimeout then rf2ethos.app.Page.mspTimeout() end end
 
     end
 end

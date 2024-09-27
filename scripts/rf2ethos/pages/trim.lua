@@ -33,18 +33,18 @@ end
 
 local function saveData()
 
-    local payload = rf2ethos.Page.values
+    local payload = rf2ethos.app.Page.values
     local message = {command = 43, payload = payload}
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 
     local message = {command = 250, payload = {}}
-    rf2ethos.mspQueue:add(message)
+    rf2ethos.msp.mspQueue:add(message)
 
 end
 
 local function mixerOn(self)
 
-    rf2ethos.audio.playMixerOverideEnable = true
+    rf2ethos.app.audio.playMixerOverideEnable = true
 
     for i = 1, 4 do
 
@@ -52,48 +52,48 @@ local function mixerOn(self)
             command = 191, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 0)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 0)
+        rf2ethos.msp.mspQueue:add(message)
 
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function mixerOff(self)
 
-    rf2ethos.audio.playMixerOverideDisable = true
+    rf2ethos.app.audio.playMixerOverideDisable = true
 
     for i = 1, 4 do
         local message = {
             command = 191, -- MSP_SET_SERVO_OVERRIDE
             payload = {i}
         }
-        rf2ethos.mspHelper.writeU16(message.payload, 2501)
-        rf2ethos.mspQueue:add(message)
+        rf2ethos.msp.mspHelper.writeU16(message.payload, 2501)
+        rf2ethos.msp.mspQueue:add(message)
     end
 
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function postLoad(self)
 
     if rf2ethos.config.tailMode == nil then
-        local v = rf2ethos.Page.values[2]
+        local v = rf2ethos.app.Page.values[2]
         rf2ethos.config.tailMode = math.floor(v)
-        rf2ethos.triggers.reload = true
+        rf2ethos.app.triggers.reload = true
         return
     end
 
     -- existing
-    currentRollTrim = rf2ethos.Page.fields[1].value
-    currentPitchTrim = rf2ethos.Page.fields[2].value
-    currentCollectiveTrim = rf2ethos.Page.fields[3].value
+    currentRollTrim = rf2ethos.app.Page.fields[1].value
+    currentPitchTrim = rf2ethos.app.Page.fields[2].value
+    currentCollectiveTrim = rf2ethos.app.Page.fields[3].value
 
-    if rf2ethos.config.tailModeActive == 1 or rf2ethos.config.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.Page.fields[4].value end
+    if rf2ethos.config.tailModeActive == 1 or rf2ethos.config.tailModeActive == 2 then currentIdleThrottleTrim = rf2ethos.app.Page.fields[4].value end
 
-    if rf2ethos.config.tailModeActive == 0 then currentYawTrim = rf2ethos.Page.fields[4].value end
-    rf2ethos.triggers.isReady = true
+    if rf2ethos.config.tailModeActive == 0 then currentYawTrim = rf2ethos.app.Page.fields[4].value end
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function wakeup(self)
@@ -101,10 +101,10 @@ local function wakeup(self)
     -- filter changes to mixer - essentially preventing queue getting flooded	
     if inOverRide == true then
 
-        currentRollTrim = rf2ethos.Page.fields[1].value
+        currentRollTrim = rf2ethos.app.Page.fields[1].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentRollTrim ~= currentRollTrimLast then
                 currentRollTrimLast = currentRollTrim
                 lastChangeTime = now
@@ -112,10 +112,10 @@ local function wakeup(self)
             end
         end
 
-        currentPitchTrim = rf2ethos.Page.fields[2].value
+        currentPitchTrim = rf2ethos.app.Page.fields[2].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentPitchTrim ~= currentPitchTrimLast then
                 currentPitchTrimLast = currentPitchTrim
                 lastChangeTime = now
@@ -123,10 +123,10 @@ local function wakeup(self)
             end
         end
 
-        currentCollectiveTrim = rf2ethos.Page.fields[3].value
+        currentCollectiveTrim = rf2ethos.app.Page.fields[3].value
         local now = os.clock()
         local settleTime = 0.85
-        if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+        if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
             if currentCollectiveTrim ~= currentCollectiveTrimLast then
                 currentCollectiveTrimLast = currentCollectiveTrim
                 lastChangeTime = now
@@ -135,10 +135,10 @@ local function wakeup(self)
         end
 
         if rf2ethos.config.tailMode == 1 or rf2ethos.config.tailMode == 2 then
-            currentIdleThrottleTrim = rf2ethos.Page.fields[4].value
+            currentIdleThrottleTrim = rf2ethos.app.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85
-            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
                 if currentIdleThrottleTrim ~= currentIdleThrottleTrimLast then
                     currentIdleThrottleTrimLast = currentIdleThrottleTrim
                     lastChangeTime = now
@@ -148,10 +148,10 @@ local function wakeup(self)
         end
 
         if rf2ethos.config.tailMode == 0 then
-            currentYawTrim = rf2ethos.Page.fields[4].value
+            currentYawTrim = rf2ethos.app.Page.fields[4].value
             local now = os.clock()
             local settleTime = 0.85
-            if ((now - lastChangeTime) >= settleTime) and rf2ethos.mspQueue:isProcessed() then
+            if ((now - lastChangeTime) >= settleTime) and rf2ethos.msp.mspQueue:isProcessed() then
                 if currentYawTrim ~= currentYawTrimLast then
                     currentYawTrimLast = currentYawTrim
                     lastChangeTime = now
@@ -167,19 +167,19 @@ local function wakeup(self)
 
         if inOverRide == false then
 
-            rf2ethos.audio.playMixerOverideEnable = true
+            rf2ethos.app.audio.playMixerOverideEnable = true
 
-            rf2ethos.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
+            rf2ethos.app.ui.progessDisplay("Mixer overide...", "Enabling mixer overide.")
 
-            rf2ethos.Page.mixerOn(self)
+            rf2ethos.app.Page.mixerOn(self)
             inOverRide = true
         else
 
-            rf2ethos.audio.playMixerOverideDisable = true
+            rf2ethos.app.audio.playMixerOverideDisable = true
 
-            rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+            rf2ethos.app.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
 
-            rf2ethos.Page.mixerOff(self)
+            rf2ethos.app.Page.mixerOff(self)
             inOverRide = false
         end
     end
@@ -232,18 +232,18 @@ end
 local function onNavMenu(self)
 
     if inOverRide == true or inFocus == true then
-        rf2ethos.audio.playMixerOverideDisable = true
+        rf2ethos.app.audio.playMixerOverideDisable = true
 
         inOverRide = false
         inFocus = false
 
-        rf2ethos.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
+        rf2ethos.app.ui.progessDisplay("Mixer overide...", "Disabling mixer overide.")
 
         mixerOff(self)
-        rf2ethos.triggers.closeProgressLoader = true
+        rf2ethos.app.triggers.closeProgressLoader = true
     end
 
-    rf2ethos.ui.openMainMenu()
+    rf2ethos.app.ui.openMainMenu()
 
 end
 

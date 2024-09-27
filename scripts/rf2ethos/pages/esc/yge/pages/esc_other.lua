@@ -40,12 +40,12 @@ fields[#fields + 1] = {t = "Stick Zero (us)", min = 900, max = 1900, vals = {msp
 fields[#fields + 1] = {t = "Stick Range (us)", min = 600, max = 1500, vals = {mspHeaderBytes + 37, mspHeaderBytes + 38}}
 
 function postLoad()
-    rf2ethos.triggers.isReady = true
+    rf2ethos.app.triggers.isReady = true
 end
 
 local function onNavMenu(self)
-    rf2ethos.triggers.escToolEnableButtons = true
-    rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+    rf2ethos.app.triggers.escToolEnableButtons = true
+    rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
 end
 
 local function event(widget, category, value, x, y)
@@ -53,7 +53,7 @@ local function event(widget, category, value, x, y)
     -- print("Event received:" .. ", " .. category .. "," .. value .. "," .. x .. "," .. y)
 
     if category == 5 or value == 35 then
-        rf2ethos.ui.openPage(pidx, folder, "esc_tool.lua")
+        rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
         return true
     end
 
