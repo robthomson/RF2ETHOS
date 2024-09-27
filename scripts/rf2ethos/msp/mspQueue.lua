@@ -47,7 +47,7 @@ function MspQueueController:processQueue()
         lastTimeInterval = 1
     end
 
-    if not rf2ethos.runningInSimulator then
+    if not system:getVersion().simulation == true then
         if not self.lastTimeCommandSent or self.lastTimeCommandSent + lastTimeInterval < os.clock() then
             if self.currentMessage.payload then
                 --rf2ethos.utils.log("Sending  cmd "..self.currentMessage.command..": {" .. rf2ethos.utils.joinTableItems(self.currentMessage.payload, ", ") .. "}")
@@ -59,7 +59,7 @@ function MspQueueController:processQueue()
             self.lastTimeCommandSent = os.clock()
             self.retryCount = self.retryCount + 1
 
-            if rf2ethos.Page ~= nil then if rf2ethos.Page.mspRetry then rf2ethos.Page.mspRetry(self) end end
+            if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspRetry then rf2ethos.app.Page.mspRetry(self) end end
 
         end
 
@@ -107,7 +107,7 @@ function MspQueueController:processQueue()
         self.currentMessage = nil
         collectgarbage()
 
-        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspSuccess then rf2ethos.Page.mspSuccess() end end
+        if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspSuccess then rf2ethos.app.Page.mspSuccess() end end
 
     elseif (self.retryCount ~= nil and self.maxRetries ~= nil) and self.retryCount > self.maxRetries then
         -- rf2ethos.utils.log("Max retries reached, aborting queue")
@@ -116,7 +116,7 @@ function MspQueueController:processQueue()
         self:clear()
         collectgarbage()
 
-        if rf2ethos.Page ~= nil then if rf2ethos.Page.mspTimeout then rf2ethos.Page.mspTimeout() end end
+        if rf2ethos.app.Page ~= nil then if rf2ethos.app.Page.mspTimeout then rf2ethos.app.Page.mspTimeout() end end
 
     end
 end

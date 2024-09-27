@@ -50,12 +50,12 @@ local function openPage(idx, title, script)
     rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
     rf2ethos.app.triggers.isReady = false
 
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.app.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
     rf2ethos.lastPage = script
 
     rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
@@ -66,8 +66,8 @@ local function openPage(idx, title, script)
 
     rf2ethos.app.ui.fieldHeader(title)
     local numCols
-    if rf2ethos.Page.cols ~= nil then
-        numCols = #rf2ethos.Page.cols
+    if rf2ethos.app.Page.cols ~= nil then
+        numCols = #rf2ethos.app.Page.cols
     else
         numCols = 6
     end
@@ -89,7 +89,7 @@ local function openPage(idx, title, script)
 
     local c = 1
     while loc > 0 do
-        local colLabel = rf2ethos.Page.cols[loc]
+        local colLabel = rf2ethos.app.Page.cols[loc]
         pos = {x = posX, y = posY, w = w, h = h}
         form.addStaticText(line, pos, colLabel)
         positions[loc] = posX - w + paddingRight
@@ -101,11 +101,11 @@ local function openPage(idx, title, script)
 
     -- display each row
     local pidRows = {}
-    for ri, rv in ipairs(rf2ethos.Page.rows) do pidRows[ri] = form.addLine(rv) end
+    for ri, rv in ipairs(rf2ethos.app.Page.rows) do pidRows[ri] = form.addLine(rv) end
 
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
+    for i = 1, #rf2ethos.app.Page.fields do
+        local f = rf2ethos.app.Page.fields[i]
+        local l = rf2ethos.app.Page.labels
         local pageIdx = i
         local currentField = i
 
@@ -137,8 +137,8 @@ local function openPage(idx, title, script)
         if f.decimals ~= nil then rf2ethos.app.formFields[i]:decimals(f.decimals) end
         if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
         if f.help ~= nil then
-            if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+            if rf2ethos.app.fieldHelpTxt[f.help]['t'] ~= nil then
+                local helpTxt = rf2ethos.app.fieldHelpTxt[f.help]['t']
                 rf2ethos.app.formFields[i]:help(helpTxt)
             end
         end
@@ -156,7 +156,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeProfile)
                 currentProfileChecked = true
             end    
         end    

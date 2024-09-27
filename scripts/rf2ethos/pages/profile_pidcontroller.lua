@@ -45,7 +45,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    

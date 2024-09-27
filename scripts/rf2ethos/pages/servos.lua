@@ -106,9 +106,9 @@ local function openPage(pidx, title, script)
 
     form.clear()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     -- size of buttons
     rf2ethos.config.iconsizeParam = rf2ethos.app.preferences.interface.iconSize
@@ -316,7 +316,7 @@ end
 local function event(widget, category, value, x, y)
 
     if category == 5 or value == 35 then
-        rf2ethos.Page.onNavMenu(self)
+        rf2ethos.app.Page.onNavMenu(self)
         return true
     end
 
@@ -395,12 +395,12 @@ local function wakeup()
         if rf2ethos.config.servoOverride == false then
             rf2ethos.audio.playServoOverideEnable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOn(self)
+            rf2ethos.app.Page.servoCenterFocusAllOn(self)
             rf2ethos.config.servoOverride = true
         else
             rf2ethos.audio.playServoOverideDisable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOff(self)
+            rf2ethos.app.Page.servoCenterFocusAllOff(self)
             rf2ethos.config.servoOverride = false
         end
     end
@@ -459,7 +459,7 @@ local function onNavMenu(self)
         rf2ethos.config.servoOverride = false
         inFocus = false
         rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-        rf2ethos.Page.servoCenterFocusAllOff(self)
+        rf2ethos.app.Page.servoCenterFocusAllOff(self)
         rf2ethos.app.triggers.closeProgressLoader = true
     end
     --rf2ethos.app.ui.progessDisplay()

@@ -23,7 +23,7 @@ fields[13] = {t = "Rates Type", hidden = true, ratetype = 1, min = 0, max = 5, v
 local function postLoad(self)
     -- if the activeRateTable is not what we are displaying
     -- then we need to trigger a reload of the page
-    local v = rf2ethos.Page.values[1]
+    local v = rf2ethos.app.Page.values[1]
     if v ~= nil then rf2ethos.activeRateTable = math.floor(v) end
 
     if rf2ethos.activeRateTable ~= nil then
@@ -47,12 +47,12 @@ end
 
 local function openPage(idx, title, script)
 
-    rf2ethos.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
+    rf2ethos.app.Page = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
     rf2ethos.lastPage = script
 
     rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
@@ -63,10 +63,10 @@ local function openPage(idx, title, script)
 
     rf2ethos.app.ui.fieldHeader(title)
 
-    local numCols = #rf2ethos.Page.cols
+    local numCols = #rf2ethos.app.Page.cols
 
     -- we dont use the global due to scrollers
-    local screenWidth, screenHeight = rf2ethos.getWindowSize()
+    local screenWidth, screenHeight = rf2ethos.app.getWindowSize()
 
     local padding = 10
     local paddingTop = rf2ethos.app.radio.linePaddingTop
@@ -77,7 +77,7 @@ local function openPage(idx, title, script)
     local positions_r = {}
     local pos
 
-    line = form.addLine(rf2ethos.Page.rTableName)
+    line = form.addLine(rf2ethos.app.Page.rTableName)
 
     local loc = numCols
     local posX = screenWidth - paddingRight
@@ -85,7 +85,7 @@ local function openPage(idx, title, script)
 
     local c = 1
     while loc > 0 do
-        local colLabel = rf2ethos.Page.cols[loc]
+        local colLabel = rf2ethos.app.Page.cols[loc]
 
         positions[loc] = posX - w
         positions_r[c] = posX - w
@@ -106,11 +106,11 @@ local function openPage(idx, title, script)
 
     -- display each row
     local rateRows = {}
-    for ri, rv in ipairs(rf2ethos.Page.rows) do rateRows[ri] = form.addLine(rv) end
+    for ri, rv in ipairs(rf2ethos.app.Page.rows) do rateRows[ri] = form.addLine(rv) end
 
-    for i = 1, #rf2ethos.Page.fields do
-        local f = rf2ethos.Page.fields[i]
-        local l = rf2ethos.Page.labels
+    for i = 1, #rf2ethos.app.Page.fields do
+        local f = rf2ethos.app.Page.fields[i]
+        local l = rf2ethos.app.Page.labels
         local pageIdx = i
         local currentField = i
 
@@ -154,8 +154,8 @@ local function openPage(idx, title, script)
             if f.unit ~= nil then rf2ethos.app.formFields[i]:suffix(f.unit) end
             if f.step ~= nil then rf2ethos.app.formFields[i]:step(f.step) end
             if f.help ~= nil then
-                if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-                    local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+                if rf2ethos.app.fieldHelpTxt[f.help]['t'] ~= nil then
+                    local helpTxt = rf2ethos.app.fieldHelpTxt[f.help]['t']
                     rf2ethos.app.formFields[i]:help(helpTxt)
                 end
             end
@@ -172,7 +172,7 @@ local function wakeup()
             -- update active profile
             -- the check happens in postLoad      
             if rf2ethos.config.activeProfile ~= nil then
-                rf2ethos.app.formFields['title']:value(rf2ethos.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
+                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
                 currentProfileChecked = true
             end    
         end    

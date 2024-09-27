@@ -207,9 +207,15 @@ function msp.wakeup()
 
     -- run the bg checks
     
-    local state = rf2ethos.rssiSensor:state()
-    if state == true then
-        rf2ethos.backgroundMsp = true        
+    local state
+    if rf2ethos.rssiSensor then
+        state = rf2ethos.rssiSensor:state()
+    elseif system:getVersion().simulation == true then
+        state = true
+    else
+        state = false
+    end
+    if state == true then       
         msp.mspQueue:processQueue()  
         if msp.wakeupBgChecksInit == true then
             msp.wakeupBgChecks()
@@ -218,6 +224,7 @@ function msp.wakeup()
         msp.mspQueue:clear()
     end    
     collectgarbage()
+    rf2ethos.backgroundMsp = true 
 end
 
 return msp

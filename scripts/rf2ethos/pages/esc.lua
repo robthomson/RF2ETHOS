@@ -17,9 +17,9 @@ local function openPage(pidx, title, script)
 
     form.clear()
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     ESC = {}
 
@@ -44,22 +44,22 @@ local function openPage(pidx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW - 10
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = x, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            rf2ethos.lastIdx = nil
+            rf2ethos.app.lastIdx = nil
             rf2ethos.lastPage = nil
 
-            if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
+            if rf2ethos.app.Page and rf2ethos.app.Page.onNavMenu then rf2ethos.app.Page.onNavMenu(rf2ethos.app.Page) end
 
             rf2ethos.app.ui.openMainMenu()
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
     local buttonW
     local buttonH

@@ -152,7 +152,7 @@ local function wakeup()
         triggerEraseDataFlash = false
 
         rf2ethos.app.ui.progessDisplay("Erasing...", "Erasing dataflash.")
-        rf2ethos.Page.eraseDataflash()
+        rf2ethos.app.Page.eraseDataflash()
         rf2ethos.app.triggers.isReady = true
     end
 

@@ -172,7 +172,7 @@ end
 local function onNavMenu(self)
 
     rf2ethos.app.ui.progessDisplay()
-    rf2ethos.app.ui.openPage(rf2ethos.lastIdx, rf2ethos.lastTitle, "servos.lua",rf2ethos.config.servoOverride)
+    rf2ethos.app.ui.openPage(rf2ethos.app.lastIdx, rf2ethos.app.lastTitle, "servos.lua",rf2ethos.config.servoOverride)
 
 end
 
@@ -209,7 +209,7 @@ local function wakeup(self)
         if rf2ethos.config.servoOverride == false then
             rf2ethos.audio.playServoOverideEnable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Enabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOn(self)
+            rf2ethos.app.Page.servoCenterFocusAllOn(self)
             rf2ethos.config.servoOverride = true
             
             rf2ethos.app.formFields[3]:enable(false)
@@ -220,12 +220,12 @@ local function wakeup(self)
             rf2ethos.app.formFields[8]:enable(false)
             rf2ethos.app.formFields[9]:enable(false)
             rf2ethos.app.formFields[10]:enable(false)
-            rf2ethos.formNavigationFields['save']:enable(false)
+            rf2ethos.app.formNavigationFields['save']:enable(false)
             
         else
             rf2ethos.audio.playServoOverideDisable = true
             rf2ethos.app.ui.progessDisplay("Servo overide...", "Disabling servo overide.")
-            rf2ethos.Page.servoCenterFocusAllOff(self)
+            rf2ethos.app.Page.servoCenterFocusAllOff(self)
             rf2ethos.config.servoOverride = false
             
             rf2ethos.app.formFields[3]:enable(true)
@@ -236,7 +236,7 @@ local function wakeup(self)
             rf2ethos.app.formFields[8]:enable(true)
             rf2ethos.app.formFields[9]:enable(true)
             rf2ethos.app.formFields[10]:enable(true)    
-            rf2ethos.formNavigationFields['save']:enable(true)
+            rf2ethos.app.formNavigationFields['save']:enable(true)
         end
     end
 
@@ -333,25 +333,25 @@ local function openPage(idx, title, script, extra1)
 
     rf2ethos.formLines = {}
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     form.clear()
 
-    if rf2ethos.Page.pageTitle ~= nil then
-        rf2ethos.app.ui.fieldHeader(rf2ethos.Page.pageTitle .. " / " .. rf2ethos.utils.titleCase(configs[servoIndex]['name']))
+    if rf2ethos.app.Page.pageTitle ~= nil then
+        rf2ethos.app.ui.fieldHeader(rf2ethos.app.Page.pageTitle .. " / " .. rf2ethos.utils.titleCase(configs[servoIndex]['name']))
     else
         rf2ethos.app.ui.fieldHeader(title .. " / " .. rf2ethos.utils.titleCase(configs[servoIndex]['name']))
     end    
 
-    if rf2ethos.Page.headerLine ~= nil then
+    if rf2ethos.app.Page.headerLine ~= nil then
         local headerLine = form.addLine("")
-        local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
+        local headerLineText = form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = rf2ethos.config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, rf2ethos.app.Page.headerLine)
     end
 
     if rf2ethos.config.servoOverride == true then
-        rf2ethos.formNavigationFields['save']:enable(false)
+        rf2ethos.app.formNavigationFields['save']:enable(false)
     end
 
 
@@ -362,7 +362,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 2250
         local defaultValue = 1500
         local suffix = nil
-        local helpTxt = rf2ethos.fieldHelpTxt['servoMid']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoMid']['t']
 
         rf2ethos.formLines[idx] = form.addLine("Center")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
@@ -382,7 +382,7 @@ local function openPage(idx, title, script, extra1)
         local defaultValue = -700
         local suffix = nil
         rf2ethos.formLines[idx] = form.addLine("Minimum")
-        local helpTxt = rf2ethos.fieldHelpTxt['servoMin']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoMin']['t']
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['min']
         end, function(value)
@@ -402,7 +402,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 1000
         local defaultValue = 700
         local suffix = nil
-        local helpTxt = rf2ethos.fieldHelpTxt['servoMax']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoMax']['t']
         rf2ethos.formLines[idx] = form.addLine("Maximum")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['max']
@@ -423,7 +423,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 1000
         local defaultValue = 500
         local suffix = nil
-        local helpTxt = rf2ethos.fieldHelpTxt['servoScaleNeg']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoScaleNeg']['t']
         rf2ethos.formLines[idx] = form.addLine("Scale negative")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['scaleNeg']
@@ -444,7 +444,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 1000
         local defaultValue = 500
         local suffix = nil
-        local helpTxt = rf2ethos.fieldHelpTxt['servoScalePos']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoScalePos']['t']
         rf2ethos.formLines[idx] = form.addLine("Scale positive")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['scalePos']
@@ -465,7 +465,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 5000
         local defaultValue = 333
         local suffix = "Hz"
-        local helpTxt = rf2ethos.fieldHelpTxt['servoRate']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoRate']['t']
         rf2ethos.formLines[idx] = form.addLine("Rate")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['rate']
@@ -486,7 +486,7 @@ local function openPage(idx, title, script, extra1)
         local maxValue = 60000
         local defaultValue = 0
         local suffix = "ms"
-        local helpTxt = rf2ethos.fieldHelpTxt['servoSpeed']['t']
+        local helpTxt = rf2ethos.app.fieldHelpTxt['servoSpeed']['t']
         rf2ethos.formLines[idx] = form.addLine("Speed")
         rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
             return configs[servoIndex]['speed']

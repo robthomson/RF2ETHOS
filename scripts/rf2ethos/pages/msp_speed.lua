@@ -32,9 +32,9 @@ mspSpeedTestStats['checksum'] = 0
 local function openPage(pidx, title, script)
 
 
-    rf2ethos.lastIdx = pidx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = pidx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     local w, h = rf2ethos.utils.getWindowSize()
 
@@ -49,7 +49,7 @@ local function openPage(pidx, title, script)
     local buttonWs = buttonW - (buttonW * 20) / 100
     local x = w - 10
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = x - 5 - buttonW - buttonWs - 5 - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -60,10 +60,10 @@ local function openPage(pidx, title, script)
 
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
     -- ACTION BUTTON
-    rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['tool'] = form.addButton(line, {x = x - 5 - buttonWs - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "*",
         icon = nil,
         options = FONT_S,
@@ -76,16 +76,16 @@ local function openPage(pidx, title, script)
 
     -- HELP BUTTON
     local help = assert(compile.loadScript(rf2ethos.config.toolDir .. "help/pages.lua"))()
-    local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
-    rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
+    local section = string.gsub(rf2ethos.app.lastScript, ".lua", "") -- remove .lua
+    rf2ethos.app.formNavigationFields['help'] = form.addButton(line, {x = x - buttonWs, y = rf2ethos.app.radio.linePaddingTop, w = buttonWs, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "?",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
-                rf2ethos.Page.onHelpMenu(rf2ethos.Page)
+            if rf2ethos.app.Page and rf2ethos.app.Page.onHelpMenu then
+                rf2ethos.app.Page.onHelpMenu(rf2ethos.app.Page)
             else
                 rf2ethos.app.ui.openPagehelp(help.data, section)
             end

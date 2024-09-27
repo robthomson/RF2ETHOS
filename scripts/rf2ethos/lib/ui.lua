@@ -8,7 +8,7 @@ function ui.progessDisplay(title, message)
 
     if rf2ethos.app.dialogs.progressDisplay == true then return end
 
-    rf2ethos.audio.playLoading = true
+    rf2ethos.app.audio.playLoading = true
 
     if title == nil then title = "Loading..." end
     if message == nil then message = "Loading data from flight controller..." end
@@ -137,9 +137,9 @@ function ui.openMainMenu()
     if tonumber(rf2ethos.utils.makeNumber(config.environment.major .. config.environment.minor .. config.environment.revision)) < config.ethosVersion then return end
 
     -- clear all nav vars
-    rf2ethos.lastIdx = nil
-    rf2ethos.lastTitle = nil
-    rf2ethos.lastScript = nil
+    rf2ethos.app.lastIdx = nil
+    rf2ethos.app.lastTitle = nil
+    rf2ethos.app.lastScript = nil
     rf2ethos.lastPage = nil
 
     --rf2ethos.msp.protocol.mspIntervalOveride = nil
@@ -266,7 +266,7 @@ function ui.fieldChoice(f, i)
 
         if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
-        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.app.Page)
         posText = p.posText
         posField = p.posField
 
@@ -293,8 +293,8 @@ function ui.fieldChoice(f, i)
         return value
     end, function(value)
         -- we do this hook to allow rates to be reset
-        if f.postEdit then f.postEdit(rf2ethos.Page, value) end
-        if f.onChange then f.onChange(rf2ethos.Page, value) end
+        if f.postEdit then f.postEdit(rf2ethos.app.Page, value) end
+        if f.onChange then f.onChange(rf2ethos.app.Page, value) end
         f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
     end)
@@ -307,7 +307,7 @@ function ui.fieldNumber(f, i)
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
         if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
-        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.app.Page)
         posText = p.posText
         posField = p.posField
 
@@ -362,8 +362,8 @@ function ui.fieldNumber(f, i)
 
         return value
     end, function(value)
-        if f.postEdit then f.postEdit(rf2ethos.Page) end
-        if f.onChange then f.onChange(rf2ethos.Page) end
+        if f.postEdit then f.postEdit(rf2ethos.app.Page) end
+        if f.onChange then f.onChange(rf2ethos.app.Page) end
 
         f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
@@ -372,7 +372,7 @@ function ui.fieldNumber(f, i)
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.app.formFields[i]:onFocus(function()
-                f.onFocus(rf2ethos.Page)
+                f.onFocus(rf2ethos.app.Page)
             end)
         end
     end
@@ -392,8 +392,8 @@ function ui.fieldNumber(f, i)
     if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
 
     if f.help ~= nil then
-        if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-            local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+        if rf2ethos.app.fieldHelpTxt[f.help]['t'] ~= nil then
+            local helpTxt = rf2ethos.app.fieldHelpTxt[f.help]['t']
             rf2ethos.app.formFields[i]:help(helpTxt)
         end
     end
@@ -405,7 +405,7 @@ function ui.fieldStaticText(f, i)
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
         if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
-        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.app.Page)
         posText = p.posText
         posField = p.posField
 
@@ -441,7 +441,7 @@ function ui.fieldStaticText(f, i)
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.app.formFields[i]:onFocus(function()
-                f.onFocus(rf2ethos.Page)
+                f.onFocus(rf2ethos.app.Page)
             end)
         end
     end
@@ -457,7 +457,7 @@ function ui.fieldText(f, i)
     if f.inline ~= nil and f.inline >= 1 and f.label ~= nil then
         if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
-        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.Page)
+        local p = rf2ethos.utils.getInlinePositions(f, rf2ethos.app.Page)
         posText = p.posText
         posField = p.posField
 
@@ -492,8 +492,8 @@ function ui.fieldText(f, i)
         local value = rf2ethos.utils.getFieldValue(f)
         return value
     end, function(value)
-        if f.postEdit then f.postEdit(rf2ethos.Page) end
-        if f.onChange then f.onChange(rf2ethos.Page) end
+        if f.postEdit then f.postEdit(rf2ethos.app.Page) end
+        if f.onChange then f.onChange(rf2ethos.app.Page) end
 
         f.value = rf2ethos.utils.saveFieldValue(f, value)
         rf2ethos.saveValue(i)
@@ -502,7 +502,7 @@ function ui.fieldText(f, i)
     if config.ethosRunningVersion >= 1514 then
         if f.onFocus ~= nil then
             rf2ethos.app.formFields[i]:onFocus(function()
-                f.onFocus(rf2ethos.Page)
+                f.onFocus(rf2ethos.app.Page)
             end)
         end
     end
@@ -510,8 +510,8 @@ function ui.fieldText(f, i)
     if f.disable == true then rf2ethos.app.formFields[i]:enable(false) end
 
     if f.help ~= nil then
-        if rf2ethos.fieldHelpTxt[f.help]['t'] ~= nil then
-            local helpTxt = rf2ethos.fieldHelpTxt[f.help]['t']
+        if rf2ethos.app.fieldHelpTxt[f.help]['t'] ~= nil then
+            local helpTxt = rf2ethos.app.fieldHelpTxt[f.help]['t']
             rf2ethos.app.formFields[i]:help(helpTxt)
         end
     end
@@ -582,16 +582,16 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
     rf2ethos.app.formFields = {}
     rf2ethos.formLines = {}
 
-    rf2ethos.Page = assert(compile.loadScript(config.toolDir .. "pages/" .. script))()
+    rf2ethos.app.Page = assert(compile.loadScript(config.toolDir .. "pages/" .. script))()
     collectgarbage()
 
-    if rf2ethos.Page.openPage then
-        rf2ethos.Page.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
+    if rf2ethos.app.Page.openPage then
+        rf2ethos.app.Page.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
     else
 
-        rf2ethos.lastIdx = idx
-        rf2ethos.lastTitle = title
-        rf2ethos.lastScript = script
+        rf2ethos.app.lastIdx = idx
+        rf2ethos.app.lastTitle = title
+        rf2ethos.app.lastScript = script
 
         local fieldAR = {}
 
@@ -604,24 +604,24 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
 
         rf2ethos.lastPage = script
 
-        if rf2ethos.Page.pageTitle ~= nil then
-            rf2ethos.app.ui.fieldHeader(rf2ethos.Page.pageTitle)
+        if rf2ethos.app.Page.pageTitle ~= nil then
+            rf2ethos.app.ui.fieldHeader(rf2ethos.app.Page.pageTitle)
         else
             rf2ethos.app.ui.fieldHeader(title)
         end
 
-        if rf2ethos.Page.headerLine ~= nil then
+        if rf2ethos.app.Page.headerLine ~= nil then
             local headerLine = form.addLine("")
             local headerLineText =
-                form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, rf2ethos.Page.headerLine)
+                form.addStaticText(headerLine, {x = 0, y = rf2ethos.app.radio.linePaddingTop, w = config.lcdWidth, h = rf2ethos.app.radio.navbuttonHeight}, rf2ethos.app.Page.headerLine)
         end
 
 
         formLineCnt = 0
 
-        for i = 1, #rf2ethos.Page.fields do
-            local f = rf2ethos.Page.fields[i]
-            local l = rf2ethos.Page.labels
+        for i = 1, #rf2ethos.app.Page.fields do
+            local f = rf2ethos.app.Page.fields[i]
+            local l = rf2ethos.app.Page.labels
             local pageValue = f
             local pageIdx = i
             local currentField = i
@@ -660,10 +660,10 @@ function ui.navigationButtons(x, y, w, h)
     local menuOffset = 0
 
     local navButtons
-    if rf2ethos.Page.navButtons == nil then
+    if rf2ethos.app.Page.navButtons == nil then
         navButtons = {menu = true, save = true, reload = true, help = true}
     else
-        navButtons = rf2ethos.Page.navButtons
+        navButtons = rf2ethos.app.Page.navButtons
     end
 
     -- calc all offsets
@@ -688,35 +688,35 @@ function ui.navigationButtons(x, y, w, h)
     -- MENU BTN
     if navButtons.menu ~= nil and navButtons.menu == true then
 
-        rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = menuOffset, y = y, w = w, h = h}, {
+        rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = menuOffset, y = y, w = w, h = h}, {
             text = "MENU",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-                if rf2ethos.Page and rf2ethos.Page.onNavMenu then
-                    rf2ethos.Page.onNavMenu(rf2ethos.Page)
+                if rf2ethos.app.Page and rf2ethos.app.Page.onNavMenu then
+                    rf2ethos.app.Page.onNavMenu(rf2ethos.app.Page)
                 else
                     rf2ethos.app.ui.openMainMenu()
                 end
             end
         })
-        rf2ethos.formNavigationFields['menu']:focus()
+        rf2ethos.app.formNavigationFields['menu']:focus()
     end
 
     -- SAVE BTN
     if navButtons.save ~= nil and navButtons.save == true then
 
-        rf2ethos.formNavigationFields['save'] = form.addButton(line, {x = saveOffset, y = y, w = w, h = h}, {
+        rf2ethos.app.formNavigationFields['save'] = form.addButton(line, {x = saveOffset, y = y, w = w, h = h}, {
             text = "SAVE",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-                if rf2ethos.Page and rf2ethos.Page.onSaveMenu then
-                    rf2ethos.Page.onSaveMenu(rf2ethos.Page)
+                if rf2ethos.app.Page and rf2ethos.app.Page.onSaveMenu then
+                    rf2ethos.app.Page.onSaveMenu(rf2ethos.app.Page)
                 else
                     rf2ethos.app.triggers.triggerSave = true
                 end
@@ -727,7 +727,7 @@ function ui.navigationButtons(x, y, w, h)
     -- RELOAD BTN
     if navButtons.reload ~= nil and navButtons.reload == true then
 
-        rf2ethos.formNavigationFields['reload'] = form.addButton(line, {x = reloadOffset, y = y, w = w, h = h}, {
+        rf2ethos.app.formNavigationFields['reload'] = form.addButton(line, {x = reloadOffset, y = y, w = w, h = h}, {
             text = "RELOAD",
             icon = nil,
             options = FONT_S,
@@ -735,8 +735,8 @@ function ui.navigationButtons(x, y, w, h)
             end,
             press = function()
 
-                if rf2ethos.Page and rf2ethos.Page.onReloadMenu then
-                    rf2ethos.Page.onReloadMenu(rf2ethos.Page)
+                if rf2ethos.app.Page and rf2ethos.app.Page.onReloadMenu then
+                    rf2ethos.app.Page.onReloadMenu(rf2ethos.app.Page)
                 else
                     rf2ethos.app.triggers.triggerReload = true
                 end
@@ -747,14 +747,14 @@ function ui.navigationButtons(x, y, w, h)
 
     -- TOOL BUTTON
     if navButtons.tool ~= nil and navButtons.tool == true then
-        rf2ethos.formNavigationFields['tool'] = form.addButton(line, {x = toolOffset, y = y, w = wS, h = h}, {
+        rf2ethos.app.formNavigationFields['tool'] = form.addButton(line, {x = toolOffset, y = y, w = wS, h = h}, {
             text = "*",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-                rf2ethos.Page.onToolMenu()
+                rf2ethos.app.Page.onToolMenu()
             end
         })
     end
@@ -763,17 +763,17 @@ function ui.navigationButtons(x, y, w, h)
     if navButtons.help ~= nil and navButtons.help == true then
 
         local help = assert(compile.loadScript(config.toolDir .. "help/pages.lua"))()
-        local section = string.gsub(rf2ethos.lastScript, ".lua", "") -- remove .lua
+        local section = string.gsub(rf2ethos.app.lastScript, ".lua", "") -- remove .lua
 
-        rf2ethos.formNavigationFields['help'] = form.addButton(line, {x = helpOffset, y = y, w = wS, h = h}, {
+        rf2ethos.app.formNavigationFields['help'] = form.addButton(line, {x = helpOffset, y = y, w = wS, h = h}, {
             text = "?",
             icon = nil,
             options = FONT_S,
             paint = function()
             end,
             press = function()
-                if rf2ethos.Page and rf2ethos.Page.onHelpMenu then
-                    rf2ethos.Page.onHelpMenu(rf2ethos.Page)
+                if rf2ethos.app.Page and rf2ethos.app.Page.onHelpMenu then
+                    rf2ethos.app.Page.onHelpMenu(rf2ethos.app.Page)
                 else
                     rf2ethos.app.ui.openPagehelp(help.data, section)
                 end
@@ -831,7 +831,7 @@ function ui.openPagehelp(helpdata, section)
 
     form.openDialog({
         width = config.lcdWidth,
-        title = "Help - " .. rf2ethos.lastTitle,
+        title = "Help - " .. rf2ethos.app.lastTitle,
         message = message,
         buttons = buttons,
         wakeup = function()

@@ -6,10 +6,10 @@ local function openPage(idx, title, script)
     rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
     rf2ethos.app.triggers.isReady = false
 
-    rf2ethos.lastIdx = idx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
-    -- rf2ethos.Page = nil
+    rf2ethos.app.lastIdx = idx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
+    -- rf2ethos.app.Page = nil
 
     form.clear()
 
@@ -31,22 +31,22 @@ local function openPage(idx, title, script)
 
     line = form.addLine("Preferences")
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - (buttonW + padding) * 1, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = buttonH}, {
+    rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = x - (buttonW + padding) * 1, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = buttonH}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
         paint = function()
         end,
         press = function()
-            rf2ethos.lastIdx = nil
+            rf2ethos.app.lastIdx = nil
             rf2ethos.lastPage = nil
 
-            if rf2ethos.Page and rf2ethos.Page.onNavMenu then rf2ethos.Page.onNavMenu(rf2ethos.Page) end
+            if rf2ethos.app.Page and rf2ethos.app.Page.onNavMenu then rf2ethos.app.Page.onNavMenu(rf2ethos.app.Page) end
 
             rf2ethos.app.ui.openMainMenu()
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
     local uipanel = form.addExpansionPanel("User interface")
     uipanel:open(true)

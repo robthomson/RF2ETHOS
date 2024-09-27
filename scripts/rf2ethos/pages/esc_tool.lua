@@ -50,9 +50,9 @@ end
 
 local function openPage(pidx, title, script)
 
-    rf2ethos.lastIdx = pidx
-    rf2ethos.lastTitle = title
-    rf2ethos.lastScript = script
+    rf2ethos.app.lastIdx = pidx
+    rf2ethos.app.lastTitle = title
+    rf2ethos.app.lastScript = script
 
     local folder = title
 
@@ -79,7 +79,7 @@ local function openPage(pidx, title, script)
     buttonW = 100
     local x = windowWidth - buttonW
 
-    rf2ethos.formNavigationFields['menu'] = form.addButton(line, {x = x - buttonW - 5, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['menu'] = form.addButton(line, {x = x - buttonW - 5, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "MENU",
         icon = nil,
         options = FONT_S,
@@ -90,9 +90,9 @@ local function openPage(pidx, title, script)
 
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
-    rf2ethos.formNavigationFields['refresh'] = form.addButton(line, {x = x, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
+    rf2ethos.app.formNavigationFields['refresh'] = form.addButton(line, {x = x, y = rf2ethos.app.radio.linePaddingTop, w = buttonW, h = rf2ethos.app.radio.navbuttonHeight}, {
         text = "RELOAD",
         icon = nil,
         options = FONT_S,
@@ -100,7 +100,7 @@ local function openPage(pidx, title, script)
         end,
         press = function()
             -- rf2ethos.app.ui.openPage(pidx, folder, "esc_tool.lua")
-            rf2ethos.Page = nil
+            rf2ethos.app.Page = nil
             local foundESC = false
             local foundESCupdateTag = false
             local showPowerCycleLoader = false
@@ -108,7 +108,7 @@ local function openPage(pidx, title, script)
             rf2ethos.app.triggers.triggerReload = true
         end
     })
-    rf2ethos.formNavigationFields['menu']:focus()
+    rf2ethos.app.formNavigationFields['menu']:focus()
 
     ESC.pages = assert(compile.loadScript(rf2ethos.config.toolDir .. "pages/esc/" .. folder .. "/pages.lua"))()
 
