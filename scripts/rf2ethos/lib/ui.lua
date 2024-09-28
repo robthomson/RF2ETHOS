@@ -81,6 +81,7 @@ end
 
 function ui.progessDisplayClose()
         if rf2ethos.app.dialogs.progress ~= nil then rf2ethos.app.dialogs.progress:close() end
+        rf2ethos.app.dialogs.progressDisplay = false
 end
 
 function ui.progessDisplayCloseAllowed(status)
@@ -93,6 +94,7 @@ end
 
 function ui.progessDisplaySaveClose()
         if rf2ethos.app.dialogs.progress ~= nil then rf2ethos.app.dialogs.save:close() end
+        rf2ethos.app.dialogs.saveDisplay = false
 end
 
 function ui.progessDisplaySaveMessage(message)
