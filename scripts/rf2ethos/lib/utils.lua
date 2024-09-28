@@ -15,7 +15,9 @@ function utils.mspGetCurrentProfile()
                                 buf.offset = 26
                                 local activeRate = rf2ethos.bg.mspHelper.readU8(buf)                                                          
                         
-                                                          
+                                rf2ethos.config.activeProfileLast = rf2ethos.config.activeProfile
+                                rf2ethos.config.activeRateProfileLast = rf2ethos.config.activeRateProfile  
+                                 
                                 rf2ethos.config.activeProfile = activeProfile + 1
                                 rf2ethos.config.activeRateProfile = activeRate + 1
 

@@ -76,40 +76,18 @@ local function openPage(idx, title, script)
         end)
 
         -- PROFILE
-        rf2ethos.config.profileswitchParamPreference = rf2ethos.app.preferences.advanced.profileSwitch
-        if rf2ethos.config.profileswitchParamPreference ~= nil then
-                local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
-                rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
-        end
+        rf2ethos.config.profileswitchParam = rf2ethos.app.preferences.interface.profileSwitch
+        if rf2ethos.config.profileswitchParam == nil or rf2ethos.config.profileswitchParam == "" then rf2ethos.config.profileswitchParam = 0 end
 
-        line = uipanel:addLine("Switch profile")
-        rf2ethos.app.formFields[2] = form.addSourceField(line, nil, function()
+        line = uipanel:addLine("Profile Switching")
+        rf2ethos.app.formFields[2] = form.addChoiceField(line, nil, {{"Enable", 0}, {"Disable", 1}}, function()
                 return rf2ethos.config.profileswitchParam
         end, function(newValue)
                 rf2ethos.config.profileswitchParam = newValue
-                local member = rf2ethos.config.profileswitchParam:member()
-                local category = rf2ethos.config.profileswitchParam:category()
-                rf2ethos.app.preferences.advanced.profileSwitch = category .. "," .. member                
+                rf2ethos.app.preferences.interface.profileSwitch = newValue
                 rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
-        -- RATES
-        rf2ethos.config.rateswitchParamPreference = rf2ethos.app.preferences.advanced.rateSwitch
-        if rf2ethos.config.rateswitchParamPreference ~= nil then
-                local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
-                rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-        end
-
-        line = uipanel:addLine("Switch rates")
-        rf2ethos.app.formFields[3] = form.addSourceField(line, nil, function()
-                return rf2ethos.config.rateswitchParam
-        end, function(newValue)
-                rf2ethos.config.rateswitchParam = newValue
-                local member = rf2ethos.config.rateswitchParam:member()
-                local category = rf2ethos.config.rateswitchParam:category()
-                rf2ethos.app.preferences.advanced.rateSwitch = category .. "," .. member
-                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
-        end)
 
         local advpanel = form.addExpansionPanel("Advanced")
         advpanel:open(true)

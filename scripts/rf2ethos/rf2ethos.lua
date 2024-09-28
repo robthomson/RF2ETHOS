@@ -37,6 +37,8 @@ rf2ethos.config.tailMode = nil
 rf2ethos.config.swashMode = nil
 rf2ethos.config.activeProfile = nil
 rf2ethos.config.activeRateProfile = nil
+rf2ethos.config.activeProfileLast = nil
+rf2ethos.config.activeRateLast = nil
 rf2ethos.config.servoCount = nil
 rf2ethos.config.servoOverride = nil
 
@@ -79,6 +81,7 @@ app.wakeupSchedulerForm = os.clock()
 app.wakeupSchedulerFormInit = false
 app.menuLastSelected = {}
 app.adjfunctions = nil
+app.profileCheckScheduler = os.clock()
 
 app.preferences = {}
 
@@ -171,39 +174,11 @@ function app.resetState()
         app.dialogs.progressDisplayEsc = false
         ELRS_PAUSE_TELEMETRY = false
         CRSF_PAUSE_TELEMETRY = false
-        --rf2ethos.config.tailMode = nil
-        --rf2ethos.config.apiVersion = nil
         app.audio = {}
-        --rf2ethos.config.servoOverride = nil
+
 
 end
 
--- CHECK IF THE PROFILE SWITCH HAS CHANGED STATE
-function app.profileSwitchCheck()
-
-        -- load and cache the switch on first run
-        if rf2ethos.config.profileswitchParamPreference == nil then
-                rf2ethos.config.profileswitchParamPreference = app.preferences.interface.profileSwitch
-                local s = rf2ethos.utils.explode(rf2ethos.config.profileswitchParamPreference, ",")
-                rf2ethos.config.profileswitchParam = system.getSource({category = s[1], member = s[2]})
-        end
-        -- store the last state
-        if rf2ethos.config.profileswitchParam ~= nil then app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value() end
-end
-
--- CHECK IF THE RATE SWITCH HAS CHANGED STATE
-function app.rateSwitchCheck()
-
-        -- load and cache the switch on first run
-        if rf2ethos.config.rateswitchParamPreference == nil then
-                rf2ethos.config.rateswitchParamPreference = app.preferences.interface.rateSwitch
-                local s = rf2ethos.utils.explode(rf2ethos.config.rateswitchParamPreference, ",")
-                rf2ethos.config.rateswitchParam = system.getSource({category = s[1], member = s[2]})
-        end
-
-        -- store the last state	
-        if rf2ethos.config.rateswitchParam ~= nil then app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value() end
-end
 
 -- SAVE FIELD VALUE FOR ETHOS FROM ETHOS FORMS INTO THE ACTUAL FORMAT THAT 
 -- WILL BE TRANSMITTED OVER MSP
@@ -536,50 +511,54 @@ function app.wakeupUI()
                 end
         end
 
-        -- profile switching - trigger a reload if needs be when the switch is toggled
+        -- profile switching - trigger a reload when profile changes
+        if rf2ethos.config.profileswitchParam == 0 and app.Page ~= nil and (app.Page.refreshOnProfileChange == true or app.Page.refreshOnRateChange == true) and app.uiState == app.uiStatus.pages and app.triggers.isSaving == false and rf2ethos.app.dialogs.progressDisplay ~= true and rf2ethos.bg.mspQueue:isProcessed() then
 
-        if app.Page ~= nil and app.Page.refreshswitch == true and app.uiState == app.uiStatus.pages then
+                local now = os.clock()
+                if (now - app.profileCheckScheduler) >= 1 then
+                        app.profileCheckScheduler = now
+ 
+                        rf2ethos.utils.mspGetCurrentProfile()
+                        
+                        if rf2ethos.config.activeProfile ~= nil and rf2ethos.config.activeProfileLast ~= nil then
+                        
+                                if app.Page.refreshOnProfileChange == true then
+                                        if rf2ethos.config.activeRateProfile ~= rf2ethos.config.activeRateProfileLast then
+                                                if app.ui.progressDisplay() then
+                                                        -- switch has been toggled mid flow - this is bad.. clean upd
+                                                        form.clear()
+                                                        app.triggers.triggerReloadNoPrompt = true
 
-                -- capture profile switching and of rates pages
-                if app.lastPage == "rates.lua" or app.lastPage == "rates_advanced.lua" or app.lastPage == "select_profile.lua" then
-                        if rf2ethos.config.rateswitchParam ~= nil then
-                                if rf2ethos.config.rateswitchParam:value() ~= app.triggers.rateswitchLast then
-
-                                        if app.ui.progressDisplay() then
-                                                -- switch has been toggled mid flow - this is bad.. clean upd
-                                                form.clear()
-                                                app.triggers.triggerReloadNoPrompt = true
-
-                                        else
-                                                -- trigger RELOAD
-                                                app.triggers.rateswitchLast = rf2ethos.config.rateswitchParam:value()
-                                                app.triggers.triggerReloadNoPrompt = true
-                                                return true
+                                                else
+                                                        -- trigger RELOAD
+                                                        app.triggers.triggerReloadNoPrompt = true
+                                                        return true
+                                                end                                
                                         end
+                                end
+                        
+                        end
+                        
+                        if rf2ethos.config.activeRateProfile ~= nil and rf2ethos.config.activeRateProfileLast ~= nil then
+                        
+                                if app.Page.refreshOnRateChange == true then
+                                        if rf2ethos.config.activeProfile ~= rf2ethos.config.activeProfileLast then
+                                                if app.ui.progressDisplay() then
+                                                        -- switch has been toggled mid flow - this is bad.. clean upd
+                                                        form.clear()
+                                                        app.triggers.triggerReloadNoPrompt = true
 
+                                                else
+                                                        -- trigger RELOAD
+                                                        app.triggers.triggerReloadNoPrompt = true
+                                                        return true
+                                                end                                
+                                        end
                                 end
                         end
-                        -- capture switching of all profile pages - excluding rates	
-                else
-                        if rf2ethos.config.profileswitchParam ~= nil then
 
-                                if rf2ethos.config.profileswitchParam:value() ~= app.triggers.profileswitchLast then
-
-                                        if app.ui.progressDisplay() then
-                                                -- switch has been toggled mid flow - this is bad.. clean upd
-                                                form.clear()
-                                                app.triggers.triggerReloadNoPrompt = true
-                                        else
-                                                -- trigger RELOAD
-                                                app.triggers.profileswitchLast = rf2ethos.config.profileswitchParam:value()
-                                                app.triggers.triggerReloadNoPrompt = true
-                                                return true
-
-                                        end
-
-                                end
-                        end
-                end
+                end                
+                           
         end
 
         -- if we do not have a telemetry link then we need to show a connecting dialog box.
@@ -792,7 +771,7 @@ function app.wakeupUI()
                         if app.triggers.badMspVersionDisplay == false then
                                 local message
                                 if rf2ethos.backgroundMsp ~= true then
-                                   message = "Please enable the backround task."
+                                   message = "Please enable the background task."
                                 elseif app.getRSSI() == 0 then
                                         message = "Unable to establish a link to the flight controller"
                                 elseif rf2ethos.config.apiVersion ~= nil then
@@ -902,9 +881,6 @@ function app.wakeupUI()
 
         end
 
-        -- check if rate or profile switches have been toggled
-        app.profileSwitchCheck()
-        app.rateSwitchCheck()
 
         -- play audio
         -- alerts 
@@ -1012,6 +988,7 @@ function app.create()
         app.uiState = app.uiStatus.init
 
         rf2ethos.config.audioParam = app.preferences.interface.audio
+        rf2ethos.config.profileswitchParam = app.preferences.interface.profileSwitch
 
         if system:getVersion().simulation == false then
                 local simpref = app.preferences.advanced.demoSwitch

@@ -13,14 +13,15 @@ bg.activeProtocol = nil
 
 rf2ethos.backgroundMsp = false
 
-bg.wakeupBgChecksInit = true
+bg.onConnectChecksInit = true
 
-rssiCheckScheduler = os.clock()
+local rssiCheckScheduler = os.clock()
+
 
 local protocol = assert(compile.loadScript(config.toolDir .. "msp/protocols.lua"))()
 
 -- BACKGROUND checks
-function bg.wakeupBgChecks()
+function bg.onConnectBgChecks()
 
         if bg.mspQueue ~= nil and bg.mspQueue:isProcessed()then
 
@@ -58,27 +59,9 @@ function bg.wakeupBgChecks()
                                 }
                                 bg.mspQueue:add(message)
                 elseif ( rf2ethos.config.activeProfile == nil or rf2ethos.config.activeRateProfile == nil) then   
-                                local message = {
-                                        command = 101, -- MSP_SERVO_CONFIGURATIONS
-                                        processReply = function(self, buf)
-                                        
-                                                if #buf >= 30 then
-                                        
-                                                        buf.offset = 24
-                                                        local activeProfile = bg.mspHelper.readU8(buf)
-                                                        buf.offset = 26
-                                                        local activeRate = bg.mspHelper.readU8(buf)                                                          
-                                                
-                                                                                  
-                                                        rf2ethos.config.activeProfile = activeProfile + 1
-                                                        rf2ethos.config.activeRateProfile = activeRate + 1
-
-                                                end 
-                                        end,
-                                        simulatorResponse = {240, 1, 124, 0, 35, 0, 0, 0, 0, 0, 0, 224, 1, 10, 1, 0, 26, 0, 0, 0, 0, 0, 2, 0, 6, 0, 6, 1, 4, 1},
-
-                                }
-                                bg.mspQueue:add(message)                  
+                
+                        rf2ethos.utils.mspGetCurrentProfile()
+                        
                 elseif (rf2ethos.config.servoCount == nil) and bg.mspQueue:isProcessed() then
                                 local message = {
                                         command = 120, -- MSP_SERVO_CONFIGURATIONS
@@ -121,7 +104,7 @@ function bg.wakeupBgChecks()
                                 bg.mspQueue:add(message)
                                 
                                 -- do this at end of last one
-                                bg.wakeupBgChecksInit = false
+                                bg.onConnectChecksInit = false
                 end        
         end
 
@@ -196,12 +179,12 @@ function bg.wakeup()
                 bg.protocol.mspPoll = transport.mspPoll  
 
                 bg.resetState()                
-                bg.wakeupBgChecksInit = true         
+                bg.onConnectChecksInit = true         
         end  
         
         if rf2ethos.rssiSensor ~= nil and rf2ethos.rssiSensor:state() == false then
                 bg.resetState()
-                bg.wakeupBgChecksInit = true 
+                bg.onConnectChecksInit = true 
         end
  
         -- this should be before bgchecks
@@ -222,11 +205,15 @@ function bg.wakeup()
         else
                 state = false
         end
-        if state == true then           
+        
+        if state == true then      
+        
                 bg.mspQueue:processQueue()  
-                if bg.wakeupBgChecksInit == true then
-                        bg.wakeupBgChecks()
-                end                
+                
+                -- checks that run on each connection to the fbl
+                if bg.onConnectChecksInit == true then
+                        bg.onConnectBgChecks()
+                end                             
         else
                 bg.mspQueue:clear()
         end        

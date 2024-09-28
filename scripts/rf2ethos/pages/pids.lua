@@ -41,7 +41,6 @@ fields[17] = {help = "profilesBoost", row = 3, col = 6, min = 0, max = 1000, def
 
 local function postLoad(self)
         rf2ethos.app.triggers.isReady = true
-        rf2ethos.utils.mspGetCurrentProfile()
         activateWakeup = true
 end
 
@@ -170,7 +169,7 @@ return {
         title = "PIDs",
         reboot = false,
         eepromWrite = true,
-        refreshswitch = true,
+        refreshOnProfileChange = true,
         minBytes = 34,
         simulatorResponse = {70, 0, 225, 0, 90, 0, 120, 0, 100, 0, 200, 0, 70, 0, 120, 0, 100, 0, 125, 0, 83, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 0, 25, 0},
         fields = fields,

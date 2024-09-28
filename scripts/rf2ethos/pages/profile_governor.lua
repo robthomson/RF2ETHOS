@@ -26,7 +26,6 @@ fields[#fields + 1] = {t = "Max throttle", help = "govMaxThrottle", min = 40, ma
 
 local function postLoad(self)
         rf2ethos.app.triggers.isReady = true
-        rf2ethos.utils.mspGetCurrentProfile()
         activateWakeup = true
 end
 
@@ -51,7 +50,7 @@ return {
         write = 149, -- msp_SET_GOVERNOR_PROFILE
         title = "Governor",
         reboot = false,
-        refreshswitch = true,
+        refreshOnProfileChange = true,
         eepromWrite = true,
         simulatorResponse = {208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100},
         minBytes = 13,

@@ -92,7 +92,6 @@ fields[#fields + 1] = {subpage = 5, t = "Gain", help = "profilesHorizonModeGain"
 
 local function postLoad(self)
         rf2ethos.app.triggers.isReady = true
-        rf2ethos.utils.mspGetCurrentProfile()
         activateWakeup = true
 end
 
@@ -115,7 +114,7 @@ return {
         read = 94, -- msp_PID_PROFILE
         write = 95, -- msp_SET_PID_PROFILE
         title = "Profile - Advanced",
-        refreshswitch = true,
+        refreshOnProfileChange = true,
         reboot = false,
         eepromWrite = true,
         minBytes = 41,

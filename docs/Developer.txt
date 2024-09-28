@@ -22,7 +22,8 @@ return {
      minBytes = 25,                             -- MINIMUM EXPECTED BYTES FOR A VALID MSP EXCHANGE
      labels = labels,                           -- LABELS USED BY ETHOS FORMS TO RENDER PAGE LABELS (see more below)
      fields = fields,                           -- FIELDS USED BY ETHOS FORMS TO RENDER FIELDS FOR DATA CAPTURE (see more below)
-     refreshswitch = false,                     -- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
+     refreshOnProfileChange = true,             -- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
+     refreshOnRateChange = true,                -- DOES TOGGLING THE REFRESH SWITCH MAKE THE PAGE RELOAD
      simulatorResponse = {4,10},                -- A VALID BYTE STRING USED WITHIN THE SIMULATOR
      pageTitle = "string"                       -- USE THIS PAGE TITLE INSTEAD OF AUTO DETECTED
      headerLine = "string"                      -- AN OPTIONAL LINE BELOW THE NAV THAT HOLDS TEXT

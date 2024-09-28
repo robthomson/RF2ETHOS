@@ -59,7 +59,6 @@ end
 
 local function postLoad(self)
         rf2ethos.app.triggers.isReady = true
-        rf2ethos.utils.mspGetCurrentProfile()
         activateWakeup = true
 end
 
@@ -96,7 +95,7 @@ return {
         minBytes = 25,
         labels = labels,
         fields = fields,
-        refreshswitch = true,
+        refreshOnRateChange = true,
         rows = rows,
         cols = cols,
         simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
