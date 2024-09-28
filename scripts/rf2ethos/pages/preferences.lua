@@ -60,7 +60,7 @@ local function openPage(idx, title, script)
         end, function(newValue)
                 rf2ethos.config.audioParam = newValue
                 rf2ethos.app.preferences.interface.audio = newValue
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         rf2ethos.config.iconsizeParam = rf2ethos.app.preferences.interface.iconSize
@@ -72,7 +72,7 @@ local function openPage(idx, title, script)
         end, function(newValue)
                 rf2ethos.config.iconsizeParam = newValue
                 rf2ethos.app.preferences.interface.iconSize = newValue
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         -- PROFILE
@@ -90,7 +90,7 @@ local function openPage(idx, title, script)
                 local member = rf2ethos.config.profileswitchParam:member()
                 local category = rf2ethos.config.profileswitchParam:category()
                 rf2ethos.app.preferences.advanced.profileSwitch = category .. "," .. member                
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         -- RATES
@@ -107,8 +107,8 @@ local function openPage(idx, title, script)
                 rf2ethos.config.rateswitchParam = newValue
                 local member = rf2ethos.config.rateswitchParam:member()
                 local category = rf2ethos.config.rateswitchParam:category()
-                rf2ethos.app.preferences.advanced.rateSwitch = category .. "," .. member                 
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.preferences.advanced.rateSwitch = category .. "," .. member
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         local advpanel = form.addExpansionPanel("Advanced")
@@ -123,7 +123,7 @@ local function openPage(idx, title, script)
         end, function(newValue)
                 rf2ethos.config.watchdogParam = newValue
                 rf2ethos.app.preferences.advanced.watchdog = newValue
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         -- COMPILATION
@@ -135,7 +135,7 @@ local function openPage(idx, title, script)
         end, function(newValue)
                 rf2ethos.config.compilationParam = newValue
                 rf2ethos.app.preferences.advanced.compilation = newValue
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
 
                 if newValue == 2 then
                         rf2ethos.app.formFields[6]:enable(true)
@@ -160,7 +160,7 @@ local function openPage(idx, title, script)
                 local member = rf2ethos.config.compilationswitchParam:member()
                 local category = rf2ethos.config.compilationswitchParam:category()
                 rf2ethos.app.preferences.advanced.compilationSwitch = category .. "," .. member                 
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         if tonumber(rf2ethos.config.compilationParam) == 2 then
@@ -184,7 +184,7 @@ local function openPage(idx, title, script)
                 local member = rf2ethos.config.demoswitchParam:member()
                 local category = rf2ethos.config.demoswitchParam:category()
                 rf2ethos.app.preferences.advanced.demoSwitch = category .. "," .. member                 
-                rf2ethos.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
+                rf2ethos.app.ini.save(rf2ethos.config.toolDir .. 'preferences.ini',rf2ethos.app.preferences)
         end)
 
         postLoad()

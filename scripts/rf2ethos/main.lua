@@ -28,8 +28,10 @@ config.adjFunctionTaskName = config.toolName .. " [ADJ Functions]"  -- backgroun
 config.adjFunctionTaskKey = "rf2adjf"                               -- key id used for adjust functions
 
 -- widgets
-config.rf2govName = "RotorFlight Governor"                                   -- background task name adjust functions
-config.rf2govKey = "rf2gov"                                         -- key id used for adjust functions
+config.rf2govName = "RotorFlight Governor"                          -- RF2Gov Name
+config.rf2govKey = "rf2gov"                                         -- RF2Gov Key
+config.rf2statusName = "RotorFlight Status"                         -- RF2Status name
+config.rf2statusKey = "bkshss"                                      -- RF2Status key
 
 -- LuaFormatter on
 
@@ -50,6 +52,9 @@ rf2ethos.adjfunctions = assert(compile.loadScript(config.toolDir .. "tasks/adjfu
 
 -- widgets
 rf2ethos.rf2gov = assert(compile.loadScript(config.toolDir .. "widgets/rf2gov.lua"))(config,compile)
+rf2ethos.rf2status = assert(compile.loadScript(config.toolDir .. "widgets/rf2status.lua"))(config,compile)
+
+-- LuaFormatter off
 
 local function init()
         system.registerSystemTool({event = rf2ethos.app.event, name = config.toolName, icon = config.icon, create = rf2ethos.app.create, wakeup = rf2ethos.app.wakeup, paint = rf2ethos.app.paint, close = rf2ethos.app.close})
@@ -58,6 +63,12 @@ local function init()
         system.registerTask({name = config.elrsTelemTaskName, key = config.elrsTelemTaskKey, wakeup = rf2ethos.elrstelemetry.wakeup})        
         system.registerTask({name = config.adjFunctionTaskName, key = config.adjFunctionTaskKey, wakeup = rf2ethos.adjfunctions.wakeup})
         system.registerWidget({name = config.rf2govName,key = config.rf2govKey, create = rf2ethos.rf2gov.create, paint = rf2ethos.rf2gov.paint, wakeup = rf2ethos.rf2gov.wakeup, persistent = false})        
+        system.registerWidget({name = config.rf2statusName,key = config.rf2statusKey, menu = rf2ethos.rf2status.menu, event = rf2ethos.rf2status.event, write = rf2ethos.rf2status.write, read = rf2ethos.rf2status.read, configure = rf2ethos.rf2status.configure, create = rf2ethos.rf2status.create, paint = rf2ethos.rf2status.paint, wakeup = rf2ethos.rf2status.wakeup, persistent = false})        
 end
 
+-- LuaFormatter on
+
 return {init = init}
+
+
+
