@@ -28,7 +28,7 @@ local function setPidProfile(profileIndex)
                 command = 210, -- MSP_SELECT_SETTING
                 payload = {profileIndex},
                 processReply = function(self, buf)
-
+                       
                 end,
                 simulatorResponse = {}
         }
@@ -41,7 +41,7 @@ local function setRateProfile(profileIndex)
                 command = 210, -- MSP_SELECT_SETTING
                 payload = {profileIndex},
                 processReply = function(self, buf)
-
+                       
                 end,
                 simulatorResponse = {}
         }
@@ -99,7 +99,10 @@ local function wakeup()
                 if saveCounter >= 100 then
                         saveCounter = 0
                         triggerSaveCounter = false
+                        rf2ethos.app.dialogs.saveDisplay = false
                         rf2ethos.app.ui.progessDisplaySaveClose()
+                        rf2ethos.app.dialogs.progressDisplay = false
+                        rf2ethos.app.triggers.isReady = true
                 end
         end
 

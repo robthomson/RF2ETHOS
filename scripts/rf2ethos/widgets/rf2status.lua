@@ -3398,14 +3398,15 @@ function rf2status.sensorsMAXMIN(sensors)
             name = string.gsub(model.name(), "%s+", "_")
             name = string.gsub(name, "%W", "_")
 
-            file = toolDir .. "logs/rf2status/" .. name .. ".log"
-            f = io.open(file, 'w')
+            local file = toolDir .. "logs/rf2status/" .. name .. ".log"
+ 
+            local f = io.open(file, 'w')
             f:write("")
             io.close(f)
 
             -- print("Writing history to: " .. file)
 
-            f = io.open(file, 'a')
+            local f = io.open(file, 'a')
             for k, v in ipairs(maxminFinals) do
                 if v ~= nil then
                     v = v:gsub("%s+", "")
@@ -3777,6 +3778,8 @@ function rf2status.read()
     rf2status.minCellVoltage = storage.read("mem69")
     rf2status.warnCellVoltage = storage.read("mem79")
 
+
+    if rf2status.alertonParam == nil then rf2status.alertonParam = 2 end
 
     if rf2status.maxCellVoltage == nil then rf2status.maxCellVoltage = 430 end 
     if rf2status.fullCellVoltage == nil then rf2status.fullCellVoltage = 410 end 
