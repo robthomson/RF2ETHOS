@@ -169,7 +169,7 @@ local function wakeup()
                                 if rf2ethos.config.ethosRunningVersion < 1516 then
                                    if status.armingDisableFlags ~= nil then
                                                 local value = armingDisableFlagsToString(status.armingDisableFlags)
-                                                rf2ethos.app.formFields[1] = form.addTextField(rf2ethos.formLines[1], nil, function()
+                                                rf2ethos.app.formFields[1] = form.addTextField(rf2ethos.app.formLines[1], nil, function()
                                                         return value
                                                 end, function(newValue)
                                                         text = value
@@ -179,7 +179,7 @@ local function wakeup()
 
                                         if summary.supported == true then
                                                 local value = getFreeDataflashSpace()
-                                                rf2ethos.app.formFields[2] = form.addTextField(rf2ethos.formLines[2], nil, function()
+                                                rf2ethos.app.formFields[2] = form.addTextField(rf2ethos.app.formLines[2], nil, function()
                                                         return value
                                                 end, function(newValue)
                                                         text = value
@@ -189,7 +189,7 @@ local function wakeup()
 
                                         if status.realTimeLoad ~= nil then
                                                 local value = status.realTimeLoad
-                                                rf2ethos.app.formFields[3] = form.addNumberField(rf2ethos.formLines[3], nil, value, value, function()
+                                                rf2ethos.app.formFields[3] = form.addNumberField(rf2ethos.app.formLines[3], nil, value, value, function()
                                                         return value
                                                 end, function(value)
                                                 end)
@@ -199,7 +199,7 @@ local function wakeup()
                                         end
                                         if status.cpuLoad ~= nil then
                                                 local value = status.cpuLoad
-                                                rf2ethos.app.formFields[4] = form.addNumberField(rf2ethos.formLines[4], nil, value, value, function()
+                                                rf2ethos.app.formFields[4] = form.addNumberField(rf2ethos.app.formLines[4], nil, value, value, function()
                                                         return value
                                                 end, function(value)
                                                 end)

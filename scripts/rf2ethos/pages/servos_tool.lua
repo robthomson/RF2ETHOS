@@ -331,7 +331,7 @@ local function openPage(idx, title, script, extra1)
         configs[servoIndex]['geometry'] = 0
         configs[servoIndex]['reverse'] = 0
 
-        rf2ethos.formLines = {}
+        rf2ethos.app.formLines = {}
 
         rf2ethos.app.lastIdx = idx
         rf2ethos.app.lastTitle = title
@@ -364,8 +364,8 @@ local function openPage(idx, title, script, extra1)
                 local suffix = nil
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoMid']['t']
 
-                rf2ethos.formLines[idx] = form.addLine("Center")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Center")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['mid']
                 end, function(value)
                         configs[servoIndex]['mid'] = value
@@ -381,9 +381,9 @@ local function openPage(idx, title, script, extra1)
                 local maxValue = 1000
                 local defaultValue = -700
                 local suffix = nil
-                rf2ethos.formLines[idx] = form.addLine("Minimum")
+                rf2ethos.app.formLines[idx] = form.addLine("Minimum")
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoMin']['t']
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['min']
                 end, function(value)
                         configs[servoIndex]['min'] = value
@@ -403,8 +403,8 @@ local function openPage(idx, title, script, extra1)
                 local defaultValue = 700
                 local suffix = nil
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoMax']['t']
-                rf2ethos.formLines[idx] = form.addLine("Maximum")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Maximum")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['max']
                 end, function(value)
                         configs[servoIndex]['max'] = value
@@ -424,8 +424,8 @@ local function openPage(idx, title, script, extra1)
                 local defaultValue = 500
                 local suffix = nil
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoScaleNeg']['t']
-                rf2ethos.formLines[idx] = form.addLine("Scale negative")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Scale negative")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['scaleNeg']
                 end, function(value)
                         configs[servoIndex]['scaleNeg'] = value
@@ -445,8 +445,8 @@ local function openPage(idx, title, script, extra1)
                 local defaultValue = 500
                 local suffix = nil
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoScalePos']['t']
-                rf2ethos.formLines[idx] = form.addLine("Scale positive")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Scale positive")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['scalePos']
                 end, function(value)
                         configs[servoIndex]['scalePos'] = value
@@ -466,8 +466,8 @@ local function openPage(idx, title, script, extra1)
                 local defaultValue = 333
                 local suffix = "Hz"
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoRate']['t']
-                rf2ethos.formLines[idx] = form.addLine("Rate")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Rate")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['rate']
                 end, function(value)
                         configs[servoIndex]['rate'] = value
@@ -487,8 +487,8 @@ local function openPage(idx, title, script, extra1)
                 local defaultValue = 0
                 local suffix = "ms"
                 local helpTxt = rf2ethos.app.fieldHelpTxt['servoSpeed']['t']
-                rf2ethos.formLines[idx] = form.addLine("Speed")
-                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.formLines[idx], nil, minValue, maxValue, function()
+                rf2ethos.app.formLines[idx] = form.addLine("Speed")
+                rf2ethos.app.formFields[idx] = form.addNumberField(rf2ethos.app.formLines[idx], nil, minValue, maxValue, function()
                         return configs[servoIndex]['speed']
                 end, function(value)
                         configs[servoIndex]['speed'] = value
@@ -508,8 +508,8 @@ local function openPage(idx, title, script, extra1)
                 local table = {"NO", "YES"}
                 local tableIdxInc = -1
                 local value
-                rf2ethos.formLines[idx] = form.addLine("Reverse")
-                rf2ethos.app.formFields[idx] = form.addChoiceField(rf2ethos.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function()
+                rf2ethos.app.formLines[idx] = form.addLine("Reverse")
+                rf2ethos.app.formFields[idx] = form.addChoiceField(rf2ethos.app.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function()
                         return configs[servoIndex]['reverse']
                 end, function(value)
                         configs[servoIndex]['reverse'] = value
@@ -526,8 +526,8 @@ local function openPage(idx, title, script, extra1)
                 local table = {"NO", "YES"}
                 local tableIdxInc = -1
                 local value
-                rf2ethos.formLines[idx] = form.addLine("Geometry")
-                rf2ethos.app.formFields[idx] = form.addChoiceField(rf2ethos.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function()
+                rf2ethos.app.formLines[idx] = form.addLine("Geometry")
+                rf2ethos.app.formFields[idx] = form.addChoiceField(rf2ethos.app.formLines[idx], nil, rf2ethos.utils.convertPageValueTable(table, tableIdxInc), function()
                         return configs[servoIndex]['geometry']
                 end, function(value)
                         configs[servoIndex]['geometry'] = value

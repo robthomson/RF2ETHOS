@@ -268,7 +268,7 @@ function ui.fieldChoice(i)
                 posText = p.posText
                 posField = p.posField
 
-                field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+                field = form.addStaticText(rf2ethos.app.formLines[formLineCnt], posText, f.t)
         else
                 if f.t ~= nil then
                         if f.t2 ~= nil then f.t = f.t2 end
@@ -276,7 +276,7 @@ function ui.fieldChoice(i)
                         if f.label ~= nil then f.t = "        " .. f.t end
                 end
                 formLineCnt = formLineCnt + 1
-                rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+                rf2ethos.app.formLines[formLineCnt] = form.addLine(f.t)
                 if f.position ~= nil then
                         posField = f.position
                 else
@@ -285,7 +285,7 @@ function ui.fieldChoice(i)
                 postText = nil
         end
 
-        rf2ethos.app.formFields[i] = form.addChoiceField(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
+        rf2ethos.app.formFields[i] = form.addChoiceField(rf2ethos.app.formLines[formLineCnt], posField, rf2ethos.utils.convertPageValueTable(f.table, f.tableIdxInc), function()
                 local value = rf2ethos.utils.getFieldValue(rf2ethos.app.Page.fields[i])
 
                 return value
@@ -311,7 +311,7 @@ function ui.fieldNumber(i)
                 posText = p.posText
                 posField = p.posField
 
-                field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+                field = form.addStaticText(rf2ethos.app.formLines[formLineCnt], posText, f.t)
         else
                 if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
@@ -324,7 +324,7 @@ function ui.fieldNumber(i)
 
                 formLineCnt = formLineCnt + 1
 
-                rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+                rf2ethos.app.formLines[formLineCnt] = form.addLine(f.t)
 
                 if f.position ~= nil then
                         posField = f.position
@@ -357,7 +357,7 @@ function ui.fieldNumber(i)
 
         if minValue == nil then minValue = 0 end
         if maxValue == nil then maxValue = 0 end
-        rf2ethos.app.formFields[i] = form.addNumberField(rf2ethos.formLines[formLineCnt], posField, minValue, maxValue, function()
+        rf2ethos.app.formFields[i] = form.addNumberField(rf2ethos.app.formLines[formLineCnt], posField, minValue, maxValue, function()
         
         
                 local value = rf2ethos.utils.getFieldValue(rf2ethos.app.Page.fields[i])
@@ -413,7 +413,7 @@ function ui.fieldStaticText(i)
                 posText = p.posText
                 posField = p.posField
 
-                field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+                field = form.addStaticText(rf2ethos.app.formLines[formLineCnt], posText, f.t)
         else
                 if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
@@ -426,7 +426,7 @@ function ui.fieldStaticText(i)
 
                 formLineCnt = formLineCnt + 1
 
-                rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+                rf2ethos.app.formLines[formLineCnt] = form.addLine(f.t)
 
                 if f.position ~= nil then
                         posField = f.position
@@ -440,7 +440,7 @@ function ui.fieldStaticText(i)
                 -- posField = {x = 2000, y = 0, w = 20, h = 20}
         end
 
-        rf2ethos.app.formFields[i] = form.addStaticText(rf2ethos.formLines[formLineCnt], posField, rf2ethos.utils.getFieldValue(rf2ethos.app.Page.fields[i]))
+        rf2ethos.app.formFields[i] = form.addStaticText(rf2ethos.app.formLines[formLineCnt], posField, rf2ethos.utils.getFieldValue(rf2ethos.app.Page.fields[i]))
 
         if config.ethosRunningVersion >= 1514 then
                 if f.onFocus ~= nil then
@@ -467,7 +467,7 @@ function ui.fieldText(i)
                 posText = p.posText
                 posField = p.posField
 
-                field = form.addStaticText(rf2ethos.formLines[formLineCnt], posText, f.t)
+                field = form.addStaticText(rf2ethos.app.formLines[formLineCnt], posText, f.t)
         else
                 if rf2ethos.app.radio.text == 2 then if f.t2 ~= nil then f.t = f.t2 end end
 
@@ -480,7 +480,7 @@ function ui.fieldText(i)
 
                 formLineCnt = formLineCnt + 1
 
-                rf2ethos.formLines[formLineCnt] = form.addLine(f.t)
+                rf2ethos.app.formLines[formLineCnt] = form.addLine(f.t)
 
                 if f.position ~= nil then
                         posField = f.position
@@ -494,7 +494,7 @@ function ui.fieldText(i)
                 -- posField = {x = 2000, y = 0, w = 20, h = 20}
         end
 
-        rf2ethos.app.formFields[i] = form.addTextField(rf2ethos.formLines[formLineCnt], posField, function()
+        rf2ethos.app.formFields[i] = form.addTextField(rf2ethos.app.formLines[formLineCnt], posField, function()
                 local value = rf2ethos.utils.getFieldValue(rf2ethos.app.Page.fields[i])
                 return value
         end, function(value)
@@ -549,8 +549,8 @@ function ui.fieldLabel(f, i, l)
                         if label.type == nil then label.type = 0 end
 
                         formLineCnt = formLineCnt + 1
-                        rf2ethos.formLines[formLineCnt] = form.addLine(labelName)
-                        form.addStaticText(rf2ethos.formLines[formLineCnt], nil, "")
+                        rf2ethos.app.formLines[formLineCnt] = form.addLine(labelName)
+                        form.addStaticText(rf2ethos.app.formLines[formLineCnt], nil, "")
 
                         rf2ethos.lastLabel = f.label
                 end
@@ -593,7 +593,7 @@ function ui.openPage(idx, title, script, extra1, extra2, extra3, extra5, extra5)
         rf2ethos.app.uiState = rf2ethos.app.uiStatus.pages
         rf2ethos.app.triggers.isReady = false
         rf2ethos.app.formFields = {}
-        rf2ethos.formLines = {}
+        rf2ethos.app.formLines = {}
 
         rf2ethos.app.Page = assert(compile.loadScript(config.toolDir .. "pages/" .. script))()
 

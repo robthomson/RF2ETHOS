@@ -64,7 +64,7 @@ local function openPage(pidx, title, script)
         simulatorResponse = ESC.simulatorResponse
 
         rf2ethos.app.formFields = {}
-        rf2ethos.formLines = {}
+        rf2ethos.app.formLines = {}
         -- rf2ethos.utils.log("ui.openPageEscTool")
 
         local windowWidth = rf2ethos.config.lcdWidth
