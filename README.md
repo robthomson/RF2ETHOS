@@ -1,6 +1,6 @@
 **RF2ETHOS**
 
-<span style="coloir:red">NOTE. This version of rf2ethos is no longer being developed.  All future dev is in the new RFSUITE product</span>
+<font style="color:red">NOTE. This version of rf2ethos is no longer being developed.  All future dev is in the new RFSUITE product</font>
 
 https://github.com/robthomson/RFSUITE
 
