@@ -1,12 +1,8 @@
 local labels = {}
 local fields = {}
 
-local activateWakeup = false
-local currentProfileChecked = false
-
-
 -- pid controller settings =
--- labels[#labels + 1] = { subpage=1,t ="Ground Error Decay", label=1          }
+-- labels[#labels + 1] = { subpage=1,t ="Ground Error Decay", label=1      }
 fields[#fields + 1] = {subpage = 1, t = "Ground Error Decay", help = "profilesErrorDecayGround", min = 0, max = 250, unit = "s", default = 250, vals = {2}, decimals = 1, scale = 10}
 
 labels[#labels + 1] = {subpage = 1, t = "Inflight Error Decay", label = 2, inline_size = 13.6}
@@ -31,7 +27,7 @@ fields[#fields + 1] = {subpage = 1, t = "Error rotation", help = "profilesErrorR
 labels[#labels + 1] = {subpage = 1, t = "I-term relax", label = 6, inline_size = 40.15}
 fields[#fields + 1] = {subpage = 1, t = "", help = "profilesItermRelaxType", inline = 1, label = 6, min = 0, max = 2, vals = {17}, table = {[0] = "OFF", "RP", "RPY"}}
 
-labels[#labels + 1] = {subpage = 1, t = "        Cut-off point", label = 15, inline_size = 8.15}
+labels[#labels + 1] = {subpage = 1, t = "    Cut-off point", label = 15, inline_size = 8.15}
 fields[#fields + 1] = {subpage = 1, t = "R", help = "profilesItermRelax", inline = 3, label = 15, min = 1, max = 100, default = 10, vals = {18}}
 fields[#fields + 1] = {subpage = 1, t = "P", help = "profilesItermRelax", inline = 2, label = 15, min = 1, max = 100, default = 10, vals = {19}}
 fields[#fields + 1] = {subpage = 1, t = "Y", help = "profilesItermRelax", inline = 1, label = 15, min = 1, max = 100, default = 10, vals = {20}}
@@ -90,37 +86,22 @@ fields[#fields + 1] = {subpage = 5, t = "Max", help = "profilesAngleModeLimit", 
 labels[#labels + 1] = {subpage = 5, t = "Horizon mode", inline_size = 13.6, label = 13}
 fields[#fields + 1] = {subpage = 5, t = "Gain", help = "profilesHorizonModeGain", inline = 2, label = 13, min = 0, max = 200, default = 40, vals = {31}}
 
-local function postLoad(self)
-        rf2ethos.app.triggers.isReady = true
-        activateWakeup = true
-end
-
-local function wakeup()
-
-        if activateWakeup == true and currentProfileChecked == false and rf2ethos.bg.mspQueue:isProcessed()then           
-                if rf2ethos.config.ethosRunningVersion >= 1516 then
-                        -- update active profile
-                        -- the check happens in postLoad          
-                        if rf2ethos.config.activeProfile ~= nil then
-                                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
-                                currentProfileChecked = true
-                        end        
-                end        
-        end        
-
-end
-
 return {
-        read = 94, -- msp_PID_PROFILE
-        write = 95, -- msp_SET_PID_PROFILE
-        title = "Profile - Advanced",
-        refreshOnProfileChange = true,
-        reboot = false,
-        eepromWrite = true,
-        minBytes = 41,
-        labels = labels,
-        simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
-        fields = fields,
-        postLoad = postLoad,
-        wakeup = wakeup
+    read = 94, -- msp_PID_PROFILE
+    write = 95, -- msp_SET_PID_PROFILE
+    title = "Profile - Advanced",
+    refreshswitch = true,
+    reboot = false,
+    eepromWrite = true,
+    minBytes = 41,
+    labels = labels,
+    simulatorResponse = {3, 25, 250, 0, 12, 0, 1, 30, 30, 45, 50, 50, 100, 15, 15, 20, 2, 10, 10, 15, 100, 100, 5, 0, 30, 0, 25, 0, 40, 55, 40, 75, 20, 25, 0, 15, 45, 45, 15, 15, 20},
+    fields = fields,
+    postRead = function(self)
+        -- rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        -- rf2ethos.utils.log("postLoad")
+		rf2ethos.triggers.isReady = true		
+    end
 }

@@ -1,21 +1,19 @@
 local labels = {}
 local fields = {}
 
-local activateWakeup = false
-local currentProfileChecked = false
 
 if rf2ethos.RateTable == nil then rf2ethos.RateTable = rf2ethos.config.defaultRateTable end
 
 fields[#fields + 1] = {
-        t = "Rates Type",
-        ratetype = 1,
-        min = 0,
-        max = 5,
-        vals = {1},
-        table = {[0] = "NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"},
-        postEdit = function(self)
-                self.flagRateChange(self, true)
-        end
+    t = "Rates Type",
+    ratetype = 1,
+    min = 0,
+    max = 5,
+    vals = {1},
+    table = {[0] = "NONE", "BETAFLIGHT", "RACEFLIGHT", "KISS", "ACTUAL", "QUICK"},
+    postEdit = function(self)
+        self.flagRateChange(self, true)
+    end
 }
 
 labels[#labels + 1] = {t = "Roll dynamics", label = "rolldynamics", inline_size = 14.6}
@@ -34,75 +32,54 @@ labels[#labels + 1] = {t = "Collective dynamics", label = "coldynamics", inline_
 fields[#fields + 1] = {t = "Time", help = "profilesRatesDynamicsTime", inline = 2, label = "coldynamics", min = 0, max = 250, vals = {23}, unit = "ms"}
 fields[#fields + 1] = {t = "Accel", help = "profilesRatesDynamicsAcc", inline = 1, label = "coldynamics", min = 0, max = 50000, vals = {24, 25}, unit = "°/^s", mult = 10, step = 10}
 
+
+
 -- rate table defaults
 local function defaultRates(x)
-        local defaults = {}
-        defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} -- NONE
-        defaults[1] = {1, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 203, 0, 1, 0, 0, 0} -- BF
-        defaults[2] = {2, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0} -- RACEFL
-        defaults[3] = {3, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0} -- KISS
-        defaults[4] = {4, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 48, 0, 48, 0, 0, 0} -- ACTUAL
-        defaults[5] = {5, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 250, 0, 104, 0, 0, 0} -- QUICK
+    local defaults = {}
+    defaults[0] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0} 				-- NONE
+    defaults[1] = {1, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 203, 0, 1, 0, 0, 0} 		-- BF
+    defaults[2] = {2, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 50, 0, 0, 0, 0, 0} 			-- RACEFL
+    defaults[3] = {3, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 180, 0, 0, 0, 0, 0, 250, 0, 0, 0, 0, 0} 		-- KISS
+    defaults[4] = {4, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 36, 0, 36, 0, 0, 0, 48, 0, 48, 0, 0, 0} 		-- ACTUAL
+    defaults[5] = {5, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 180, 0, 36, 0, 0, 0, 250, 0, 104, 0, 0, 0} 	-- QUICK
 
-        return defaults[x]
+    return defaults[x]
 end
 
-local function preSavePayload(payload)
-        if rf2ethos.app.triggers.resetRates == true then
-                rf2ethos.app.triggers.resetRates = false
-                rf2ethos.NewRateTable = rf2ethos.app.Page.values[1]
-                payload = defaultRates(rf2ethos.NewRateTable)
-        end
-
-        return payload
-end
-
-local function postLoad(self)
-        rf2ethos.app.triggers.isReady = true
-        activateWakeup = true
-end
-
-
-local function wakeup()
-
-        if activateWakeup == true and currentProfileChecked == false and rf2ethos.bg.mspQueue:isProcessed()then           
-                if rf2ethos.config.ethosRunningVersion >= 1516 then
-                        -- update active profile
-                        -- the check happens in postLoad          
-                        if rf2ethos.config.activeProfile ~= nil then
-                                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
-                                currentProfileChecked = true
-                        end        
-                end        
-        end        
-
-end
-
-local function postRead(self)
-
-end
-
-local function flagRateChange(self)
-        rf2ethos.app.triggers.resetRates = true
-end
 
 return {
-        read = 111, -- msp_RC_TUNING
-        write = 204, -- msp_SET_RC_TUNING
-        title = "Rates",
-        reboot = false,
-        eepromWrite = true,
-        minBytes = 25,
-        labels = labels,
-        fields = fields,
-        refreshOnRateChange = true,
-        rows = rows,
-        cols = cols,
-        simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
-        rTableName = rTableName,
-        flagRateChange = flagRateChange,
-        postRead = postRead,
-        postLoad = postLoad,
-        preSavePayload = preSavePayload,
-        wakeup = wakeup
+    read = 111, -- msp_RC_TUNING
+    write = 204, -- msp_SET_RC_TUNING
+    title = "Rates",
+    reboot = false,
+    eepromWrite = true,
+    minBytes = 25,
+    labels = labels,
+    fields = fields,
+    refreshswitch = true,
+    rows = rows,
+    cols = cols,
+    simulatorResponse = {4, 18, 25, 32, 20, 0, 0, 18, 25, 32, 20, 0, 0, 32, 50, 45, 10, 0, 0, 56, 0, 56, 20, 0, 0},
+    rTableName = rTableName,
+    flagRateChange = function(self)
+        -- --rf2ethos.utils.log("We need to reset the rates tables on save")
+        rf2ethos.triggers.resetRates = true
+    end,
+    postRead = function(self)
+        -- rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        -- rf2ethos.utils.log("postLoad")
+		rf2ethos.triggers.isReady = true
+    end,
+	preSavePayload = function(payload)	
+		if rf2ethos.triggers.resetRates == true then
+			rf2ethos.triggers.resetRates = false
+			rf2ethos.NewRateTable = rf2ethos.Page.values[1]
+			payload =  defaultRates(rf2ethos.NewRateTable)			
+		end
+		
+		return payload 
+    end	
 }

@@ -37,19 +37,21 @@ labels[#labels + 1] = {t = "", label = "line12", inline_size = 13.6}
 fields[#fields + 1] = {t = "Min", help = "gyroDynamicNotchMinHz", label = "line12", inline = 2, min = 10, max = 200, default = 25, unit = "Hz", vals = {22, 23}}
 fields[#fields + 1] = {t = "Max", help = "gyroDynamicNotchMaxHz", label = "line12", inline = 1, min = 100, max = 500, default = 245, unit = "Hz", vals = {24, 25}}
 
-local function postLoad(self)
-        rf2ethos.app.triggers.isReady = true
-end
-
 return {
-        read = 92, -- msp_FILTER_CONFIG
-        write = 93, -- msp_SET_FILTER_CONFIG
-        eepromWrite = true,
-        reboot = true,
-        title = "Filters",
-        minBytes = 25,
-        simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
-        labels = labels,
-        fields = fields,
-        postLoad = postLoad
+    read = 92, -- msp_FILTER_CONFIG
+    write = 93, -- msp_SET_FILTER_CONFIG
+    eepromWrite = true,
+    reboot = true,
+    title = "Filters",
+    minBytes = 25,
+    simulatorResponse = {0, 1, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 25, 25, 0, 245, 0},
+    labels = labels,
+    fields = fields,
+    postRead = function(self)
+        -- rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        -- rf2ethos.utils.log("postLoad")
+		rf2ethos.triggers.isReady = true		
+    end
 }

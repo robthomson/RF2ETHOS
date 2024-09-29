@@ -19,4 +19,9 @@ fields[#fields + 1] = {row = 2, col = 3, min = 0, max = 100, vals = {9}, default
 fields[#fields + 1] = {row = 3, col = 3, min = 0, max = 100, vals = {15}, default = 0}
 fields[#fields + 1] = {row = 4, col = 3, min = 0, max = 100, vals = {21}, default = 0}
 
-return {rTableName = rTableName, rows = rows, cols = cols, fields = fields}
+return {
+	rTableName = rTableName,
+	rows = rows,
+	cols = cols,
+	fields = fields
+}

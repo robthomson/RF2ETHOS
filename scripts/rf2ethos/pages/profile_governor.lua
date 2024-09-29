@@ -1,10 +1,7 @@
 local labels = {}
 local fields = {}
 
-local activateWakeup = false
-local currentProfileChecked = false
-
-fields[#fields + 1] = {t = "Full headspeed", help = "govHeadspeed", min = 0, max = 50000, default = 1000, unit = "rpm", step = 10, vals = {1, 2}}
+fields[#fields + 1] = {t = "Full headspeed", help = "govHeadspeed", min = 0, max = 50000, default = 1000, unit = "rpm", vals = {1, 2}}
 fields[#fields + 1] = {t = "PID master gain", help = "govMasterGain", min = 0, max = 250, default = 40, vals = {3}}
 
 labels[#labels + 1] = {subpage = 1, t = "Gains", label = 1, inline_size = 8.15}
@@ -24,38 +21,22 @@ fields[#fields + 1] = {t = "Limit", help = "govTTALimit", inline = 1, label = 3,
 
 fields[#fields + 1] = {t = "Max throttle", help = "govMaxThrottle", min = 40, max = 100, default = 100, unit = "%", vals = {13}}
 
-local function postLoad(self)
-        rf2ethos.app.triggers.isReady = true
-        activateWakeup = true
-end
-
-
-local function wakeup()
-
-        if activateWakeup == true and currentProfileChecked == false and rf2ethos.bg.mspQueue:isProcessed()then           
-                if rf2ethos.config.ethosRunningVersion >= 1516 then
-                        -- update active profile
-                        -- the check happens in postLoad          
-                        if rf2ethos.config.activeProfile ~= nil then
-                                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
-                                currentProfileChecked = true
-                        end        
-                end        
-        end        
-
-end
-
 return {
-        read = 148, -- msp_GOVERNOR_PROFILE
-        write = 149, -- msp_SET_GOVERNOR_PROFILE
-        title = "Governor",
-        reboot = false,
-        refreshOnProfileChange = true,
-        eepromWrite = true,
-        simulatorResponse = {208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100},
-        minBytes = 13,
-        labels = labels,
-        fields = fields,
-        postLoad = postLoad,
-        wakeup = wakeup
+    read = 148, -- msp_GOVERNOR_PROFILE
+    write = 149, -- msp_SET_GOVERNOR_PROFILE
+    title = "Profile - Governor",
+    reboot = false,
+    refreshswitch = true,
+    eepromWrite = true,
+    simulatorResponse = {208, 7, 100, 10, 125, 5, 20, 0, 20, 10, 40, 100, 100},
+    minBytes = 13,
+    labels = labels,
+    fields = fields,
+    postRead = function(self)
+        -- rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        -- rf2ethos.utils.log("postLoad")
+		rf2ethos.triggers.isReady = true		
+    end
 }

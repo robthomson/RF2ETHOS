@@ -1,10 +1,7 @@
 local labels = {}
 local fields = {}
 
-local activateWakeup = false
-local currentProfileChecked = false
-
--- fields[#fields + 1] = { t = "Rescue mode enable",  min = 0, max = 2,         vals = { 1 }, table = { [0] = "Off", "On", "Alt hold" } }
+-- fields[#fields + 1] = { t = "Rescue mode enable",  min = 0, max = 2,     vals = { 1 }, table = { [0] = "Off", "On", "Alt hold" } }
 fields[#fields + 1] = {t = "Rescue mode enable", min = 0, max = 1, default = 0, ftype = "bool", type = "1", vals = {1}, table = {[0] = "Off", "On"}}
 fields[#fields + 1] = {t = "Flip to upright", help = "profilesRescueFlipMode", min = 0, max = 1, default = 0, vals = {2}, table = {[0] = "No flip", "Flip"}}
 
@@ -33,38 +30,22 @@ fields[#fields + 1] = {t = "Rate", help = "profilesRescueMaxRate", label = "resc
 labels[#labels + 1] = {subpage = 1, t = "", label = "rescue3", inline_size = 40.15}
 fields[#fields + 1] = {t = "Accel", help = "profilesRescueMaxAccel", label = "rescue3", inline = 1, min = 1, max = 10000, default = 2000, unit = "°/^2", vals = {27, 28}}
 
-local function postLoad(self)
-        rf2ethos.app.triggers.isReady = true
-        activateWakeup = true
-end
-
-
-local function wakeup()
-
-        if activateWakeup == true and currentProfileChecked == false and rf2ethos.bg.mspQueue:isProcessed()then           
-                if rf2ethos.config.ethosRunningVersion >= 1516 then
-                        -- update active profile
-                        -- the check happens in postLoad          
-                        if rf2ethos.config.activeProfile ~= nil then
-                                rf2ethos.app.formFields['title']:value(rf2ethos.app.Page.title .. " #" .. rf2ethos.config.activeRateProfile)
-                                currentProfileChecked = true
-                        end        
-                end        
-        end        
-
-end
-
 return {
-        read = 146, -- msp_RESCUE_PROFILE
-        write = 147, -- msp_SET_RESCUE_PROFILE
-        title = "Rescue",
-        reboot = false,
-        refreshOnProfileChange = true,
-        eepromWrite = true,
-        simulatorResponse = {1, 0, 200, 100, 5, 3, 10, 5, 182, 3, 188, 2, 194, 1, 244, 1, 20, 0, 20, 0, 10, 0, 232, 3, 44, 1, 184, 11},
-        minBytes = 28,
-        labels = labels,
-        fields = fields,
-        postLoad = postLoad,
-        wakeup = wakeup
+    read = 146, -- msp_RESCUE_PROFILE
+    write = 147, -- msp_SET_RESCUE_PROFILE
+    title = "Profile - Rescue",
+    reboot = false,
+    refreshswitch = true,
+    eepromWrite = true,
+    simulatorResponse = {1, 0, 200, 100, 5, 3, 10, 5, 182, 3, 188, 2, 194, 1, 244, 1, 20, 0, 20, 0, 10, 0, 232, 3, 44, 1, 184, 11},
+    minBytes = 28,
+    labels = labels,
+    fields = fields,
+    postRead = function(self)
+        -- rf2ethos.utils.log("postRead")
+    end,
+    postLoad = function(self)
+        -- rf2ethos.utils.log("postLoad")
+		rf2ethos.triggers.isReady = true		
+    end
 }
