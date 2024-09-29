@@ -1,10 +1,13 @@
+
 **RF2ETHOS**
 
-<font style="color:red">NOTE. This version of rf2ethos is no longer being developed.  All future dev is in the new RFSUITE product</font>
+***
 
-https://github.com/robthomson/RFSUITE
+> NOTE. This version of rf2ethos is no longer being developed.  All future dev is in the new [RFSUITE](https://github.com/robthomson/RFSUITE) product
+> 
 
-Enjoy...
+
+***
 
 <img src="https://github.com/robthomson/RF2ETHOS/blob/main/git/rf2ethos-main.png?raw=true" width="800" alt="MAIN PAGE">
 
