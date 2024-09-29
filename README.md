@@ -1,5 +1,9 @@
 **RF2ETHOS**
 
+*** NOTE. This version of rf2ethos is no longer being developed.  All future dev is in the new RFSUITE product ***
+
+https://github.com/robthomson/RFSUITE
+
 <img src="https://github.com/robthomson/RF2ETHOS/blob/main/git/rf2ethos-main.png?raw=true" width="800" alt="MAIN PAGE">
 
 RF2ETHOS is a widget that has been designed to run on Frsky Radios. The system tool allows you to manage almost all aspects of your Rotorflight FBL.  
